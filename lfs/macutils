@@ -1,0 +1,98 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: macutils 1551 2008-07-08 11:58:33Z dotzball $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = macutils
+VER        = 2.0b3
+HOST_ARCH  = ppc
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)_$(VER)
+DL_FILE    = $(THISAPP).orig.tar.gz
+DL_FROM    = $(URL_DEBIAN)/m/$(PKG_NAME)
+DIR_APP    = $(DIR_SRC)/$(PKG_NAME)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+CFLAGS     =
+CXXFLAGS   =
+
+PATCH1     = $(THISAPP)-15.diff.gz
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE) \
+	$(PATCH1)
+
+$(DL_FILE)		= $(DL_FROM)/$(DL_FILE)
+$(PATCH1)		= $(DL_FROM)/$(PATCH1)
+
+$(DL_FILE)_MD5		= 4ff71b1634ea503398c33994458fbe40
+$(PATCH1)_MD5		= c248f59822e13ae9b6ee5c68f8673251
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+
+	cd $(DIR_APP) && gzip -dc $(DIR_DL)/$(PATCH1) | patch -Np1
+	cd $(DIR_APP) && sed -i "s,^BINDIR.*,BINDIR = /usr/bin,g" makefile
+	cd $(DIR_APP) && make -f makefile
+	cd $(DIR_APP) && make -f makefile install
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

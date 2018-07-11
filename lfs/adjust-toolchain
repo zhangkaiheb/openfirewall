@@ -1,0 +1,129 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: adjust-toolchain 6621 2012-05-21 19:22:54Z gespinasse $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = adjust-toolchain
+HOST_ARCH  = all
+OTHER_SRC  = no
+
+THISAPP    = adjust-toolchain
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+CFLAGS     =
+CXXFLAGS   =
+
+GCC_MACHINE = $(shell gcc -dumpmachine)
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+install : $(TARGET)
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) :
+	@$(PREBUILD)
+
+ifeq "$(STAGE)" "toolchain"
+#	$(LFS_TGT)-gcc -dumpspecs | sed -e 's@/lib\(64\)\?/ld@/$(TOOLS_DIR)&@g' \
+#			-e "/^\*cpp:$$/{n;s,$$, -isystem /$(TOOLS_DIR)/include,}" \
+#			> `dirname $$($(LFS_TGT)-gcc -print-libgcc-file-name)`/specs
+
+#	$(LFS_TGT)-gcc -dumpspecs | sed -e 's@/lib\(64\)\?/ld@/$(TOOLS_DIR)&@g' \
+#			> /home/kai/network/ipcop-svn/ipcop/trunk/build_x86_64/tools_x86_64/bin/../lib/gcc/x86_64-lfs-linux-gnu/7.3.0/specs
+
+#
+#	# fix problem with glibc configure switch --with-headers=/$(TOOLS_DIR)/include
+#	$(LFS_TGT)-gcc -dumpspecs | sed -e "/^\*cpp:$$/{n;s,$$, -isystem /$(TOOLS_DIR)/include,}" \
+#			> `dirname $$($(LFS_TGT)-gcc -print-libgcc-file-name)`/specs
+
+
+	# test basic compiler behavior and control the right $(LINKER) is used
+	cd $(DIR_SRC) && echo 'int main(){return 0;}' > dummy.c
+##	cd $(DIR_SRC) && $(LFS_TGT)-gcc -B/$(TOOLS_DIR)/lib dummy.c
+	cd $(DIR_SRC) && $(LFS_TGT)-gcc dummy.c
+	cd $(DIR_SRC) && readelf -l a.out | grep ": /$(TOOLS_DIR)$(LINKER)"
+	cd $(DIR_SRC) && rm a.out dummy.c
+endif
+
+ifeq "$(STAGE)" "base"
+
+	echo "tools dir: $(TOOLS_DIR)"
+	echo "linker : $(LINKER)"
+##	gcc -dumpspecs | sed \
+##		-e 's@/$(TOOLS_DIR)$(LINKER)@$(LINKER)@g' \
+##		-e '/\*startfile_prefix_spec:/{n;s@.*@/usr/lib/ @}' \
+##		-e '/\*cpp:/{n;s@$$@ -isystem /usr/include@}' \
+##		> `dirname $$(gcc --print-libgcc-file-name)`/specs
+
+	# First, backup the /tools linker, and replace it with the adjusted linker we made in chapter 5.
+	# We'll also create a link to its counterpart in /#(TOOLS_DIR)/$(uname -m)-pc-linux-gnu/bin
+	mv /$(TOOLS_DIR)/bin/ld /$(TOOLS_DIR)/bin/ld-old
+#	mv /$(TOOLS_DIR)/$$(gcc -dumpmachine)/bin/ld /$(TOOLS_DIR)/$$(gcc -dumpmachine)/bin/ld-old
+	mv /$(TOOLS_DIR)/$(GCC_MACHINE)/bin/ld /$(TOOLS_DIR)/$(GCC_MACHINE)/bin/ld-old
+	mv /$(TOOLS_DIR)/bin/ld-new /$(TOOLS_DIR)/bin/ld
+	ln -sf /$(TOOLS_DIR)/bin/ld /$(TOOLS_DIR)/$$(gcc -dumpmachine)/bin/ld
+#	ln -sf /$(TOOLS_DIR)/lib/libstdc++.a `dirname $$(gcc --print-libgcc-file-name)`/libstdc++.a
+
+
+	# Next, amend the GCC specs file so that it points to the new dynamic linker.
+	# Simply deleting all instances of “/$(TOOLS_DIR)” should leave us with the correct
+	#  path to the dynamic linker. Also adjust the specs file so that GCC knows where to
+	# find the correct headers and Glibc start files
+	gcc -dumpspecs | sed -e 's@/$(TOOLS_DIR)@@g'                   \
+		-e '/\*startfile_prefix_spec:/{n;s@.*@/usr/lib/ @}' \
+		-e '/\*cpp:/{n;s@$$@ -isystem /usr/include@}' >      \
+		`dirname $$(gcc --print-libgcc-file-name)`/specs
+
+	# test basic compiler behavior
+	cd $(DIR_SRC) && echo 'int main(){return 0;}' > dummy.c
+	cd $(DIR_SRC) && cc dummy.c -v -Wl,--verbose &> dummy.log
+	# fail if improperly linked against /lib
+	cd $(DIR_SRC) && readelf -l $(DIR_SRC)/a.out | grep ': /lib'
+	cd $(DIR_SRC) && grep -o '/usr/lib.*/crt[1in].*succeeded' dummy.log
+	cd $(DIR_SRC) && grep -B1 '^ /usr/include' dummy.log
+	cd $(DIR_SRC) && grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g'
+	cd $(DIR_SRC) && grep "/lib.*/libc.so.6 " dummy.log
+	cd $(DIR_SRC) && grep found dummy.log
+
+	cd $(DIR_SRC) && rm dummy.c a.out dummy.log
+endif
+
+	@$(POSTBUILD)

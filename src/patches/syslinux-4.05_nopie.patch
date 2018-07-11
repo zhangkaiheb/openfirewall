@@ -1,0 +1,53 @@
+From 8191b98d79177c9cb6aee459c6c8a6a77cc81dd1 Mon Sep 17 00:00:00 2001
+From: Gilles Espinasse <g.esp@free.fr>
+Date: Fri, 9 Dec 2011 12:22:44 +0100
+Subject: [PATCH] Fix compilation when gcc is patched to default to -fPIE -Wl,-pie
+
+gcc hardened by default is seen on gentoo, alt-linux, HLFS, etc.
+
+Patch fix on syslinux this error during gpxe compilation:
+  [BUILD] bin/cpu.o
+arch/i386/core/cpu.c: In function 'get_cpuinfo':
+arch/i386/include/bits/cpu.h:79: error: can't find a register in class 'BREG' while reloading 'asm'
+arch/i386/include/bits/cpu.h:79: error: can't find a register in class 'BREG' while reloading 'asm'
+arch/i386/include/bits/cpu.h:79: error: can't find a register in class 'BREG' while reloading 'asm'
+arch/i386/include/bits/cpu.h:79: error: can't find a register in class 'BREG' while reloading 'asm'
+arch/i386/include/bits/cpu.h:79: error: 'asm' operand has impossible constraints
+arch/i386/include/bits/cpu.h:79: error: 'asm' operand has impossible constraints
+arch/i386/include/bits/cpu.h:79: error: 'asm' operand has impossible constraints
+arch/i386/include/bits/cpu.h:79: error: 'asm' operand has impossible constraints
+make[3]: *** [bin/cpu.o] Error 1
+
+Mostly same fix has been applied on ipxe tree, the only change is on the variable name to hold the flags.
+Compile tested against 4.05-pre7
+
+Signed-off-by: Gilles Espinasse <g.esp@free.fr>
+---
+ gpxe/src/Makefile.housekeeping |   11 +++++++++++
+ 1 files changed, 11 insertions(+), 0 deletions(-)
+
+diff --git a/gpxe/src/Makefile.housekeeping b/gpxe/src/Makefile.housekeeping
+index 1f5e115..d351a52 100644
+--- a/gpxe/src/Makefile.housekeeping
++++ b/gpxe/src/Makefile.housekeeping
+@@ -134,6 +134,17 @@ SP_FLAGS := $(shell $(SP_TEST) && $(ECHO) '-fno-stack-protector')
+ CFLAGS	+= $(SP_FLAGS)
+ endif
+ 
++# Some widespread patched versions of gcc include -fPIE -Wl,-pie by
++# default.  Note that gcc will exit *successfully* if it fails to
++# recognise an option that starts with "no", so we have to test for
++# output on stderr instead of checking the exit status.
++#
++ifeq ($(CCTYPE),gcc)
++PIE_TEST = [ -z "`$(CC) -fno-PIE -nopie -x c -c /dev/null -o /dev/null 2>&1`" ]
++PIE_FLAGS := $(shell $(PIE_TEST) && $(ECHO) '-fno-PIE -nopie')
++CFLAGS += $(PIE_FLAGS)
++endif
++
+ # gcc 4.4 generates .eh_frame sections by default, which distort the
+ # output of "size".  Inhibit this.
+ #
+-- 
+1.5.6.5
+

@@ -1,0 +1,29 @@
+## capi4k-utils-2005-07-18
+##
+#etc/drdsl
+#etc/drdsl/adsl.conf
+#etc/ppp/peers
+#etc/ppp/peers/isdn
+#etc/ppp/peers/isdn/arcor
+#etc/ppp/peers/isdn/avm
+#etc/ppp/peers/isdn/avm-ml
+#etc/ppp/peers/isdn/leased
+#etc/ppp/peers/isdn/otelo
+#etc/ppp/peers/isdn/talkline
+#sbin/avmcapictrl
+####usr/bin/capiinfo
+#usr/include/capi20.h
+#usr/include/capicmd.h
+#usr/include/capiutils.h
+#usr/lib/libcapi20.la
+# do NOT delete libcapi20.so, pppd plugin segfaults when symlink is missing!
+####usr/lib/libcapi20.so
+####usr/lib/libcapi20.so.3
+####usr/lib/libcapi20.so.3.0.4
+#usr/lib/libcapi20dyn.a
+####usr/lib/pppd/2.4.7/capiplugin.so
+####usr/lib/pppd/2.4.7/userpass.so
+####usr/sbin/capiinit
+#usr/share/man/man8/avmcapictrl.8
+#usr/share/man/man8/capiinfo.8
+#usr/share/man/man8/capiplugin.8

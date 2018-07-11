@@ -1,0 +1,64 @@
+? cvs_Makefile.patch
+Index: Makefile
+===================================================================
+RCS file: /sources/radiusplugin/radiusplugin/Makefile,v
+retrieving revision 1.6
+diff -u -r1.6 Makefile
+--- Makefile	2 Sep 2010 11:00:16 -0000	1.6
++++ Makefile	4 Aug 2012 10:02:28 -0000
+@@ -1,18 +1,10 @@
+-BLUE    =\033[20;36m
+-GREEN   =\033[32m
+-RED     =\033[31m
+-ESC     =\033[0m
+-OK      =[$(GREEN) Ok $(ESC)]
+-FAILED  =[$(RED) failed $(ESC)]
+-
+-CC=g++
+-
+-
++CXX ?=g++
+ 
+ INCL=
+-LDFLAGS=
++
+ LIBS=-lgcrypt -lpthread
+-CFLAGS=-Wall -shared -fPIC -DPIC
++CXXFLAGS ?= -O2 -g
++CXXFLAGS +=-Wall -shared -fPIC -DPIC
+ 
+ 
+ PLUGIN=radiusplugin.so
+@@ -37,18 +29,27 @@
+   UserPlugin.o \
+   Config.o
+ 
++ifeq ($(V),1)
++Q=
++NQ=true
++else
++Q=@
++NQ=echo
++endif
++
+ all: $(PLUGIN)
+ 
+ $(PLUGIN): $(OBJECTS)
+-	@echo -e 'BIN: $(GREEN) $(PLUGIN) $(ESC)'
+-	@$(CC) $(CFLAGS) $(OBJECTS) -o $(PLUGIN) $(LDFLAGS) $(LIBS)
++	@$(NQ) 'CXXLD $@'
++	$(Q)$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(PLUGIN) $(LDFLAGS) $(LIBS)
+ 
+ %.o: %.cpp
+-	@echo -e 'OBJ: $(GREEN) $@ $(ESC)'
+-	@$(CC) $(INCL) $(CFLAGS) -o $@ -c $<
++	@$(NQ) 'CXX $@'
++	$(Q)$(CXX) $(INCL) $(CXXFLAGS) -o $@ -c $<
+ 
+ test: $(OBJECTS)
+-	@$(CC) -Wall $(OBJECTS) -o main $(LDFLAGS) $(LIBS)
++	@$(NQ) 'CXX $@'
++	$(Q)$(CXX) -Wall $(OBJECTS) -o main $(LDFLAGS) $(LIBS)
+ 
+ clean:
+ 	-rm $(PLUGIN) *.o */*.o

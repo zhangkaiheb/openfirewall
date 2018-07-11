@@ -1,0 +1,13 @@
+<ipcop>
+    <update>
+        <version>2.0.5</version>
+        <releasedate>2012-10-27</releasedate>
+        <size>1373</size>
+        <description>Fix the 'update is old' information message.&lt;br /&gt;
+            Language updates. Upgrade tzdata to 2012g.
+        </description>
+        <previousversion>2.0.4</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

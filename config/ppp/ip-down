@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+#
+# $Id: ip-down 4962 2010-09-18 06:51:46Z owes $
+#
+
+use strict;
+require '/usr/lib/ipcop/general-functions.pl';
+
+&General::log("PPP has gone down on $ARGV[0]");
+
+umask 022;
+
+unlink('/var/ipcop/red/active');
+system('/etc/rc.d/rc.updatered ppp down &');
+
+
+if ( -e '/var/ipcop/red/keepconnected') {
+
+    # We have to stop the ipppd (TYPE is ISDN) it stays even on disconnect (from ISP),
+    # and rc.connectioncheck will fail to reconnect as it waits for [p]ppd to go away.
+    my %pppsettings;
+    &General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+
+    if ($pppsettings{'TYPE'} eq 'isdn') {
+        system('/usr/bin/touch var/ipcop/red/redial');
+        system('/etc/rc.d/rc.red stop');
+    }
+
+    if (system('/bin/ps ax | /bin/grep -q "[r]c.connectioncheck reconnect"')) {
+        system('/etc/rc.d/rc.connectioncheck reconnect &');
+        &General::log('red', 'rc.connectioncheck reconnect started') if ($pppsettings{'DEBUG'} eq 'on');
+    } 
+    else {
+        &General::log('red', 'rc.connectioncheck reconnect already running') if ($pppsettings{'DEBUG'} eq 'on');
+    }
+}

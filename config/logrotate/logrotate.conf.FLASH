@@ -1,0 +1,39 @@
+# logrotate cfg for FLASH installations
+#
+
+# use date in filenames when rotating
+dateext
+dateyesterday
+
+# rotate log files daily
+daily
+
+# default is to keep 2 weeks worth of backlogs
+rotate 14
+
+# create new (empty) log files after rotating old ones
+create
+
+# Maximum logfile size of 4MB
+maxsize 4M
+
+# uncomment this if you want your log files compressed
+compress
+
+# packages drop log rotation information into this directory
+include /etc/logrotate.d
+
+# no packages own wtmp, or btmp -- we'll rotate them here
+/var/log/wtmp {
+    missingok
+    weekly
+    create 0664 root utmp
+    rotate 1
+}
+
+/var/log/btmp {
+    missingok
+    weekly
+    create 0600 root root
+    rotate 1
+}

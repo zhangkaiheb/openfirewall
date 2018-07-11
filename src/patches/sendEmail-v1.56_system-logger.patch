@@ -1,0 +1,24 @@
+--- src/sendEmail	2011-02-09 10:08:32.000000000 +0100
++++ src/sendEmail	2011-02-09 16:14:51.000000000 +0100
+@@ -1138,6 +1138,11 @@ sub printmsg {
+         
+     }
+     
++    # Add 'normal' messages to system log
++    if ($level == 0) {
++        system('/usr/bin/logger', '-t', "$conf{'programName'}\[$$\]", $message);
++    }
++
+     ## Return 0 errors
+     return(0);
+ }
+@@ -2187,7 +2192,8 @@ close $SERVER;
+ ##  Generate exit message/log entry  ##
+ #######################################
+ 
+-if ($conf{'debug'} or $conf{'logging'}) {
++# We always want a detailed exit message
++if ( 1 ) {
+     printmsg("Generating a detailed exit message", 3);
+     
+     ## Put the message together

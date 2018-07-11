@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Used for event handling
+# Called on events like system up/down, network up/down, red up/down
+# 
+# $Id: rc.event 4071 2010-01-03 17:10:33Z owes $
+#
+
+# Fetch some settings and set variables
+eval $(/usr/local/bin/readhash /var/ipcop/main/settings)
+EVENT=${1}
+VALUE=${2}
+
+
+# startup beep
+if [ "$EVENT" = "system" -a "$VALUE" = "up" -a "$IPCOPUPDOWNBEEP" = "on" ]; then
+    /usr/bin/beep -l 250 -f 770 -n -l 250 -f 864 -n -l 250 -f 686 -n -l 250 -f 343 -n -l 500 -f 514
+fi
+
+# shutdown beep
+if [ "$EVENT" = "system" -a "$VALUE" = "down" -a "$IPCOPUPDOWNBEEP" = "on" ]; then
+    /usr/bin/beep -l 250 -f 514 -n -l 250 -f 343 -n -l 250 -f 686 -n -l 250 -f 864 -n -l 500 -f 770
+fi
+
+# red up beep
+if [ "$EVENT" = "red" -a "$VALUE" = "up" -a "$PPPUPDOWNBEEP" = "on" ]; then
+    /usr/bin/beep -l 75 -f 440 -n -l 120 -f 880
+fi
+
+# red down beep
+if [ "$EVENT" = "red" -a "$VALUE" = "down" -a "$PPPUPDOWNBEEP" = "on" ]; then
+    /usr/bin/beep -l 75 -f 880 -n -l 120 -f 440
+fi
+
+
+# Launch private event handler
+/etc/rc.d/rc.event.local $EVENT $VALUE

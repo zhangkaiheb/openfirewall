@@ -1,0 +1,11 @@
+<ipcop>
+    <update>
+        <version>2.0.6</version>
+        <releasedate>2012-10-28</releasedate>
+        <size>3</size>
+        <description>Fix /var/log symlink for flash installations.</description>
+        <previousversion>2.0.5</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

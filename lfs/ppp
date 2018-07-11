@@ -1,0 +1,123 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: ppp 7991 2015-07-09 19:56:58Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = ppp
+VER        = 2.4.7
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+DL_FROM    = http://samba.org/ftp/ppp
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+CFLAGS += -Wall -fno-strict-aliasing
+
+PATCH1 = $(PKG_NAME)_2.4.6-3.1.debian.tar.xz
+
+$(PATCH1)  := $(URL_DEBIAN)/i/$(PKG_NAME)/$(PATCH1)
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE) $(PATCH1)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+$(PATCH1)  = $(URL_DEBIAN)/p/$(PKG_NAME)/$(PATCH1)
+
+$(DL_FILE)_MD5 = 78818f40e6d33a1d1de68a1551f6595a
+$(PATCH1)_MD5  = 82f8a21b47900d7e8ce0ea95ae1d741d
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+
+	# Apply patches on debian order
+	#cd $(DIR_APP) && gzip -dc $(DIR_DL)/$(PATCH1) | patch -p1
+	# Hack the list of patches, remove rejected and later patches (debian specific), blank lines and comments.
+	#cd $(DIR_APP) && sed -i -e '/rejected/,$$d' -e '/^$$/d' -e '/#.*/d' debian/patches/series
+	#cd $(DIR_APP) && for patch in `cat debian/patches/series` ; do patch -p1 -i debian/patches/$$patch; done
+	# logwtmp patch need this added as we skipped zzz_config patch in end of series
+	#cd $(DIR_APP) && sed -i 's/LIBS =$$/LIBS = -lutil/' pppd/Makefile.linux
+	# needed now or pppdump fail to build
+	#cd $(DIR_APP) && sed -i -e '/DO_DEFLATE=y/d' pppdump/Makefile.linux
+
+	# Fix 'call to __builtin___strncat_chk might  overflow destination buffer'
+	cd $(DIR_APP) && sed -i -e 's/strncat/strlcat/' pppd/plugins/radius/clientid.c
+
+	cd $(DIR_APP) && ./configure --prefix=/usr
+	cd $(DIR_APP) && sed -i -e 's/-O2/$(CFLAGS)/' chat/Makefile
+	cd $(DIR_APP) && sed -i -e 's/-O2/$(CFLAGS)/' pppd/plugins/Makefile
+	cd $(DIR_APP) && sed -i -e 's/-O2/$(CFLAGS)/' pppd/plugins/rp-pppoe/Makefile
+	cd $(DIR_APP) && sed -i -e 's/-O2/$(CFLAGS)/' pppd/plugins/pppoatm/Makefile
+	cd $(DIR_APP) && sed -i -e 's/-O2/$(CFLAGS)/' pppd/plugins/radius/Makefile
+	cd $(DIR_APP) && sed -i -e 's/-O2/$(CFLAGS)/' pppd/Makefile
+	cd $(DIR_APP) && make -j $(PARALLELISM) HAVE_INET6=y CBCP=y
+	cd $(DIR_APP) && make install
+
+	touch /var/log/connect-errors
+	mkdir -p /etc/ppp
+	cp $(DIR_SRC)/config/ppp/* /etc/ppp
+	chmod 755 /etc/ppp/{dialer,ip-up,ip-down}
+	ln -sf /var/ipcop/ppp/secrets /etc/ppp/pap-secrets
+	ln -sf /var/ipcop/ppp/secrets /etc/ppp/chap-secrets
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

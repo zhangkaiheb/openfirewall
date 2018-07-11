@@ -1,0 +1,10 @@
+#usr/bin/gpg-error
+#usr/bin/gpg-error-config
+#usr/include/gpg-error.h
+#usr/lib/libgpg-error.la
+#usr/lib/libgpg-error.so
+usr/lib/libgpg-error.so.0
+usr/lib/libgpg-error.so.0.24.2
+#usr/share/aclocal/gpg-error.m4
+#usr/share/info/gpgrt.info
+#usr/share/man/man1/gpg-error-config.1

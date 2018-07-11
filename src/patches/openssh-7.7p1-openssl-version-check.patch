@@ -1,0 +1,11 @@
+--- configure	2018-06-25 09:04:15.013452895 -0700
++++ configure.new	2018-06-25 09:04:04.325504414 -0700
+@@ -13075,7 +13075,7 @@ if ac_fn_c_try_run "$LINENO"; then :
+ 				100*)   ;; # 1.0.x
+ 				200*)   ;; # LibreSSL
+ 			        *)
+-					as_fn_error $? "OpenSSL >= 1.1.0 is not yet supported (have \"$ssl_library_ver\")" "$LINENO" 5
++##					as_fn_error $? "OpenSSL >= 1.1.0 is not yet supported (have \"$ssl_library_ver\")" "$LINENO" 5
+ 			                ;;
+ 			esac
+ 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ssl_library_ver" >&5

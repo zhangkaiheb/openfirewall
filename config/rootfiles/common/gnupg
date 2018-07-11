@@ -1,0 +1,16 @@
+root/.gnupg
+#root/.gnupg/gpg.conf
+#root/.gnupg/pubring.gpg
+#root/.gnupg/secring.gpg
+#root/.gnupg/trustdb.gpg
+usr/bin/gpg
+#usr/bin/gpg-zip
+#usr/bin/gpgsplit
+#usr/bin/gpgv
+#usr/share/gnupg
+#usr/share/gnupg/FAQ
+#usr/share/gnupg/options.skel
+#usr/share/info/gnupg1.info
+#usr/share/man/man1/gpg-zip.1
+#usr/share/man/man1/gpg.1
+#usr/share/man/man1/gpgv.1

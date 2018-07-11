@@ -1,0 +1,6 @@
+##
+## miboot-1.0d4
+##
+#usr/bin/miboot
+#usr/share/miboot/System.rsrc
+#usr/share/miboot/hfs-bootblock.b

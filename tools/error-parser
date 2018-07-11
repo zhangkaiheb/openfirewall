@@ -1,0 +1,143 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+# for nice colors
+use Term::ANSIColor qw(:constants);
+$Term::ANSIColor::AUTORESET = 1;
+# if output is redirected to a file, suppress color formatting to be more readable
+if (! -t STDOUT) {
+	$ENV{ANSI_COLORS_DISABLED} = 1;
+}
+
+# Restore default terminal color on Ctrl-C (when program is interrupted)
+# That work but is not perfect as it look harder to stop error-parser when called from error-parser-all
+sub INT_handler {
+	print RESET;
+	exit 0;
+}
+$SIG{'INT'} = 'INT_handler';
+
+my $f;
+my $package;	# without the package version, so we could simply parse different directories in one liners
+my $testdir;
+my @thefiles=();
+
+if ( $#ARGV == -1 || $#ARGV>1 ) {
+	print "Usage: $0 [package] test_<machine>/<date-stamp>\n";
+	print "Use gcc or 'gcc|^bc' for [package] to read both gcc and bc summaries\n";
+	exit
+}
+if ( $#ARGV == 1 ) {
+	$package=$ARGV[0];
+	shift;
+}
+$testdir=$ARGV[0];
+
+# Check test directory exist
+opendir(TESTDIR, $testdir) or die("Cannot open directory");
+# Read every present log
+@thefiles= readdir(TESTDIR);
+closedir(TESTDIR);
+
+@thefiles= sort(@thefiles);
+
+if (defined($package)) {
+	# Find the full files that match [package] with version
+	# so keep only what is matching
+	# print "Selecting only packages that match $package\n";
+	my @selection=();
+	# push package that match into @selection
+	for ( my $count = 0; $count < scalar(@thefiles); $count++ )  {
+		if ( $thefiles[$count] =~ m!^$package! ) {
+			push(@selection, $thefiles[$count]);
+		}
+	}
+	@thefiles=@selection;
+}
+
+# Now parse each selected log
+foreach $f (@thefiles) {
+	my $error=0;
+	if ( $f eq "." || $f eq ".." ) { next; }
+	if ( $f =~ m!^glibc! && $f =~ m!summary! ) { next; } 	# skip glibc summary
+	if ( $f =~ m!^gcc! && $f !~ m!summary! ) { next; }	# skip gcc not the summary
+	if ( $f =~ m!^cairo-([\.\d])+\-03! ) { print "\t$testdir/$f no more used, could be removed\n"; next; }
+
+	print "Reading $f";
+
+	if ( $f =~ m!^bc! ) {
+		# There is always errors and we don't care if there is not too much
+		# Check if Total failed tests is not too big
+		# 15 is very arbitrary, just more than 10 that is the usual error count on i486
+		open FILE, "$testdir/$f" or die $!;
+		while (my $line = <FILE>) {
+			if ( $line =~ /^Total failed tests=(\d*)/ ) { $error=$1; }
+		}
+		close (FILE);
+		if ( $error < 15 ) {
+			print "\t $error errors considered ok\n";
+		} else {
+			print BOLD BLUE "\t $error errors considered too much\n";
+		}
+	} elsif ( $f =~ m!^cairo-.*-summary-.*! ) {
+		print "\n"; # Case with no error is not considered actually.
+		# Print every lines and retrieve error count
+		open FILE, "$testdir/$f" or die $!;
+		while (my $line = <FILE>) {
+			if ( $line =~ m!Failures per surface - image: (\d*)\.$!) { $error = $1; }
+			print  BOLD BLUE "$line" if ($line !~ m!^make! );
+		}
+		close (FILE);
+		# Stay with 'Approximately' as it is convenient to use | grep Approx to only see error count on quick check
+		print " Approximately $error error(s) with $testdir/$f\n";
+	} else {
+		# FAILED | UNEXPECTED PASS from autoconf lib/general.m4
+		# ^ERROR:|^FAIL:|^XPASS: from automake and derivated
+		# ' program timed out' from gcc
+		# ': FAIL |:	FAIL|CRASH" from cairo (separated with space in middle, with tab in end of line)
+		# perl packages (not all) use '^not ok' to fail, but this is too often for broken tests with TODO, trying to match that give false alarm.
+		my $errorstring = "^FAIL:|^ERROR:|^XPASS:|FAILED | UNEXPECTED PASS |^UNSUPPORTED ";
+		$errorstring .= "| program timed out|: FAIL |:	FAIL|CRASH";
+
+		# flex
+		if ( $f =~ m!flex! ) { $errorstring .= '|^Test .* FAILED\.'; }
+
+		# glib
+		if ( $f =~ m!glib[^c]! ) { $errorstring .= '|FAIL$'; }
+
+		# 'generated an error' come from libxml2, try to compile (if that compile) --with-minimum --with-output to trigger error
+		# DBD-SQLite print twice that same message and should be still ok, so only match for libxml2
+		if ( $f =~ m!libxml2! ) { $errorstring .= "| generated an error"; }
+
+		# Add " Error " match for every package but sed
+		# sed produce 'make[4]: *** [utf8-x] Error 1' that result in XFAIL, so not a real error
+		# We will catch for sure the makefile error but may not print the specific message
+		if ( $f !~ m!sed|flex! ) { $errorstring= "$errorstring| Error [0-9]\+\$"; }
+		
+		if ( $f =~ m!^tcl|^expect! ) {
+			# without ending space on FAILED, that would wrongly match on flex
+			$errorstring= " .+ .+ FAILED"; # to not match twice on the same error
+		}
+
+		open FILE, "$testdir/$f" or die $!;
+		while (my $line = <FILE>) {
+			if ( $line =~ m!$errorstring! ) {
+				if ( $line !~ m! Error \d* \(ignored\)! ) {
+					if ($error==0) { print "\n"; }
+					$error++;
+					print BOLD BLUE "$line" if ($error < 50);
+				}
+			}
+		}
+		close(FILE);
+		if ( $error==0 ) {
+			print " no error\n";
+		} else {
+			# we may count more errors than reality, depending of makefile deepness
+			print " Approximately $error error(s) with $testdir/$f\n";
+		}
+	}
+}
+

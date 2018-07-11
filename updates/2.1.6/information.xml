@@ -1,0 +1,24 @@
+<ipcop>
+    <update>
+        <version>2.1.6</version>
+        <releasedate>2014-10-28</releasedate>
+        <size>20806</size>
+        <isoimages>yes</isoimages>
+        <description>Language updates.&lt;br /&gt;
+        Patch bash for CVE-2014-6271, 6277, 6278, 7169, 7186, 7187, openssl for CVE-2010-5298.&lt;br /&gt;
+        Upgrade linux kernel to 3.4-3 (3.4.104).&lt;br /&gt;
+        Upgrade bash to 4.3.30, bind to 9.9.5-P1, dhcpcd to 6.4.7, dnsmasq to 2.72, e2fsprogs to 1.42.12, fcron to 3.2.0,
+        gnupg to 1.4.18, grep to 2.20, iproute2 to 3.16.0, libgcrypt to 1.6.2, libnl to 3.2.25, mdadm to 3.3.2,
+        openssh to 6.7p1, openssl to 1.0.1j, openvpn to 2.3.4, ppp to 2.4.7, rsyslog to 7.6.7,
+        squid to 3.4.8, squid-langpack to 20140506, syslinux to 6.02,
+        tzdata to 2014h, vnstat to 1.13, util-linux to 2.25.1.
+        Upgrade Perl modules IO-Socket-SSL to 1.997, NetAddr-IP to 4.075, Net-DNS to 0.75, Net-SSLeay to 1.63.
+        &lt;br /&gt;
+        Upgrade e1000e network driver to 3.1.0.2, igb network driver to 5.2.9.4.&lt;br /&gt;
+        &lt;b&gt;Mandatory reboot after upgrade.&lt;/b&gt;
+        </description>
+        <previousversion>2.1.5</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

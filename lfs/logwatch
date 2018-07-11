@@ -1,0 +1,140 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: logwatch 5890 2011-10-03 12:17:49Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = logwatch
+VER        = 7.4.0
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+DL_FROM    = $(URL_SFNET)/$(PKG_NAME)
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects		= $(DL_FILE)
+
+$(DL_FILE)	= $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5	= b776466fb0633b486a41cf5aafcd9d12
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+
+	mkdir -p /etc/logwatch/lib /var/log/logwatch
+	mkdir -p /etc/logwatch/conf/{logfiles,services}
+	mkdir -p /etc/logwatch/scripts/{services,shared}
+	chown logwatch:nobody /var/log/logwatch
+	cd $(DIR_APP) && cp -Rf lib /etc/logwatch
+	cd $(DIR_APP) && cp conf/{logwatch.conf,ignore.conf} /etc/logwatch/conf
+	cd $(DIR_APP) && cp scripts/shared/* /etc/logwatch/scripts/shared
+	cd $(DIR_APP) && install -m 0755 scripts/logwatch.pl /etc/logwatch/scripts/logwatch.pl
+	cd $(DIR_APP) && install -m 0644 logwatch.8 /usr/share/man/man8
+
+	# change BaseDir
+	sed -i -e 's/my $$BaseDir = .*/my $$BaseDir = "\/etc\/logwatch";/' /etc/logwatch/scripts/logwatch.pl
+	# change TmpDir
+	sed -i -e 's/TmpDir = .*/TmpDir = \/tmp/' /etc/logwatch/conf/logwatch.conf
+	sed -i 's/^Print = .*$$/Print = Yes/' /etc/logwatch/conf/logwatch.conf
+	# comment out lines with unused example
+	sed -i '/-zz-network/s/Service/#Service/' /etc/logwatch/conf/logwatch.conf
+	sed -i '/-zz-sys/s/Service/#Service/' /etc/logwatch/conf/logwatch.conf
+	sed -i '/-eximstats/s/Service/#Service/' /etc/logwatch/conf/logwatch.conf
+
+	# Copy only those filters for services we run
+	# cron filter don't support fcron
+	NEEDED="http init iptables kernel modprobe openvpn pam_unix pluto \
+		raid scsi secure sshd sshd2 syslogd xntpd \
+		zz-disk_space zz-network" && \
+		for i in $$NEEDED ; do \
+			cp -f $(DIR_APP)/conf/services/$$i.conf /etc/logwatch/conf/services; \
+			cp -f $(DIR_APP)/scripts/services/$$i   /etc/logwatch/scripts/services; \
+		done
+	# Copy logfiles
+	NEEDED="http messages secure" && \
+		for i in $$NEEDED ; do \
+			cp -f $(DIR_APP)/conf/logfiles/$$i.conf /etc/logwatch/conf/logfiles; \
+		done
+
+	# All our iptables logging is in /var/log/messages
+	sed -i 's/LogFile.*=.*iptables/#LogFile = iptables/' /etc/logwatch/conf/services/iptables.conf
+
+	# We use OpenVPN daemon with non-standard name, to allow for multiple instances (RoadWarrior and Net-2-Net)
+	sed -i 's/\*OnlyService.*=.*/\*OnlyService = (openvpn\.\*|OVPN\.\*)/' /etc/logwatch/conf/services/openvpn.conf
+
+	sed -i 's/df -h/df -h -x rootfs/' /etc/logwatch/scripts/services/zz-disk_space
+	sed -i 's/\/usr\/local\/sbin/\/usr\/bin/' /etc/logwatch/scripts/services/xntpd
+
+	for i in `find /etc/logwatch -type f`; do \
+		sed -i 's/perl -w/perl/' $$i; \
+	done
+
+	# The httpd log checker script considers any request containing the word
+	# null to be an exploit attempt, reverse this behaviour as we have a
+	# null.gif
+	sed -i -e "/ 'null',/d" /etc/logwatch/scripts/services/http
+	chmod -R 755 /etc/logwatch
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

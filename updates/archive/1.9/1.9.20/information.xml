@@ -1,0 +1,22 @@
+<ipcop>
+    <update>
+        <version>1.9.20</version>
+        <releasedate>2011-08-21</releasedate>
+        <size>0</size>
+        <description>Language updates.&lt;br /&gt;
+        Fix SF 3000712 - Spike in Traffic graphs after reboot.&lt;br /&gt;
+        Upgrade acpid to 2.0.9, apache httpd to 2.2.19, bash to 4.2.10, bind to 9.7.3-P1, coreutils to 8.12,
+        dejavu-fonts to 2.33, dhcpcd to 5.2.12, freetype to 2.4.6, gawk to 4.0.0, grep to 2.9,
+        hdparm to 9.37, iproute2 to 2.6.39, iptables to 1.4.12, iptstate to 2.2.3, iw to 0.9.22, kernel to 2.6.32.45,
+        less to 444, libnet to 1.1.5, libcap to 2.22, libpng to 1.5.4, linux-atm-2.5.2 patched, logrotate to 3.8.0,
+        mdadm to 3.1.5, openssh to 5.8p2, openswan to 2.6.35, openvpn to 2.2.1,
+        pango to 1.28.4, parted to 3.0, pcmciautils to 018, procps-3.2.8 patched,
+        squid to 3.1.14, squid-langpack to 20110718, tzdata to 2011h, traceroute to 2.0.17, 
+        usb-modeswitch to 1.1.8, usbutils to 003, vnstat to 1.11.
+        Compile gnupg with stackprotector.&lt;br /&gt;
+        &lt;b&gt;Mandatory reboot after upgrade.&lt;/b&gt;</description>
+        <previousversion>1.9.19</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

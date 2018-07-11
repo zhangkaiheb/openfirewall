@@ -1,0 +1,28 @@
+diff --git a/Makefile b/Makefile
+index 5457dc9..ce0dc06 100644
+--- a/Makefile
++++ b/Makefile
+@@ -21,7 +21,7 @@ TEXTADDR	= 0x200000
+ MALLOCADDR	= 0x300000
+ MALLOCSIZE	= 0x100000
+ # Load kernel and ramdisk at real-base.  If there is overlap, will retry until find open space
+-KERNELADDR	= 0x00000000
++KERNELADDR	= 0x00C00000
+ 
+ # Set this to the prefix of your cross-compiler, if you have one.
+ # Else leave it empty.
+diff --git a/second/fs_of.c b/second/fs_of.c
+index 0d554c5..95c131d 100644
+--- a/second/fs_of.c
++++ b/second/fs_of.c
+@@ -44,8 +44,8 @@
+ #include "errors.h"
+ #include "debug.h"
+ 
+-#define LOAD_BUFFER_POS		0x00000000
+-#define LOAD_BUFFER_SIZE	0x01000000
++#define LOAD_BUFFER_POS		0x1000000
++#define LOAD_BUFFER_SIZE	0x1000000
+ 
+ static int of_open(struct boot_file_t* file, const char* dev_name,
+ 		   struct partition_t* part, const char* file_name);

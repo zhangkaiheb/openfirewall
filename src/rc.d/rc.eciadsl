@@ -1,0 +1,170 @@
+#!/bin/bash
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (c) 2003-2011 The IPCop Team
+#
+# $Id: rc.eciadsl 5948 2011-10-15 20:41:04Z owes $
+#
+
+DEBUG="off"
+eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
+
+# Debugging. Comment it out to use DEBUG from ppp settings
+DEBUG="on"
+
+msg() {
+    if [ "$DEBUG" = "on" ] ; then
+        /usr/bin/logger -t red "ECI USB: $*"
+    fi
+    echo "$*"
+}
+
+# Function to wait for interface to become ready
+# Borrowed from eciadsl startmodem script
+function wait_for_iface()
+{
+    msg "Waiting for interface: $1"
+    COUNTER=10
+    FLREADY=0
+    TIMES=1
+    while [ $TIMES -le $COUNTER ]; do
+        /sbin/ip link show $1> /dev/null 2>&1
+        if [ 0$? -eq 0 ]; then
+            FLREADY=1
+            break
+        fi
+        /bin/sleep 1
+        TIMES=$(expr $TIMES + 1)
+    done
+    if [ 0"$FLREADY" -eq 0 ]; then
+        msg "Interface not found: $1"
+        exit 1
+    fi
+}
+
+# See how we were called.
+case "$1" in
+start)
+    if [ ! -f "/var/ipcop/eciadsl/synch.bin" ]; then
+        msg "Synch.bin not uploaded"
+        exit 1
+    fi
+
+    if [ ! -d "/sys/bus/usb/devices/usb1" ]; then
+        msg "No USB enabled"
+        exit 1
+    fi
+
+    VID1="$(/bin/grep "$MODEM	" "/etc/eciadsl/modems.db" | /usr/bin/tr -s "\t" "|" | /usr/bin/cut -d '|' -f 2)"
+    PID1="$(/bin/grep "$MODEM	" "/etc/eciadsl/modems.db" | /usr/bin/tr -s "\t" "|" | /usr/bin/cut -d '|' -f 3)"
+    VID2="$(/bin/grep "$MODEM	" "/etc/eciadsl/modems.db" | /usr/bin/tr -s "\t" "|" | /usr/bin/cut -d '|' -f 4)"
+    PID2="$(/bin/grep "$MODEM	" "/etc/eciadsl/modems.db" | /usr/bin/tr -s "\t" "|" | /usr/bin/cut -d '|' -f 5)"
+    CHIP="$(/bin/grep "$MODEM	" "/etc/eciadsl/modems.db" | /usr/bin/tr -s "\t" "|" | /usr/bin/cut -d '|' -f 6)"
+    ALTS="$(/bin/grep "$MODEM	" "/etc/eciadsl/modems.db" | /usr/bin/tr -s "\t" "|" | /usr/bin/cut -d '|' -f 7)"
+    ALTP="$(/bin/grep "$MODEM	" "/etc/eciadsl/modems.db" | /usr/bin/tr -s "\t" "|" | /usr/bin/cut -d '|' -f 8)"
+
+    if [ "$CHIP" = '' ]; then
+        msg "error in modems.db reading for $MODEM no CHIP found"
+        exit 1
+    fi
+
+    # Firmware
+    if [ "$CHIP" = 'GS7070' ]; then
+        if ( /bin/grep -q "^P:  Vendor=$VID1 ProdID=$PID1" /proc/bus/usb/devices ); then
+            /bin/rm -f /var/ipcop/red/eciadsl-synch-done
+            /bin/sleep 2
+            msg "Loading Firmware for $MODEM"
+            /usr/sbin/eciadsl-firmware 0x$VID1 0x$PID1 0x$VID2 0x$PID2 /etc/eciadsl/firmware00.bin
+            RET=$?
+            if [ "$RET" -ne "0" ]; then
+                msg "$MODEM failed to load firmware, reason: $RET"
+                exit 1
+            fi
+            /bin/sleep 2
+        fi
+    fi
+
+    if ( ! /bin/grep -q "^P:  Vendor=$VID2 ProdID=$PID2" /proc/bus/usb/devices ); then
+        msg "$MODEM modem not found ready"
+        exit 1
+    fi
+
+    # Modem synch
+    if [ ! -e "/var/ipcop/red/eciadsl-synch-done" ]; then
+        /usr/sbin/eciadsl-synch -alt $ALTS -mc $CHIP 0x$VID2 0x$PID2 /var/ipcop/eciadsl/synch.bin
+        RET=$?
+        if [ "$RET" -ne "0" ]; then
+            msg "$MODEM failed to get synchronization, reason:$RET"
+            exit 1
+        else
+            /usr/bin/touch /var/ipcop/red/eciadsl-synch-done
+        fi
+    fi
+
+    if [ "$PROTOCOL" = "RFC1483" ]; then
+        case "$ENCAP" in
+            0) ECIMODE="LLC_SNAP_RFC1483_BRIDGED_ETH_NO_FCS"
+            ;;
+            1) ECIMODE="VCM_RFC_1483_BRIDGED_ETH"
+            ;;
+            2) ECIMODE="LLC_RFC1483_ROUTED_IP"
+            ;;
+            3) ECIMODE="VCM_RFC1483_ROUTED_IP"
+            ;;
+            *) msg "Unknown encapsulation: $ENCAP"
+            exit 1
+            ;;
+        esac
+
+        # Start pppoeci
+        if [ "$ENCAP" = "0" -o "$ENCAP" = "1" ]; then
+            ECIIF="tap0"
+        else
+            ECIIF="tun0"
+        fi
+        /sbin/modprobe tun
+        /usr/sbin/eciadsl-pppoeci -alt $ALTP -vpi $VPI -vci $VCI -vendor 0x$VID2 -product 0x$PID2 -mode $ECIMODE
+        wait_for_iface $ECIIF
+        /sbin/ip link set $ECIIF up
+        exit $?
+    fi
+    exit 0
+    ;;
+stop)
+    msg "stop"
+    # Avoid possibility of multiple 'rc.eciadsl start' as only one prog can claim interface at a time
+    # and time for the full eci-load2 loop may be too long for the user to wait until to try once again
+    RCECIADSLSTART=`/bin/ps ax | /bin/grep '[r]c.eciadsl start' | /usr/bin/cut -f1 -d ' '`
+    [ "$RCECIADSLSTART" != '' ] && /bin/kill "$RCECIADSLSTART"
+
+    # -KILL is necessary because pppoeci ignores sigint
+    /usr/bin/killall -KILL eciadsl-pppoeci eciadsl-firmware eciadsl-synch 2> /dev/null
+    /bin/sleep 1
+    /sbin/modprobe -r tun
+    ;;
+cleanup)
+    msg "driver cleanup"
+
+    /bin/rm -f /var/ipcop/red/eciadsl-synch-done
+    ;;
+*)
+    /bin/echo "Usage: $0 {start|stop|cleanup}"
+    exit 1
+    ;;
+esac
+
+exit 0

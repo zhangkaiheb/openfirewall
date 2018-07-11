@@ -1,0 +1,14 @@
+## slang-1.4.5-mini
+##
+#usr/include/slang.h
+#usr/include/slcurses.h
+#usr/lib/libslang.a
+#usr/share/doc/slang
+#usr/share/doc/slang/v2
+#usr/share/doc/slang/v2/COPYING
+#usr/share/doc/slang/v2/changes.txt
+#usr/share/doc/slang/v2/cref.txt
+#usr/share/doc/slang/v2/cslang.txt
+#usr/share/doc/slang/v2/slang.txt
+#usr/share/doc/slang/v2/slangdoc.html
+#usr/share/doc/slang/v2/slangfun.txt

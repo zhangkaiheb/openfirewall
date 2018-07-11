@@ -1,0 +1,20 @@
+--- lib/libtools.c.old	2004-12-17 15:22:00.141377490 +0000
++++ lib/libtools.c	2004-12-17 15:22:16.347283347 +0000
+@@ -711,6 +711,7 @@
+ 				case 'r': _mode |= R_OK;
+ 				          break;
+ 				default :
++					  ((void)0);
+ 			}
+ 		}
+ 
+--- eicon/divautil/linload.c.old	2004-12-17 15:28:02.676421483 +0000
++++ eicon/divautil/linload.c	2004-12-17 15:28:11.658598179 +0000
+@@ -198,6 +198,7 @@
+ 				filename[strlen(filename)-1]='6';
+ 				break;
+ 			default:
++				((void)0);
+ 		}
+ 	}
+ 

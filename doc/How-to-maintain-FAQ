@@ -1,0 +1,30 @@
+Prerequisites
+- have a login created on the wiki at ipcop.org
+- with Power users group rights, you are able to answer to question posted in
+  the site or delete them if inappropriate question
+- with Admins group rights, you are able to fully edit anything to the FAQ
+ (already answered questions, add or suppres a category)
+
+What you could do
+Post a question to the FAQ ( anybody logged-in could)
+	FAQ is not the way to ask for help, but to provide help with solutions
+	to know problems. You would have an anwser faster going to ipcop-user
+	list or any forum related to IPCop (see Support on the menu).
+	Users could post any questions but a particular subject may not need an
+	entry to the FAQ. Unfortunaly many of the entries posted there does not
+	qualify as appropriate questions and they have to be deleted.
+
+Anwser to the FAQ (need Power users rights)
+	You show questions waiting for answer at the left bottom of the screen
+	Waiting content : Frequently asked questions
+	You could post you own questions to enlight the FAQ
+
+	We should improve the 'Ask a question' screen to state that standard question
+	should be asked on ipcop-user or on the various available forums.
+
+Edit the FAQ (need Admin rights)
+	Go to the Administration menu in 3-rd-party tab and click on FAQ module
+	Then with each 'content' link, you could edit each menu entry of the FAQ
+
+You should ask preferably on ipcop-devel the right to work on the FAQ or other documents.
+Better ask on ipcop-user if you are not registered on ipcop-devel.

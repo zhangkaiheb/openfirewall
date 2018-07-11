@@ -1,0 +1,19 @@
+## silo-1.3.13
+##
+#boot/fd.b
+boot/first.b
+boot/generic.b
+#boot/ieee32.b
+#boot/isofs.b
+boot/second.b
+#boot/silotftp.b
+boot/ultra.b
+etc/silo.conf
+sbin/silo
+#usr/bin/maketilo
+#usr/bin/tilo
+#usr/sbin/silocheck
+#usr/share/man/man1/maketilo.1
+#usr/share/man/man1/tilo.1
+#usr/share/man/man5/silo.conf.5
+#usr/share/man/man8/silo.8

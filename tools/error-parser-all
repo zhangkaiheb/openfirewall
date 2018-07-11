@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ "$1" = '--help' ]; then
+	echo "Parse tests_* directories (optionally for all, one or more package)"
+	echo "./tools/error-parser-all (without arg, for all packages)"
+	echo "./tools/error-parser-all 'package1|package2'"
+	echo "./tools/error-parser-all 'glib[^c]' (glib and not glibc)"
+	exit 0
+fi
+
+for d in $(ls test_*); do
+	echo "Reading test from $d ..."
+	./tools/error-parser $1 ./test_*/$d
+done

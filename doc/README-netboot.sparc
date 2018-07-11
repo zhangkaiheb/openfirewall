@@ -1,0 +1,48 @@
+Compile on sparc arch and test ipcop for sparc (IPCop only support sparc64)
+
+Short installation notes for those like me (Gilles) unfamiliar with sparc
+
+Goal : install debian etch with sparc netboot (work for me on Ultra5)
+
+On the sparc machine
+- start the machine
+- stop the machine to boot with keyboard function stop + A
+- note ethernet MAC address
+- prompt should be ok.
+  If silo has already started (prompt is silo), type halt, prompt should go back to ok
+
+I find more convenient to have a fixed name for the file to load and switch the
+real file to be loaded with a symlink on the tftp server.
+So the file name that the dhcp server send is set to 'sparc'
+
+On the dhcp server (could be an IPCop)
+- write a fixed lease on the network dhcp server:
+	MAC address,
+	corresponding IP,
+	IP of the tftp server (next-server),
+	file to boot from : sparc
+	no root path if tftp-hpa is started with -s option
+
+On the tftp server
+- to install debian from netboot,
+  load http://ftp.nl.debian.org/debian/dists/etch/main/installer-sparc/current/images/sparc64/netboot/2.6/boot.img
+  and copy boot.img inside /var/tftp (I choose debian-installer/sparc64/boot.img path, your's may vary)
+  write corresponding symlink:
+	cd <tftproot>
+	ln -sf debian-installer/sparc64/boot.img sparc
+
+- to install ipcop-1.9.3 from netboot
+	cd <tftproot>
+	tar zvxf ipcop-1.9.3-install-netboot-sparc.tgz
+	ln -sf ipcop/1.9.3/sparc/boot.img sparc
+
+On the sparc machine, in openfirmware (you see ok starting the line), type
+boot net:dhcp
+
+System should now start to count file size loaded and boot
+Once system is installed, it will boot from the disk.
+
+More complete details in debian installation manual.
+
+Count two days for a full build (including toolchain) on a Ultra5 with 256 MB 400 MHz 800 bogomips 20GB hdd
+Rebuild time is 13h30 because of ccache and packaged toolchain

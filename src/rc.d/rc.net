@@ -1,0 +1,271 @@
+#!/usr/bin/perl
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+#
+# (c) 2008-2014, the IPCop team
+#
+# $Id: rc.net 7628 2014-07-17 06:47:30Z owes $
+#
+
+use strict;
+require '/usr/lib/ipcop/general-functions.pl';
+
+
+my %netsettings;
+my %oldnetsettings;
+my %pppsettings;
+my @INTERFACEs = ('GREEN', 'BLUE', 'ORANGE', 'RED');
+my $counter;
+my $interface;
+my $columns = 0;        # For pretty output
+my $init = 0;
+
+&General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
+if (-e '/var/ipcop/ethernet/settings.old') {
+    # Special case when reconfiguring
+    &General::readhash('/var/ipcop/ethernet/settings.old', \%oldnetsettings);
+    unlink('/var/ipcop/ethernet/settings.old');
+}
+# We need pppsettings for AUTOCONNECT
+&General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+
+
+if (($ARGV[0] eq 'init') || ($ARGV[0] eq '--init')) {
+    $init = 1;
+    $columns = &General::getcolumns() - 10;
+    &net_init();
+}
+elsif (($ARGV[0] eq 'reconfigure') || ($ARGV[0] eq '--reconfigure')) {
+    my $redactive = (-e '/var/ipcop/red/active') ? 1 : 0;
+    # reconfigure is used by setup, first stop and unload everything, then pull everything back up
+    if (defined($oldnetsettings{'GREEN_COUNT'})) {
+        &net_stop(\%oldnetsettings);
+        &modules_unload(\%oldnetsettings);
+    }
+    else {
+        &net_stop(\%netsettings);
+    }
+    &modules_unload(\%netsettings);
+    &modules_load(\%netsettings);
+    &net_start(\%netsettings);
+
+    # one of host, domain, green IP may have changed
+    system('/usr/local/bin/rebuildhosts');
+
+    # Blue may have been added/removed
+    system('/usr/local/bin/updatemenu.pl');
+
+    &net_startred(\%netsettings) if ($redactive);
+    # TODO: other services that need restarting ?
+}
+elsif (($ARGV[0] eq 'start') || ($ARGV[0] eq '--start')) {
+    &net_start(\%netsettings);
+    &net_startred(\%netsettings);
+}
+elsif (($ARGV[0] eq 'startred') || ($ARGV[0] eq '--startred')) {
+    $columns = &General::getcolumns() - 10;
+    &net_startred(\%netsettings);
+}
+elsif (($ARGV[0] eq 'stop') || ($ARGV[0] eq '--stop')) {
+    &net_stop(\%netsettings);
+}
+elsif (($ARGV[0] eq 'restart') || ($ARGV[0] eq '--restart')) {
+    &net_stop(\%netsettings);
+    &net_start(\%netsettings);
+    &net_startred(\%netsettings);
+}
+elsif (($ARGV[0] eq 'load') || ($ARGV[0] eq '--load')) {
+    &modules_load(\%netsettings);
+}
+elsif (($ARGV[0] eq 'unload') || ($ARGV[0] eq '--unload')) {
+    &modules_unload(\%netsettings);
+}
+else {
+    print("ERROR: rc.net bad argument $ARGV[0]\n");
+    exit 1;
+}
+
+exit 0;
+
+
+#
+# Called from rc.sysinit when booting
+#
+sub net_init
+{
+    system("/sbin/ip link set lo up");
+
+    print "Loading iptables helper modules ... ";
+
+    system("/sbin/modprobe iptable_nat");
+    system("/sbin/modprobe nf_conntrack");
+    system("/sbin/modprobe nf_conntrack_ftp");
+    system("/sbin/modprobe nf_nat_ftp");
+    system("/sbin/modprobe nf_conntrack_h323");
+    system("/sbin/modprobe nf_nat_h323");
+    system("/sbin/modprobe nf_conntrack_sip");
+    # nf_nat_sip seems to cause nothing but trouble
+    system("/sbin/modprobe nf_conntrack_irc");
+    system("/sbin/modprobe nf_nat_irc");
+    system("/sbin/modprobe nf_conntrack_pptp");
+    system("/sbin/modprobe nf_nat_pptp");
+    system("/sbin/modprobe nf_conntrack_proto_gre");
+    system("/sbin/modprobe nf_nat_proto_gre");
+    &General::testok($columns);
+
+    system("/etc/rc.d/rc.red clear");
+
+    # Create an empty resolv.conf for dnsmasq, will be filled with proper data later by rc.updatered
+    system ('echo > /var/ipcop/red/resolv.conf');
+
+    # TODO: Launch PCMCIA ?
+    # TODO: Relaunch PCMCIA USB ?
+
+    &modules_load(\%netsettings);
+
+    &net_start(\%netsettings);
+}
+
+
+#
+# Start firewall, ifconfig up, etc.
+#
+sub net_start
+{
+    my $settings = shift;
+
+    print "Setting up IPCop firewall rules ... ";
+    system("/etc/rc.d/rc.firewall start");
+    &General::testok($columns);
+
+    foreach $interface (@INTERFACEs) {
+        # RED is handled later in rc.red
+        next if ($interface eq "RED");
+
+        for ($counter = 1; $counter <= $settings->{"${interface}_COUNT"}; $counter++) {
+            my $ic = "${interface}_${counter}";
+            print "Starting interface ${interface} ... ";
+            if ($columns && ! -e "/sys/class/net/$settings->{\"${ic}_DEV\"}") {
+                # If the device does not exist, there is no point in producing a lot of output when booting
+                print "\nDevice ".$settings->{"${ic}_DEV"}." does not exist";
+                system('/bin/false');
+            }
+            else {
+                system('/sbin/ip', 'addr', 'add', $settings->{"${ic}_ADDRESS"}."/".$settings->{"${ic}_NETMASK"}, 'dev', $settings->{"${ic}_DEV"} );
+                system('/sbin/ip', 'link', 'set', $settings->{"${ic}_DEV"}, 'up' );
+            }
+            &General::testok($columns);
+        }
+    }
+
+    print "Setting up IP Accounting ... ";
+    if ($init) {
+        system("/usr/local/bin/accountingctrl --init");
+    }
+    else {
+        system("/usr/local/bin/accountingctrl");
+    }
+    &General::testok($columns);
+
+    system("/etc/rc.d/rc.dnsmasq restart");
+    
+    system("/etc/rc.d/rc.event network up");
+}
+
+
+#
+# Start RED
+#
+sub net_startred
+{
+    my $settings = shift;
+
+    if(($pppsettings{'AUTOCONNECT'} eq 'on') ||
+       (($settings->{'RED_COUNT'} > 0) && (($settings->{'RED_1_TYPE'} eq 'STATIC') || ($settings->{'RED_1_TYPE'} eq 'DHCP')))) {
+        print "Starting interface RED ... ";
+        system("/etc/rc.d/rc.red start");
+        &General::testok($columns);
+    }
+}
+
+
+#
+# ifconfig down, stop red, stop firewall
+#
+sub net_stop
+{
+    my $settings = shift;
+
+    foreach $interface (@INTERFACEs) {
+        # RED is handled later in rc.red
+        next if ($interface eq "RED");
+
+        for ($counter = 1; $counter <= $settings->{"${interface}_COUNT"}; $counter++) {
+            my $ic = "${interface}_${counter}";
+            system('/sbin/ip', 'link', 'set', $settings->{"${ic}_DEV"}, 'down');
+        }
+    }
+
+    system("/etc/rc.d/rc.red stop");
+    # TODO: do we need to sleep here? Why not let rc.red take care of that?
+    sleep 3;
+    system("/etc/rc.d/rc.red clear");
+
+    print "Stopping IPCop firewall\n";
+    system('/etc/rc.d/rc.firewall stop');
+
+    system("/etc/rc.d/rc.event network down");
+}
+
+
+#
+# Modprobe all configured kernel modules
+#
+sub modules_load
+{
+    my $settings = shift;
+
+    foreach $interface (@INTERFACEs) {
+        for ($counter = 1; $counter <= $settings->{"${interface}_COUNT"}; $counter++) {
+            my $ic = "${interface}_${counter}";
+
+            # modprobe silently, produce output in case we are booting and modprobe failed
+            system('/sbin/modprobe', '-q', $settings->{"${ic}_DRIVER"}, $settings->{"${ic}_DRIVER_OPTIONS"});
+            if ($? && $columns) {
+                print "Loading module ".$settings->{"${ic}_DRIVER"}." for interface ${interface}-${counter} ... ";
+                &General::testok($columns);
+            }
+        }
+    }
+    system("/sbin/udevadm settle");
+}
+
+
+#
+# Modprobe -r all configured kernel modules
+#
+sub modules_unload
+{
+    my $settings = shift;
+    
+    foreach $interface (@INTERFACEs) {
+        for ($counter = 1; $counter <= $settings->{"${interface}_COUNT"}; $counter++) {
+            my $ic = "${interface}_${counter}";
+            system('/sbin/modprobe', '-r', $settings->{"${ic}_DRIVER"});
+        }
+    }
+    system("/sbin/udevadm settle");
+}

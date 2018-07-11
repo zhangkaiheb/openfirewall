@@ -1,0 +1,65 @@
+Fix incorrect usage only detected with zlib-1.2.6 and later
+gzFile *" should be "gzFile".
+
+Solve those compilation warnings
+../zlibsupport.c: In function 'grab_contents':
+../zlibsupport.c:30: warning: passing argument 1 of 'gzread' from incompatible pointer type
+/usr/include/zlib.h:1290: note: expected 'gzFile' but argument is of type 'struct gzFile_s **'
+../zlibsupport.c: In function 'grab_file':
+../zlibsupport.c:56: warning: passing argument 1 of 'grab_contents' from incompatible pointer type
+../zlibsupport.c:23: note: expected 'struct gzFile_s **' but argument is of type 'gzFile'
+
+and those tests warnings if testing with --enable-zlib-dynamic
+Building with --enable-zlib-dynamic...
+In file included from ../../lsmod.c:31:
+../../testing.h: In function 'modtest_gzopen':
+../../testing.h:238: warning: return from incompatible pointer type
+In file included from ../../zlibsupport.c:19:
+../../testing.h: In function 'modtest_gzopen':
+../../testing.h:238: warning: return from incompatible pointer type
+../../zlibsupport.c: In function 'grab_contents':
+../../zlibsupport.c:30: warning: passing argument 1 of 'gzread' from incompatible pointer type
+/usr/include/zlib.h:1290: note: expected 'gzFile' but argument is of type 'struct gzFile_s **'
+../../zlibsupport.c: In function 'grab_file':
+../../zlibsupport.c:50: warning: assignment from incompatible pointer type
+../../zlibsupport.c:56: warning: passing argument 1 of 'grab_contents' from incompatible pointer type
+../../zlibsupport.c:23: note: expected 'struct gzFile_s **' but argument is of type 'gzFile'
+In file included from ../../modprobe.c:54:
+../../testing.h: In function 'modtest_gzopen':
+../../testing.h:238: warning: return from incompatible pointer type
+In file included from ../../rmmod.c:33:
+../../testing.h: In function 'modtest_gzopen':
+../../testing.h:238: warning: return from incompatible pointer type
+In file included from ../../depmod.c:50:
+../../testing.h: In function 'modtest_gzopen':
+../../testing.h:238: warning: return from incompatible pointer type
+In file included from ../../modinfo.c:21:
+../../testing.h: In function 'modtest_gzopen':
+../../testing.h:238: warning: return from incompatible pointer type
+
+--- module-init-tools-3.16/zlibsupport.orig	2012-02-04 10:23:04.000000000 +0100
++++ module-init-tools-3.16/zlibsupport.c	2012-02-04 10:25:47.000000000 +0100
+@@ -20,7 +20,7 @@
+ #ifdef CONFIG_USE_ZLIB
+ #include <zlib.h>
+ 
+-void *grab_contents(gzFile *gzfd, unsigned long *size)
++void *grab_contents(gzFile gzfd, unsigned long *size)
+ {
+ 	unsigned int max = 16384;
+ 	void *buffer = NOFAIL(malloc(max));
+--- module-init-tools-3.16/testing.h.orig	2011-06-02 19:55:01.000000000 +0200
++++ module-init-tools-3.16/testing.h	2012-02-04 17:10:15.000000000 +0100
+@@ -227,10 +227,10 @@
+ 
+ #ifdef CONFIG_USE_ZLIB
+ #include <zlib.h>
+-static gzFile *modtest_gzopen(const char *path, const char *mode)
++static gzFile modtest_gzopen(const char *path, const char *mode)
+ __attribute__((unused));
+ 
+-static gzFile *modtest_gzopen(const char *path, const char *mode)
++static gzFile modtest_gzopen(const char *path, const char *mode)
+ {
+ 	char path_buf[PATH_MAX];
+ 

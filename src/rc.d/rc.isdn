@@ -1,0 +1,116 @@
+#!/bin/bash
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (c) 2001-2011 The IPCop Team
+#
+# $Id: rc.isdn 6146 2011-11-30 14:43:36Z owes $
+#
+
+# Debugging. May need to eval from ppp/settings to use global DEBUG
+DEBUG="on"
+eval $(/usr/local/bin/readhash /var/ipcop/ethernet/isdn)
+
+msg() {
+    if [ "$DEBUG" = "on" ] ; then
+        /usr/bin/logger -t red "ISDN: $*"
+    fi
+    echo "$*"
+}
+
+# See how we were called.
+case "$1" in
+start)
+    if [ "$ENABLED" = "on" ]; then
+        /sbin/modprobe -r hisax_st5481      2>/dev/null
+        /sbin/modprobe -r hisax_fcpcipnp    2>/dev/null
+        /sbin/modprobe -r hisax_isac        2>/dev/null
+        /sbin/modprobe -r hisax             2>/dev/null
+        /sbin/modprobe -r avmfritz          2>/dev/null
+
+        # Create ISDN devices in /dev
+        i=0
+        for ((i ; i < 8; i++)); do
+            rm /dev/isdn$i 2>/dev/null
+            mknod /dev/isdn$i c 45 $i
+            chown root:dialout /dev/isdn$i
+            chmod 660 /dev/isdn$i
+
+            j=$((64+$i))
+            rm /dev/isdnctrl$i 2>/dev/null
+            mknod /dev/isdnctrl$i c 45 $j
+            chown root:dialout /dev/isdnctrl$i
+            chmod 660 /dev/isdnctrl$i
+
+            j=$((128+$i))
+            rm /dev/ippp$i 2>/dev/null
+            mknod /dev/ippp$i c 45 $j
+            chown root:dialout /dev/ippp$i
+            chmod 660 /dev/ippp$i
+        done
+
+        rm /dev/isdnctrl 2>/dev/null
+        ln -s /dev/isdnctrl0 /dev/isdnctrl
+
+        rm /dev/isdninfo 2>/dev/null
+        mknod /dev/isdninfo c 45 255
+        chown root:dialout /dev/isdninfo
+        chmod 660 /dev/isdninfo
+
+        if [ "$TYPE" = "998" ]; then
+            /sbin/modprobe hisax_st5481 protocol=$PROTOCOL $MODULE_PARAMS
+            exit $?
+        elif [ "$TYPE" = "999" ]; then
+            /sbin/modprobe hisax_fcpcipnp protocol=$PROTOCOL $MODULE_PARAMS
+            exit $?
+        else
+            /sbin/modprobe hisax protocol=$PROTOCOL type=$TYPE $MODULE_PARAMS
+            exit $?
+        fi
+    else
+        msg "No ISDN enabled"
+        exit 1
+    fi
+    ;;
+stop)
+    /sbin/ip link set ippp1 down   2>/dev/null
+    /sbin/ip link set ippp0 down   2>/dev/null
+    /usr/sbin/isdnctrl delif ippp1 2>/dev/null
+    /usr/sbin/isdnctrl delif ippp0 2>/dev/null
+    /usr/bin/killall ipppd         2>/dev/null
+    /usr/bin/killall ibod          2>/dev/null
+    /sbin/modprobe -r hisax_st5481      2>/dev/null
+    /sbin/modprobe -r hisax_fcpcipnp    2>/dev/null
+    /sbin/modprobe -r hisax_isac        2>/dev/null
+    /sbin/modprobe -r hisax             2>/dev/null
+
+    # Remove ISDN devices from /dev
+    i=0
+    for ((i ; i < 8; i++)); do
+        rm /dev/isdn$i 2>/dev/null
+        rm /dev/isdnctrl$i 2>/dev/null
+        rm /dev/ippp$i 2>/dev/null
+    done
+    rm /dev/isdnctrl 2>/dev/null
+    rm /dev/isdninfo 2>/dev/null    
+    ;;
+*)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,29 @@
+--- silo-1.4.14/second/file.h.old	2008-06-12 16:39:12.000000000 +0000
++++ silo-1.4.14/second/file.h	2008-08-12 19:18:22.000000000 +0000
+@@ -18,9 +18,10 @@
+    USA.  */
+ 
+ typedef int FILE;
+-#include <linux/types.h>
++
+ #include <ext2fs/ext2_fs.h>
+ #include <ext2fs/ext2fs.h>
++#include <linux/types.h>
+ 
+ extern unsigned int bs;			/* Block Size */
+ extern io_manager silo_io_manager;	/* The Filesystem I/O Manager */
+--- silo-1.4.14/second/ls.c.old 2008-06-12 16:39:12.000000000 +0000
++++ silo-1.4.14/second/ls.c     2008-08-12 19:47:12.000000000 +0000
+@@ -22,9 +22,10 @@
+ #include <stringops.h>
+
+ typedef int FILE;
+-#include <linux/types.h>
++
+ #include <ext2fs/ext2_fs.h>
+ #include <ext2fs/ext2fs.h>
++#include <linux/types.h>
+
+ int ls_opt = 0;
+
+

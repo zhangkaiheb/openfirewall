@@ -1,0 +1,71 @@
+http://lists.gnu.org/archive/html/bug-dejagnu/2008-08/msg00001.html
+perror should not errcnt across test files
+Hi,
+
+$ echo 'perror foo' >a.exp; echo 'pass bar' >b.exp; runtest a.exp b.exp; cat testrun.sum
+...
+Running target unix
+Running ./a.exp ...
+ERROR: foo
+Running ./b.exp ...
+UNRESOLVED: bar
+
+                ===  Summary ===
+...
+
+With the attached patch it shows:
+
+$ echo 'perror foo' >a.exp; echo 'pass bar' >b.exp; runtest a.exp b.exp; cat 
+testrun.sum
+...
+Running target unix
+Running ./a.exp ...
+ERROR: foo
+Running ./b.exp ...
+PASS: bar
+
+                ===  Summary ===
+...
+
+perror was not intended to affect test results from other files, was it?
+
+The patch resets errcnt and warncnt.  It is causing me spurious UNRESOLVED
+results for testcases unrelated to the original perror (in the GDB testsuite).
+
+From 6d2e2d3791bcea70131a6cf64a0a5223333a7b8e Mon Sep 17 00:00:00 2001
+From: Ben Elliston <bje@gnu.org>
+Date: Mon, 14 Mar 2011 08:02:04 +1100
+Subject: [PATCH] 	* runtest.exp (runtest): Call reset_vars at initialisation so that
+ 	perror does not affect test results in other test scripts.
+
+
+2011-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	* runtest.exp (runtest): Call reset_vars at initialisation so that
+	a perror does not affect test results in other test scripts.
+
+
+diff --git a/runtest.exp b/runtest.exp
+index 2140020..641bfe8 100644
+--- a/runtest.exp
++++ b/runtest.exp
+@@ -1435,16 +1435,13 @@ proc load_base_board_description { board_name } {
+ #
+ 
+ proc runtest { test_file_name } {
+-    global prms_id
+-    global bug_id
+     global test_result
+     global errcnt
+     global errorInfo
+     global tool
+ 
+     clone_output "Running $test_file_name ..."
+-    set prms_id	0
+-    set bug_id	0
++    reset_vars
+     set test_result ""
+ 
+     if {[file exists $test_file_name]} {
+-- 
+1.7.2.5
+

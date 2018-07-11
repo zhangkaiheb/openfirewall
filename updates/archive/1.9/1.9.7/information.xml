@@ -1,0 +1,10 @@
+<ipcop>
+    <update>
+        <version>1.9.7</version>
+        <releasedate>2009-08-17</releasedate>
+        <description>There is no upgrade to 1.9.7, to upgrade a full installation is necessary.</description>
+        <previousversion>1.9.6</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

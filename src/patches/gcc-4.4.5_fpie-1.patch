@@ -1,0 +1,104 @@
+Submitted By: Robert Connolly (robert at linuxfromscratch dot org)
+Date: 2010-11-07
+Initial Package Version: 4.5.1
+Upstream Status: Not submitted - Hack
+Origin: Robert Connolly
+Description: This patch adds "-fPIE -Wl,-pie -Wl,-z,relro -Wl,-z,now
+-Wl,-z,combreloc -Wl,--warn-shared-textrel -Wl,--fatal-warnings" to GCC's
+default options. This is mainly usefull for PaX and Exeshield kernels. The
+"--fatal-warnings" option will also have the affect of causing a linker error
+if mktemp(3) or tmpnam(3) are used by a program or library.
+
+Disable with "-fno-PIE" "-nopie" "-norelro" "-nonow" "-nocombreloc"
+"-no-warn-shared-textrel" "-no-fatal-warnings".
+
+
+diff -Naur gcc-4.5.1.orig/gcc/Makefile.in gcc-4.5.1/gcc/Makefile.in
+--- gcc-4.5.1.orig/gcc/Makefile.in	2010-06-30 13:26:17.000000000 +0000
++++ gcc-4.5.1/gcc/Makefile.in	2010-11-08 02:06:48.956649747 +0000
+@@ -646,7 +646,7 @@
+ LIBGCC2_CFLAGS = -O2 $(LIBGCC2_INCLUDES) $(GCC_CFLAGS) $(TARGET_LIBGCC2_CFLAGS) \
+ 		 $(LIBGCC2_DEBUG_CFLAGS) $(GTHREAD_FLAGS) \
+ 		 -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED \
+-		 $(INHIBIT_LIBC_CFLAGS)
++		 $(INHIBIT_LIBC_CFLAGS) -fno-PIE
+ 
+ # Additional options to use when compiling libgcc2.a.
+ # Some targets override this to -isystem include
+@@ -659,7 +659,7 @@
+ CRTSTUFF_CFLAGS = -O2 $(GCC_CFLAGS) $(INCLUDES) $(MULTILIB_CFLAGS) -g0 \
+   -finhibit-size-directive -fno-inline -fno-exceptions \
+   -fno-zero-initialized-in-bss -fno-toplevel-reorder -fno-tree-vectorize \
+-  $(INHIBIT_LIBC_CFLAGS)
++  $(INHIBIT_LIBC_CFLAGS) -fno-PIE
+ 
+ # Additional sources to handle exceptions; overridden by targets as needed.
+ LIB2ADDEH = $(srcdir)/unwind-dw2.c $(srcdir)/unwind-dw2-fde.c \
+diff -Naur gcc-4.5.1.orig/gcc/config/i386/linux.h gcc-4.5.1/gcc/config/i386/linux.h
+--- gcc-4.5.1.orig/gcc/config/i386/linux.h	2010-03-24 20:44:48.000000000 +0000
++++ gcc-4.5.1/gcc/config/i386/linux.h	2010-11-08 02:06:48.957651260 +0000
+@@ -128,7 +128,8 @@
+    %{mpc32:crtprec32.o%s} \
+    %{mpc64:crtprec64.o%s} \
+    %{mpc80:crtprec80.o%s} \
+-   %{shared|pie:crtendS.o%s;:crtend.o%s} crtn.o%s"
++   %{shared|pie:crtendS.o%s;static|nopie|pg|p|profile:crtend.o%s;:crtendS.o%s} \
++   crtn.o%s"
+ 
+ /* A C statement (sans semicolon) to output to the stdio stream
+    FILE the assembler definition of uninitialized global DECL named
+diff -Naur gcc-4.5.1.orig/gcc/config/i386/linux64.h gcc-4.5.1/gcc/config/i386/linux64.h
+--- gcc-4.5.1.orig/gcc/config/i386/linux64.h	2010-03-24 20:44:48.000000000 +0000
++++ gcc-4.5.1/gcc/config/i386/linux64.h	2010-11-08 02:06:48.959649028 +0000
+@@ -91,7 +91,8 @@
+    %{mpc32:crtprec32.o%s} \
+    %{mpc64:crtprec64.o%s} \
+    %{mpc80:crtprec80.o%s} \
+-   %{shared|pie:crtendS.o%s;:crtend.o%s} crtn.o%s"
++   %{shared|pie:crtendS.o%s;static|nopie|pg|p|profile:crtend.o%s;:crtendS.o%s} \
++   crtn.o%s"
+ 
+ #if TARGET_64BIT_DEFAULT
+ #define MULTILIB_DEFAULTS { "m64" }
+diff -Naur gcc-4.5.1.orig/gcc/config/linux.h gcc-4.5.1/gcc/config/linux.h
+--- gcc-4.5.1.orig/gcc/config/linux.h	2009-04-09 15:00:19.000000000 +0000
++++ gcc-4.5.1/gcc/config/linux.h	2010-11-08 02:06:48.960649741 +0000
+@@ -45,8 +45,9 @@
+ #undef	STARTFILE_SPEC
+ #if defined HAVE_LD_PIE
+ #define STARTFILE_SPEC \
+-  "%{!shared: %{pg|p|profile:gcrt1.o%s;pie:Scrt1.o%s;:crt1.o%s}} \
+-   crti.o%s %{static:crtbeginT.o%s;shared|pie:crtbeginS.o%s;:crtbegin.o%s}"
++  "%{!shared: %{pg|p|profile:gcrt1.o%s;pie:Scrt1.o%s;static|nopie:crt1.o%s;: \
++   Scrt1.o%s}} crti.o%s %{static:crtbeginT.o%s;shared|pie:crtbeginS.o%s; \
++   nopie|pg|p|profile:crtbegin.o%s;:crtbeginS.o%s}"
+ #else
+ #define STARTFILE_SPEC \
+   "%{!shared: %{pg|p|profile:gcrt1.o%s;:crt1.o%s}} \
+diff -Naur gcc-4.5.1.orig/gcc/gcc.c gcc-4.5.1/gcc/gcc.c
+--- gcc-4.5.1.orig/gcc/gcc.c	2010-04-18 17:46:08.000000000 +0000
++++ gcc-4.5.1/gcc/gcc.c	2010-11-08 02:06:48.981650823 +0000
+@@ -752,7 +752,13 @@
+ 
+ #ifndef LINK_PIE_SPEC
+ #ifdef HAVE_LD_PIE
+-#define LINK_PIE_SPEC "%{pie:-pie} "
++#define LINK_PIE_SPEC "%{pie:-pie}\
++  %{shared|Bshareable: %{!no-warn-shared-textrel:--warn-shared-textrel}}\
++  %{static|Bstatic|shared|Bshareable|i|r|pie|nopie:;:-pie %{!no-warn-shared-textrel:--warn-shared-textrel}}\
++  %{!static:%{!Bstatic: %{norelro:-z norelro;:-z relro}\
++  %{nocombreloc:-z nocombreloc;:-z combreloc}\
++  %{nonow:-z lazy;:-z now} }}\
++  %{!no-fatal-warnings:--fatal-warnings} "
+ #else
+ #define LINK_PIE_SPEC "%{pie:} "
+ #endif
+@@ -903,6 +909,8 @@
+  %{--target-help:--target-help}\
+  %{--help=*:--help=%(VALUE)}\
+  %{!fsyntax-only:%{S:%W{o*}%{!o*:-o %b.s}}}\
++ %{fpic|fPIC|fpie|fPIE|fno-pic|fno-PIC|fno-pie|fno-PIE|static|shared|nostdlib|nostartfiles|D__KERNEL__:;:-fPIE}\
++ %{static:%{pie:%e-static and -pie are incompatible}}\
+  %{fsyntax-only:-o %j} %{-param*}\
+  %{fmudflap|fmudflapth:-fno-builtin -fno-merge-constants}\
+  %{coverage:-fprofile-arcs -ftest-coverage}";

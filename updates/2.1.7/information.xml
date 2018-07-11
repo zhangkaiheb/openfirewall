@@ -1,0 +1,14 @@
+<ipcop>
+    <update>
+        <version>2.1.7</version>
+        <releasedate>2014-10-28</releasedate>
+        <size>11</size>
+        <isoimages>yes</isoimages>
+        <description>
+        Fix PPPoE dialup.
+        </description>
+        <previousversion>2.1.6</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

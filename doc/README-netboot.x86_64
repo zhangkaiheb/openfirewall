@@ -1,0 +1,105 @@
+Boot from PXE instructions on x86 machines
+
+To boot a machine with pxe, you need to :
+- have a net card with a boot prom and a not too old boot agent
+- have a dhcp server (could be another IPCop)
+- have a tfpt server running
+
+To continue installation from network, you probably need an http server too.
+
+Booting from pxe will show you exactly the same boot menu as with local boot
+from cdrom or floppy or usb key.
+After the machine is booted, you will need to provide a source (cdrom, usb or
+ftp/http) like with other installations
+
+You should be able to use pxe even if there is no 'lan' option in the bios boot
+order. This is because the net card boot agent take the hand during the boot
+process if the agent is set to do so on the net card prom.
+
+*/ Update the card boot agent /*
+If you don't want to wast time to understand why it may not work, you are
+strongly encouraged to first update old net card firmware with a recent
+version (PXE 2.0 / boot agent v4 or better). This operation is low risk but
+only work with net cards not integrated into motherboards.
+For net card integrated into motherboard, only a bios upgrade (if available)
+is a simple solution.
+
+Instructions for Intel net cards upgrade
+- download Boot.exe, uncompress it
+- copy content of IntelPRO/Boot agent to a floppy
+http://www.intel.com/support/network/adapter/pro100/bootagent/index.htm
+- boot from a dos floppy, put the floppy with Intel software and run
+ibautil -upgrade
+To enable an additional configuration boot menu during machine start,
+allowing you to change the net card options or boot order, use
+ibautil -setupenable -messageenable
+
+
+Instructions for 3Com cards
+- download the last mbautils at
+ http://support.3com.com/infodeli/tools/nic/mba.htm
+use "crtrl+alt+B" to configure it !
+
+Instructions for Realtek cards
+- download dos utility at
+http://www.realtek.com.tw/downloads/downloads1-3.aspx?series=16&Software=True
+
+* Installing a tftp server *
+You probably should install tftp-hpa from you distrib package.
+Installing another tftp server is possible.
+Using ipcop as tftp server could be possible.
+But ipcop can't act as http server as it always serve https only
+
+Here is describe how to install tftp-hpa
+- build from source with configure && make install
+- configure the server to use /var/tftp (or whatever directory you want).
+	Installation in gentoo :
+	- configuration is in /etc/conf.d/in.tftpd, set INTFTPD_PATH="/var/tftp"
+	- start the server with /etc/init.d/in.tftpd start
+
+- install IPCop netboot package inside tftp root (/var/tftp in previous example)
+	- unpack ipcop-<VERSION>-install-netboot-i486 package with
+	tar -C /var/tftp -xvzf ipcop-<VERSION>-install-netboot-i486.tgz
+	- make the dhcp server find our pxelinux.0 on root, so you don't need
+	to change dhcp settings booting various distrib
+	cd /var/tftp
+	ln -sf ipcop/<VERSION>/i486/pxelinux.0 pxelinux.0
+	- link or copy ipcop-pxe-<VERSION>.model to a file whose name start with '01-'
+	  and end with the MAC address of the card in lower case.
+	cd /var/tftp/pxelinux.cfg
+	ln -sf ipcop-pxe-<VERSION>.model 01-00-90-27-92-44-bd
+
+* Configure dhcp server *
+The dhcp server is necessary to give an IP and redirect the request to the
+ tftp server. You could use another IPCop to act as the dhcp server.
+For an IPCop dhcp server,
+- check the 'Allow bootp clients" box
+- add a fixed lease with
+	- the MAC address of the card,
+	- an IP out of the dhcp start..end address dynamic range (but in the
+	  same network),
+	- fill 'Next address" box with the address of the tftp server
+	- fill 'Filename' with pxelinux.0
+	- leave 'Root path' empty if the tftp server run chrooted.
+With -s option, tftp-hpa server run chrooted inside a designated directory.
+It is more secure and in this case, you need to not include a path.
+
+For other distrib,refer to http://syslinux.zytor.com/pxe.php#tftp
+
+Once the new IPCop is installed, to retrieve normal boot, you could
+- unset the boot agent on the net card
+- or disable the fixed lease on the dhcp server
+- or remove the link of the MAC file inside /var/tftp/pxelinux.cfg
+Second or third solution will create a small delay to start until the pxe boot
+fail.
+
+* Troubleshooting *
+Verify the tftp server run with  ps ax | grep [t]ftp
+
+Use tcpdump somewhere on the same network
+- to write a packets log
+tcpdump -i eth0 -n -w tcpdump.log (stop with ctrl-c)
+
+- to read the log
+tcpdump -r tcpdump.log (only traffic headers)
+tcpdump -Ar tcpdump.log (trafic with details, a good solution to see error messages)

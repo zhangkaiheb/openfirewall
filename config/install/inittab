@@ -1,0 +1,5 @@
+# Run gettys in standard runlevels
+CURRENT_TTY::respawn:/bin/iowrap /dev/CURRENT_TTY /bin/ash --login -c /bin/installer
+
+# Stuff to do if rebooting (installer call halt)
+::ctrlaltdel:/etc/halt

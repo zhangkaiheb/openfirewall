@@ -1,0 +1,25 @@
+<ipcop>
+    <update>
+        <version>2.1.8</version>
+        <releasedate>2015-01-25</releasedate>
+        <size>12469</size>
+        <isoimages>no</isoimages>
+        <description>Language updates.&lt;br /&gt;
+        Upgrade acpid to 2.0.23, apache to 2.2.29, bash to 4.3.33, bind to 9.10.1-P1,
+        cairo to 1.14.0, db to 6.1.19, dhcpcd to 6.6.7, ethtool to 3.16,
+        fontconfig to 2.11.1, freetype to 2.5.5, gawk to 4.1.1, grep to 2.21,
+        harfbuzz to 0.9.37, hdparm to 9.45, iproute2 to 3.18.0, iw to 3.17, krb5 to 1.12.2,
+        libpcap to 1.6.2, libpng to 1.6.16, libxml2 to 2.9.2, lsof to 4.88,
+        ntp to 4.2.8, openssl to 1.0.1k, openvpn to 2.3.6, openldap to 2.4.40,
+        pango to 1.36.8, pciutils to 3.3.0, pcre to 8.36, pixman to 0.32.6, procps to 3.3.10,
+        rrdtool to 1.4.9, smartmontools to 6.3, sqlite to 3.8.7.2, squid to 3.4.11, squid-langpack to 20141030,
+        tar to 1.28, tcpdump to 4.6.2, traceroute to 2.0.21,
+        usb-modeswitch to 2.2.0, usb-modeswitch-data to 20140529, util-linux to 2.25.2, vnstat to 1.12, wget to 1.16.1.
+        Upgrade Perl modules DBD-SQLite to 1.46, DBI to 1.633, IO-Socket-SSL to 2.008,
+        Net-SSLeay to 1.66, URI to 1.65, XML-Parser to 2.43.
+        </description>
+        <previousversion>2.1.7</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

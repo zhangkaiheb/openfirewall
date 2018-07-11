@@ -1,0 +1,417 @@
+#!/bin/sh
+#
+# mkinitramfs, creates initramfs from installer/kernel update
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) 2007-2012, the IPCop team.
+#
+# $Id: mkinitramfs 6634 2012-06-01 21:26:40Z owes $
+#
+
+# Copy all the script arguments here
+ARGUMENTS="$@"
+
+# By default don't include binary firmware
+FIRMWARE=no
+
+# The kernel version must be specified (eg --with-kernel=2.6.22)
+KVER="undefined"
+
+# Just a temporary variable
+MODULE=
+ALLMODULES=no
+MANYMODULES=no
+
+# Another temporary variable
+COUNTER=0
+
+# Another variable to count how many times a failure occured (any type of failure)
+FAILURES=0
+
+# An array that contains the modules we requested
+declare -a REQUESTED_MODULES
+
+# An array that contains the modules we requested, plus all their dependencies
+declare -a INCLUDED_MODULES
+
+# Should we output everything?  Default is no
+VERBOSE=no
+
+
+
+############################################################################
+# This function shows a help message                                       #
+############################################################################
+show_usage()
+{
+    echo "Usage: mkinitramfs --with-kernel=<version> [--with-firmware] [-v|--verbose] [-h|--help]"
+    echo "    and one of (combinations are possible):"
+    echo "       --with-list= The path to a file with a list of modules, one per line"
+    echo "       --with-modules= A comma-separated list of modules directories, e.g. --with-modules=usb,scsi,ide"
+    echo "       --many-modules Include most of disk related kernel modules"
+    echo "       --all-modules Include all the kernel modules modules"
+    echo ""
+    echo "       --with-firmware Include binary firmware, needed by some controllers.  Optional."
+    echo ""
+    echo "       --with-kernel= Needs the version of the target kernel, which may or may not be the same"
+    echo "          as the currently running kernel."
+    echo ""
+    echo "       -v or --verbose Show every module and its dependencies being included.  Optional."
+    echo ""
+    echo "       -h or --help Show this message"
+    echo ""
+} # End of show_usage()
+
+
+
+############################################################################
+# This function just outputs the error message                             #
+############################################################################
+exiterror()
+{
+    # Error codes:
+    # 1 -- wrong invocation
+    # 2 -- /etc/fstab not found
+    # 3 -- kernel directory not found
+    # 4 -- module(s) (file) (directory) not found
+    # 5 -- firmware not found
+    # 6 -- insufficient space on /boot for the requested ipcoprd.img
+    # 7 -- error during modules.dep creation
+    # 128 -- various cp errors
+    # 129 -- missing errorcode
+
+    [ -n "${TMPDIR}" ] && [ -e "${TMPDIR}" ] && rm -fr "${TMPDIR}"
+
+    local ERROR_CODE=${1}
+    local ERROR_MESSAGE=${2}
+
+    if [ -z ${ERROR_CODE} ]; then
+        ERROR_CODE=129
+    fi
+
+    if [ -e /usr/bin/logger ]; then
+        /usr/bin/logger -t installpackage "mkinitramfs ERROR: ${ERROR_MESSAGE}"
+    fi
+    echo "ERROR: ${ERROR_MESSAGE}"
+    exit ${ERROR_CODE}
+} # End of exiterror()
+
+
+
+############################################################################
+# This function outputs messages only in verbose mode                      #
+############################################################################
+echo_me()
+{
+    local MESSAGE="$@"
+
+    if [ x"${VERBOSE}" == x"yes" ]; then
+        echo -ne "${MESSAGE}"
+    fi
+} # End of echo_me()
+
+
+
+############################################################################
+# This function adds a module to the list of requested modules making sure #
+# no modules are duplicated                                                #
+############################################################################
+request_module()
+{
+    local REQUESTED=${1}
+
+    #if ! { echo ${REQUESTED_MODULES[@]} | grep " $(basename ${REQUESTED} .ko).ko " 2>&1 > /dev/null; }; then
+        REQUESTED_MODULES[${COUNTER}]="$(basename ${REQUESTED} .ko).ko"
+        COUNTER=$[ ${COUNTER} + 1 ]
+    #fi
+} # End of request_module()
+
+
+
+############################################################################
+# This function checks if a requested kernel module really exists          #
+############################################################################
+check_module()
+{
+    local REQUESTED=${1}
+    local MODULE=`find /lib/modules/${KVER} -type f -name ${REQUESTED}`
+
+    if [ ! -z ${MODULE} ]; then
+        find_module_deps ${MODULE}
+    else
+        exiterror 4 "Module ${REQUESTED} NOT FOUND"
+    fi
+        
+} # End of check_module()
+
+
+
+############################################################################
+# This function finds all the dependencies of a module.                    #
+# CAUTION: It runs recursively                                             #
+############################################################################
+find_module_deps()
+{
+    local MODULE=${1}
+    local SHORT_MODULE=`basename ${MODULE}`
+    local DEPS=0
+    local i
+
+    echo_me "Looking for ${SHORT_MODULE} dependencies: "
+
+    LINE=`grep "${SHORT_MODULE}: " /lib/modules/${KVER}/modules.dep | cut -d":" -f2-`
+    DEPS=`echo ${LINE} | wc -w`
+
+    if [ ${DEPS} -gt 0 ]; then
+        if ! { echo ${INCLUDED_MODULES[*]} | grep "/${SHORT_MODULE}" 2>&1 > /dev/null; }; then
+            INCLUDED_MODULES[${#INCLUDED_MODULES[*]}]=${MODULE}
+        fi
+
+        echo_me "(${DEPS}) "
+        for i in ${LINE}
+        do
+            echo_me "$(basename ${i}) "
+        done
+
+        echo_me "\n"
+
+        i=
+        for i in ${LINE}
+        do
+            if ! { echo ${INCLUDED_MODULES[*]} | grep "/$(basename ${i})" 2>&1 > /dev/null; }; then
+                check_module $(basename ${i})
+            else
+                echo_me "Module $(basename ${i}) already saved"
+                echo_me "\n"
+            fi
+        done
+    else
+        echo_me "none\n"
+
+        if ! { echo ${INCLUDED_MODULES[*]} | grep "/${SHORT_MODULE}" 2>&1 > /dev/null; }; then
+            INCLUDED_MODULES[${#INCLUDED_MODULES[*]}]=${MODULE}
+        fi
+    fi
+} # End of find_module_deps()
+
+
+
+############################################################################
+# This function creates the initramfs                                      #
+############################################################################
+create_initramfs()
+{
+    local i
+    local TMPDIR=`mktemp -d -t ipcoprd.XXXXXX`
+
+    # Copy the pre-packaged initramfs directory structure
+    if ! tar zxf /usr/lib/mkinitramfs.tar.gz -C ${TMPDIR}; then
+        exiterror 128 "Couldn't copy initramfs directory structure"
+    fi
+
+    # Copy the system /etc/fstab so we can do things like fsck
+    if [ ! -f /etc/fstab ]; then
+        exiterror 2 "/etc/fstab not found!"
+    else
+        if ! cp -af /etc/fstab ${TMPDIR}/etc; then
+            exiterror 128 "Couldn't copy /etc/fstab"
+        fi
+    fi
+
+    # Start with a clean /etc/modules
+    rm -fr ${TMPDIR}/etc/modules
+    # Make sure it exists
+    touch ${TMPDIR}/etc/modules
+
+    # Create the modules directory
+    mkdir -p ${TMPDIR}/lib/modules/${KVER}/kernel
+
+    for i in ${REQUESTED_MODULES[@]}
+    do
+        check_module ${i}
+    done
+
+    # Copy those modules we've requested (and their dependencies)
+    for i in ${INCLUDED_MODULES[@]}
+    do
+        mkdir -p ${TMPDIR}/$(dirname ${i})
+        [ -f ${i} ] || exiterror 4 "${i} not found"
+        if ! cp -a ${i} ${TMPDIR}/$(dirname ${i})/$(basename ${i}); then
+            exiterror 128 "Couldn't copy module ${i}"
+        else
+            echo "$(basename ${i} .ko.gz)" >> ${TMPDIR}/etc/modules
+        fi
+    done
+
+    if [ x"${ALLMODULES}" == x"yes" ]; then
+        # We want all the modules
+        echo -ne "Copying all the modules.  This may take some time ... "
+        if ! cp -a /lib/modules/${KVER}/kernel/* ${TMPDIR}/lib/modules/${KVER}/kernel/; then
+            exiterror 128 "Couldn't copy kernel modules"
+        else
+            echo -ne "Done\n"
+        fi
+    elif [ x"${MANYMODULES}" == x"yes" ]; then
+        # We want many modules
+        echo -ne "Copying many modules.  This may take some time "
+        for d in fs drivers/ata drivers/ide drivers/scsi
+        do
+            LIBPATH=lib/modules/${KVER}/kernel/$d
+            mkdir -p ${TMPDIR}/${LIBPATH}
+            if ! cp -a /${LIBPATH}/* ${TMPDIR}/${LIBPATH}/; then
+                exiterror 128 "Couldn't copy kernel modules"
+            else
+                echo -ne "."
+            fi
+        done
+        echo -ne " Done\n"
+    fi
+
+    # Copy binary firmware if requested
+    if [ x"${FIRMWARE}" == x"yes" ]; then
+        if [ -d /lib/firmware ]; then
+            echo -ne "Copying firmware ... "
+            mkdir -p ${TMPDIR}/lib/firmware
+            if ! cp -a /lib/firmware/* ${TMPDIR}/lib/firmware; then
+                exiterror 128 "Couldn't copy binary firmware"
+            else
+                echo -ne "Done\n"
+            fi
+        else
+            exiterror 5 "Binary firmware directory /lib/firmware doesn't exist!"
+        fi
+    fi
+
+    # Copy mdadm.conf if detected
+    if [ -e /etc/mdadm/mdadm.conf ]; then
+        mkdir -p ${TMPDIR}/etc/mdadm
+        cp -af /etc/mdadm/mdadm.conf ${TMPDIR}/etc/mdadm
+    fi
+
+    # Create module.dep for installed modules
+    if ! /usr/sbin/chroot /${TMPDIR} /sbin/depmod -a ${KVER} ; then
+        exiterror 7 "Error during initramfs depmod"
+    fi
+
+    # Now create the initramfs ipcoprd.img
+    echo -ne "Creating ipcoprd.img.  This may take some time ... "
+    cd ${TMPDIR} && find . | cpio -o -H newc --quiet | gzip -9 > /tmp/temp_ipcoprd.img
+    echo -ne "Done\n"
+
+    # Clean up
+    rm -fr ${TMPDIR}
+} # End of create_initramfs()
+
+
+
+############################################################################
+# This function installs the initramfs                                     #
+############################################################################
+install_initramfs()
+{
+    local INITRAMFS_SIZE=`du -ks /tmp/temp_ipcoprd.img | cut -f1`
+    local FREE_BOOT_SPACE=`df -P -k /boot | tail -n 1 | awk '{ print $4 }'`
+
+    if [ 0${FREE_BOOT_SPACE} -gt 0${INITRAMFS_SIZE} ]; then
+        echo_me "Installing initramfs in /boot ... "
+        if mv -f /tmp/temp_ipcoprd.img /boot/ipcoprd-${KVER}.img; then
+            echo_me "Done\n"
+            if [ x"${VERBOSE}" == x"yes" ]; then
+                du -h /boot/ipcoprd-${KVER}.img
+            fi
+        else
+            exiterror 128 "Couldn't install ipcoprd.img in /boot"
+        fi
+    else
+        exiterror 6 "Not enough space on /boot."
+    fi
+} # End of install_initramfs()
+
+
+
+
+if [ -z "${ARGUMENTS}" ]; then
+    show_usage
+    exiterror 1 "Needs arguments"
+fi
+
+for ARG in ${ARGUMENTS}
+do
+    case ${ARG} in
+        --all-modules)
+            ALLMODULES=yes
+            ;;
+        --many-modules)
+            MANYMODULES=yes
+            ;;
+        --with-list=*)
+            MODULESFILE=`echo ${ARG} | cut -d"=" -f 2`
+            [ -f  ${MODULESFILE} ] || exiterror 1 "${MODULESFILE} not found"
+            MODULES=`cat $MODULESFILE`
+            for MODULE in ${MODULES}
+            do
+                REQUESTED_MODULES[${COUNTER}]="${MODULE}.ko.gz"
+                COUNTER=$[ ${COUNTER} + 1 ]
+            done
+            ;;
+        --with-modules=*)
+            MODULES=`echo ${ARG} | cut -d"=" -f 2`
+            OLD_IFS=$IFS
+            IFS=,
+            for MODULE in ${MODULES}
+            do
+                REQUESTED_MODULES[${COUNTER}]="${MODULE}.ko.gz"
+                COUNTER=$[ ${COUNTER} + 1 ]
+            done
+            IFS=$OLD_IFS
+            ;;
+        --with-firmware)
+            FIRMWARE=yes
+            ;;
+        --with-kernel=*)
+            KVER=`echo ${ARG} | cut -d"=" -f 2`
+            ;;
+        -v|--verbose)
+            VERBOSE=yes
+            ;;
+        -h|--help)
+            show_usage
+            ;;
+        *)
+            show_usage
+            exiterror 1 "Malformed argument: ${ARG}"
+            ;;
+    esac
+done
+
+echo_me "Creating IPCop bootstrap/rescue initramfs for kernel ${KVER}\n"
+
+# Check if the kernel modules directory exists
+if [ ! -d /lib/modules/${KVER} ]; then
+    exiterror 3 "No modules found for kernel ${KVER}"
+fi
+
+# modules.dep may not exist yet after upgrade
+if [ ! -e /lib/modules/${KVER}/modules.dep ]; then
+    /sbin/depmod -a ${KVER}
+fi
+
+# Create the initramfs
+create_initramfs
+
+# Install the initramfs if there's enough space on /boot
+install_initramfs

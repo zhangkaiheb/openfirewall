@@ -1,0 +1,206 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: linux 8100 2016-03-27 17:43:45Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = linux
+VER        = 4.15.3
+#PATCHLEVEL = 3.10.101
+IPCOPKRELEASE =
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = linux-$(VER)
+DL_FILE    = $(THISAPP).tar.xz
+#DL_FROM    = $(URL_KERNEL)/linux/kernel/v3.x
+DL_FROM    = $(URL_KERNEL)/linux/kernel/v4.x
+##DIR_APP    = $(DIR_SRC)/$(THISAPP)$(IPCOPKRELEASE)
+DIR_APP    = $(DIR_SRC)/$(THISAPP)-build
+CFLAGS     =
+CXXFLAGS   =
+LDFLAGS    =
+
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(PKG_NAME)-$(PATCHLEVEL)
+
+# grsecurity, not used for now, define to yes, to load patch and apply
+GRSEC := no
+
+#GRSECURITYPATCH = grsecurity-2.2.2-2.6.32.45-201108162115.patch
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+objects =$(DL_FILE)
+##	patch-$(PATCHLEVEL).xz
+
+##ifeq "$(GRSEC)" "yes"
+##  objects += $(GRSECURITYPATCH)
+##endif
+
+$(DL_FILE)                  = $(DL_FROM)/$(DL_FILE)
+##patch-$(PATCHLEVEL).xz      = $(DL_FROM)/patch-$(PATCHLEVEL).xz
+# source location, changes can happen quickly and old files are no longer available:
+# $(GRSECURITYPATCH)          = http://grsecurity.net/stable/$(GRSECURITYPATCH)
+# alternative location:
+##$(GRSECURITYPATCH)          = http://ipcop-addons.mooo.com/misc/IPCop/$(GRSECURITYPATCH)
+
+#$(DL_FILE)_MD5              = 4f25cd5bec5f8d5a7d935b3f2ccb8481
+$(DL_FILE)_MD5              = c74d30ec13491aeb24c237d703eace3e
+##patch-$(PATCHLEVEL).xz_MD5  = e380f4f8525e12230a13334753a90f04
+##$(GRSECURITYPATCH)_MD5      = b15bb91a07aa2fb030e18c47c91940bb
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects)) $(DIR_SRC)/config/kernel/kernel.config.$(MACHINE)
+	# so list of installed files is always real, even if .config is changed and a module removed
+	@rm -rf /lib/modules/$(IPCOPKRELEASE) /boot/System.map* /boot/vmlinuz* $(DIR_SRC)/lsalr $(TARGET)
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) $(DIR_SRC)/$(THISAPP) && cd $(DIR_SRC) && tar --no-same-owner --no-same-permissions -xf $(DIR_DL)/$(DL_FILE)
+	mv $(DIR_SRC)/$(THISAPP) $(DIR_APP)
+###	cd $(DIR_APP) && xzcat $(DIR_DL)/patch-$(PATCHLEVEL).xz | patch -p1
+	# Remove patch level in EXTRAVERSION and add our own versioning (wanpipe-3.5.11 does not support localversion).
+#####	cd $(DIR_APP) && sed -i -e "s/SUBLEVEL\ =.*//" Makefile
+#####	cd $(DIR_APP) && sed -i -e "s/EXTRAVERSION\ =.*/EXTRAVERSION\ =$(IPCOPKRELEASE)/" Makefile
+
+	# get working isapnp, not yet ready, need some others changes to retrieve the events
+	#cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/$(THISAPP)_isapnp1.patch
+	#cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/$(THISAPP)_isapnp2.patch
+
+ifeq "$(GRSEC)" "yes"
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_DL)/$(GRSECURITYPATCH)
+	# Remove test for binutils version, --build-id does not work for us and we have binutils > 2.18
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/grsecurity_no-binutils-check.patch
+	# Remove -grsec addition to localversion
+	cd $(DIR_APP) && rm -f localversion-grsec
+endif
+
+	# Cleanup kernel source
+	cd $(DIR_APP) && make mrproper
+
+	cp $(DIR_SRC)/config/kernel/kernel.config.$(MACHINE) $(DIR_APP)/.config
+	cd $(DIR_APP) && make oldconfig
+	cd $(DIR_APP) && make clean
+
+ifeq "$(MACHINE)" "i486"
+	# -9 require 674 MiB to compress a 3 MB file and is a nonsense.
+	# Remove -9 to use default -6 that require 94 Mib to compress, 9 Mib to uncompress
+	# Setting dictionary size near uncompressed file size is enought to give same resulting file,
+	# This help too to reduce memory requirement to 38 Mib to compress and to 4 Mib to uncompress
+	# -vv just show the memory requirements
+	cd $(DIR_APP) && sed -i 's/lzma -9/lzma -vv --lzma1=dict=3MiB/' scripts/Makefile.lib
+	cd $(DIR_APP) && make -j $(PARALLELISM) all CC="gcc -fno-PIE"
+	cd $(DIR_APP) && cp -f arch/x86/boot/bzImage /boot/vmlinuz-$(KVER)
+	cd $(DIR_APP) && cp -f System.map /boot/System.map-$(KVER)
+	ln -sf vmlinuz-$(KVER) /boot/vmlinuz
+	ln -sf System.map-$(KVER) /boot/System.map
+	cd $(DIR_APP) && make INSTALL_MOD_STRIP=--strip-unneeded modules_install
+endif
+
+ifeq "$(MACHINE)" "x86_64"
+	# -9 require 674 MiB to compress a 3 MB file and is a nonsense.
+	# Remove -9 to use default -6 that require 94 Mib to compress, 9 Mib to uncompress
+	# Setting dictionary size near uncompressed file size is enought to give same resulting file,
+	# This help too to reduce memory requirement to 38 Mib to compress and to 4 Mib to uncompress
+	# -vv just show the memory requirements
+	cd $(DIR_APP) && sed -i 's/lzma -9/lzma -vv --lzma1=dict=3MiB/' scripts/Makefile.lib
+	cd $(DIR_APP) && make -j $(PARALLELISM) all CC="gcc -fno-PIE"
+	cd $(DIR_APP) && cp -f arch/x86/boot/bzImage /boot/vmlinuz-$(KVER)
+	cd $(DIR_APP) && cp -f System.map /boot/System.map-$(KVER)
+	ln -sf vmlinuz-$(KVER) /boot/vmlinuz
+	ln -sf System.map-$(KVER) /boot/System.map
+	cd $(DIR_APP) && make INSTALL_MOD_STRIP=--strip-unneeded modules_install
+endif
+
+ifeq "$(MACHINE)" "alpha"
+	cd $(DIR_APP) && make -j $(PARALLELISM) vmlinux
+	cd $(DIR_APP) && gzip -9c vmlinux > /boot/vmlinuz-$(KVER)
+	cd $(DIR_APP) && cp -f System.map /boot/System.map-$(KVER)
+	ln -sf vmlinuz-$(KVER) /boot/vmlinuz
+	ln -sf System.map-$(KVER) /boot/System.map
+	cd $(DIR_APP) && make -j $(PARALLELISM) modules
+	cd $(DIR_APP) && make INSTALL_MOD_STRIP=--strip-unneeded modules_install
+endif
+
+ifeq "$(MACHINE)" "ppc"
+	cd $(DIR_APP) && make -j $(PARALLELISM) all
+	cd $(DIR_APP) && cp -f vmlinux /boot/vmlinuz-$(KVER)
+	cd $(DIR_APP) && cp -f vmlinux.strip.gz /boot/vmlinuz.strip.gz
+	cd $(DIR_APP) && cp -f arch/powerpc/boot/zImage.coff /boot/vmlinuz.coff
+	cd $(DIR_APP) && cp -f System.map /boot/System.map-$(KVER)
+	ln -sf vmlinuz-$(KVER) /boot/vmlinuz
+	ln -sf System.map-$(KVER) /boot/System.map
+	cd $(DIR_APP) && make INSTALL_MOD_STRIP=--strip-unneeded modules_install
+endif
+
+ifeq "$(MACHINE)" "sparc"
+	cd $(DIR_APP) && make CROSS_COMPILE=$(MACHINE_REAL)-linux-gnu- -j $(PARALLELISM) all
+	cd $(DIR_APP) && cp -f vmlinux /boot/vmlinuz-$(KVER)
+	cd $(DIR_APP) && cp -f System.map /boot/System.map-$(KVER)
+	ln -sf vmlinuz-$(KVER) /boot/vmlinuz
+	ln -sf System.map-$(KVER) /boot/System.map
+	cd $(DIR_APP) && make CROSS_COMPILE=$(MACHINE_REAL)-linux-gnu- INSTALL_MOD_STRIP=--strip-unneeded modules_install
+endif
+
+	# remove symlinked pcmcia directory
+###	rm -rf /lib/modules/$(KVER)/pcmcia
+
+	# compress modules to save space on disk
+	mkdir -p /lib/modules/$(KVER)
+	find /lib/modules/$(KVER)/ -name '*.ko' -a -type f -exec gzip -nf9 {} \;
+
+	# Finally, force the rebuilding of the extra modules
+	rm -f $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/linux-$(KVER)-*
+
+	@$(POSTBUILD)

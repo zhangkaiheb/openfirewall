@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# udhcpc script 
+# 
+# Based on simple.script by Tim Riker <Tim@Rikers.org>
+# Adapted by the IPCop team for use with IPCop installation
+#
+# $Id: default.script 5583 2011-04-01 06:49:06Z gespinasse $
+#
+
+[ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
+
+RESOLV_CONF="/etc/resolv.conf"
+[ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
+[ -n "$subnet" ] && NETMASK="netmask $subnet"
+
+case "$1" in
+	deconfig)
+		/sbin/ifconfig $interface 0.0.0.0
+		;;
+
+	renew|bound)
+		/sbin/ifconfig $interface $ip $BROADCAST $NETMASK
+
+		if [ -n "$router" ] ; then
+			echo "deleting routers"
+			while route del default gw 0.0.0.0 dev $interface ; do
+				:
+			done
+
+			metric=0
+			for i in $router ; do
+				route add default gw $i dev $interface metric $((metric++))
+			done
+		fi
+
+		echo -n > $RESOLV_CONF
+		[ -n "$domain" ] && echo search $domain >> $RESOLV_CONF
+		for i in $dns ; do
+			echo adding dns $i
+			echo nameserver $i >> $RESOLV_CONF
+		done
+
+		DHCP_PARAMS="/etc/dhcp-$interface.params"
+		echo -n > $DHCP_PARAMS
+		[ -n "$serverid" ] && echo "SERVERID=$serverid" >> $DHCP_PARAMS
+		[ -n "$ip" ] && echo "IP=$ip" >> $DHCP_PARAMS
+		[ -n "$subnet" ] && echo "NETMASK=$subnet" >> $DHCP_PARAMS
+		[ -n "$hostname" ] && echo "HOSTNAME=$hostname" >> $DHCP_PARAMS
+		[ -n "$domain" ] && echo "DOMAIN=$domain" >> $DHCP_PARAMS
+		;;
+esac
+
+exit 0

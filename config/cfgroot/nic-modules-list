@@ -1,0 +1,55 @@
+#
+# This is the IPCop list of network cards that are not auto-detected
+#   if you want to add your own modules to IPCop simply add to the list below
+#
+3c509,3Com EtherLink III
+3c501,3Com 3c501
+3c515,3Com ISA EtherLink XL
+3c503,3Com 3c503 and 3c503/16
+3c523,3Com EtherLink MC (3c523)
+3c527,3Com EtherLink MC/32 (3c527)
+3c505,3Com EtherLink Plus (3c505)
+3c507,3Com EtherLink 16
+#atl2,Attansic/Atheros atl2 Gigabit
+lance,AMD LANCE/PCnetAllied Telesis AT1500, J2405A, etc
+ac3200,Ansel Communications EISA 3200
+82596,Apricot 680x0 VME, 82596 chipset
+at1700,AT1700/1720
+e2100,Cabletron E2100 series ethercards
+#CDCEther,CDC USB Ethernet
+cs89x0,Crystal LAN CS8900/CS8920
+depca,Digital DEPCA & EtherWORKS,DEPCA, DE100, etc
+dummy,Dummy Network Card (testing)
+de4x5,EtherWORKS DE425 TP/COAX EISA, DE434 TP PCI, etc.
+ewrk3,EtherWORKS 3 (DE203, DE204 and DE205)
+hp-plus,HP PCLAN/plus
+hp,HP LAN ethernet
+ibmlana,IBM LANA
+eth16i,ICL EtherTeam 16i/32
+e100,Intel i82557/i82558 PCI EtherExpressPro
+eepro100_cb,Intel EtherExpress Cardbus Ethernet
+eepro,Intel i82595 ISA EtherExpressPro10/10+ driver
+eexpress,Intel EtherExpress 16 (i82586)
+lp486e,Intel Panther onboard i82596 driver
+lne390,Mylex EISA LNE390A/B
+ne2,NE/2 MCA
+ne,NE1000 / NE2000 (non-pci)
+ni52,NI50 card (i82586 Ethernet chip)
+ni65,NI6510, ni6510 EtherBlaster
+ne3210,Novell/Eagle/Microdyne NE3210 EISA
+wd,PureData PDUC8028,WD8003 and WD8013 compatibles
+es3210,Racal-Interlan EISA ES3210
+#r1000,RealTek RTL-8110/8169 Gigabit Ethernet
+sk_mca,SKnet MCA
+smc9194,SMC 9000 series of ethernet cards
+smc-ultra,SMC Ultra/EtherEZ ISA/PnP Ethernet
+smc-ultra32,SMC Ultra32 EISA Ethernet
+smc-mca,SMC Ultra MCA Ethernet
+tc35815,Toshiba TC35815 Ethernet
+tulip_cb,Tulip chipset Cardbus Ethernet
+usbnet,USB Ethernet
+xircom_cb,Xircom Cardbus Ethernet
+xircom_tulip_cb,Xircom (tulip-like) Cardbus Ethernet
+
+#
+# Add your own modules below this line, format is: module,description

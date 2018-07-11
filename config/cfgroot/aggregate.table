@@ -1,0 +1,19 @@
+CREATE TABLE daily (
+    type        VARCHAR(16) default NULL,
+    date        INT UNSIGNED,
+    oob_prefix  VARCHAR(32) default NULL,
+    ip_saddr    VARCHAR(40) default NULL,
+    ip_protocol TINYINT UNSIGNED,
+    tcp_dport   SMALLINT UNSIGNED,
+    udp_dport   SMALLINT UNSIGNED,
+    ip_totlen   SMALLINT UNSIGNED
+);
+
+CREATE INDEX dailyinx ON daily (
+    date,
+    oob_prefix,
+    ip_saddr,
+    ip_protocol,
+    tcp_dport,
+    udp_dport
+);

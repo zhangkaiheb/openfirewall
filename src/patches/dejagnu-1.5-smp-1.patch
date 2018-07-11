@@ -1,0 +1,48 @@
+http://git.savannah.gnu.org/gitweb/?p=dejagnu.git;a=commitdiff;h=50a378f626fcdbaf30202a36bf73738de08a53bf
+Fix behavior on gcc tests in smp machine
+
+From 50a378f626fcdbaf30202a36bf73738de08a53bf Mon Sep 17 00:00:00 2001
+From: Ben Elliston <bje@gnu.org>
+Date: Tue, 15 Mar 2011 10:07:50 +1100
+Subject: [PATCH] 2011-03-15  H.J. Lu  <hjl.tools@gmail.com>
+
+	* lib/remote.exp (local_exec): Ignore SIGHUP.
+
+2011-03-15  H.J. Lu  <hjl.tools@gmail.com>
+
+	* lib/remote.exp (local_exec): Ignore SIGHUP.
+
+
+diff --git a/lib/remote.exp b/lib/remote.exp
+index f0bf269..e270f85 100644
+--- a/lib/remote.exp
++++ b/lib/remote.exp
+@@ -86,11 +86,15 @@ proc local_exec { commandline inp outp timeout } {
+     # doesn't assign process groups correctly and we can't reliably kill
+     # programs that bear children. We can't use tcl's exec because it has
+     # no way to timeout programs that hang. *sigh*
+-
++    #
++    # The expect command will close the connection when it sees
++    # EOF. Closing the connection may send SIGHUP to the child and
++    # cause it to exit before it can exit normally.  The child should
++    # ignore SIGHUP.
+     global errorInfo
+     if { "$inp" == "" && "$outp" == "" } {
+ 	set id -1
+-	set result [catch "eval spawn \{${commandline}\}" pid]
++	set result [catch "eval spawn -ignore SIGHUP \{${commandline}\}" pid]
+ 	if { $result == 0 } {
+ 	    set result2 0
+ 	} else {
+@@ -130,7 +134,7 @@ proc local_exec { commandline inp outp timeout } {
+ 	    return [list -1 "open of $commandline $inp $outp failed: $errorInfo"]
+ 	}
+ 	set pid [pid $id]
+-	set result [catch "spawn -leaveopen $id" result2]
++	set result [catch "spawn -ignore SIGHUP -leaveopen $id" result2]
+     }
+     # Prepend "-" to each pid, to generate the "process group IDs" needed by
+     # kill.
+-- 
+1.7.2.5

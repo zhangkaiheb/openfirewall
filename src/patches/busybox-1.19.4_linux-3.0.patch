@@ -1,0 +1,17 @@
+Patch depmod to accept x.y kernel version in addition to x.y.z.
+Without depmod will use kernel version from building box, not good.
+
+diff --git a/modutils/depmod.c b/modutils/depmod.c
+index f6c0bf3..4997673 100644
+--- a/modutils/depmod.c
++++ b/modutils/depmod.c
+@@ -190,6 +190,9 @@ int depmod_main(int argc UNUSED_PARAM, char **argv)
+ 	 * "uname -r").  */
+ 	if (*argv && sscanf(*argv, "%u.%u.%u", &tmp, &tmp, &tmp) == 3) {
+ 		version = *argv++;
++	}
++	else if (*argv && sscanf(*argv, "%u.%u", &tmp, &tmp, &tmp) == 2) {
++		version = *argv++;
+ 	} else {
+ 		uname(&uts);
+ 		version = uts.release;

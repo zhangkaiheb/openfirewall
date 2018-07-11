@@ -1,0 +1,13 @@
+needed with 2.6.25 kernel
+diff -Nur quik-2.1.old/second/misc.c quik-2.1/second/misc.c
+--- quik-2.1.old/second/misc.c	2008-08-10 11:23:29.000000000 +0200
++++ quik-2.1/second/misc.c	2008-08-10 10:24:16.000000000 +0200
+@@ -11,8 +11,6 @@
+  */
+ #include <linux/kernel.h>
+ 
+-#include <asm/page.h>
+-
+ #include <sys/types.h>
+ #include "setjmp.h"
+ #include "gzip.h"

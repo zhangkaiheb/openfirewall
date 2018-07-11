@@ -1,0 +1,194 @@
+#!/usr/bin/perl
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+#
+# (c) 2009-2011, the IPCop team
+#
+# $Id: rc.connectioncheck 5784 2011-08-13 10:51:11Z owes $
+#
+
+
+use strict;
+require '/usr/lib/ipcop/general-functions.pl';
+
+
+my $attempts = 0;
+my %pppsettings = ();
+$pppsettings{'HOLDOFF'} = 30;
+$pppsettings{'DEBUG'} = 'off';
+$pppsettings{'MAXCONFIGURE'} = 160;
+
+&General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+
+if (-s "/var/ipcop/red/keepconnected") {
+    $attempts = `/bin/cat /var/ipcop/red/keepconnected`; 
+}
+else {
+    system('echo "0" > /var/ipcop/red/keepconnected');    
+}
+
+if ($ARGV[0] eq 'start') {
+    &msg('Start');
+
+    # waiting pppd start or sync timout set at 90 s when available in driver
+    #rc.eciadsl/eci-load2 timout after 60s and 5 eci-load2 maximum attempts are done in rc.eciadsl.
+    #So just wait 5 s after 'rc.red start' end where pppd should have been started
+    
+    my $timetostart = 0;
+
+    while (system("/bin/ps ax | /bin/grep -q [p]ppd")) {
+
+        if (! -e "/var/ipcop/red/keepconnected") {
+            # user pressed disconnect in gui
+            &msg('Disconnect via GUI');
+            exit 0
+        }
+
+        my $rcredstart = system("/bin/ps ax | /bin/grep '[r]c.red start'");
+        if ($timetostart == 1) {
+            &msg('fail before pppd start : no sync, trying again');
+            system('/etc/rc.d/rc.red stop');
+            system('/etc/rc.d/rc.red clear');
+            system('/etc/rc.d/rc.red start');
+            exit 0
+        }
+        # give 5 s more at pppd to be visible  with ps ax after 'rc.red start' end
+        if ($rcredstart != 0) {
+            $timetostart = 1;
+        }
+        sleep 5;
+    }
+
+    #watching if an IP is received in MAXCONFIGURE time to avoid some pppoa waiting forever even after LCP timeout
+    my $count = 0;
+    while ($count < $pppsettings{'MAXCONFIGURE'}) {
+        if (! -e "/var/ipcop/red/keepconnected") {
+            # user pressed disconnect in gui
+            &msg('Disconnect via GUI');
+            exit 0;
+        }
+
+        if (-e "/var/ipcop/red/active") {
+            # connected in time so exit
+            system('echo "0" > /var/ipcop/red/keepconnected');    
+            &msg('Connected');
+            exit 0;
+        }
+
+        # pppd uses 10.64.64.64 as a temporary IP when dial-on-demand is used
+        # but the connection has not yet been dialed - ie no demand (see
+        # ppp-2.4.3/pppd/ipcp.c:1651). Don't count in this case
+        $count+=5 unless ( (-e "/var/ipcop/red/dial-on-demand") && system("/sbin/ip addr list label 'ppp*' | /bin/grep -q 'inet 10.64.64.64'"));
+
+        if (system("/bin/ps ax | /bin/grep -q [p]ppd")) {
+            #pppd exit, so don't need to wait MAXCONFIGURE
+            $count = $pppsettings{'MAXCONFIGURE'};
+
+            # TODO: but we still want to sleep after?
+        }
+        else {
+            sleep 5;
+        }
+    }
+
+    &msg('RED fail to connect');
+    my $rcredstart = `/bin/ps ax | /bin/grep '[r]c.red start' | /usr/bin/cut -f1 -d ' '`;
+    if ($rcredstart ne '') {
+        system("/bin/kill $rcredstart");
+    }
+    # this attempt to connect fail, so retry
+
+    #Don't erase keepconnected because it is used to watch user actions
+    system("/usr/bin/touch /var/ipcop/red/redial");
+    system("/etc/rc.d/rc.red stop");
+    while (! system("/bin/ps ax | /bin/grep -q [p]ppd") ) {
+        &msg('Waiting pppd exit');
+        sleep 2;
+    }
+
+    if (! -e "/var/ipcop/red/keepconnected") {
+        # user pressed disconnect in gui
+        &msg('Disconnect via GUI');
+        exit 0;
+    }
+    $attempts++;
+    if ($attempts >= $pppsettings{'MAXRETRIES'}) {
+        system('echo "0" > /var/ipcop/red/keepconnected');
+        &msg('Clearing RED interface');
+        system("/etc/rc.d/rc.red clear");
+        if (defined($pppsettings{'BACKUPPROFILE'}) && ($pppsettings{'BACKUPPROFILE'} != 0)) {
+            my $backup = $pppsettings{'BACKUPPROFILE'};
+            &General::SelectProfile($backup);
+
+            # read the new profile
+            &General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+            &msg("Changed to backup profile $backup $pppsettings{'PROFILENAME'}");
+        }
+        else {
+            &msg("Maximum retries and no backup profile, giving up.");
+            exit 0;
+        }
+    }
+    else {
+        system("echo $attempts > /var/ipcop/red/keepconnected");
+        # Increment attempts counter for logfile
+        $attempts++;
+        &msg("Restarting $attempts/$pppsettings{'MAXRETRIES'}");
+    }
+
+    my $holdoff = $pppsettings{'HOLDOFF'};
+    &msg("Holdoff $holdoff seconds");
+    while (($holdoff > 0) && (-e "/var/ipcop/red/keepconnected")) {
+        sleep 1;
+        $holdoff--;
+    }
+
+    if (! -e "/var/ipcop/red/keepconnected") {
+        # user pressed disconnect in gui
+        &msg('Disconnect via GUI');
+        exit 0;
+    }
+
+    system("/etc/rc.d/rc.red start");
+}
+elsif ($ARGV[0] eq 'reconnect') {
+    # Wait for [p]ppd to finish
+    while (! system("/bin/ps ax | /bin/grep -q [p]ppd") ) {
+        sleep 2;
+    }
+    # Wait for rc.updatered to finish
+    while (! system("/bin/ps ax | /bin/grep -q [r]c.updatered") ) {
+        sleep 2;
+    }
+
+    if ($pppsettings{'PROTOCOL'} eq 'RFC1483') {
+        # remove bridged/routed user-space programs
+        if ($pppsettings{'TYPE'} eq 'eciadsl') {
+            system("/etc/rc.d/rc.eciadsl stop");
+        }
+    }
+    &msg("Will connect again");
+    system("/etc/rc.d/rc.red start");
+}
+else {
+    print "Usage: $0 {start|reconnect}\n";
+    exit 1;
+}
+
+
+sub msg() {
+    &General::log("connectioncheck", "$_[0]") if ($pppsettings{'DEBUG'} eq 'on');
+}

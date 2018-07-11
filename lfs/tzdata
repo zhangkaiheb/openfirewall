@@ -1,0 +1,119 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: tzdata 8106 2016-03-28 10:56:37Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = tzdata
+#VER        = 2016c
+VER        = 2018c
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(PKG_NAME)$(VER).tar.gz
+# http://www.twinsun.com/tz/tz-link.htm
+#DL_FROM    = http://www.iana.org/time-zones/repository/releases
+DL_FROM    = ftp://ftp.lfs-matrix.net/pub/lfs/lfs-packages/8.2
+# old and new tzdata can also be found here:
+#DL_FROM    = ftp://munnari.oz.au/pub/oldtz
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+ZONEINFO   = /usr/share/zoneinfo
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+#$(DL_FILE)_MD5 = 0330ccd16140d3b6438a18dae9b34b93
+$(DL_FILE)_MD5 = c412b1531adef1be7a645ab734f86acc
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	# No top directory inside the package
+	@rm -rf $(DIR_APP) && mkdir $(DIR_APP) && cd $(DIR_APP) && tar xf $(DIR_DL)/$(DL_FILE)
+
+
+	mkdir -pv $(ZONEINFO)/{posix,right}
+
+	cd $(DIR_APP) && \
+		for tz in etcetera southamerica northamerica europe africa antarctica  \
+			asia australasia backward pacificnew systemv; do \
+			/usr/sbin/zic -L /dev/null   -d $(ZONEINFO)       -y "sh yearistype.sh" $$tz;  \
+			/usr/sbin/zic -L /dev/null   -d $(ZONEINFO)/posix -y "sh yearistype.sh" $$tz;  \
+			/usr/sbin/zic -L leapseconds -d $(ZONEINFO)/right -y "sh yearistype.sh" $$tz;  \
+		done
+
+	cd $(DIR_APP) && cp -v zone.tab zone1970.tab iso3166.tab $(ZONEINFO)
+	/usr/sbin/zic -d $(ZONEINFO) -p America/New_York
+
+	unset ZONEINFO
+
+	cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
+
+	# Build only the "posix"versions (no leap seconds)
+####	cd $(DIR_APP) && \
+####		for zone in africa antarctica asia australasia europe northamerica southamerica etcetera \
+####		factory backward systemv pacificnew; do \
+####			/usr/sbin/zic -d /usr/share/zoneinfo/posix -L /dev/null -y yearistype.sh $$zone ; \
+####		done
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

@@ -1,0 +1,124 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: openvpn 8101 2016-03-28 08:00:54Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = openvpn
+#VER        = 2.3.10
+##VER        = v2.3.10
+VER        = 2.4.5
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+#DL_FROM    = http://swupdate.openvpn.net/community/releases
+DL_FROM    = https://github.com/OpenVPN/openvpn/archive/v2.4.5.tar.gz
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+# Used to include same timestamp for all
+# This is the release date
+DATESTAMP = "Jan 4 2016"
+
+# Fix most of the issues seen with --enable-strict option
+CFLAGS += -fno-strict-aliasing
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+#$(DL_FILE)_MD5 = 275a640ccfc6a9f9a8faa4c84a74d294
+##$(DL_FILE)_MD5 = 4aaec1804bcbbe2241d78eaa702a23e7
+$(DL_FILE)_MD5 = 05dfc7a86da42a034fff12ce64285701
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+	# Use release date instead of __DATE__ so everyone that compile has same md5
+	cd $(DIR_APP) && sed -i -e 's|__DATE__|$(DATESTAMP)|' src/openvpn/options.c
+
+	cd $(DIR_APP) && autoreconf -i -v -f
+
+	cd $(DIR_APP) && ./configure	--prefix=/usr \
+					--program-prefix="" \
+					--disable-management \
+					--disable-socks \
+					--disable-http \
+					--disable-port-share \
+					--disable-plugin-auth-pam \
+					--enable-iproute2 \
+					--enable-strict
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# Do not to stop on error in tests
+	-cd $(DIR_APP); make -j 1 check &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+
+	cd $(DIR_APP) && make install
+
+	# Create the OpenVPN server status file and make sure rights are OK
+	touch /var/log/openvpnserver.log
+	chmod 644 /var/log/openvpnserver.log
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

@@ -1,0 +1,3 @@
+# By the way, lib/modules/KVER/kernel is already include
+#lib/modules/KVER/kernel/drivers/net/e1000e
+#lib/modules/KVER/kernel/drivers/net/e1000e/e1000e.ko.gz

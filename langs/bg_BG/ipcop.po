@@ -1,0 +1,3965 @@
+# Bulgarian (bg) Data File 
+#
+# This file is part of the IPCop Firewall.
+# 
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with IPCop; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+# 
+# (c) The IPCop Team
+# 
+# IPCop translation
+# (c) 2006 Alexander Dimitrov  
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#### UNTRANSLATED:
+msgid "AUTH always required"
+msgstr "Require authentication for unrestricted source addresses"
+#### UNTRANSLATED:
+msgid "AUTH auth cache TTL"
+msgstr "Authentication cache TTL (in minutes)"
+#### UNTRANSLATED:
+msgid "AUTH global settings"
+msgstr "Global authentication settings"
+msgid "AUTH limit of IP addresses"
+msgstr "Лимит на IP адреси за потребител"
+#### UNTRANSLATED:
+msgid "AUTH method"
+msgstr "Authentication method"
+#### UNTRANSLATED:
+msgid "AUTH method ident"
+msgstr "identd"
+#### UNTRANSLATED:
+msgid "AUTH method ldap"
+msgstr "LDAP"
+#### UNTRANSLATED:
+msgid "AUTH method ncsa"
+msgstr "Local"
+msgid "AUTH method none"
+msgstr "Няма"
+#### UNTRANSLATED:
+msgid "AUTH method ntlm"
+msgstr "Windows"
+#### UNTRANSLATED:
+msgid "AUTH method radius"
+msgstr "RADIUS"
+#### UNTRANSLATED:
+msgid "AUTH no auth"
+msgstr "Destinations without authentication (one per line)"
+#### UNTRANSLATED:
+msgid "AUTH number of auth processes"
+msgstr "Number of authentication processes"
+#### UNTRANSLATED:
+msgid "AUTH realm"
+msgstr "Authentication realm prompt"
+#### UNTRANSLATED:
+msgid "AUTH user IP cache TTL"
+msgstr "User/IP cache TTL (in minutes)"
+#### UNTRANSLATED:
+msgid "IDENT authorized users"
+msgstr "Authorized users (one per line)"
+#### UNTRANSLATED:
+msgid "IDENT aware hosts"
+msgstr "Ident aware hosts (one per line)"
+#### UNTRANSLATED:
+msgid "IDENT identd settings"
+msgstr "Common identd settings"
+#### UNTRANSLATED:
+msgid "IDENT required"
+msgstr "Require identd authentication"
+#### UNTRANSLATED:
+msgid "IDENT timeout"
+msgstr "Ident timeout (in seconds)"
+#### UNTRANSLATED:
+msgid "IDENT unauthorized users"
+msgstr "Unauthorized users (one per line)"
+#### UNTRANSLATED:
+msgid "IDENT use negative access list"
+msgstr "Use negative access control"
+#### UNTRANSLATED:
+msgid "IDENT use positive access list"
+msgstr "Use positive access control"
+#### UNTRANSLATED:
+msgid "IDENT user based access restrictions"
+msgstr "User based access restrictions"
+#### UNTRANSLATED:
+msgid "LDAP ADS"
+msgstr "Active Directory"
+#### UNTRANSLATED:
+msgid "LDAP NDS"
+msgstr "Novell eDirectory"
+#### UNTRANSLATED:
+msgid "LDAP V2"
+msgstr "LDAP version 2"
+#### UNTRANSLATED:
+msgid "LDAP V3"
+msgstr "LDAP version 3"
+#### UNTRANSLATED:
+msgid "LDAP basedn"
+msgstr "Base DN"
+#### UNTRANSLATED:
+msgid "LDAP binddn password"
+msgstr "Bind DN password"
+#### UNTRANSLATED:
+msgid "LDAP binddn settings"
+msgstr "Bind DN settings"
+#### UNTRANSLATED:
+msgid "LDAP binddn username"
+msgstr "Bind DN username"
+#### UNTRANSLATED:
+msgid "LDAP common settings"
+msgstr "Common LDAP settings"
+#### UNTRANSLATED:
+msgid "LDAP group access control"
+msgstr "Group based access control"
+#### UNTRANSLATED:
+msgid "LDAP group required"
+msgstr "Required group"
+#### UNTRANSLATED:
+msgid "LDAP port"
+msgstr "Port"
+#### UNTRANSLATED:
+msgid "LDAP server"
+msgstr "LDAP Server"
+#### UNTRANSLATED:
+msgid "LDAP type"
+msgstr "LDAP type"
+#### UNTRANSLATED:
+msgid "MIME block types"
+msgstr "Block these MIME types (one per line)"
+#### UNTRANSLATED:
+msgid "MIME filter"
+msgstr "MIME type filter"
+#### UNTRANSLATED:
+msgid "MIME filter exceptions"
+msgstr "Do not filter these destinations (one per line)"
+#### UNTRANSLATED:
+msgid "NCSA auth"
+msgstr "Local user authentication"
+#### UNTRANSLATED:
+msgid "NCSA create user"
+msgstr "Create user"
+#### UNTRANSLATED:
+msgid "NCSA group"
+msgstr "Group"
+#### UNTRANSLATED:
+msgid "NCSA group membership"
+msgstr "Group membership"
+#### UNTRANSLATED:
+msgid "NCSA grp disabled"
+msgstr "Disabled"
+#### UNTRANSLATED:
+msgid "NCSA grp extended"
+msgstr "Extended"
+#### UNTRANSLATED:
+msgid "NCSA grp standard"
+msgstr "Standard"
+#### UNTRANSLATED:
+msgid "NCSA min password length"
+msgstr "Min password length"
+#### UNTRANSLATED:
+msgid "NCSA no accounts"
+msgstr "No user accounts available"
+#### UNTRANSLATED:
+msgid "NCSA password"
+msgstr "Password"
+#### UNTRANSLATED:
+msgid "NCSA password confirm"
+msgstr "Password (confirm)"
+#### UNTRANSLATED:
+msgid "NCSA redirector bypass"
+msgstr "Bypass redirection for members of the group"
+#### UNTRANSLATED:
+msgid "NCSA update user"
+msgstr "Update user"
+#### UNTRANSLATED:
+msgid "NCSA user accounts"
+msgstr "User accounts"
+#### UNTRANSLATED:
+msgid "NCSA user management"
+msgstr "User management"
+#### UNTRANSLATED:
+msgid "NCSA username"
+msgstr "Username"
+#### UNTRANSLATED:
+msgid "NTLM BDC hostname"
+msgstr "BDC hostname"
+#### UNTRANSLATED:
+msgid "NTLM PDC hostname"
+msgstr "PDC hostname"
+#### UNTRANSLATED:
+msgid "NTLM auth mode"
+msgstr "Authentication mode"
+#### UNTRANSLATED:
+msgid "NTLM authorized users"
+msgstr "Authorized domain users (one per line)"
+#### UNTRANSLATED:
+msgid "NTLM domain"
+msgstr "Domain"
+#### UNTRANSLATED:
+msgid "NTLM domain settings"
+msgstr "Common domain settings"
+#### UNTRANSLATED:
+msgid "NTLM unauthorized users"
+msgstr "Unauthorized domain users (one per line)"
+#### UNTRANSLATED:
+msgid "NTLM use integrated auth"
+msgstr "Enable Windows integrated authentication"
+#### UNTRANSLATED:
+msgid "NTLM use negative access list"
+msgstr "Use negative access control"
+#### UNTRANSLATED:
+msgid "NTLM use positive access list"
+msgstr "Use positive access control"
+#### UNTRANSLATED:
+msgid "NTLM user based access restrictions"
+msgstr "User based access restrictions"
+#### UNTRANSLATED:
+msgid "RADIUS authorized users"
+msgstr "Authorized users (one per line)"
+#### UNTRANSLATED:
+msgid "RADIUS identifier"
+msgstr "Identifier"
+#### UNTRANSLATED:
+msgid "RADIUS port"
+msgstr "Port"
+#### UNTRANSLATED:
+msgid "RADIUS radius settings"
+msgstr "Common RADIUS settings"
+#### UNTRANSLATED:
+msgid "RADIUS secret"
+msgstr "Shared secret"
+#### UNTRANSLATED:
+msgid "RADIUS server"
+msgstr "RADIUS Server"
+#### UNTRANSLATED:
+msgid "RADIUS unauthorized users"
+msgstr "Unauthorized users (one per line)"
+#### UNTRANSLATED:
+msgid "RADIUS use negative access list"
+msgstr "Use negative access control"
+#### UNTRANSLATED:
+msgid "RADIUS use positive access list"
+msgstr "Use positive access control"
+#### UNTRANSLATED:
+msgid "RADIUS user based access restrictions"
+msgstr "User based access restrictions"
+#### UNTRANSLATED:
+msgid "RAID status"
+msgstr "RAID Status"
+#### UNTRANSLATED:
+msgid "UA enable filter"
+msgstr "Enable browser check"
+msgid "a ca certificate with this name already exists"
+msgstr "съществува сертификат с това име"
+msgid "a connection with this common name already exists"
+msgstr "Връзка с подобни имена вече съществува"
+msgid "a connection with this name already exists"
+msgstr "Връзка с това име вече съществува"
+msgid "access"
+msgstr "Достъп"
+msgid "action"
+msgstr "Напред"
+#### UNTRANSLATED:
+msgid "activity detection"
+msgstr "Activity detection"
+msgid "add"
+msgstr "Добави"
+msgid "add a ddns name"
+msgstr "Добави динамичен DNS"
+msgid "add a host"
+msgstr "Добави хост"
+msgid "add a new rule"
+msgstr "Добави ново правило"
+msgid "add address"
+msgstr "Добави адрес"
+msgid "add address grouping"
+msgstr "Добави адреси в Група"
+msgid "add device"
+msgstr "Добави компонент"
+msgid "add interface"
+msgstr "Добави интерфейс"
+msgid "add new alias"
+msgstr "Добавете ново правило"
+msgid "add new lease"
+msgstr "Добави нов статичен адрес"
+#### UNTRANSLATED:
+msgid "add new time constraint rule"
+msgstr "Add new time constraint rule"
+#### UNTRANSLATED:
+msgid "add new user quota rule"
+msgstr "Add new user quota rule"
+msgid "add service"
+msgstr "Добави процес"
+msgid "add service grouping"
+msgstr "Добави услуги в Група"
+msgid "add timeframe"
+msgstr "Добави Таймфрейм"
+msgid "added from dhcp lease list"
+msgstr "Добавен от DHCP разпределителна таблица"
+msgid "additional"
+msgstr "Допълнителен"
+msgid "address"
+msgstr "Адрес"
+msgid "address added"
+msgstr "Частен адрес е добавен"
+msgid "address added to group"
+msgstr "Добавени адреси в Група"
+msgid "address already in group"
+msgstr "Избраните адреси вече са в Групата"
+msgid "address from group deleted"
+msgstr "Адресите са изтрити от Групата"
+msgid "address group deleted"
+msgstr "Групата с Адреси е изтрита"
+msgid "address group exists already"
+msgstr "Вече има Адресна Група с това име"
+msgid "address group name"
+msgstr "Име на Група с Адреси"
+msgid "address group not be empty"
+msgstr "Името на Групата Адреси не може да е празно"
+msgid "address group updated"
+msgstr "Групата с Адреси е обновена"
+msgid "address grouping settings"
+msgstr "Защитна стена - Групиране на Адреси"
+msgid "address groups"
+msgstr "Групи с Адреси"
+msgid "address in group enabled"
+msgstr "Разреши/забрани Адресите в Групата"
+msgid "address removed"
+msgstr "Ръчно добавения адрес е премахнат"
+msgid "address settings"
+msgstr "Защитна стена - настройки на Адреси"
+msgid "address updated"
+msgstr "Ръчно добавените адреси са обновени"
+msgid "addresses"
+msgstr "Адреси"
+msgid "addressfilter"
+msgstr "Филтър на Адреси"
+msgid "addressfilter use hint"
+msgstr "Трябва да въведете по един MAC или IP Адрес за устройство. Възможност е да въведетв и двете - MAC & IP Адрес"
+msgid "addressformat"
+msgstr "Формат на Адреси"
+msgid "admin mac"
+msgstr "Допълнително ограничен от администраторски MAC"
+msgid "admin mail"
+msgstr "Скрий администраторска поща"
+msgid "admin network"
+msgstr "Администраторска мрежа (позволява IPCop ssh и IPCop https връзки през тази мрежа)"
+msgid "admin user password has been changed"
+msgstr "Паролата на 'администратор' беше променена "
+msgid "administrator user password"
+msgstr "Парола на администратор"
+msgid "adr is used as dest"
+msgstr "Този адрес се използва като крайна цел в настройките на защитната стена"
+msgid "adr is used in portfw"
+msgstr "Този адрес се използва в настройки за пренасочване не портове"
+msgid "adsl settings"
+msgstr "ADSL настойки"
+msgid "adv mode"
+msgstr "Режим за Напреднали"
+msgid "adv options"
+msgstr "Опции за напреднали (Advanced options)"
+msgid "advanced"
+msgstr "За напреднали"
+#### UNTRANSLATED:
+msgid "advanced rule"
+msgstr "Advanced Accept Rule, open Firewall"
+msgid "advanced server"
+msgstr "Разширени опции на Сървъра"
+msgid "again"
+msgstr "Отново"
+msgid "alcatelusb help"
+msgstr "За да свържете Speedtouch 330 или Speedtouch USB модем, трябва да качите фърмлерът му в инсталирания IPCop. Моля свалете <b>Embedded Firmware</b> пакета за SpeedTouch 330 от speedtouch.com, разархивирайте и после прехвърлете нужния фаил за вашия модем: KQD6_3.xxx когато Rev<4 или ZZZL_3.xxx за Rev=4 използвайте формата от долу."
+msgid "alcatelusb upload"
+msgstr "Качи Speedtouch USB фърмуер"
+msgid "alias ip"
+msgstr "IP настройки "
+msgid "aliases"
+msgstr "Настройки"
+msgid "aliases not active"
+msgstr "Насройикте няма да са активни докато ЧЕРВЕН-ия интерфейс не се промени със СТАТИЧЕН"
+msgid "all"
+msgstr "Всички"
+msgid "all icmp types"
+msgstr "Всички типове ICMP"
+msgid "all updates installed"
+msgstr "Всички ъпдейти са инсталирани"
+msgid "allmsg"
+msgstr "покажи всички"
+msgid "allow"
+msgstr "разреши"
+#### UNTRANSLATED:
+msgid "allow custom whitelist for banned clients"
+msgstr "Allow custom whitelist for banned clients"
+#### UNTRANSLATED:
+msgid "allowed domains"
+msgstr "Allowed domains (one per line)"
+#### UNTRANSLATED:
+msgid "allowed subnets"
+msgstr "Allowed subnets (one per line)"
+#### UNTRANSLATED:
+msgid "allowed urls"
+msgstr "Allowed URLs (one per line)"
+msgid "allowed web browsers"
+msgstr "Допуснати клиенти през web"
+msgid "alt dialup"
+msgstr "Телефонен достъп"
+msgid "alt home"
+msgstr "Начало"
+msgid "alt information"
+msgstr "информация"
+msgid "alt logs"
+msgstr "Логове"
+msgid "alt services"
+msgstr "Задачи"
+msgid "alt system"
+msgstr "Система"
+msgid "alt vpn"
+msgstr "VPN-и"
+msgid "any"
+msgstr "Всеки"
+msgid "apply"
+msgstr "Промени сега"
+msgid "april"
+msgstr "Април"
+msgid "are you sure"
+msgstr "Сигурен ли сте?"
+msgid "arp table entries"
+msgstr "ARP Таблица"
+#### UNTRANSLATED:
+msgid "assigned quota users"
+msgstr "Assigned users (one per line)"
+#### UNTRANSLATED:
+msgid "assigned users"
+msgstr "Assigned users"
+#### UNTRANSLATED:
+msgid "at least monitor one volume"
+msgstr "At least one volume must be selected"
+#### UNTRANSLATED:
+msgid "at least one address enabled"
+msgstr "At least one address must be enabled per group"
+#### UNTRANSLATED:
+msgid "at least one day enabled"
+msgstr "At least one Day must be enabled"
+#### UNTRANSLATED:
+msgid "at least one service enabled"
+msgstr "At least one service must be enabled per group"
+msgid "august"
+msgstr "Август"
+msgid "authentication"
+msgstr "Автентичност"
+msgid "automatic"
+msgstr "Автоматично"
+#### UNTRANSLATED:
+msgid "available redirectors"
+msgstr "Available redirectors"
+msgid "available updates"
+msgstr "Ъпдейти на разположение"
+msgid "average"
+msgstr "Средно ниво"
+msgid "avoid dod"
+msgstr "Не използвай тази опция с модем (Dial on Demand)! Ръчно използване е възможно ако IPCop е зад рутер. Вашият Червн IP, трябва да е под единия ит трите запазени мрежови номера пр.: 10/8, 172.16/12, 192.168/16"
+msgid "back"
+msgstr "Назад"
+msgid "back to main page"
+msgstr "Обратно към началната страница"
+msgid "backup"
+msgstr "Създаване на възстановяваш архив"
+msgid "backup export key"
+msgstr "Запази архивиран ключ"
+msgid "backup import dat file"
+msgstr "Качи архивиран (.dat) файл"
+msgid "backup key"
+msgstr "Архивирай кодиран ключ"
+msgid "backup missing key"
+msgstr "Необходим е архивиран ключ за да възтанови настройките"
+msgid "backup password"
+msgstr "Архивирай парола"
+msgid "backup sets"
+msgstr "Архивиране на настройки"
+msgid "backup to floppy"
+msgstr "Архивирай на дискета"
+msgid "backupprofile"
+msgstr "В случаи на неуспешно свързване, смяна на профил"
+msgid "bad characters in"
+msgstr "Има некоректни/непозволени символи "
+msgid "bad characters in script field"
+msgstr "неадекватни символи в скрипта"
+msgid "bad characters in the telephone number field"
+msgstr "неадекватни символи в телефонния номер"
+msgid "bad destination range"
+msgstr "Насочването на портовете има стойност по висока или равна на втората величина."
+msgid "bad ignore filter"
+msgstr "неточен игнориращ филтър"
+msgid "bad return code"
+msgstr "Помощната програма даде грешка"
+msgid "bad source range"
+msgstr "Изходната величина на портовете има първа стойност, която е по-голяма или равна на втората стойност"
+msgid "banned ip clients"
+msgstr "Забранени IP адреси (по един на ред)"
+msgid "banned mac clients"
+msgstr "Забрана по MAC адрес (един на ред)"
+#### UNTRANSLATED:
+msgid "beep on ..."
+msgstr "Beep ..."
+msgid "beep on ... ppp connects or disconnects"
+msgstr "... когато IPCop се свързва или прекъсва"
+#### UNTRANSLATED:
+msgid "beep on ... system start or stop"
+msgstr "... on IPCop boot, shutdown or reboot"
+#### UNTRANSLATED:
+msgid "binary files"
+msgstr "Binary files"
+msgid "bits per second"
+msgstr "Бита за Секунда"
+#### UNTRANSLATED:
+msgid "blacklist category name"
+msgstr "Blacklist category name"
+#### UNTRANSLATED:
+msgid "blacklist editor"
+msgstr "Blacklist Editor"
+#### UNTRANSLATED:
+msgid "blacklist import text"
+msgstr "To import a previously saved Blacklist Editor file upload the .tar.gz file below"
+#### UNTRANSLATED:
+msgid "blacklist is old1"
+msgstr "The blacklist file is"
+#### UNTRANSLATED:
+msgid "blacklist maintenance"
+msgstr "Blacklist Maintenance"
+#### UNTRANSLATED:
+msgid "blacklist name"
+msgstr "Blacklist name"
+#### UNTRANSLATED:
+msgid "blacklist source"
+msgstr "Blacklist Source"
+#### UNTRANSLATED:
+msgid "blacklist update"
+msgstr "Blacklist Update"
+#### UNTRANSLATED:
+msgid "blacklist update results"
+msgstr "Blacklist update results"
+#### UNTRANSLATED:
+msgid "blacklist upload information"
+msgstr "The new blacklist will be automatically compiled to prebuilt databases. Depending on the size of the blacklist, this may take several minutes. Please wait for this task to be finished before restarting the URL filter."
+#### UNTRANSLATED:
+msgid "blacklist upload success"
+msgstr "Blacklist upload successfully completed."
+#### UNTRANSLATED:
+msgid "block"
+msgstr "Block"
+#### UNTRANSLATED:
+msgid "block ads with empty window"
+msgstr "Block 'ads' with empty window"
+#### UNTRANSLATED:
+msgid "block all urls not explicitly allowed"
+msgstr "Block all URLs not explicitly allowed"
+#### UNTRANSLATED:
+msgid "block categories"
+msgstr "Block categories"
+#### UNTRANSLATED:
+msgid "block page settings"
+msgstr "Block page settings"
+#### UNTRANSLATED:
+msgid "block sites accessed by ip address"
+msgstr "Block sites accessed by their IP address"
+#### UNTRANSLATED:
+msgid "blocked domains"
+msgstr "Blocked domains (one per line)"
+#### UNTRANSLATED:
+msgid "blocked expressions"
+msgstr "Blocked expressions (as regular expressions)"
+#### UNTRANSLATED:
+msgid "blocked urls"
+msgstr "Blocked URLs (one per line)"
+msgid "blue"
+msgstr "СИН"
+msgid "blue interface"
+msgstr "Син интерфейс"
+msgid "broadcast"
+msgstr "Предаване"
+msgid "buffered memory"
+msgstr "Буферирана памет"
+msgid "buffers"
+msgstr "буфери"
+msgid "bytes"
+msgstr "Байтове"
+#### UNTRANSLATED:
+msgid "bytes received"
+msgstr "Bytes Received"
+#### UNTRANSLATED:
+msgid "bytes sent"
+msgstr "Bytes Sent"
+msgid "ca certificate"
+msgstr "CA Сертификат"
+msgid "ca name"
+msgstr "CA Име"
+msgid "cache management"
+msgstr "Управление на Кеш"
+#### UNTRANSLATED:
+msgid "cache replacement policy"
+msgstr "Cache replacement policy"
+msgid "cached"
+msgstr "прихванато"
+msgid "cached memory"
+msgstr "запазена памет"
+#### UNTRANSLATED:
+msgid "calc traffic all x minutes"
+msgstr "Calculate traffic every x minutes"
+msgid "cancel"
+msgstr "откажи"
+msgid "cannot enable both nat traversal and compression"
+msgstr "Не може да се активират и двете опции NAT Traversal и Compression."
+msgid "cannot enable ntp without specifying primary"
+msgstr "Не може да се активира NTP без назначение на начален"
+msgid "cannot mount local hard disk"
+msgstr "Не може да се монтира локалния твърд диск"
+msgid "cannot specify secondary dns without specifying primary"
+msgstr "Не може да се въведе втори DNS, без да е въведен първи"
+msgid "cannot specify secondary ntp without specifying primary"
+msgstr "Не може да се активира  Втори NTP сървър без назначение на начален"
+msgid "cannot specify secondary wins without specifying primary"
+msgstr "Не може да се активира Втори WINS сървър без наличието на първи"
+#### UNTRANSLATED:
+msgid "cannot specify tertiary ntp without specifying secondary"
+msgstr "Cannot specify Tertiary NTP Server without specifying Secondary"
+msgid "cant change certificates"
+msgstr "Неможе да се сменят сертификатите"
+msgid "caps all"
+msgstr "ВСИЧКИ"
+msgid "capsclosed"
+msgstr "ЗАТВОРЕН"
+msgid "capserror"
+msgstr "ГРЕШКА"
+msgid "capsopen"
+msgstr "ОТВОРЕН"
+msgid "capswarning"
+msgstr "ВНИМАНИЕ"
+msgid "category"
+msgstr "Категория"
+msgid "cert"
+msgstr "Сертификат"
+msgid "certificate"
+msgstr "Сертификат"
+msgid "certificate authorities"
+msgstr "Главен сертификат "
+msgid "certificate does not have a valid ca associated with it"
+msgstr "Сертификата няма валиден ключ асоцииран към него"
+msgid "certificate file move failed"
+msgstr "Преместването на сертификата неуспешно"
+msgid "cfg restart"
+msgstr "Препоръчително е да рестартирате след възтановяване от архив на конфигурация"
+msgid "chain"
+msgstr "Верига"
+msgid "change password"
+msgstr "Смени парола"
+msgid "change passwords"
+msgstr "Сменяне на пароли"
+msgid "change to profile"
+msgstr "Премини към Профил"
+#### UNTRANSLATED:
+msgid "change web access password"
+msgstr "Change web access password"
+#### UNTRANSLATED:
+msgid "check for blacklist updates"
+msgstr "Check for Blacklist Updates"
+msgid "check for updates"
+msgstr "Провери за Обновяване"
+#### UNTRANSLATED:
+msgid "check for updates after connect"
+msgstr "Check for Updates after IPCop connects"
+msgid "check vpn lr"
+msgstr "Проверка"
+#### UNTRANSLATED:
+msgid "cipher"
+msgstr "Encryption"
+msgid "city"
+msgstr "Град"
+#### UNTRANSLATED:
+msgid "classroom extensions"
+msgstr "Classroom extensions"
+msgid "clear cache"
+msgstr "Изчисти Кеш"
+msgid "click to disable"
+msgstr "Разрешено (кликни за забрана)"
+msgid "click to enable"
+msgstr "Забранено (кликни за разрешаване)"
+msgid "client"
+msgstr "Клиент"
+#### UNTRANSLATED:
+msgid "client IP forwarding"
+msgstr "Client IP address forwarding"
+msgid "color"
+msgstr "Цвят"
+msgid "common name"
+msgstr "Публично Име"
+#### UNTRANSLATED:
+msgid "common settings"
+msgstr "Common settings"
+#### UNTRANSLATED:
+msgid "comp-lzo"
+msgstr "LZO-Compression"
+#### UNTRANSLATED:
+msgid "compressed archive files"
+msgstr "Compressed archive files"
+msgid "computer to modem rate"
+msgstr "Скорост компютър до модем"
+msgid "concentrator name"
+msgstr "Име на концентратора"
+msgid "confirm new password"
+msgstr "Потвърди новата парола"
+msgid "confirmation"
+msgstr "потвърждение"
+msgid "connect on ipcop restart"
+msgstr "Свържи се отново при рестартиране на IPCop"
+msgid "connect the modem"
+msgstr "Свържете модема"
+msgid "connect timeout"
+msgstr "просрочено време на връзката"
+msgid "connected"
+msgstr "Свързан"
+msgid "connecting"
+msgstr "Свързване..."
+msgid "connection"
+msgstr "Връзка"
+msgid "connection debugging"
+msgstr "Ремонт на връзката"
+msgid "connection is down"
+msgstr "Свързаността е спряна"
+msgid "connection status and controlc"
+msgstr "Статус и контрол на Връзката"
+msgid "connection tracking"
+msgstr "IP таблици Свързващи Връзки"
+msgid "connection type"
+msgstr "Тип на връзката"
+msgid "connection type is invalid"
+msgstr "Типът на връзката е невалиден."
+msgid "connections"
+msgstr "Връзки"
+msgid "connections are associated with this ca.  deleting the ca will delete these connections as well."
+msgstr "Връзкта е асоциирана с този Сертификат. Ако премахнете Сертификата, ще премахнете и всички тези връзки по подразбиране."
+#### UNTRANSLATED:
+msgid "content based throttling"
+msgstr "Enable content based throttling"
+#### UNTRANSLATED:
+msgid "copy rule"
+msgstr "Copy rule"
+msgid "could not be opened"
+msgstr "не може да бъде отворен"
+msgid "could not create directory"
+msgstr "Не може да  се създаде директория."
+msgid "could not download the available updates list"
+msgstr "Не може да се свали лист с ъпдейти"
+msgid "could not open available updates file"
+msgstr "Не може да се отвори файла за ъпдейт"
+msgid "could not open installed updates file"
+msgstr "Не може да се отвори инсталирания фаил за ъпдейт"
+msgid "could not open update information file"
+msgstr "Не може да се отвори информационния фаил за ъпдейт. Файла е повреден."
+msgid "could not retrieve common name from certificate"
+msgstr "Не излиза изходящото име от сертификат."
+msgid "country"
+msgstr "Държава"
+msgid "cpu usage"
+msgstr "Натоварване CPU"
+#### UNTRANSLATED:
+msgid "cre group definitions"
+msgstr "Classroom group definitions"
+msgid "cre management disabled"
+msgstr "Интерфейсът за управелние е забранен от Администратор"
+#### UNTRANSLATED:
+msgid "cre no groups"
+msgstr "There are no access groups available"
+#### UNTRANSLATED:
+msgid "cre supervisors"
+msgstr "Supervisor IP addresses (one per line)"
+#### UNTRANSLATED:
+msgid "create backup file"
+msgstr "Create backup file"
+msgid "create new backup"
+msgstr "Създайте нов бекъп на настройки"
+msgid "credits"
+msgstr "Заслуги"
+#### UNTRANSLATED:
+msgid "crl"
+msgstr "Certificate Revocation List"
+msgid "cron server"
+msgstr "CRON сървър"
+#### UNTRANSLATED:
+msgid "ctrl select multiple"
+msgstr "Press Ctrl key to select multiple"
+msgid "current"
+msgstr "Сегашен"
+msgid "current aliases"
+msgstr "Текущи настройки"
+#### UNTRANSLATED:
+msgid "current ddns names"
+msgstr "Current dynamic DNS names"
+msgid "current dhcp leases on blue"
+msgstr "Текущи DHCP връзки на Син"
+msgid "current dynamic leases"
+msgstr "Текущи динамични връзки"
+msgid "current fixed leases"
+msgstr "Текущи фиксирани връзки"
+msgid "current hosts"
+msgstr "Текущи хостове"
+msgid "current media"
+msgstr "Налична медия"
+msgid "current password"
+msgstr "Сегашна парола"
+msgid "current profile"
+msgstr "Наличен профил"
+msgid "current rules"
+msgstr "Налични правила (настройки)"
+#### UNTRANSLATED:
+msgid "custom addresses"
+msgstr "Custom addresses"
+#### UNTRANSLATED:
+msgid "custom blacklist"
+msgstr "Custom blacklist"
+#### UNTRANSLATED:
+msgid "custom blacklist url"
+msgstr "Custom Blacklist URL"
+#### UNTRANSLATED:
+msgid "custom blacklist url required"
+msgstr "Custom Blacklist URL required"
+#### UNTRANSLATED:
+msgid "custom expression list"
+msgstr "Custom expression list"
+#### UNTRANSLATED:
+msgid "custom interfaces"
+msgstr "Custom interfaces"
+#### UNTRANSLATED:
+msgid "custom interfaces only in adv mode"
+msgstr "Custom Interfaces are only available in 'Advanced Mode'!"
+msgid "custom services"
+msgstr "ръчно създадени процеси"
+#### UNTRANSLATED:
+msgid "custom whitelist"
+msgstr "Custom whitelist"
+msgid "daily"
+msgstr "ежедневно"
+msgid "date"
+msgstr "Дата"
+msgid "date not in logs"
+msgstr "Няма (или частични) логове са налични за искания ден"
+msgid "day"
+msgstr "Ден"
+msgid "day after"
+msgstr "Ден след"
+msgid "day before"
+msgstr "Ден преди"
+#### UNTRANSLATED:
+msgid "day today"
+msgstr "Today"
+#### UNTRANSLATED:
+msgid "day yesterday"
+msgstr "Yesterday"
+msgid "days"
+msgstr "дни"
+msgid "days of the week"
+msgstr "Дни от седмицата"
+#### UNTRANSLATED:
+msgid "days to"
+msgstr "to"
+#### UNTRANSLATED:
+msgid "daytime"
+msgstr "Daytime"
+msgid "ddns help dnsmadeeasy"
+msgstr "Напишете вашият потребител/и (разделени със знак ; между тях) в формата за HOSTNAME"
+msgid "ddns help freedns"
+msgstr "Опишете свързващия адрес в формата Влез"
+msgid "ddns hostname added"
+msgstr "добавен Динамичен DNS хостиме "
+msgid "ddns hostname modified"
+msgstr "Променен Динамичен DNS хостиме"
+msgid "ddns hostname removed"
+msgstr "Премахнато е динамичното DNS име на хоста"
+msgid "ddns minimize updates"
+msgstr "Минимизиране на ъпдейти: Преди ъпдейта се сравнява DNS на хоста '[host.]domain' against RED IP."
+msgid "ddns noip prefix"
+msgstr "За да използвате no-ip в група, променете хоста с <b>%</b>"
+msgid "december"
+msgstr "декември"
+msgid "def lease time"
+msgstr "Основно време за скачване"
+#### UNTRANSLATED:
+msgid "default action"
+msgstr "Default Deny action"
+#### UNTRANSLATED:
+msgid "default action not matched packets"
+msgstr " packets which have not matched a rule"
+#### UNTRANSLATED:
+msgid "default interfaces"
+msgstr "Default interfaces"
+msgid "default lease time"
+msgstr "Нормално време за връзка (минути)"
+msgid "default networks"
+msgstr "мрежи по подразбиране"
+msgid "default services"
+msgstr "Стандратни възможности"
+#### UNTRANSLATED:
+msgid "definition"
+msgstr "Definition"
+msgid "delete"
+msgstr "Изтрий"
+msgid "demon login script"
+msgstr "Автоматичен скрипт за влизане"
+msgid "deny"
+msgstr "забрани"
+#### UNTRANSLATED:
+msgid "deny rule"
+msgstr "Deny Rule"
+msgid "description"
+msgstr "Описание"
+msgid "dest ip and port"
+msgstr "Дестинация. IP:Port"
+msgid "destination"
+msgstr "Дестинация"
+msgid "destination ip"
+msgstr "IP Направление"
+msgid "destination ip or net"
+msgstr "IP Направление или Мрежа"
+msgid "destination port"
+msgstr "Направление за порт"
+msgid "destination port numbers"
+msgstr "направлението трябва да е валиден порт или обхват "
+#### UNTRANSLATED:
+msgid "destination ports"
+msgstr "Destination ports"
+msgid "detail level"
+msgstr "Ниво на детайлност"
+msgid "device"
+msgstr "Устройство"
+msgid "devices on blue"
+msgstr "Машини към Син"
+msgid "dhcp allow bootp"
+msgstr "Разреши bootp клиенти"
+msgid "dhcp bootp pxe data"
+msgstr "Въведете нужната bootp pxe информация за тази фиксирана връзка"
+msgid "dhcp configuration"
+msgstr "DHCP конфигурация"
+msgid "dhcp fixed lease err1"
+msgstr "Трябва да са въведат полетата за хардуерен адрес или хостиме или двете за фиксирана връзка."
+msgid "dhcp fixed lease help1"
+msgstr "IP адреса може да се въведе като FQDN (fully qualified domain name)"
+msgid "dhcp mode"
+msgstr "DHCP"
+msgid "dhcp server"
+msgstr "DHCP сървър"
+msgid "dhcp server disabled"
+msgstr "DHCP сървъра е изключен. Спрян."
+msgid "dhcp server enabled"
+msgstr "DHCP сървъра е включен. Рестартиране."
+#### UNTRANSLATED:
+msgid "dhcp-options"
+msgstr "DHCP push options"
+msgid "dial"
+msgstr "Свързване"
+msgid "dial user password"
+msgstr "Потребителска парола"
+msgid "dial user password has been changed"
+msgstr "Паролата за телефонно набиране беше променена. "
+msgid "dialing mode"
+msgstr "Модус на набиране"
+msgid "dialup settings"
+msgstr "Настройки на набиране"
+#### UNTRANSLATED:
+msgid "disabled"
+msgstr "disabled"
+#### UNTRANSLATED:
+msgid "disconnecting"
+msgstr "Disconnecting..."
+#### UNTRANSLATED:
+msgid "disk access"
+msgstr "Disk Access"
+#### UNTRANSLATED:
+msgid "disk images"
+msgstr "CD images"
+msgid "disk usage"
+msgstr "Заето дисково пространство"
+msgid "display"
+msgstr "Дисплей"
+msgid "display hostname in window title"
+msgstr "Показване името на хоста в заглавието на прозореца"
+#### UNTRANSLATED:
+msgid "display traffic at home"
+msgstr "Display calculated traffic on Homepage"
+#### UNTRANSLATED:
+msgid "dl client arch"
+msgstr "Download Client Package (zip)"
+msgid "dmz"
+msgstr "DMZ"
+msgid "dns check failed"
+msgstr "Проверката на DNS се провали"
+msgid "dns configuration"
+msgstr "DNS настройки"
+msgid "dns proxy server"
+msgstr "DNS прокси сървър"
+msgid "dns server"
+msgstr "DNS сървър"
+msgid "dod"
+msgstr "Набери при необходимост"
+msgid "dod for dns"
+msgstr "Набери при Необходимост за DNS"
+#### UNTRANSLATED:
+msgid "dod not compatible with ddns"
+msgstr "Dial on demand is not compatible with dynamic dns services"
+#### UNTRANSLATED:
+msgid "dod waiting"
+msgstr "Dial on Demand waiting"
+msgid "domain"
+msgstr "Домейн"
+msgid "domain name"
+msgstr "Домайн име"
+#### UNTRANSLATED:
+msgid "domain name suffix"
+msgstr "Domain name suffix"
+msgid "domain not set"
+msgstr "Не е настроен Домайн."
+#### UNTRANSLATED:
+msgid "domains"
+msgstr "Domains (one per line)"
+#### UNTRANSLATED:
+msgid "down"
+msgstr "Down"
+#### UNTRANSLATED:
+msgid "downlink speed"
+msgstr "Downlink speed (kbit/sec)"
+msgid "download"
+msgstr "Изтегли"
+msgid "download ca certificate"
+msgstr "Свали CA сертификат"
+msgid "download certificate"
+msgstr "Сваляне на Сертификат"
+#### UNTRANSLATED:
+msgid "download host certificate"
+msgstr "Download Host Certificate"
+#### UNTRANSLATED:
+msgid "download pkcs12 file"
+msgstr "Download PKCS12 File"
+#### UNTRANSLATED:
+msgid "download root certificate"
+msgstr "Download Root Certificate"
+#### UNTRANSLATED:
+msgid "download throttling"
+msgstr "Download throttling"
+#### UNTRANSLATED:
+msgid "dpd action"
+msgstr "Dead Peer Detection action"
+msgid "driver"
+msgstr "Драйвър"
+#### UNTRANSLATED:
+msgid "dst port"
+msgstr "Dst Port"
+msgid "duplicate ip"
+msgstr "Дублирай въведения IP адрес"
+msgid "duplicate mac"
+msgstr "Дублирай въведения MAC адрес"
+#### UNTRANSLATED:
+msgid "duplicate name"
+msgstr "That name is already being used, please choose another."
+#### UNTRANSLATED:
+msgid "dyn dns source choice"
+msgstr "Dynamic DNS provider(s) will receive an IP address for this IPCop from"
+msgid "dynamic dns"
+msgstr "Динамичен DNS"
+#### UNTRANSLATED:
+msgid "dynamic dns client"
+msgstr "Dynamic DNS Client"
+#### UNTRANSLATED:
+msgid "dyndns force"
+msgstr "Force DynDNS Update"
+msgid "e-mail address too long"
+msgstr "Адресът на електронна поща е прекалено дълъг, не трябва да надвишава 40 символа"
+#### UNTRANSLATED:
+msgid "eciadsl help"
+msgstr "To utilise the ECI ADSL modem you must upload a synch.bin file to your IPCop box. Please download the file from the ECIADSL website and then upload the file <b>synch.bin</b> using the form below."
+#### UNTRANSLATED:
+msgid "eciadsl upload"
+msgstr "Upload ECI ADSL Synch.bin File"
+msgid "edit"
+msgstr "Редакция"
+msgid "edit a rule"
+msgstr "Редактирай съществуваща настройка"
+msgid "edit address"
+msgstr "Редактирай адрес"
+msgid "edit advanced settings when done"
+msgstr "Редактирай разширени настройки след приключване."
+#### UNTRANSLATED:
+msgid "edit an existing alias"
+msgstr "Edit an existing alias"
+#### UNTRANSLATED:
+msgid "edit an existing ddns name"
+msgstr "Edit an existing dynamic DNS name"
+#### UNTRANSLATED:
+msgid "edit an existing host"
+msgstr "Edit an existing host"
+#### UNTRANSLATED:
+msgid "edit an existing lease"
+msgstr "Edit an existing lease"
+msgid "edit device"
+msgstr "Редактирай устройство"
+#### UNTRANSLATED:
+msgid "edit domains urls expressions"
+msgstr "Edit domains, URLs and expressions"
+#### UNTRANSLATED:
+msgid "edit hosts"
+msgstr "Edit Hosts"
+#### UNTRANSLATED:
+msgid "edit interface"
+msgstr "Edit interface"
+#### UNTRANSLATED:
+msgid "edit policy"
+msgstr "Edit policy"
+#### UNTRANSLATED:
+msgid "edit service"
+msgstr "Edit service"
+#### UNTRANSLATED:
+msgid "edit time constraint rule"
+msgstr "Edit an existing time constraint rule"
+#### UNTRANSLATED:
+msgid "edit user quota rule"
+msgstr "Edit an existing user quota rule"
+#### UNTRANSLATED:
+msgid "eg"
+msgstr "e.g."
+msgid "email server"
+msgstr "Пощенски сървър"
+#### UNTRANSLATED:
+msgid "email server can not be empty"
+msgstr "Email server cannot be empty"
+msgid "email server port"
+msgstr "Порт за пощенския сървър"
+#### UNTRANSLATED:
+msgid "email server port bad"
+msgstr "Email server port is not valid"
+msgid "email settings"
+msgstr "Настройки Електронна поща"
+#### UNTRANSLATED:
+msgid "email to help"
+msgstr "If required, it is possible to send to a number of email addresses. The addresses must be separated by spaces."
+#### UNTRANSLATED:
+msgid "email use tls"
+msgstr "Use TLS"
+msgid "empty"
+msgstr "Празно"
+#### UNTRANSLATED:
+msgid "enable automatic update"
+msgstr "Enable automatic update"
+#### UNTRANSLATED:
+msgid "enable background image"
+msgstr "Enable background image"
+#### UNTRANSLATED:
+msgid "enable expression lists"
+msgstr "Enable expression lists"
+msgid "enable ignore filter"
+msgstr "Включи игнориращ филтър"
+msgid "enable javascript"
+msgstr "Разреши Javascript"
+#### UNTRANSLATED:
+msgid "enable logging not matched broadcast packets"
+msgstr "Log broadcast packets which have not matched a rule"
+#### UNTRANSLATED:
+msgid "enable logging not matched packets"
+msgstr "Log packets which have not matched a rule"
+#### UNTRANSLATED:
+msgid "enable safesearch"
+msgstr "Enable SafeSearch"
+#### UNTRANSLATED:
+msgid "enable wildcards"
+msgstr "Enable wildcards"
+msgid "enabled"
+msgstr "Разрешено"
+msgid "enabled on"
+msgstr "Разрешено на"
+#### UNTRANSLATED:
+msgid "enabledtitle"
+msgstr "Enabled"
+#### UNTRANSLATED:
+msgid "encapsulation"
+msgstr "Encapsulation"
+#### UNTRANSLATED:
+msgid "end address"
+msgstr "End address"
+msgid "err bk 1"
+msgstr "Грешка при създаването на архив"
+#### UNTRANSLATED:
+msgid "err bk 2 key"
+msgstr "Error creating key file"
+#### UNTRANSLATED:
+msgid "err bk 3 tar"
+msgstr "Error appending files to archive"
+#### UNTRANSLATED:
+msgid "err bk 4 gz"
+msgstr "Error compressing archive"
+#### UNTRANSLATED:
+msgid "err bk 5 encrypt"
+msgstr "Error encrypting archive"
+#### UNTRANSLATED:
+msgid "err create backup file"
+msgstr "Unable to create backup file"
+#### UNTRANSLATED:
+msgid "err create export file"
+msgstr "Unable to create export file"
+msgid "err rs 1"
+msgstr "Грешка при възстановяването на архив"
+#### UNTRANSLATED:
+msgid "err rs 12 version"
+msgstr "Backup has no version information or version is not acceptable"
+#### UNTRANSLATED:
+msgid "err rs 6 decrypt"
+msgstr "Error decrypting archive"
+#### UNTRANSLATED:
+msgid "err rs 7 untartst"
+msgstr "Invalid decrypted archive"
+#### UNTRANSLATED:
+msgid "err rs 8 untar"
+msgstr "Error untarring archive"
+#### UNTRANSLATED:
+msgid "errmsg acl cannot be empty"
+msgstr "Access control list cannot be empty"
+#### UNTRANSLATED:
+msgid "errmsg at least one category must be selected"
+msgstr "There must be at least one category selected"
+#### UNTRANSLATED:
+msgid "errmsg auth cache ttl"
+msgstr "Invalid value for authentication cache TTL"
+#### UNTRANSLATED:
+msgid "errmsg auth children"
+msgstr "Invalid number of authentication processes"
+#### UNTRANSLATED:
+msgid "errmsg auth ipcache may not be null"
+msgstr "Authentication cache TTL may not be 0 when using IP address limits"
+#### UNTRANSLATED:
+msgid "errmsg auth ipcache ttl"
+msgstr "Invalid value for user/IP cache TTL"
+#### UNTRANSLATED:
+msgid "errmsg blacklist empty"
+msgstr "Blacklist is empty"
+#### UNTRANSLATED:
+msgid "errmsg category name error"
+msgstr "Blacklist category name required"
+#### UNTRANSLATED:
+msgid "errmsg change fail"
+msgstr "Password could not be changed"
+#### UNTRANSLATED:
+msgid "errmsg extract tar"
+msgstr "Could not extract files from tar archive"
+#### UNTRANSLATED:
+msgid "errmsg filter children"
+msgstr "Invalid number of filter processes"
+#### UNTRANSLATED:
+msgid "errmsg hdd cache size"
+msgstr "Invalid value for harddisk cache size (min 10 MB required)"
+#### UNTRANSLATED:
+msgid "errmsg ident timeout"
+msgstr "Invalid ident timeout"
+#### UNTRANSLATED:
+msgid "errmsg invalid bdc"
+msgstr "Invalid hostname for Backup Domain Controller"
+#### UNTRANSLATED:
+msgid "errmsg invalid blacklist content"
+msgstr "File is not a squidGuard compatible blacklist"
+#### UNTRANSLATED:
+msgid "errmsg invalid destination port"
+msgstr "Invalid destination port"
+#### UNTRANSLATED:
+msgid "errmsg invalid import file"
+msgstr "File is not a valid URL filter Blacklist Editor file"
+#### UNTRANSLATED:
+msgid "errmsg invalid ip or mask"
+msgstr "Invalid IP address or network mask"
+#### UNTRANSLATED:
+msgid "errmsg invalid mac"
+msgstr "Invalid MAC address"
+#### UNTRANSLATED:
+msgid "errmsg invalid pdc"
+msgstr "Invalid hostname for Primary Domain Controller"
+msgid "errmsg invalid proxy port"
+msgstr "Невалиден порт за прокси"
+#### UNTRANSLATED:
+msgid "errmsg invalid restore file"
+msgstr "File is not a valid URL filter backup file"
+#### UNTRANSLATED:
+msgid "errmsg invalid upstream proxy username or password setting"
+msgstr "Invalid upstream proxy username or password setting"
+msgid "errmsg invalid user"
+msgstr "Потребителят не съществува"
+#### UNTRANSLATED:
+msgid "errmsg ldap base dn"
+msgstr "LDAP base DN required"
+#### UNTRANSLATED:
+msgid "errmsg ldap bind dn"
+msgstr "LDAP bind DN username and password required"
+#### UNTRANSLATED:
+msgid "errmsg ldap port"
+msgstr "Invalid LDAP port number"
+#### UNTRANSLATED:
+msgid "errmsg ldap server"
+msgstr "Invalid IP address for LDAP Server"
+#### UNTRANSLATED:
+msgid "errmsg max userip"
+msgstr "Invalid number of IP addresses per user"
+#### UNTRANSLATED:
+msgid "errmsg mem cache size"
+msgstr "Invalid value for memory cache size"
+#### UNTRANSLATED:
+msgid "errmsg no browser"
+msgstr "At least one browser or client must be selected for web access"
+#### UNTRANSLATED:
+msgid "errmsg no password"
+msgstr "Password can not be empty"
+#### UNTRANSLATED:
+msgid "errmsg no username"
+msgstr "Username cannot be empty"
+#### UNTRANSLATED:
+msgid "errmsg non-transparent proxy required"
+msgstr "Web Proxy must be running in non-transparent mode for authentication"
+#### UNTRANSLATED:
+msgid "errmsg ntlm domain"
+msgstr "Windows domain name required"
+#### UNTRANSLATED:
+msgid "errmsg ntlm pdc"
+msgstr "Hostname for Primary Domain Controller required"
+#### UNTRANSLATED:
+msgid "errmsg password length"
+msgstr "Invalid value for password length"
+#### UNTRANSLATED:
+msgid "errmsg password length 1"
+msgstr "Password must have at least "
+msgid "errmsg password length 2"
+msgstr "символи"
+msgid "errmsg passwords different"
+msgstr "Паролите не съвпадат"
+#### UNTRANSLATED:
+msgid "errmsg quota time"
+msgstr "Invalid value for time quota"
+#### UNTRANSLATED:
+msgid "errmsg quota user"
+msgstr "At least one username is required"
+#### UNTRANSLATED:
+msgid "errmsg radius port"
+msgstr "Invalid RADIUS port number"
+#### UNTRANSLATED:
+msgid "errmsg radius secret"
+msgstr "RADIUS shared secret required"
+#### UNTRANSLATED:
+msgid "errmsg radius server"
+msgstr "Invalid IP address for RADIUS Server"
+#### UNTRANSLATED:
+msgid "errmsg src empty"
+msgstr "Source cannot be empty"
+#### UNTRANSLATED:
+msgid "errmsg time restriction"
+msgstr "Invalid time restriction"
+#### UNTRANSLATED:
+msgid "errmsg web proxy service required"
+msgstr "Web proxy service must be enabled to use URL filter"
+#### UNTRANSLATED:
+msgid "errmsg weekday"
+msgstr "There must be at least one day selected"
+#### UNTRANSLATED:
+msgid "errmsg wrong filetype"
+msgstr "File has not the extension .tar.gz"
+#### UNTRANSLATED:
+msgid "error design"
+msgstr "Error messages design"
+#### UNTRANSLATED:
+msgid "error language"
+msgstr "Error messages language"
+msgid "error messages"
+msgstr "Съобщения за грешки"
+#### UNTRANSLATED:
+msgid "error time space"
+msgstr "Error in time space declaration"
+#### UNTRANSLATED:
+msgid "esp encryption"
+msgstr "ESP Encryption"
+#### UNTRANSLATED:
+msgid "esp grouptype"
+msgstr "ESP Grouptype"
+#### UNTRANSLATED:
+msgid "esp integrity"
+msgstr "ESP Integrity"
+#### UNTRANSLATED:
+msgid "esp keylife"
+msgstr "ESP Keylife"
+#### UNTRANSLATED:
+msgid "esp keylife should be between 1 and 24 hours"
+msgstr "ESP Keylife should be between 1 and 24 hours."
+#### UNTRANSLATED:
+msgid "excluding buffers and cache"
+msgstr "-/+ buffers/cache"
+msgid "expires"
+msgstr "Изтича"
+msgid "export"
+msgstr "Експорт"
+#### UNTRANSLATED:
+msgid "export blacklist"
+msgstr "Export blacklist"
+#### UNTRANSLATED:
+msgid "expressions"
+msgstr "Expressions (one per line)"
+#### UNTRANSLATED:
+msgid "external aliases configuration"
+msgstr "External aliases configuration"
+#### UNTRANSLATED:
+msgid "external ipcop access"
+msgstr "External IPCop Access"
+#### UNTRANSLATED:
+msgid "fake referer"
+msgstr "Fake referrer submitted to external sites"
+#### UNTRANSLATED:
+msgid "fake useragent"
+msgstr "Fake useragent submitted to external sites"
+#### UNTRANSLATED:
+msgid "falseIFace"
+msgstr "Only letters, numbers, -, _, . and : are allowed in Interface"
+msgid "february"
+msgstr "февруари"
+#### UNTRANSLATED:
+msgid "fetch ip from"
+msgstr "Guess the real public IP with help of an external server"
+#### UNTRANSLATED:
+msgid "file extension blocking"
+msgstr "File extension blocking"
+msgid "filesystem full"
+msgstr "Файловата система е пълна"
+msgid "firewall"
+msgstr "Защитна стена"
+#### UNTRANSLATED:
+msgid "firewall configuration"
+msgstr "Firewall configuration"
+#### UNTRANSLATED:
+msgid "firewall hits"
+msgstr "Total number of firewall hits for"
+#### UNTRANSLATED:
+msgid "firewall interface policy changed"
+msgstr "Firewall interface policy changed; restarting blocker"
+#### UNTRANSLATED:
+msgid "firewall log"
+msgstr "Firewall log"
+#### UNTRANSLATED:
+msgid "firewall log viewer"
+msgstr "Firewall Log Viewer"
+#### UNTRANSLATED:
+msgid "firewall logs"
+msgstr "Firewall Logs"
+#### UNTRANSLATED:
+msgid "firewall rule added"
+msgstr "Firewall rule added; restarting blocker"
+#### UNTRANSLATED:
+msgid "firewall rule removed"
+msgstr "Firewall rule removed; restarting blocker"
+#### UNTRANSLATED:
+msgid "firewall rule updated"
+msgstr "Firewall rule updated; restarting blocker"
+#### UNTRANSLATED:
+msgid "firewall rules"
+msgstr "Firewall Rules"
+#### UNTRANSLATED:
+msgid "firewall settings"
+msgstr "Firewall Settings"
+#### UNTRANSLATED:
+msgid "firmware"
+msgstr "Firmware"
+#### UNTRANSLATED:
+msgid "firmware upload"
+msgstr "Upload Firmware/Drivers"
+#### UNTRANSLATED:
+msgid "fixed ip lease added"
+msgstr "Fixed IP lease added"
+#### UNTRANSLATED:
+msgid "fixed ip lease modified"
+msgstr "Fixed IP lease modified"
+#### UNTRANSLATED:
+msgid "fixed ip lease removed"
+msgstr "Fixed IP lease removed"
+msgid "free"
+msgstr "Свободен"
+msgid "free memory"
+msgstr "Свободна Памет"
+msgid "friday"
+msgstr "петък"
+#### UNTRANSLATED:
+msgid "friday short"
+msgstr "Fri"
+#### UNTRANSLATED:
+msgid "friday very short"
+msgstr "F"
+msgid "from"
+msgstr "От"
+#### UNTRANSLATED:
+msgid "from email adr"
+msgstr "From email address"
+#### UNTRANSLATED:
+msgid "from email bad"
+msgstr "From email address is not valid"
+msgid "fw accept"
+msgstr "ПРИЕМАМ"
+#### UNTRANSLATED:
+msgid "fw drop"
+msgstr "DROP"
+msgid "fw iface"
+msgstr "интерфейс"
+#### UNTRANSLATED:
+msgid "fw invert"
+msgstr "Invert"
+#### UNTRANSLATED:
+msgid "fw log only"
+msgstr "LOG only"
+#### UNTRANSLATED:
+msgid "fw reject"
+msgstr "REJECT"
+#### UNTRANSLATED:
+msgid "gateway"
+msgstr "Gateway"
+#### UNTRANSLATED:
+msgid "gateway ip"
+msgstr "Gateway IP"
+#### UNTRANSLATED:
+msgid "generate a certificate"
+msgstr "Generate a certificate"
+#### UNTRANSLATED:
+msgid "generate root/host certificates"
+msgstr "Generate Root/Host Certificates"
+#### UNTRANSLATED:
+msgid "generating the root and host certificates may take a long time. it can take up to several minutes on older hardware. please be patient"
+msgstr "Generating the root and host certificates may take a long time.  It can take up to several minutes on older hardware. Please be patient."
+msgid "global settings"
+msgstr "Основни настройки"
+msgid "graph"
+msgstr "Графика"
+msgid "green"
+msgstr "ЗЕЛЕН"
+#### UNTRANSLATED:
+msgid "green interface"
+msgstr "Green Interface"
+#### UNTRANSLATED:
+msgid "gui settings"
+msgstr "GUI Settings"
+#### UNTRANSLATED:
+msgid "hangup"
+msgstr "Disconnect"
+#### UNTRANSLATED:
+msgid "hangup string"
+msgstr "Hangup"
+#### UNTRANSLATED:
+msgid "hdd cache size"
+msgstr "Harddisk cache size (MB)"
+#### UNTRANSLATED:
+msgid "high"
+msgstr "High"
+#### UNTRANSLATED:
+msgid "high memory usage"
+msgstr "High memory usage"
+#### UNTRANSLATED:
+msgid "holdoff"
+msgstr "Holdoff time (in seconds)"
+msgid "host"
+msgstr "Хост"
+#### UNTRANSLATED:
+msgid "host certificate"
+msgstr "Host Certificate"
+#### UNTRANSLATED:
+msgid "host configuration"
+msgstr "Host Configuration"
+msgid "host ip"
+msgstr "Хост IP адрес"
+#### UNTRANSLATED:
+msgid "host to net vpn"
+msgstr "Host-to-Net Virtual Private Network (RoadWarrior)"
+#### UNTRANSLATED:
+msgid "hostname"
+msgstr "Hostname"
+#### UNTRANSLATED:
+msgid "hostname cant be empty"
+msgstr "Hostname can't be empty."
+#### UNTRANSLATED:
+msgid "hostname not set"
+msgstr "Hostname not set."
+#### UNTRANSLATED:
+msgid "hosts config added"
+msgstr "hosts config added"
+#### UNTRANSLATED:
+msgid "hosts config changed"
+msgstr "hosts config changed"
+#### UNTRANSLATED:
+msgid "hourly"
+msgstr "hourly"
+#### UNTRANSLATED:
+msgid "hours"
+msgstr "hours"
+#### UNTRANSLATED:
+msgid "hours2"
+msgstr "Hours"
+#### UNTRANSLATED:
+msgid "ibod for dual isdn only"
+msgstr "iBOD can only be used with Dual ISDN."
+#### UNTRANSLATED:
+msgid "icmp selected but no type"
+msgstr "ICMP selected for protocol, but no ICMP type specified."
+#### UNTRANSLATED:
+msgid "icmp type"
+msgstr "ICMP Type"
+#### UNTRANSLATED:
+msgid "idle"
+msgstr "Idle"
+#### UNTRANSLATED:
+msgid "idle cpu usage"
+msgstr "Idle CPU Usage"
+#### UNTRANSLATED:
+msgid "idle timeout"
+msgstr "Idle timeout (mins; 0 to disable)"
+#### UNTRANSLATED:
+msgid "idle timeout not set"
+msgstr "Idle timeout not set."
+#### UNTRANSLATED:
+msgid "if this is not your mac"
+msgstr "If this is not your MAC, you are only able to access IPCop for administration when you create an IPCop access rule on your own!"
+#### UNTRANSLATED:
+msgid "iface"
+msgstr "Iface"
+#### UNTRANSLATED:
+msgid "iface added"
+msgstr "Interface added"
+#### UNTRANSLATED:
+msgid "iface name exists already"
+msgstr "Interface name exists already"
+#### UNTRANSLATED:
+msgid "iface removed"
+msgstr "Interface removed"
+#### UNTRANSLATED:
+msgid "iface updated"
+msgstr "Interface updated"
+#### UNTRANSLATED:
+msgid "ignore filter"
+msgstr "Ignore filter"
+#### UNTRANSLATED:
+msgid "ike encryption"
+msgstr "IKE Encryption"
+#### UNTRANSLATED:
+msgid "ike grouptype"
+msgstr "IKE Grouptype"
+#### UNTRANSLATED:
+msgid "ike integrity"
+msgstr "IKE Integrity"
+#### UNTRANSLATED:
+msgid "ike lifetime"
+msgstr "IKE Lifetime"
+#### UNTRANSLATED:
+msgid "ike lifetime should be between 1 and 8 hours"
+msgstr "IKE lifetime should be between 1 and 8 hours."
+#### UNTRANSLATED:
+msgid "import"
+msgstr "Import"
+#### UNTRANSLATED:
+msgid "import backup file"
+msgstr "Import backup file"
+#### UNTRANSLATED:
+msgid "import blacklist"
+msgstr "Import blacklist"
+#### UNTRANSLATED:
+msgid "incoming traffic in bits per second"
+msgstr "Incoming Traffic in Bits per Second"
+msgid "incorrect password"
+msgstr "Грешна парола"
+#### UNTRANSLATED:
+msgid "information messages"
+msgstr "Information messages"
+#### UNTRANSLATED:
+msgid "init string"
+msgstr "Init"
+#### UNTRANSLATED:
+msgid "inodes usage"
+msgstr "Inodes usage"
+#### UNTRANSLATED:
+msgid "insert floppy"
+msgstr "To backup to floppy, insert a floppy without bad blocks into the drive on IPCop and click <i>Backup to floppy</i> to backup the system configuration. This can take a while to complete, so please be patient."
+#### UNTRANSLATED:
+msgid "install blacklist"
+msgstr "Install blacklist"
+#### UNTRANSLATED:
+msgid "install blacklist information"
+msgstr "The new blacklist will be automatically compiled to prebuilt databases. Depending on the size of the blacklist, this may take several minutes."
+#### UNTRANSLATED:
+msgid "installed"
+msgstr "Installed"
+#### UNTRANSLATED:
+msgid "installed updates"
+msgstr "Installed updates"
+#### UNTRANSLATED:
+msgid "instant update"
+msgstr "Instant Update"
+#### UNTRANSLATED:
+msgid "interface"
+msgstr "Interface"
+#### UNTRANSLATED:
+msgid "interface policies"
+msgstr "Interface policies"
+#### UNTRANSLATED:
+msgid "interfaces"
+msgstr "Interfaces"
+#### UNTRANSLATED:
+msgid "interfaces settings"
+msgstr "Firewall - Interfaces settings"
+#### UNTRANSLATED:
+msgid "internal network"
+msgstr "Internal Network"
+#### UNTRANSLATED:
+msgid "internal traffic"
+msgstr "Internal Traffic"
+msgid "internet"
+msgstr "Интернет"
+#### UNTRANSLATED:
+msgid "invalid address"
+msgstr "Invalid Address"
+#### UNTRANSLATED:
+msgid "invalid address group"
+msgstr "Invalid address group"
+#### UNTRANSLATED:
+msgid "invalid addressfilter ip blue"
+msgstr "Invalid IP Address. IP has to be in the Blue subnet!"
+#### UNTRANSLATED:
+msgid "invalid addressformat"
+msgstr "Invalid Address format"
+#### UNTRANSLATED:
+msgid "invalid broadcast ip"
+msgstr "Invalid broadcast IP"
+#### UNTRANSLATED:
+msgid "invalid characters found in pre-shared key"
+msgstr "Invalid characters found in pre-shared key."
+#### UNTRANSLATED:
+msgid "invalid date entered"
+msgstr "Invalid date entered."
+#### UNTRANSLATED:
+msgid "invalid default action"
+msgstr "Invalid Default Action"
+#### UNTRANSLATED:
+msgid "invalid default lease time"
+msgstr "Invalid default lease time."
+#### UNTRANSLATED:
+msgid "invalid dest"
+msgstr "Invalid Destination"
+#### UNTRANSLATED:
+msgid "invalid domain name"
+msgstr "Invalid domain name."
+#### UNTRANSLATED:
+msgid "invalid downlink speed"
+msgstr "Invalid downlink speed."
+#### UNTRANSLATED:
+msgid "invalid end address"
+msgstr "Invalid end address."
+#### UNTRANSLATED:
+msgid "invalid end day"
+msgstr "Invalid end day"
+#### UNTRANSLATED:
+msgid "invalid end hour"
+msgstr "Invalid end hour"
+#### UNTRANSLATED:
+msgid "invalid end minute"
+msgstr "Invalid end minute"
+#### UNTRANSLATED:
+msgid "invalid fixed ip address"
+msgstr "Invalid fixed IP address"
+#### UNTRANSLATED:
+msgid "invalid fixed mac address"
+msgstr "Invalid fixed MAC address"
+#### UNTRANSLATED:
+msgid "invalid hostname"
+msgstr "Invalid hostname."
+#### UNTRANSLATED:
+msgid "invalid iface"
+msgstr "Invalid Interface"
+#### UNTRANSLATED:
+msgid "invalid input"
+msgstr "Invalid input"
+#### UNTRANSLATED:
+msgid "invalid input for authentication method"
+msgstr "Invalid input for authentication method."
+#### UNTRANSLATED:
+msgid "invalid input for city"
+msgstr "Invalid input for city."
+#### UNTRANSLATED:
+msgid "invalid input for country"
+msgstr "Invalid input for country."
+#### UNTRANSLATED:
+msgid "invalid input for department"
+msgstr "Invalid input for department."
+#### UNTRANSLATED:
+msgid "invalid input for dhcp domain"
+msgstr "Invalid input for DHCP Domain"
+#### UNTRANSLATED:
+msgid "invalid input for e-mail address"
+msgstr "Invalid input for e-mail address."
+#### UNTRANSLATED:
+msgid "invalid input for esp keylife"
+msgstr "Invalid input for ESP Keylife"
+#### UNTRANSLATED:
+msgid "invalid input for hostname"
+msgstr "Invalid input for hostname."
+#### UNTRANSLATED:
+msgid "invalid input for ike lifetime"
+msgstr "Invalid input for IKE lifetime"
+#### UNTRANSLATED:
+msgid "invalid input for keepalive 1"
+msgstr "Invalid input for Keepalive ping"
+#### UNTRANSLATED:
+msgid "invalid input for keepalive 1:2"
+msgstr "Invalid input for Keepalive use at least a ratio of 1:2"
+#### UNTRANSLATED:
+msgid "invalid input for keepalive 2"
+msgstr "Invalid input for Keepalive ping-restart"
+#### UNTRANSLATED:
+msgid "invalid input for max clients"
+msgstr "Invalid input for Max Clients"
+#### UNTRANSLATED:
+msgid "invalid input for name"
+msgstr "Invalid input for user's full name or system hostname"
+#### UNTRANSLATED:
+msgid "invalid input for organization"
+msgstr "Invalid input for organization"
+#### UNTRANSLATED:
+msgid "invalid input for radius acctport"
+msgstr "Invalid input for Accounting port"
+#### UNTRANSLATED:
+msgid "invalid input for radius auth acct"
+msgstr "Invalid input Authentication and Accountingport can not be equal"
+#### UNTRANSLATED:
+msgid "invalid input for radius authport"
+msgstr "Invalid input for Authentication port"
+#### UNTRANSLATED:
+msgid "invalid input for radius hostname"
+msgstr "Invalid input for Radius Hostname/IP"
+#### UNTRANSLATED:
+msgid "invalid input for radius retry"
+msgstr "Invalid input for maximum retries"
+#### UNTRANSLATED:
+msgid "invalid input for radius timeout"
+msgstr "Invalid input for timeout"
+#### UNTRANSLATED:
+msgid "invalid input for remote host/ip"
+msgstr "Invalid input for remote host/ip."
+#### UNTRANSLATED:
+msgid "invalid input for state or province"
+msgstr "Invalid input for state or province."
+msgid "invalid ip"
+msgstr "Грешен IP Адрес"
+#### UNTRANSLATED:
+msgid "invalid ipcop red address"
+msgstr "Invalid IPCop red address"
+#### UNTRANSLATED:
+msgid "invalid keep time"
+msgstr "Keep time must be a valid number"
+#### UNTRANSLATED:
+msgid "invalid key"
+msgstr "Invalid key."
+#### UNTRANSLATED:
+msgid "invalid limit params"
+msgstr "Invalid <b>limit</b> parameter"
+#### UNTRANSLATED:
+msgid "invalid local-remote id"
+msgstr "When used, leftid and rightid must not be equal, and must begin with an '@' sign. These are leftid and rightid in openswan terminology."
+#### UNTRANSLATED:
+msgid "invalid logserver address"
+msgstr "Invalid syslogd server address"
+#### UNTRANSLATED:
+msgid "invalid mac"
+msgstr "Invalid MAC Address"
+#### UNTRANSLATED:
+msgid "invalid maximum incoming size"
+msgstr "Invalid maximum incoming size."
+#### UNTRANSLATED:
+msgid "invalid maximum object size"
+msgstr "Invalid maximum object size."
+#### UNTRANSLATED:
+msgid "invalid maximum outgoing size"
+msgstr "Invalid maximum outgoing size."
+#### UNTRANSLATED:
+msgid "invalid minimum object size"
+msgstr "Invalid minimum object size."
+#### UNTRANSLATED:
+msgid "invalid mtu input"
+msgstr "Invalid MTU"
+#### UNTRANSLATED:
+msgid "invalid net"
+msgstr "Invalid Network"
+#### UNTRANSLATED:
+msgid "invalid netmask"
+msgstr "Invalid netmask"
+#### UNTRANSLATED:
+msgid "invalid port"
+msgstr "Invalid port. Must be a valid port number."
+#### UNTRANSLATED:
+msgid "invalid primary dns"
+msgstr "Invalid primary DNS."
+#### UNTRANSLATED:
+msgid "invalid primary ntp"
+msgstr "Invalid Primary NTP server address"
+#### UNTRANSLATED:
+msgid "invalid secondary dns"
+msgstr "Invalid secondary DNS."
+#### UNTRANSLATED:
+msgid "invalid secondary ntp"
+msgstr "Invalid Secondary NTP server address"
+#### UNTRANSLATED:
+msgid "invalid service"
+msgstr "Invalid Service"
+#### UNTRANSLATED:
+msgid "invalid start address"
+msgstr "Invalid start address."
+#### UNTRANSLATED:
+msgid "invalid start day"
+msgstr "Invalid start day"
+#### UNTRANSLATED:
+msgid "invalid start hour"
+msgstr "Invalid start hour"
+#### UNTRANSLATED:
+msgid "invalid start minute"
+msgstr "Invalid start minute"
+#### UNTRANSLATED:
+msgid "invalid tertiary ntp"
+msgstr "Invalid Tertiary NTP server address"
+#### UNTRANSLATED:
+msgid "invalid time entered"
+msgstr "Invalid time entered."
+#### UNTRANSLATED:
+msgid "invalid time period"
+msgstr "Invalid time period"
+#### UNTRANSLATED:
+msgid "invalid uplink speed"
+msgstr "Invalid uplink speed."
+#### UNTRANSLATED:
+msgid "invalid vlan tag"
+msgstr "Invalid VLAN tag"
+#### UNTRANSLATED:
+msgid "invalid vpi vpci"
+msgstr "Invalid VPI/VPCI settings"
+#### UNTRANSLATED:
+msgid "invalid wins address"
+msgstr "Invalid WINS Server address."
+#### UNTRANSLATED:
+msgid "invert"
+msgstr "Invert"
+#### UNTRANSLATED:
+msgid "invert port not allowed in portfw"
+msgstr "Invert port is not allowed for custom services in Portforwarding rules"
+#### UNTRANSLATED:
+msgid "invert proto not allowed in portfw"
+msgstr "Invert protocol is not allowed for custom services in Portforwarding rules"
+msgid "ip address"
+msgstr "IP Адрес"
+#### UNTRANSLATED:
+msgid "ip alias added"
+msgstr "External IP alias added"
+#### UNTRANSLATED:
+msgid "ip alias changed"
+msgstr "External IP alias changed"
+#### UNTRANSLATED:
+msgid "ip alias removed"
+msgstr "External IP alias removed"
+#### UNTRANSLATED:
+msgid "ip bad"
+msgstr "Not a valid IP address."
+#### UNTRANSLATED:
+msgid "ip info"
+msgstr "IP Information"
+msgid "ipcop access"
+msgstr "IPCop Достъп"
+#### UNTRANSLATED:
+msgid "ipcop access only from green blue and vpn"
+msgstr "IPCop access is only allowed from Green, Blue and VPN!"
+msgid "ipcop will now reboot"
+msgstr "IPCop сега ще се рестарира."
+#### UNTRANSLATED:
+msgid "ipcop will now shutdown"
+msgstr "IPCop will now shutdown."
+#### UNTRANSLATED:
+msgid "ipcop will now update"
+msgstr "IPCop will now update."
+#### UNTRANSLATED:
+msgid "ipcops hostname"
+msgstr "IPCop's Hostname"
+#### UNTRANSLATED:
+msgid "ipsec configuration main"
+msgstr "IPsec configuration"
+#### UNTRANSLATED:
+msgid "ipsec on blue"
+msgstr "IPsec on BLUE"
+#### UNTRANSLATED:
+msgid "ipsec on red"
+msgstr "IPsec on RED"
+#### UNTRANSLATED:
+msgid "ipsec server"
+msgstr "IPsec"
+#### UNTRANSLATED:
+msgid "ipsec-blue"
+msgstr "IPsec-Blue"
+#### UNTRANSLATED:
+msgid "ipsec-red"
+msgstr "IPsec-Red"
+#### UNTRANSLATED:
+msgid "isdn"
+msgstr "ISDN"
+#### UNTRANSLATED:
+msgid "isdn settings"
+msgstr "Additional ISDN settings"
+#### UNTRANSLATED:
+msgid "isdn1"
+msgstr "Single ISDN"
+#### UNTRANSLATED:
+msgid "isdn2"
+msgstr "Dual ISDN"
+msgid "january"
+msgstr "януари"
+msgid "july"
+msgstr "юли"
+msgid "june"
+msgstr "юни"
+#### UNTRANSLATED:
+msgid "kernel"
+msgstr "Kernel"
+#### UNTRANSLATED:
+msgid "kernel version"
+msgstr "Kernel version"
+#### UNTRANSLATED:
+msgid "lan"
+msgstr "LAN"
+#### UNTRANSLATED:
+msgid "languagepurpose"
+msgstr "Select the language you wish IPCop to display in"
+#### UNTRANSLATED:
+msgid "last activity"
+msgstr "Last Activity"
+#### UNTRANSLATED:
+msgid "lease expires"
+msgstr "Lease expires"
+#### UNTRANSLATED:
+msgid "legend"
+msgstr "Legend"
+#### UNTRANSLATED:
+msgid "load blacklist"
+msgstr "Load blacklist"
+#### UNTRANSLATED:
+msgid "loaded modules"
+msgstr "Loaded modules"
+#### UNTRANSLATED:
+msgid "local hard disk"
+msgstr "Hard disk"
+#### UNTRANSLATED:
+msgid "local ntp server specified but not enabled"
+msgstr "Local NTP server specified but not enabled"
+#### UNTRANSLATED:
+msgid "local subnet"
+msgstr "Local Subnet"
+#### UNTRANSLATED:
+msgid "local subnet is invalid"
+msgstr "Local subnet is invalid."
+#### UNTRANSLATED:
+msgid "local vpn hostname/ip"
+msgstr "Local VPN Hostname/IP"
+#### UNTRANSLATED:
+msgid "log"
+msgstr "Log"
+#### UNTRANSLATED:
+msgid "log archive"
+msgstr "Log archive"
+#### UNTRANSLATED:
+msgid "log enabled"
+msgstr "Log Enabled"
+#### UNTRANSLATED:
+msgid "log lines per page"
+msgstr "Lines per page"
+#### UNTRANSLATED:
+msgid "log query"
+msgstr "Log query terms"
+#### UNTRANSLATED:
+msgid "log rule"
+msgstr "Log rule"
+#### UNTRANSLATED:
+msgid "log server address"
+msgstr "Syslog server"
+#### UNTRANSLATED:
+msgid "log settings"
+msgstr "Log Settings"
+#### UNTRANSLATED:
+msgid "log summaries"
+msgstr "Log summaries"
+#### UNTRANSLATED:
+msgid "log summary"
+msgstr "Log Summary"
+#### UNTRANSLATED:
+msgid "log useragent"
+msgstr "Log useragents"
+#### UNTRANSLATED:
+msgid "log username"
+msgstr "Log username"
+#### UNTRANSLATED:
+msgid "log viewing options"
+msgstr "Log viewing options"
+#### UNTRANSLATED:
+msgid "log-options"
+msgstr "Logfile options"
+#### UNTRANSLATED:
+msgid "loged in at"
+msgstr "Logged In At"
+#### UNTRANSLATED:
+msgid "logging"
+msgstr "Logging"
+#### UNTRANSLATED:
+msgid "logging rule"
+msgstr "Logging Rule, only Log"
+#### UNTRANSLATED:
+msgid "logging server"
+msgstr "Logging server"
+#### UNTRANSLATED:
+msgid "loginlogout"
+msgstr "Login/Logout"
+#### UNTRANSLATED:
+msgid "logs kept"
+msgstr "Keep logs for"
+#### UNTRANSLATED:
+msgid "lookup failed"
+msgstr "Reverse lookup failed"
+#### UNTRANSLATED:
+msgid "low"
+msgstr "Low"
+#### UNTRANSLATED:
+msgid "ls_dhcpd"
+msgstr "DHCP Server"
+#### UNTRANSLATED:
+msgid "ls_disk space"
+msgstr "Disk space"
+#### UNTRANSLATED:
+msgid "ls_free/swan"
+msgstr "VPN"
+#### UNTRANSLATED:
+msgid "ls_httpd"
+msgstr "HTTP Server"
+#### UNTRANSLATED:
+msgid "ls_init"
+msgstr "Init"
+#### UNTRANSLATED:
+msgid "ls_modprobe"
+msgstr "Module loader"
+#### UNTRANSLATED:
+msgid "ls_pam_unix"
+msgstr "Local user logins"
+#### UNTRANSLATED:
+msgid "ls_sshd"
+msgstr "Remote user logins"
+#### UNTRANSLATED:
+msgid "ls_syslogd"
+msgstr "Syslogd"
+#### UNTRANSLATED:
+msgid "mac address"
+msgstr "MAC Address"
+#### UNTRANSLATED:
+msgid "mac adr not as dest"
+msgstr "A MAC address can not be used as destination address!"
+#### UNTRANSLATED:
+msgid "mac bad"
+msgstr "Not a valid MAC address."
+#### UNTRANSLATED:
+msgid "main page"
+msgstr "Main page"
+#### UNTRANSLATED:
+msgid "manual"
+msgstr "Manual"
+#### UNTRANSLATED:
+msgid "manually upload a blacklist"
+msgstr "Manually upload a Blacklist"
+#### UNTRANSLATED:
+msgid "manually upload an update"
+msgstr "Manually upload an update"
+msgid "march"
+msgstr "март"
+#### UNTRANSLATED:
+msgid "marked"
+msgstr "Marked"
+#### UNTRANSLATED:
+msgid "match accept deny"
+msgstr "Enabled for Accept or deny"
+#### UNTRANSLATED:
+msgid "match both"
+msgstr "Enabled for both"
+#### UNTRANSLATED:
+msgid "match log"
+msgstr "Enabled for Logging"
+#### UNTRANSLATED:
+msgid "match none"
+msgstr "Option disabled"
+#### UNTRANSLATED:
+msgid "max download size"
+msgstr "Max download size (KB)"
+#### UNTRANSLATED:
+msgid "max retries not set"
+msgstr "Max retries not set."
+#### UNTRANSLATED:
+msgid "max size"
+msgstr "Max object size (KB)"
+#### UNTRANSLATED:
+msgid "max upload size"
+msgstr "Max upload size (KB)"
+#### UNTRANSLATED:
+msgid "maximal"
+msgstr "Maximum"
+#### UNTRANSLATED:
+msgid "maximum retries"
+msgstr "Maximum retries"
+msgid "may"
+msgstr "май"
+#### UNTRANSLATED:
+msgid "medium"
+msgstr "Medium"
+#### UNTRANSLATED:
+msgid "memory"
+msgstr "Memory"
+#### UNTRANSLATED:
+msgid "memory replacement policy"
+msgstr "Memory replacement policy"
+#### UNTRANSLATED:
+msgid "memory usage"
+msgstr "Memory Usage"
+#### UNTRANSLATED:
+msgid "message line 1"
+msgstr "Message line 1"
+#### UNTRANSLATED:
+msgid "message line 2"
+msgstr "Message line 2"
+#### UNTRANSLATED:
+msgid "message line 3"
+msgstr "Message line 3"
+#### UNTRANSLATED:
+msgid "method"
+msgstr "Method"
+#### UNTRANSLATED:
+msgid "min size"
+msgstr "Min object size (KB)"
+#### UNTRANSLATED:
+msgid "minutes"
+msgstr "Minutes"
+#### UNTRANSLATED:
+msgid "misc-options"
+msgstr "Miscellaneous options"
+#### UNTRANSLATED:
+msgid "missing dat"
+msgstr "Encrypted archive not found"
+msgid "mode allow"
+msgstr "Разрешено"
+#### UNTRANSLATED:
+msgid "mode deny"
+msgstr "deny"
+#### UNTRANSLATED:
+msgid "modem"
+msgstr "Modem"
+#### UNTRANSLATED:
+msgid "modem configuration"
+msgstr "Modem configuration"
+#### UNTRANSLATED:
+msgid "modem init for this profile"
+msgstr "Modem INIT for this Profile"
+#### UNTRANSLATED:
+msgid "modem on com1"
+msgstr "Modem on COM1"
+#### UNTRANSLATED:
+msgid "modem on com2"
+msgstr "Modem on COM2"
+#### UNTRANSLATED:
+msgid "modem on com3"
+msgstr "Modem on COM3"
+#### UNTRANSLATED:
+msgid "modem on com4"
+msgstr "Modem on COM4"
+#### UNTRANSLATED:
+msgid "modem on com5"
+msgstr "Modem on COM5"
+#### UNTRANSLATED:
+msgid "modem settings have errors"
+msgstr "Modem settings have errors"
+#### UNTRANSLATED:
+msgid "modem speaker on"
+msgstr "Modem speaker on"
+#### UNTRANSLATED:
+msgid "modulation"
+msgstr "Modulation"
+msgid "monday"
+msgstr "понеделник"
+msgid "monday short"
+msgstr "Пон"
+#### UNTRANSLATED:
+msgid "monday very short"
+msgstr "M"
+#### UNTRANSLATED:
+msgid "monitor period bad"
+msgstr "The monitor period must be selected"
+#### UNTRANSLATED:
+msgid "monitor traffic volume"
+msgstr "Monitor traffic volume"
+#### UNTRANSLATED:
+msgid "monitor volume"
+msgstr "Monitor volume"
+#### UNTRANSLATED:
+msgid "monitor volume bad"
+msgstr "Monitor volume is not correct"
+#### UNTRANSLATED:
+msgid "month"
+msgstr "Month"
+#### UNTRANSLATED:
+msgid "monthly base"
+msgstr "Monthly base"
+#### UNTRANSLATED:
+msgid "monthly start day bad"
+msgstr "Monthly start day is not correct"
+#### UNTRANSLATED:
+msgid "monthly volume start day"
+msgstr "First day of monthly period"
+#### UNTRANSLATED:
+msgid "monthly volume start day short"
+msgstr "First day"
+#### UNTRANSLATED:
+msgid "mount"
+msgstr "Mount"
+#### UNTRANSLATED:
+msgid "mounted on"
+msgstr "Mounted on"
+#### UNTRANSLATED:
+msgid "mtu size"
+msgstr "MTU Size"
+#### UNTRANSLATED:
+msgid "multimedia"
+msgstr "Multimedia"
+#### UNTRANSLATED:
+msgid "name"
+msgstr "Name"
+#### UNTRANSLATED:
+msgid "name is invalid"
+msgstr "Name is invalid"
+#### UNTRANSLATED:
+msgid "name must only contain characters"
+msgstr "Name must only contain characters."
+#### UNTRANSLATED:
+msgid "name too long"
+msgstr "User's full name or system hostname is too long"
+#### UNTRANSLATED:
+msgid "need admin network"
+msgstr "You have to select at least one admin network!"
+#### UNTRANSLATED:
+msgid "net"
+msgstr "Net"
+#### UNTRANSLATED:
+msgid "net br iface"
+msgstr "Net<br />Iface"
+#### UNTRANSLATED:
+msgid "net to net vpn"
+msgstr "Net-to-Net Virtual Private Network"
+#### UNTRANSLATED:
+msgid "netmask"
+msgstr "Netmask"
+#### UNTRANSLATED:
+msgid "network"
+msgstr "Network"
+#### UNTRANSLATED:
+msgid "network based access"
+msgstr "Network based access control"
+#### UNTRANSLATED:
+msgid "network status information"
+msgstr "Network Status Information"
+#### UNTRANSLATED:
+msgid "network time from"
+msgstr "Obtain time from a Network Time Server"
+#### UNTRANSLATED:
+msgid "network traffic graphs"
+msgstr "Network traffic graphs"
+#### UNTRANSLATED:
+msgid "new password"
+msgstr "New password"
+msgid "newer"
+msgstr "Никога"
+#### UNTRANSLATED:
+msgid "next"
+msgstr "Next"
+#### UNTRANSLATED:
+msgid "no"
+msgstr "No"
+#### UNTRANSLATED:
+msgid "no alcatelusb firmware"
+msgstr "No Alcatel USB firmware. Please upload."
+#### UNTRANSLATED:
+msgid "no cache sites"
+msgstr "Do not cache these destinations (one per line)"
+#### UNTRANSLATED:
+msgid "no categories"
+msgstr "No categories available"
+#### UNTRANSLATED:
+msgid "no cfg upload"
+msgstr "No data was uploaded"
+#### UNTRANSLATED:
+msgid "no clients defined"
+msgstr "No clients defined"
+#### UNTRANSLATED:
+msgid "no connection auth"
+msgstr "No connection oriented authentication forwarding"
+#### UNTRANSLATED:
+msgid "no dhcp lease"
+msgstr "No DHCP lease has been acquired"
+#### UNTRANSLATED:
+msgid "no eciadsl synch.bin file"
+msgstr "No ECI ADSL synch.bin file. Please upload."
+#### UNTRANSLATED:
+msgid "no fritzdsl driver"
+msgstr "No Fritz!DSL driver.  Please upload."
+#### UNTRANSLATED:
+msgid "no information available"
+msgstr "No information available."
+#### UNTRANSLATED:
+msgid "no internal proxy"
+msgstr "Disable internal proxy access"
+#### UNTRANSLATED:
+msgid "no internal proxy on blue"
+msgstr "Disable internal proxy access from Blue to other subnets"
+#### UNTRANSLATED:
+msgid "no internal proxy on green"
+msgstr "Disable internal proxy access to Green from other subnets"
+#### UNTRANSLATED:
+msgid "no modem selected"
+msgstr "No modem selected"
+#### UNTRANSLATED:
+msgid "no profile switch"
+msgstr "Do not switch"
+#### UNTRANSLATED:
+msgid "no time limit"
+msgstr "unlimited time"
+#### UNTRANSLATED:
+msgid "noIFace"
+msgstr "No Interface entered"
+#### UNTRANSLATED:
+msgid "noIFacename"
+msgstr "No Interface Name entered"
+#### UNTRANSLATED:
+msgid "none address type"
+msgstr "No Address type selected, please select"
+#### UNTRANSLATED:
+msgid "none day type"
+msgstr "No day type selected, please select"
+#### UNTRANSLATED:
+msgid "none iface type"
+msgstr "No Interface type selected, please select"
+#### UNTRANSLATED:
+msgid "none limit for"
+msgstr "Please select if limit option is disabled or enabled"
+#### UNTRANSLATED:
+msgid "none limit type"
+msgstr "No limit type selected, please select"
+#### UNTRANSLATED:
+msgid "none service type"
+msgstr "No Service type selected, please select"
+#### UNTRANSLATED:
+msgid "nonetworkname"
+msgstr "No Network Name entered"
+#### UNTRANSLATED:
+msgid "noservicename"
+msgstr "No Service Name entered"
+#### UNTRANSLATED:
+msgid "not a valid ca certificate"
+msgstr "Not a valid CA certificate."
+#### UNTRANSLATED:
+msgid "not enough disk space"
+msgstr "Not enough disk space"
+#### UNTRANSLATED:
+msgid "not present"
+msgstr "<b>Not</b> present"
+#### UNTRANSLATED:
+msgid "not running"
+msgstr "not running"
+#### UNTRANSLATED:
+msgid "note"
+msgstr "Note"
+msgid "november"
+msgstr "ноември"
+#### UNTRANSLATED:
+msgid "ntp configuration"
+msgstr "NTP configuration"
+#### UNTRANSLATED:
+msgid "ntp server"
+msgstr "NTP Server"
+#### UNTRANSLATED:
+msgid "ntp syncro disabled"
+msgstr "NTP synchronization disabled"
+#### UNTRANSLATED:
+msgid "ntp syncro enabled"
+msgstr "NTP synchronization enabled"
+#### UNTRANSLATED:
+msgid "number"
+msgstr "Number"
+#### UNTRANSLATED:
+msgid "number of L1 dirs"
+msgstr "Number of level-1 subdirectories"
+msgid "october"
+msgstr "октомври"
+#### UNTRANSLATED:
+msgid "of month"
+msgstr "of Month"
+#### UNTRANSLATED:
+msgid "offline mode"
+msgstr "Enable offline mode"
+#### UNTRANSLATED:
+msgid "older"
+msgstr "Older"
+#### UNTRANSLATED:
+msgid "online help en"
+msgstr "Online Help (in English)"
+#### UNTRANSLATED:
+msgid "only digits allowed in holdoff field"
+msgstr "Only digits allowed in holdoff field"
+#### UNTRANSLATED:
+msgid "only digits allowed in max retries field"
+msgstr "Only digits allowed in max retries field."
+#### UNTRANSLATED:
+msgid "only digits allowed in the idle timeout"
+msgstr "Only digits allowed in the idle timeout."
+#### UNTRANSLATED:
+msgid "only host ip adr allowed in portfw"
+msgstr "Only host IP addresses (no IP subnetworks) are allowed as destination in Portforwarding rules!"
+#### UNTRANSLATED:
+msgid "openssl produced an error"
+msgstr "OpenSSL produced an error"
+#### UNTRANSLATED:
+msgid "openvpn con stat"
+msgstr "OpenVPN Connection Statistics"
+#### UNTRANSLATED:
+msgid "openvpn configuration main"
+msgstr "OpenVPN configuration"
+#### UNTRANSLATED:
+msgid "openvpn device"
+msgstr "OpenVPN device"
+#### UNTRANSLATED:
+msgid "openvpn on blue"
+msgstr "OpenVPN on BLUE"
+#### UNTRANSLATED:
+msgid "openvpn on red"
+msgstr "OpenVPN on RED"
+#### UNTRANSLATED:
+msgid "openvpn server"
+msgstr "OpenVPN Server"
+#### UNTRANSLATED:
+msgid "openvpn subnet"
+msgstr "OpenVPN Subnet"
+#### UNTRANSLATED:
+msgid "openvpn subnet is invalid"
+msgstr "OpenVPN subnet is invalid."
+#### UNTRANSLATED:
+msgid "openvpn subnet overlap"
+msgstr "OpenVPN Subnet overlaps with"
+#### UNTRANSLATED:
+msgid "openvpn-rw"
+msgstr "OpenVPN-RW"
+#### UNTRANSLATED:
+msgid "operation at ipsec startup"
+msgstr "Operation at IPsec startup"
+#### UNTRANSLATED:
+msgid "or"
+msgstr "or"
+#### UNTRANSLATED:
+msgid "orange"
+msgstr "ORANGE"
+#### UNTRANSLATED:
+msgid "orange interface"
+msgstr "Orange Interface"
+#### UNTRANSLATED:
+msgid "organization cant be empty"
+msgstr "Organization can't be empty."
+#### UNTRANSLATED:
+msgid "organization name"
+msgstr "Organization Name"
+#### UNTRANSLATED:
+msgid "organization too long"
+msgstr "Organization is too long; it should not be longer than 60 characters."
+#### UNTRANSLATED:
+msgid "original"
+msgstr "Original"
+#### UNTRANSLATED:
+msgid "other countries"
+msgstr "Other countries"
+#### UNTRANSLATED:
+msgid "other login script"
+msgstr "Other login script"
+#### UNTRANSLATED:
+msgid "outgoing traffic"
+msgstr "Outgoing Traffic"
+#### UNTRANSLATED:
+msgid "outgoing traffic in bits per second"
+msgstr "Outgoing Traffic in Bits per Second"
+#### UNTRANSLATED:
+msgid "outside"
+msgstr "outside"
+#### UNTRANSLATED:
+msgid "override mtu"
+msgstr "Override default MTU"
+#### UNTRANSLATED:
+msgid "overview"
+msgstr "Overview"
+#### UNTRANSLATED:
+msgid "package failed to install"
+msgstr "Package failed to install."
+#### UNTRANSLATED:
+msgid "packets"
+msgstr "Packets"
+#### UNTRANSLATED:
+msgid "pap or chap"
+msgstr "PAP or CHAP"
+msgid "password"
+msgstr "Парола"
+#### UNTRANSLATED:
+msgid "password changed"
+msgstr "Password has been changed"
+#### UNTRANSLATED:
+msgid "password contains illegal characters"
+msgstr "Password contains illegal characters"
+#### UNTRANSLATED:
+msgid "password not set"
+msgstr "Password not set."
+#### UNTRANSLATED:
+msgid "password too short"
+msgstr "Password is too short."
+#### UNTRANSLATED:
+msgid "passwords do not match"
+msgstr "Passwords do not match."
+#### UNTRANSLATED:
+msgid "passwords must be at least 6 characters in length"
+msgstr "Passwords must be at least 6 characters in length"
+#### UNTRANSLATED:
+msgid "percentage"
+msgstr "Percentage"
+#### UNTRANSLATED:
+msgid "persistent"
+msgstr "Persistent"
+#### UNTRANSLATED:
+msgid "pfs yes no"
+msgstr "Perfect Forward Secrecy (PFS)"
+#### UNTRANSLATED:
+msgid "pfw internal destination"
+msgstr "Internal Destination"
+#### UNTRANSLATED:
+msgid "pfw ipcop destination"
+msgstr "IPCop External Destination"
+#### UNTRANSLATED:
+msgid "phase1 group"
+msgstr "Phase1 Group"
+#### UNTRANSLATED:
+msgid "phonebook entry"
+msgstr "Phonebook entry"
+#### UNTRANSLATED:
+msgid "pkcs12 file password"
+msgstr "PKCS12 File Password"
+#### UNTRANSLATED:
+msgid "policy"
+msgstr "Policy"
+#### UNTRANSLATED:
+msgid "policy closed"
+msgstr "Closed"
+#### UNTRANSLATED:
+msgid "policy half-open"
+msgstr "Half-open"
+#### UNTRANSLATED:
+msgid "policy open"
+msgstr "Open"
+#### UNTRANSLATED:
+msgid "port"
+msgstr "Port"
+#### UNTRANSLATED:
+msgid "ports"
+msgstr "Ports"
+#### UNTRANSLATED:
+msgid "ppp setup"
+msgstr "PPP setup"
+#### UNTRANSLATED:
+msgid "pppoe"
+msgstr "PPPoE"
+#### UNTRANSLATED:
+msgid "pppoe settings"
+msgstr "Additional PPPoE settings"
+#### UNTRANSLATED:
+msgid "pptp settings"
+msgstr "Additional PPTP settings"
+#### UNTRANSLATED:
+msgid "pre-shared key is too short"
+msgstr "Pre-shared key is too short."
+#### UNTRANSLATED:
+msgid "preload available updates"
+msgstr "Preload available Updates"
+#### UNTRANSLATED:
+msgid "present"
+msgstr "Present"
+#### UNTRANSLATED:
+msgid "primary dns"
+msgstr "Primary DNS"
+#### UNTRANSLATED:
+msgid "primary ntp server"
+msgstr "Primary NTP Server"
+#### UNTRANSLATED:
+msgid "primary wins server address"
+msgstr "Primary WINS Server address"
+#### UNTRANSLATED:
+msgid "priority"
+msgstr "Priority"
+#### UNTRANSLATED:
+msgid "privacy"
+msgstr "Privacy"
+#### UNTRANSLATED:
+msgid "profile"
+msgstr "Profile"
+#### UNTRANSLATED:
+msgid "profile deleted"
+msgstr "Profile deleted"
+#### UNTRANSLATED:
+msgid "profile has errors"
+msgstr "Profile has errors"
+#### UNTRANSLATED:
+msgid "profile made current"
+msgstr "Profile made current"
+#### UNTRANSLATED:
+msgid "profile name"
+msgstr "Profile name"
+#### UNTRANSLATED:
+msgid "profile name not given"
+msgstr "Profile name not given."
+#### UNTRANSLATED:
+msgid "profile saved"
+msgstr "Profile saved"
+#### UNTRANSLATED:
+msgid "profiles"
+msgstr "Profiles"
+#### UNTRANSLATED:
+msgid "proto"
+msgstr "Proto"
+#### UNTRANSLATED:
+msgid "protocol"
+msgstr "Protocol"
+#### UNTRANSLATED:
+msgid "proxy"
+msgstr "Proxy"
+#### UNTRANSLATED:
+msgid "proxy access graphs"
+msgstr "Proxy access graphs"
+#### UNTRANSLATED:
+msgid "proxy hits percentage"
+msgstr "Proxy hits percentage"
+#### UNTRANSLATED:
+msgid "proxy log viewer"
+msgstr "Proxy log viewer"
+#### UNTRANSLATED:
+msgid "proxy logs"
+msgstr "Proxy Logs"
+#### UNTRANSLATED:
+msgid "proxy port"
+msgstr "Proxy Port"
+#### UNTRANSLATED:
+msgid "proxy requests"
+msgstr "Proxy requests"
+#### UNTRANSLATED:
+msgid "psk"
+msgstr "PSK"
+#### UNTRANSLATED:
+msgid "pulse"
+msgstr "Pulse"
+#### UNTRANSLATED:
+msgid "pulse dial"
+msgstr "Pulse dial"
+#### UNTRANSLATED:
+msgid "push-routes"
+msgstr "Push Routes"
+#### UNTRANSLATED:
+msgid "quota restart message"
+msgstr "Note: The counters will be reset for all users when restarting the URL filter"
+#### UNTRANSLATED:
+msgid "radius acctport"
+msgstr "Accounting port(UDP)"
+#### UNTRANSLATED:
+msgid "radius authport"
+msgstr "Authentication port(UDP)"
+#### UNTRANSLATED:
+msgid "radius enable"
+msgstr "Enable Radius  authentication"
+#### UNTRANSLATED:
+msgid "radius server settings"
+msgstr "Radius server settings"
+#### UNTRANSLATED:
+msgid "radius servername"
+msgstr "Server hostname/IP"
+#### UNTRANSLATED:
+msgid "radius sharedsecret"
+msgstr "Shared secret"
+#### UNTRANSLATED:
+msgid "radius wait"
+msgstr "Response timeout (in seconds)"
+#### UNTRANSLATED:
+msgid "ram"
+msgstr "RAM"
+#### UNTRANSLATED:
+msgid "ram cache size"
+msgstr "Memory cache size (MB)"
+#### UNTRANSLATED:
+msgid "real address"
+msgstr "Real Address"
+msgid "reboot"
+msgstr "Рестартирай"
+#### UNTRANSLATED:
+msgid "reboot required"
+msgstr "Reboot required"
+#### UNTRANSLATED:
+msgid "rebooting"
+msgstr "Rebooting"
+#### UNTRANSLATED:
+msgid "reconnect"
+msgstr "Reconnect"
+#### UNTRANSLATED:
+msgid "reconnection"
+msgstr "Reconnection"
+#### UNTRANSLATED:
+msgid "red"
+msgstr "Red"
+#### UNTRANSLATED:
+msgid "red interface"
+msgstr "Red Interface"
+#### UNTRANSLATED:
+msgid "redirect ntp packets"
+msgstr "Redirect NTP to IPCop"
+#### UNTRANSLATED:
+msgid "redirect to this url"
+msgstr "Redirect to this URL"
+#### UNTRANSLATED:
+msgid "redirect traffic"
+msgstr "Redirect all Traffic through Tunnel"
+#### UNTRANSLATED:
+msgid "redirector children"
+msgstr "Number of redirector processes"
+#### UNTRANSLATED:
+msgid "redirectors"
+msgstr "Redirectors"
+#### UNTRANSLATED:
+msgid "redirectors are disabled"
+msgstr "Redirectors are disabled on the Web proxy page"
+#### UNTRANSLATED:
+msgid "refresh"
+msgstr "Refresh"
+#### UNTRANSLATED:
+msgid "refresh index page while connected"
+msgstr "Refresh index.cgi page whilst connected"
+#### UNTRANSLATED:
+msgid "refresh update list"
+msgstr "Refresh update list"
+#### UNTRANSLATED:
+msgid "release notes"
+msgstr "Release Notes"
+#### UNTRANSLATED:
+msgid "released"
+msgstr "Released"
+#### UNTRANSLATED:
+msgid "remark"
+msgstr "Remark"
+#### UNTRANSLATED:
+msgid "remote access"
+msgstr "Remote access"
+#### UNTRANSLATED:
+msgid "remote host/ip"
+msgstr "Remote Host/IP"
+#### UNTRANSLATED:
+msgid "remote logging"
+msgstr "Remote logging"
+#### UNTRANSLATED:
+msgid "remote subnet"
+msgstr "Remote subnet"
+#### UNTRANSLATED:
+msgid "remote subnet is invalid"
+msgstr "Remote subnet is invalid."
+#### UNTRANSLATED:
+msgid "removable device advice"
+msgstr "Plug in a device, refresh, select and mount before usage. Umount before removal."
+#### UNTRANSLATED:
+msgid "remove"
+msgstr "Remove"
+#### UNTRANSLATED:
+msgid "remove ca certificate"
+msgstr "Remove CA Certificate"
+#### UNTRANSLATED:
+msgid "remove x509"
+msgstr "Remove all CA and certs"
+#### UNTRANSLATED:
+msgid "reply"
+msgstr "Reply"
+#### UNTRANSLATED:
+msgid "reserved dst port"
+msgstr "Destination port is reserved for IPCop use only"
+#### UNTRANSLATED:
+msgid "reserved external port"
+msgstr "External destination port is reserved for IPCop use only!"
+#### UNTRANSLATED:
+msgid "reserved external portrange"
+msgstr "External destination portrange contains a reserved port for IPCop use only!"
+#### UNTRANSLATED:
+msgid "reset"
+msgstr "Reset"
+#### UNTRANSLATED:
+msgid "resetting the vpn configuration will remove the root ca, the host certificate and all certificate based connections"
+msgstr "Resetting the VPN configuration will remove the root CA, the host certificate and all certificate based connections"
+#### UNTRANSLATED:
+msgid "restart"
+msgstr "Restart"
+#### UNTRANSLATED:
+msgid "restart openvpn server"
+msgstr "Restart OpenVPN Server"
+#### UNTRANSLATED:
+msgid "restore"
+msgstr "Restore"
+#### UNTRANSLATED:
+msgid "restore defaults"
+msgstr "Restore defaults"
+#### UNTRANSLATED:
+msgid "restore hardware settings"
+msgstr "Restore hardware settings"
+#### UNTRANSLATED:
+msgid "restore results"
+msgstr "Restore results"
+#### UNTRANSLATED:
+msgid "reverse sort"
+msgstr "Sort in reverse chronological order"
+#### UNTRANSLATED:
+msgid "rolling window"
+msgstr "Rolling traffic window"
+#### UNTRANSLATED:
+msgid "rolling window bad"
+msgstr "Rolling traffic window is not correct"
+#### UNTRANSLATED:
+msgid "rolling window days"
+msgstr "Days in rolling window"
+#### UNTRANSLATED:
+msgid "root certificate"
+msgstr "Root Certificate"
+#### UNTRANSLATED:
+msgid "router ip"
+msgstr "Router IP Address"
+#### UNTRANSLATED:
+msgid "routing table entries"
+msgstr "Routing Table Entries"
+#### UNTRANSLATED:
+msgid "rule action"
+msgstr "Rule Action"
+#### UNTRANSLATED:
+msgid "rule active"
+msgstr "Rule is active"
+#### UNTRANSLATED:
+msgid "rule can open your Firewall"
+msgstr "This rule can open your Firewall!"
+#### UNTRANSLATED:
+msgid "rule enabled"
+msgstr "Rule enabled"
+#### UNTRANSLATED:
+msgid "rule exists"
+msgstr "Rule exists already"
+#### UNTRANSLATED:
+msgid "rule opens your Firewall"
+msgstr "This rule opens your Firewall!"
+#### UNTRANSLATED:
+msgid "rule position"
+msgstr "Rule Position"
+#### UNTRANSLATED:
+msgid "rules"
+msgstr "Rules"
+#### UNTRANSLATED:
+msgid "running"
+msgstr "RUNNING"
+#### UNTRANSLATED:
+msgid "safe removal of umounted device"
+msgstr "You can safely remove the unmounted device"
+#### UNTRANSLATED:
+msgid "same proto in portfw"
+msgstr "The protocol has to be identical in 'IPCop External Destination' service and in 'Internal Destination' service!"
+msgid "saturday"
+msgstr "събота"
+#### UNTRANSLATED:
+msgid "saturday short"
+msgstr "Sat"
+#### UNTRANSLATED:
+msgid "saturday very short"
+msgstr "S"
+#### UNTRANSLATED:
+msgid "save"
+msgstr "Save"
+#### UNTRANSLATED:
+msgid "save and restart"
+msgstr "Save and restart"
+#### UNTRANSLATED:
+msgid "save error"
+msgstr "Unable to save configuration archive file"
+#### UNTRANSLATED:
+msgid "save-adv-options"
+msgstr "Save Advanced options"
+#### UNTRANSLATED:
+msgid "scheduled actions"
+msgstr "Scheduled Actions"
+#### UNTRANSLATED:
+msgid "scheduler"
+msgstr "Scheduler"
+#### UNTRANSLATED:
+msgid "scheduler add action"
+msgstr "Add a Scheduler Action"
+#### UNTRANSLATED:
+msgid "scheduler update action"
+msgstr "Edit a Scheduler Action"
+#### UNTRANSLATED:
+msgid "script name"
+msgstr "Script name"
+#### UNTRANSLATED:
+msgid "secondary dns"
+msgstr "Secondary DNS"
+#### UNTRANSLATED:
+msgid "secondary ntp server"
+msgstr "Secondary NTP Server"
+#### UNTRANSLATED:
+msgid "secondary wins server address"
+msgstr "Secondary WINS Server address"
+msgid "seconds"
+msgstr "Секунди"
+#### UNTRANSLATED:
+msgid "section"
+msgstr "Section"
+#### UNTRANSLATED:
+msgid "sectors read from disk per second"
+msgstr "Sectors read from disk per second"
+#### UNTRANSLATED:
+msgid "sectors written to disk per second"
+msgstr "Sectors written to disk per second"
+#### UNTRANSLATED:
+msgid "secure shell server"
+msgstr "Secure shell server"
+#### UNTRANSLATED:
+msgid "select"
+msgstr "Select"
+#### UNTRANSLATED:
+msgid "select address group"
+msgstr "No Address Group selected, please select"
+#### UNTRANSLATED:
+msgid "select address group typ"
+msgstr "No Address Group type selected, please select"
+#### UNTRANSLATED:
+msgid "select blacklist"
+msgstr "Select existing blacklist"
+#### UNTRANSLATED:
+msgid "select media"
+msgstr "Select media <br />(only FAT supported for removable media)"
+#### UNTRANSLATED:
+msgid "select rule position"
+msgstr "You have to select rule position."
+#### UNTRANSLATED:
+msgid "select service group"
+msgstr "No Service Group selected, please select"
+#### UNTRANSLATED:
+msgid "select service group typ"
+msgstr "No Service Group type selected, please select"
+#### UNTRANSLATED:
+msgid "selecttraffic"
+msgstr "Select utilisation overview"
+#### UNTRANSLATED:
+msgid "send cr"
+msgstr "ISP requires Carriage Return"
+#### UNTRANSLATED:
+msgid "send email notification"
+msgstr "Send email notification"
+#### UNTRANSLATED:
+msgid "send test mail"
+msgstr "Send Test email"
+msgid "september"
+msgstr "септември"
+#### UNTRANSLATED:
+msgid "serial"
+msgstr "Serial"
+#### UNTRANSLATED:
+msgid "service"
+msgstr "Service"
+#### UNTRANSLATED:
+msgid "service added"
+msgstr "Custom Network Service added"
+#### UNTRANSLATED:
+msgid "service added to group"
+msgstr "Added service to Group"
+#### UNTRANSLATED:
+msgid "service already in group"
+msgstr "Selected service is already in selected Group"
+#### UNTRANSLATED:
+msgid "service from group deleted"
+msgstr "Service from Group deleted"
+#### UNTRANSLATED:
+msgid "service group deleted"
+msgstr "Service Group deleted"
+#### UNTRANSLATED:
+msgid "service group exists already"
+msgstr "Service Group name exists already"
+#### UNTRANSLATED:
+msgid "service group name"
+msgstr "Service Group name"
+#### UNTRANSLATED:
+msgid "service group not be empty"
+msgstr "Service Group name can not be empty"
+#### UNTRANSLATED:
+msgid "service group updated"
+msgstr "Service Group updated"
+#### UNTRANSLATED:
+msgid "service grouping settings"
+msgstr "Firewall - Service Grouping"
+#### UNTRANSLATED:
+msgid "service groups"
+msgstr "Service Groups"
+#### UNTRANSLATED:
+msgid "service in group enabled"
+msgstr "Service in Group enabled/disabled"
+#### UNTRANSLATED:
+msgid "service is used in portfw"
+msgstr "This service is used in Portforwarding rules"
+#### UNTRANSLATED:
+msgid "service name"
+msgstr "Service name"
+#### UNTRANSLATED:
+msgid "service name exists already"
+msgstr "Service name exists already"
+#### UNTRANSLATED:
+msgid "service removed"
+msgstr "Custom Network Service removed"
+#### UNTRANSLATED:
+msgid "service updated"
+msgstr "Custom Network Service updated"
+#### UNTRANSLATED:
+msgid "servicename"
+msgstr "Service Name"
+#### UNTRANSLATED:
+msgid "services"
+msgstr "Services"
+#### UNTRANSLATED:
+msgid "services settings"
+msgstr "Firewall - Services settings"
+#### UNTRANSLATED:
+msgid "set time constraints"
+msgstr "Set time constraints"
+#### UNTRANSLATED:
+msgid "set time now"
+msgstr "Set Time Now"
+#### UNTRANSLATED:
+msgid "set user quota"
+msgstr "Set user quota"
+msgid "settings"
+msgstr "Настройки"
+#### UNTRANSLATED:
+msgid "settingsfile bad"
+msgstr "Settingsfile is not valid"
+#### UNTRANSLATED:
+msgid "settingsfile bad. please edit"
+msgstr "Your settingsfile is not valid. BlockOutTraffic is not able to work. Please edit settings!"
+#### UNTRANSLATED:
+msgid "shaping list options"
+msgstr "Traffic shaping services"
+#### UNTRANSLATED:
+msgid "show adv config"
+msgstr "Show Firewall Config"
+#### UNTRANSLATED:
+msgid "show ca certificate"
+msgstr "Show CA Certificate"
+#### UNTRANSLATED:
+msgid "show category on block page"
+msgstr "Show category on block page"
+#### UNTRANSLATED:
+msgid "show certificate"
+msgstr "Show Certificate"
+#### UNTRANSLATED:
+msgid "show crl"
+msgstr "Show Certificate Revocation List"
+#### UNTRANSLATED:
+msgid "show host certificate"
+msgstr "Show Host Certificate"
+#### UNTRANSLATED:
+msgid "show interface colors"
+msgstr "Show interface colors in rule overview"
+#### UNTRANSLATED:
+msgid "show ip on block page"
+msgstr "Show IP on block page"
+#### UNTRANSLATED:
+msgid "show root certificate"
+msgstr "Show Root Certificate"
+#### UNTRANSLATED:
+msgid "show url on block page"
+msgstr "Show URL on block page"
+#### UNTRANSLATED:
+msgid "shutdown"
+msgstr "Shutdown"
+#### UNTRANSLATED:
+msgid "shutdown control"
+msgstr "Shutdown control"
+#### UNTRANSLATED:
+msgid "shutting down"
+msgstr "Shutting down"
+#### UNTRANSLATED:
+msgid "size"
+msgstr "Size"
+#### UNTRANSLATED:
+msgid "sort ascending"
+msgstr "Sort Ascending"
+#### UNTRANSLATED:
+msgid "sort descending"
+msgstr "Sort Descending"
+#### UNTRANSLATED:
+msgid "source"
+msgstr "Source"
+#### UNTRANSLATED:
+msgid "source address"
+msgstr "Source Address (MAC or IP or network)"
+#### UNTRANSLATED:
+msgid "source adr and dest adr can not be same"
+msgstr "Source and destination address/network can not be the same"
+#### UNTRANSLATED:
+msgid "source iface and dest iface can not be same"
+msgstr "Source and destination Interface can not be the same"
+#### UNTRANSLATED:
+msgid "source ip"
+msgstr "Source IP"
+#### UNTRANSLATED:
+msgid "source ip and port"
+msgstr "Source IP:Port"
+#### UNTRANSLATED:
+msgid "source port"
+msgstr "Source port"
+#### UNTRANSLATED:
+msgid "source port numbers"
+msgstr "Source port must be a valid port number or port range."
+#### UNTRANSLATED:
+msgid "speaker off"
+msgstr "Speaker off"
+#### UNTRANSLATED:
+msgid "speaker on"
+msgstr "Speaker on"
+#### UNTRANSLATED:
+msgid "split log by categories"
+msgstr "Split log by categories"
+#### UNTRANSLATED:
+msgid "squid version"
+msgstr "Squid Cache version"
+#### UNTRANSLATED:
+msgid "src port"
+msgstr "Src Port"
+#### UNTRANSLATED:
+msgid "ssh access"
+msgstr "SSH Access"
+#### UNTRANSLATED:
+msgid "ssh access tip"
+msgstr "IPCop SSH uses the non-standard Port 8022!"
+#### UNTRANSLATED:
+msgid "ssh fingerprint"
+msgstr "Fingerprint"
+#### UNTRANSLATED:
+msgid "ssh host keys"
+msgstr "SSH Host Keys"
+#### UNTRANSLATED:
+msgid "ssh is disabled"
+msgstr "SSH is disabled.  Stopping."
+#### UNTRANSLATED:
+msgid "ssh is enabled"
+msgstr "SSH is enabled.  Restarting."
+#### UNTRANSLATED:
+msgid "ssh key"
+msgstr "Key"
+#### UNTRANSLATED:
+msgid "ssh key size"
+msgstr "Size (bits)"
+#### UNTRANSLATED:
+msgid "ssh keys"
+msgstr "Allow public key based authentication"
+#### UNTRANSLATED:
+msgid "ssh no auth"
+msgstr "You have not allowed any authentication methods; this will stop you logging in"
+#### UNTRANSLATED:
+msgid "ssh passwords"
+msgstr "Allow password based authentication"
+#### UNTRANSLATED:
+msgid "ssh portfw"
+msgstr "Allow TCP Forwarding"
+#### UNTRANSLATED:
+msgid "ssh1 disabled"
+msgstr "SSHv1 is disabled, a version 2 client will be required."
+#### UNTRANSLATED:
+msgid "ssh1 enabled"
+msgstr "SSHv1 is enabled, old clients will be supported."
+#### UNTRANSLATED:
+msgid "ssh1 support"
+msgstr "Support SSH protocol version 1 (required only for old clients)"
+#### UNTRANSLATED:
+msgid "ssl ports"
+msgstr "Allowed SSL ports (one per line)"
+#### UNTRANSLATED:
+msgid "ssnetwork status"
+msgstr "Network Status"
+#### UNTRANSLATED:
+msgid "sspasswords"
+msgstr "Passwords"
+#### UNTRANSLATED:
+msgid "ssport forwarding"
+msgstr "Port Forwarding"
+#### UNTRANSLATED:
+msgid "ssproxy graphs"
+msgstr "Proxy Graphs"
+#### UNTRANSLATED:
+msgid "sssystem status"
+msgstr "System Status"
+#### UNTRANSLATED:
+msgid "sstraffic"
+msgstr "Traffic Accounting"
+#### UNTRANSLATED:
+msgid "sstraffic graphs"
+msgstr "Traffic Graphs"
+#### UNTRANSLATED:
+msgid "standard"
+msgstr "Standard"
+#### UNTRANSLATED:
+msgid "standard login script"
+msgstr "Standard login script"
+#### UNTRANSLATED:
+msgid "standard ports"
+msgstr "Allowed standard ports (one per line)"
+#### UNTRANSLATED:
+msgid "standard rule"
+msgstr "Standard Accept Rule"
+#### UNTRANSLATED:
+msgid "start address"
+msgstr "Start address"
+#### UNTRANSLATED:
+msgid "start ipsec"
+msgstr "Start IPsec VPN"
+#### UNTRANSLATED:
+msgid "start openvpn server"
+msgstr "Start OpenVPN Server"
+#### UNTRANSLATED:
+msgid "state or province"
+msgstr "State or Province"
+#### UNTRANSLATED:
+msgid "static ip"
+msgstr "Static IP"
+msgid "status"
+msgstr "Статус"
+#### UNTRANSLATED:
+msgid "status information"
+msgstr "Status information"
+#### UNTRANSLATED:
+msgid "stop ipsec"
+msgstr "Stop IPsec VPN"
+#### UNTRANSLATED:
+msgid "stop openvpn server"
+msgstr "Stop OpenVPN Server"
+#### UNTRANSLATED:
+msgid "stopped"
+msgstr "STOPPED"
+#### UNTRANSLATED:
+msgid "subject"
+msgstr "Subject"
+#### UNTRANSLATED:
+msgid "subject test"
+msgstr "Test email"
+#### UNTRANSLATED:
+msgid "subject warn traffic"
+msgstr "Warning - warnlevel reached"
+#### UNTRANSLATED:
+msgid "successfully refreshed updates list"
+msgstr "Successfully refreshed updates list."
+#### UNTRANSLATED:
+msgid "summaries kept"
+msgstr "Keep summaries for"
+msgid "sunday"
+msgstr "неделя"
+#### UNTRANSLATED:
+msgid "sunday short"
+msgstr "Sun"
+#### UNTRANSLATED:
+msgid "sunday very short"
+msgstr "S"
+#### UNTRANSLATED:
+msgid "supervisor password"
+msgstr "Supervisor password"
+#### UNTRANSLATED:
+msgid "suppress version"
+msgstr "Suppress version information"
+#### UNTRANSLATED:
+msgid "swap"
+msgstr "Swap"
+#### UNTRANSLATED:
+msgid "swapcached memory"
+msgstr "SwapCached Memory"
+#### UNTRANSLATED:
+msgid "system cpu usage"
+msgstr "System CPU Usage"
+#### UNTRANSLATED:
+msgid "system graphs"
+msgstr "System Graphs"
+#### UNTRANSLATED:
+msgid "system info"
+msgstr "System Info"
+#### UNTRANSLATED:
+msgid "system info cobalt"
+msgstr "Cobalt information"
+#### UNTRANSLATED:
+msgid "system info cpu"
+msgstr "CPU information"
+#### UNTRANSLATED:
+msgid "system info hdd"
+msgstr "System harddisk"
+#### UNTRANSLATED:
+msgid "system info irq"
+msgstr "Interrupts"
+#### UNTRANSLATED:
+msgid "system info link"
+msgstr "Link state"
+#### UNTRANSLATED:
+msgid "system info linketh"
+msgstr "Link state (ethtool)"
+#### UNTRANSLATED:
+msgid "system info linkmii"
+msgstr "Link state (MII)"
+#### UNTRANSLATED:
+msgid "system info nic"
+msgstr "Network interface cards"
+#### UNTRANSLATED:
+msgid "system info pci"
+msgstr "PCI devices"
+#### UNTRANSLATED:
+msgid "system info ps"
+msgstr "Process status"
+#### UNTRANSLATED:
+msgid "system info usb"
+msgstr "USB devices"
+#### UNTRANSLATED:
+msgid "system log viewer"
+msgstr "System Log Viewer"
+#### UNTRANSLATED:
+msgid "system logs"
+msgstr "System Logs"
+#### UNTRANSLATED:
+msgid "system status information"
+msgstr "System Status Information"
+#### UNTRANSLATED:
+msgid "telephone not set"
+msgstr "Telephone not set."
+#### UNTRANSLATED:
+msgid "tertiary ntp server"
+msgstr "Tertiary NTP Server"
+#### UNTRANSLATED:
+msgid "test email could not be sent"
+msgstr "Could not send Test email"
+#### UNTRANSLATED:
+msgid "test email was sent"
+msgstr "Test email was sent successfully"
+#### UNTRANSLATED:
+msgid "the statistics were last updated at"
+msgstr "The statistics were last updated at"
+#### UNTRANSLATED:
+msgid "there are updates"
+msgstr "There are updates available for your system. Please go to the 'Updates' section for more information."
+#### UNTRANSLATED:
+msgid "there are updates available"
+msgstr "There are updates available for your system. It is strongly urged that you install them as soon as possible."
+#### UNTRANSLATED:
+msgid "there was no file upload"
+msgstr "There was no file upload."
+#### UNTRANSLATED:
+msgid "this field may be blank"
+msgstr "This field may be blank."
+#### UNTRANSLATED:
+msgid "this is not a valid archive"
+msgstr "This is not a valid archive."
+#### UNTRANSLATED:
+msgid "this is not an authorised update"
+msgstr "This is not an authorised update."
+#### UNTRANSLATED:
+msgid "this months volume"
+msgstr "This month's volume"
+#### UNTRANSLATED:
+msgid "this update is already installed"
+msgstr "This update is already installed."
+#### UNTRANSLATED:
+msgid "this weeks volume"
+msgstr "This week's volume"
+#### UNTRANSLATED:
+msgid "throttling per host on"
+msgstr "Limit per host on"
+#### UNTRANSLATED:
+msgid "throttling total on"
+msgstr "Overall limit on"
+#### UNTRANSLATED:
+msgid "throttling unlimited"
+msgstr "unlimited"
+msgid "thursday"
+msgstr "четвъртък"
+#### UNTRANSLATED:
+msgid "thursday short"
+msgstr "Thu"
+#### UNTRANSLATED:
+msgid "thursday very short"
+msgstr "T"
+#### UNTRANSLATED:
+msgid "time"
+msgstr "Time"
+#### UNTRANSLATED:
+msgid "time date manually reset"
+msgstr "Time/Date manually reset."
+#### UNTRANSLATED:
+msgid "time quota"
+msgstr "Time quota"
+#### UNTRANSLATED:
+msgid "time restrictions"
+msgstr "Time restrictions"
+msgid "time server"
+msgstr "Време Сървър"
+#### UNTRANSLATED:
+msgid "time space"
+msgstr "Time space"
+#### UNTRANSLATED:
+msgid "timebased access control"
+msgstr "Time based access control"
+#### UNTRANSLATED:
+msgid "timeout must be a number"
+msgstr "Timeout must be a number."
+#### UNTRANSLATED:
+msgid "title"
+msgstr "Title"
+#### UNTRANSLATED:
+msgid "to"
+msgstr "To"
+#### UNTRANSLATED:
+msgid "to email adr"
+msgstr "To email address"
+#### UNTRANSLATED:
+msgid "to email bad"
+msgstr "To email address is not valid"
+#### UNTRANSLATED:
+msgid "toggle enable disable"
+msgstr "Enable or Disable"
+#### UNTRANSLATED:
+msgid "tone"
+msgstr "Tone"
+#### UNTRANSLATED:
+msgid "tone dial"
+msgstr "Tone dial"
+#### UNTRANSLATED:
+msgid "too long 80 char max"
+msgstr " is too long, maximum allowed is 80 characters"
+#### UNTRANSLATED:
+msgid "total hits for log section"
+msgstr "Total Hits for Log Section"
+#### UNTRANSLATED:
+msgid "traffic"
+msgstr "Traffic"
+#### UNTRANSLATED:
+msgid "traffic accounting enabled"
+msgstr "Traffic accounting enabled"
+#### UNTRANSLATED:
+msgid "traffic calc time"
+msgstr "Time of calculation"
+#### UNTRANSLATED:
+msgid "traffic calc time bad"
+msgstr "Calculation time is not correct"
+#### UNTRANSLATED:
+msgid "traffic configuration"
+msgstr "Traffic accounting configuration"
+#### UNTRANSLATED:
+msgid "traffic info messages"
+msgstr "Info messages"
+#### UNTRANSLATED:
+msgid "traffic monitor"
+msgstr "Traffic Monitor"
+#### UNTRANSLATED:
+msgid "traffic on"
+msgstr "Traffic on"
+#### UNTRANSLATED:
+msgid "traffic shaping"
+msgstr "Traffic Shaping"
+#### UNTRANSLATED:
+msgid "traffic shaping settings"
+msgstr "Traffic Shaping Settings"
+#### UNTRANSLATED:
+msgid "traffic warn level bad"
+msgstr "Warnlevel is not correct"
+#### UNTRANSLATED:
+msgid "trafficin"
+msgstr "Input"
+#### UNTRANSLATED:
+msgid "trafficout"
+msgstr "Output"
+#### UNTRANSLATED:
+msgid "traffics"
+msgstr "Utilisation overview"
+#### UNTRANSLATED:
+msgid "trafficsum"
+msgstr "Total"
+#### UNTRANSLATED:
+msgid "transfer limits"
+msgstr "Transfer limits"
+#### UNTRANSLATED:
+msgid "transparent on"
+msgstr "Transparent on"
+msgid "tuesday"
+msgstr "вторник"
+#### UNTRANSLATED:
+msgid "tuesday short"
+msgstr "Tue"
+#### UNTRANSLATED:
+msgid "tuesday very short"
+msgstr "T"
+#### UNTRANSLATED:
+msgid "typ custom"
+msgstr "Custom"
+#### UNTRANSLATED:
+msgid "typ default"
+msgstr "Default"
+msgid "type"
+msgstr "Тип"
+#### UNTRANSLATED:
+msgid "umount"
+msgstr "Umount"
+#### UNTRANSLATED:
+msgid "umount removable media before to unplug"
+msgstr "Umount removable media before unplugging the device"
+#### UNTRANSLATED:
+msgid "unable to alter profiles while red is active"
+msgstr "Unable to alter profiles while RED is active."
+#### UNTRANSLATED:
+msgid "unable to contact"
+msgstr "Unable to contact"
+#### UNTRANSLATED:
+msgid "unknown"
+msgstr "UNKNOWN"
+#### UNTRANSLATED:
+msgid "unnamed"
+msgstr "Unnamed"
+#### UNTRANSLATED:
+msgid "unrestricted ip clients"
+msgstr "Unrestricted IP addresses (one per line)"
+#### UNTRANSLATED:
+msgid "unrestricted mac clients"
+msgstr "Unrestricted MAC addresses (one per line)"
+#### UNTRANSLATED:
+msgid "up"
+msgstr "Up"
+#### UNTRANSLATED:
+msgid "update"
+msgstr "Update"
+#### UNTRANSLATED:
+msgid "update time"
+msgstr "Update the time"
+#### UNTRANSLATED:
+msgid "update transcript"
+msgstr "Update transcript"
+#### UNTRANSLATED:
+msgid "updates"
+msgstr "Updates"
+#### UNTRANSLATED:
+msgid "updates is old1"
+msgstr "Your update file is "
+#### UNTRANSLATED:
+msgid "updates is old2"
+msgstr "days old. We recommend you update it on the <b>System&nbsp;&gt;&nbsp;Updates</b> page."
+#### UNTRANSLATED:
+msgid "updates is old3"
+msgstr "days old."
+#### UNTRANSLATED:
+msgid "uplink speed"
+msgstr "Uplink speed (kbit/sec)"
+#### UNTRANSLATED:
+msgid "upload"
+msgstr "Upload"
+#### UNTRANSLATED:
+msgid "upload a certificate"
+msgstr "Upload a certificate"
+#### UNTRANSLATED:
+msgid "upload a certificate request"
+msgstr "Upload a certificate request"
+#### UNTRANSLATED:
+msgid "upload blacklist file"
+msgstr "Upload Blacklist file"
+#### UNTRANSLATED:
+msgid "upload ca certificate"
+msgstr "Upload CA Certificate"
+#### UNTRANSLATED:
+msgid "upload file"
+msgstr "Upload file"
+#### UNTRANSLATED:
+msgid "upload p12 file"
+msgstr "Upload PKCS12 file"
+#### UNTRANSLATED:
+msgid "upload successful"
+msgstr "Upload successful."
+#### UNTRANSLATED:
+msgid "upload synch.bin"
+msgstr "Upload synch.bin"
+#### UNTRANSLATED:
+msgid "upload update file"
+msgstr "Upload update file"
+#### UNTRANSLATED:
+msgid "upstream password"
+msgstr "Upstream password"
+#### UNTRANSLATED:
+msgid "upstream proxy"
+msgstr "Upstream proxy"
+#### UNTRANSLATED:
+msgid "upstream proxy host:port"
+msgstr "Upstream proxy (host:port)"
+#### UNTRANSLATED:
+msgid "upstream username"
+msgstr "Upstream username"
+#### UNTRANSLATED:
+msgid "uptime and users"
+msgstr "Uptime and users"
+#### UNTRANSLATED:
+msgid "url filter"
+msgstr "URL filter"
+#### UNTRANSLATED:
+msgid "urlfilter configuration"
+msgstr "URL filter configuration"
+#### UNTRANSLATED:
+msgid "urlfilter dont restart"
+msgstr "Do not restart URL filter"
+#### UNTRANSLATED:
+msgid "urlfilter log viewer"
+msgstr "URL filter log viewer"
+#### UNTRANSLATED:
+msgid "urlfilter logs"
+msgstr "URL filter logs"
+#### UNTRANSLATED:
+msgid "urlfilter not enabled"
+msgstr "URL filter is not enabled"
+#### UNTRANSLATED:
+msgid "urlfilter restart"
+msgstr "Restart URL filter"
+#### UNTRANSLATED:
+msgid "urlfilter restart message"
+msgstr "The URL filter must be restarted to activate the changed rules"
+#### UNTRANSLATED:
+msgid "urlfilter restart notification"
+msgstr "Activate changed rules"
+#### UNTRANSLATED:
+msgid "urlfilter restore success"
+msgstr "URL filter configuration has been restored. The URL filter must be restarted to activate the new settings."
+#### UNTRANSLATED:
+msgid "urls"
+msgstr "URLs (one per line)"
+#### UNTRANSLATED:
+msgid "use"
+msgstr "Use"
+#### UNTRANSLATED:
+msgid "use Service"
+msgstr "Use Service"
+#### UNTRANSLATED:
+msgid "use a pre-shared key"
+msgstr "Use a Pre-Shared Key"
+#### UNTRANSLATED:
+msgid "use addressfilter for this interface"
+msgstr "With policy 'open'/'half-open' only the clients entered in Address Filter are allowed to access IPCop/Internet in default rules"
+#### UNTRANSLATED:
+msgid "use dns error to block"
+msgstr "Use 'DNS Error' to block URLs"
+#### UNTRANSLATED:
+msgid "use dov"
+msgstr "Use DOV (Data Over Voice)"
+#### UNTRANSLATED:
+msgid "use ibod"
+msgstr "Use Bandwidth on Demand (iBOD)"
+#### UNTRANSLATED:
+msgid "use ipcop red ip"
+msgstr "The classical RED IP used by IPCop during connection"
+#### UNTRANSLATED:
+msgid "use only proposed settings"
+msgstr "Use only proposed settings."
+#### UNTRANSLATED:
+msgid "use src port"
+msgstr "Use source Port"
+msgid "used"
+msgstr "Използван"
+#### UNTRANSLATED:
+msgid "used memory"
+msgstr "Used Memory"
+#### UNTRANSLATED:
+msgid "used swap"
+msgstr "Used Swap"
+#### UNTRANSLATED:
+msgid "user cpu usage"
+msgstr "User CPU Usage"
+msgid "username"
+msgstr "Потребителско име"
+#### UNTRANSLATED:
+msgid "username forwarding"
+msgstr "Username forwarding"
+#### UNTRANSLATED:
+msgid "username not set"
+msgstr "Username not set."
+#### UNTRANSLATED:
+msgid "users department"
+msgstr "User's Department"
+#### UNTRANSLATED:
+msgid "users email"
+msgstr "User's E-mail Address"
+#### UNTRANSLATED:
+msgid "users fullname or system hostname"
+msgstr "User's Full Name or System Hostname"
+#### UNTRANSLATED:
+msgid "using portrange in portfw"
+msgstr "When using a portrange in Portforwarding, the portrange has to be identical in 'IPCop External Destination' service and in 'Internal Destination' service!"
+#### UNTRANSLATED:
+msgid "valid icmp types"
+msgstr "Valid ICMP Types"
+#### UNTRANSLATED:
+msgid "valid root certificate already exists"
+msgstr "A valid root certificate already exists."
+#### UNTRANSLATED:
+msgid "valid until"
+msgstr "Valid until"
+#### UNTRANSLATED:
+msgid "vci number"
+msgstr "VCI Number"
+#### UNTRANSLATED:
+msgid "vdsl using vlan tag"
+msgstr "VDSL using VLAN tag"
+#### UNTRANSLATED:
+msgid "via forwarding"
+msgstr "Proxy address forwarding"
+#### UNTRANSLATED:
+msgid "virtual address"
+msgstr "Virtual Address"
+#### UNTRANSLATED:
+msgid "virtual private networking"
+msgstr "Virtual Private Networking"
+#### UNTRANSLATED:
+msgid "visible hostname"
+msgstr "Visible hostname"
+#### UNTRANSLATED:
+msgid "vpi number"
+msgstr "VPI Number"
+#### UNTRANSLATED:
+msgid "vpn aggrmode"
+msgstr "IKE aggressive mode allowed. Avoid if possible (preshared key is transmitted in clear text)!"
+#### UNTRANSLATED:
+msgid "vpn altname syntax"
+msgstr "SubjectAltName is a comma separated list of email, dns, uri, rid and ip objects.<br />email:an email address. Syntax email:copy takes the email field from the cert to be used.<br />DNS:a valid domain name.<br />URI:any valid uri.<br />RID:registered object identifier.<br />IP:an IP address.<br />Note:charset is limited and case is significant.<br />Example:<br /><b>email:</b>ipcop@foo.org<b>,email:</b>copy<b>,DNS:</b>www.ipcop.org<b>,IP:</b>127.0.0.1<b>,URI:</b>http://url/to/something"
+#### UNTRANSLATED:
+msgid "vpn auth-dn"
+msgstr "Peer is identified by either IPV4_ADDR, FQDN, USER_FQDN or DER_ASN1_DN string in Remote ID field"
+#### UNTRANSLATED:
+msgid "vpn delayed start"
+msgstr "Delay before launching VPN (seconds)"
+#### UNTRANSLATED:
+msgid "vpn delayed start help"
+msgstr "If required, this delay can be used to allow Dynamic DNS updates to propagate properly. 60 is a common value when RED is a dynamic IP."
+#### UNTRANSLATED:
+msgid "vpn incompatible use of defaultroute"
+msgstr "hostname=%defaultroute not allowed"
+#### UNTRANSLATED:
+msgid "vpn local id"
+msgstr "Local ID"
+#### UNTRANSLATED:
+msgid "vpn missing remote id"
+msgstr "You must specify a correct Distinguished Name (DN) for this authentication."
+#### UNTRANSLATED:
+msgid "vpn mtu invalid"
+msgstr "MTU must be a numeric value!"
+#### UNTRANSLATED:
+msgid "vpn name is invalid"
+msgstr "VPN name cannot be a reserved word or begin with a digit or contain special characters or is too long!"
+#### UNTRANSLATED:
+msgid "vpn no full pki"
+msgstr "missing private key to generate cert"
+#### UNTRANSLATED:
+msgid "vpn payload compression"
+msgstr "Negotiate payload compression"
+#### UNTRANSLATED:
+msgid "vpn red name"
+msgstr "Public IP or FQDN for RED interface or <%defaultroute>"
+#### UNTRANSLATED:
+msgid "vpn remote id"
+msgstr "Remote ID"
+#### UNTRANSLATED:
+msgid "vpn subjectaltname"
+msgstr "Subject Alt Name"
+#### UNTRANSLATED:
+msgid "vpn vhost"
+msgstr "Roadwarrior virtual IP (sometimes called Inner-IP)"
+#### UNTRANSLATED:
+msgid "vpn watch"
+msgstr "Restart net-to-net vpn when remote peer IP changes (dyndns), it helps DPD"
+#### UNTRANSLATED:
+msgid "warn when traffic reaches"
+msgstr "Warn when traffic reaches x %"
+#### UNTRANSLATED:
+msgid "warning messages"
+msgstr "Warning messages"
+#### UNTRANSLATED:
+msgid "web access password hint"
+msgstr "To change your password for web access enter your user name, your current password and your new password twice for confirmation"
+#### UNTRANSLATED:
+msgid "web browser"
+msgstr "Web browser"
+#### UNTRANSLATED:
+msgid "web hits"
+msgstr "Total number of websites matching selected criteria for"
+#### UNTRANSLATED:
+msgid "web proxy"
+msgstr "Web proxy"
+#### UNTRANSLATED:
+msgid "web proxy configuration"
+msgstr "Web proxy configuration"
+#### UNTRANSLATED:
+msgid "web proxy will now restart"
+msgstr "Web proxy will now restart"
+msgid "web server"
+msgstr "Уеб сървър"
+msgid "website"
+msgstr "Сайт"
+msgid "wednesday"
+msgstr "сряда"
+msgid "wednesday short"
+msgstr "Срд"
+msgid "wednesday very short"
+msgstr "Ср"
+msgid "week"
+msgstr "Седмица"
+msgid "weekly"
+msgstr "седмично"
+#### UNTRANSLATED:
+msgid "wildcards"
+msgstr "Wildcards"
+msgid "wireless"
+msgstr "Безжично"
+msgid "wireless config added"
+msgstr "Безжичната конфигурация е добавена"
+msgid "wireless config changed"
+msgstr "Безжичната конфигурация е променена"
+#### UNTRANSLATED:
+msgid "within"
+msgstr "within"
+msgid "year"
+msgstr "Година"
+msgid "yes"
+msgstr "Да"
+#### UNTRANSLATED:
+msgid "you can only define one roadwarrior connection when using pre-shared key authentication"
+msgstr "You can only define one Roadwarrior connection when using pre-shared key authentication.<br />Either you already have a Roadwarrior connection with pre-shared key authentication, or you're trying to add one now."
+msgid "your department"
+msgstr "Вашият Отрасъл"
+msgid "your e-mail"
+msgstr "Вашият E-mail адрес"

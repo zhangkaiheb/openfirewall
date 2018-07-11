@@ -1,0 +1,3 @@
+## please place IPCop files first, then packages sorted by alphabetical order
+/etc/rc.d/rc.connectioncheck
+/usr/local/bin/ipcoprestore

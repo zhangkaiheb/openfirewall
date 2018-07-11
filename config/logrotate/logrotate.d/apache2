@@ -1,0 +1,13 @@
+# logrotate fragment for apache2
+#
+
+/var/log/httpd/access_log /var/log/httpd/error_log /var/log/httpd/ssl_request_log /var/log/httpd/ssl_engine_log {
+    missingok
+    # override daily rotation, apache logs contain admin activity and errors
+    weekly
+    delaycompress
+    sharedscripts
+    postrotate
+        /bin/kill -HUP `cat /var/run/httpd.pid 2>/dev/null` 2> /dev/null || true
+    endscript
+}

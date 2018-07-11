@@ -1,0 +1,15 @@
+<ipcop>
+    <update>
+        <version>2.1.9</version>
+        <releasedate>2015-02-23</releasedate>
+        <size>2345</size>
+        <isoimages>no</isoimages>
+        <description>Language updates.&lt;br /&gt;
+        Fix lease renew when RED connection is DHCP.&lt;br /&gt;
+        Update dhcpcd to 6.7.1, openswan to 2.6.42, squid to 3.4.12.
+        </description>
+        <previousversion>2.1.8</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

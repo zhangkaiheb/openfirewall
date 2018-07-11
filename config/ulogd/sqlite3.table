@@ -1,0 +1,22 @@
+CREATE TABLE ulog (
+--			raw_mac		VARCHAR(80),
+			oob_time_sec	INT UNSIGNED,
+			oob_time_usec	INT UNSIGNED,
+			oob_prefix VARCHAR(32) default NULL,
+			ip_saddr	 VARCHAR(40) default NULL,
+--			ip_daddr	VARCHAR(40) default NULL,
+			ip_protocol	TINYINT UNSIGNED,
+--			tcp_sport	SMALLINT UNSIGNED,
+			tcp_dport	SMALLINT UNSIGNED,
+--			udp_sport	SMALLINT UNSIGNED,
+			udp_dport	SMALLINT UNSIGNED,
+--			udp_len		SMALLINT UNSIGNED,
+--			icmp_type	TINYINT UNSIGNED,
+--			icmp_code	TINYINT UNSIGNED,
+--			icmp_echoid	SMALLINT UNSIGNED,
+--			icmp_echoseq	SMALLINT UNSIGNED,
+--			icmp_gateway	INT UNSIGNED,
+--			icmp_fragmtu	SMALLINT UNSIGNED,
+			ip_totlen       SMALLINT UNSIGNED
+		);
+

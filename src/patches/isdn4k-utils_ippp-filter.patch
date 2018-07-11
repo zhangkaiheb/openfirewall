@@ -1,0 +1,296 @@
+Originally from http://trash.net/~kaber/ippp-filter
+
+diff -urN a/ipppd/configure.in b/ipppd/configure.in
+--- a/ipppd/configure.in	2002-07-19 20:51:41.000000000 +0200
++++ b/ipppd/configure.in	2003-09-05 00:06:42.000000000 +0200
+@@ -98,6 +98,12 @@
+ 	AC_DEFINE(CONFIG_IPPPD_DEBUGFLAGS,"-DDEBUGALL"),
+ )
+ 
++AC_ARG_ENABLE(ippp-filter,
++	[  --enable-ippp-filter    Enable IPPP Filters (needs kernel supports) [no]],
++	CONFIG_IPPP_FILTER="1"
++	AC_DEFINE(CONFIG_IPPP_FILTER,"1"),
++)
++
+ AC_SUBST(I4LVERSION)
+ AC_SUBST(MANDATE)
+ AC_SUBST(HAVE_LIBDES)
+@@ -113,4 +119,5 @@
+ AC_SUBST(RADIUS_CLIENT_CONFIG_FILE)
+ AC_SUBST(CONFIG_RADIUS_WTMP_LOGGING)
+ AC_SUBST(CONFIG_IPPPD_DEBUGFLAGS)
++AC_SUBST(CONFIG_IPPP_FILTER)
+ AC_OUTPUT(Makefile ipppd.man pathnames.h)
+diff -urN a/ipppd/ipppd.h b/ipppd/ipppd.h
+--- a/ipppd/ipppd.h	2002-07-06 02:34:08.000000000 +0200
++++ b/ipppd/ipppd.h	2003-09-05 00:06:42.000000000 +0200
+@@ -215,6 +215,11 @@
+ #ifdef __linux__
+ extern int      hostroute;      /* Add a route to the host at the other end? */
+ #endif
++#ifdef IPPP_FILTER
++#include <net/bpf.h>
++extern struct   bpf_program pass_filter;   /* Filter for pkts to pass */
++extern struct   bpf_program active_filter; /* Filter for link-active pkts */
++#endif /* IPPP_FILTER */
+ 
+ /*
+  * Values for phase.
+@@ -288,6 +293,9 @@
+ void link_terminated(int);
+ void link_down(int);
+ void link_established(int unit);
++#ifdef IPPP_FILTER
++int set_filters(int, struct bpf_program *, struct bpf_program *);
++#endif /* IPPP_FILTER */
+ int device_script(char *program,int in,int out);
+ void check_auth_options(void);
+ void setipdefault(void);
+diff -urN a/ipppd/ipppd.man.in b/ipppd/ipppd.man.in
+--- a/ipppd/ipppd.man.in	2000-10-05 22:45:25.000000000 +0200
++++ b/ipppd/ipppd.man.in	2003-09-05 00:06:42.000000000 +0200
+@@ -88,6 +88,22 @@
+ .B ipcp-accept-remote
+ options are given, respectively.
+ .TP
++.B active-filter \fIfilter-expression
++Specifies a packet filter to be applied to data packets to determine
++which packets are to be regarded as link activity, and therefore reset
++the idle timer, or cause the link to be brought up in demand-dialling
++mode.  This option is useful in conjunction with the
++\fBidle\fR option if there are packets being sent or received
++regularly over the link (for example, routing information packets)
++which would otherwise prevent the link from ever appearing to be idle.
++The \fIfilter-expression\fR syntax is as described for tcpdump(1),
++except that qualifiers which are inappropriate for a PPP link, such as
++\fBether\fR and \fBarp\fR, are not permitted.  Generally the filter
++expression should be enclosed in single-quotes to prevent whitespace
++in the expression from being interpreted by the shell. This option
++is currently only available if both the kernel and ipppd were compiled
++with IPPP_FILTER defined.
++.TP
+ .B -ac
+ Disable Address/Control compression negotiation (use default, i.e.
+ address/control field compression disabled).
+@@ -515,6 +531,23 @@
+ will wait for the peer to authenticate itself with PAP to
+ <n> seconds (0 means no limit).
+ .TP
++.B pass-filter \fIfilter-expression
++Specifies a packet filter to applied to data packets being sent or
++received to determine which packets should be allowed to pass.
++Packets which are rejected by the filter are silently discarded.  This
++option can be used to prevent specific network daemons (such as
++routed) using up link bandwidth, or to provide a basic firewall
++capability.
++The \fIfilter-expression\fR syntax is as described for tcpdump(1),
++except that qualifiers which are inappropriate for a PPP link, such as
++\fBether\fR and \fBarp\fR, are not permitted.  Generally the filter
++expression should be enclosed in single-quotes to prevent whitespace
++in the expression from being interpreted by the shell.  Note that it
++is possible to apply different constraints to incoming and outgoing
++packets using the \fBinbound\fR and \fBoutbound\fR qualifiers. This
++option is currently only available if both the kernel and ipppd were
++compiled with IPPP_FILTER defined.
++.TP
+ .B -pc
+ Disable protocol field compression negotiation (use default, i.e.
+ protocol field compression disabled).
+diff -urN a/ipppd/ippp-filter-compat.h b/ipppd/ippp-filter-compat.h
+--- a/ipppd/ippp-filter-compat.h	1970-01-01 01:00:00.000000000 +0100
++++ b/ipppd/ippp-filter-compat.h	2003-09-05 00:07:04.000000000 +0200
+@@ -0,0 +1,11 @@
++#ifndef _IPPP_FILTER_COMPAT_H
++#define _IPPP_FILTER_COMPAT_H
++
++#ifndef PPPIOCSPASS
++#define PPPIOCSPASS	_IOW('t', 71, struct sock_fprog) /* set pass filter */
++#endif
++#ifndef PPPIOCSACTIVE
++#define PPPIOCSACTIVE	_IOW('t', 70, struct sock_fprog) /* set active filt */
++#endif
++                                                                                
++#endif /* _IPPP_FILTER_COMPAT_H */
+diff -urN a/ipppd/main.c b/ipppd/main.c
+--- a/ipppd/main.c	2002-07-18 02:06:21.000000000 +0200
++++ b/ipppd/main.c	2003-09-05 00:06:42.000000000 +0200
+@@ -564,6 +564,9 @@
+ 	lns[linkunit].upap_unit = lns[linkunit].chap_unit = lns[linkunit].lcp_unit;
+ 	upap[lns[linkunit].upap_unit].us_unit = chap[lns[linkunit].chap_unit].unit = linkunit;
+ 	lcp_lowerup(lns[linkunit].lcp_unit);
++#ifdef IPPP_FILTER
++	set_filters(linkunit, &pass_filter, &active_filter);
++#endif /* IPPP_FILTER */
+ 
+ 	return 0;
+ }
+diff -urN a/ipppd/Makefile.in b/ipppd/Makefile.in
+--- a/ipppd/Makefile.in	2002-07-19 21:03:53.000000000 +0200
++++ b/ipppd/Makefile.in	2003-09-05 00:06:42.000000000 +0200
+@@ -7,6 +7,7 @@
+ HAVE_LIBCRYPT := @HAVE_LIBCRYPT@
+ HAVE_SHADOW_H := @HAVE_SHADOW_H@
+ HAVE_LZSCOMP_H:= @HAVE_LZSCOMP_H@
++IPPP_FILTER   := @CONFIG_IPPP_FILTER@
+ SBINDIR       := @CONFIG_SBINDIR@
+ MANDIR        := @CONFIG_MANDIR@
+ CC            := @CC@
+@@ -77,6 +78,10 @@
+ LIBS        = -lcrypt -lutil
+ endif
+ 
++ifeq ($(IPPP_FILTER),1)
++CFLAGS     += -DIPPP_FILTER
++LIBS       += -lpcap
++endif
+ 
+ SOURCE = RELNOTES configure *.in $(PPPDSRCS) $(HEADERS) $(MANPAGES)
+ 
+diff -urN a/ipppd/options.c b/ipppd/options.c
+--- a/ipppd/options.c	2002-07-06 02:34:08.000000000 +0200
++++ b/ipppd/options.c	2003-09-05 00:06:42.000000000 +0200
+@@ -39,6 +39,10 @@
+ #include <radiusclient.h>
+ #endif
+ 
++#ifdef IPPP_FILTER
++#include <pcap.h>
++#endif /* IPPP_FILTER */
++
+ #include "fsm.h"
+ #include "ipppd.h"
+ #include "pathnames.h"
+@@ -140,6 +144,10 @@
+ struct option_info auth_req_info;
+ struct option_info devnam_info;
+ 
++#ifdef IPPP_FILTER
++struct  bpf_program pass_filter;/* Filter program for packets to pass */
++struct  bpf_program active_filter; /* Filter program for link-active pkts */
++#endif /* IPPP_FILTER */
+ 
+ /*
+  * Prototypes
+@@ -292,6 +300,11 @@
+ int __P (radius_init ( void ));
+ #endif
+ 
++#ifdef IPPP_FILTER
++static int setpassfilter __P((int,char **));
++static int setactivefilter __P((int,char **));
++#endif /* IPPP_FILTER */
++
+ /*
+  * Valid arguments.
+  */
+@@ -470,7 +483,10 @@
+     {"nohostroute", 0, setnohostroute}, /* Don't add host route */
+ #endif
+     {"+force-driver",0,setforcedriver},
+-
++#ifdef IPPP_FILTER
++    { "pass-filter", 1, setpassfilter},		/* pass filter */
++    { "active-filter", 1, setactivefilter},	/* link-active filter */
++#endif /* IPPP_FILTER */
+     {NULL, 0, NULL}
+ };
+ 
+@@ -2615,3 +2631,33 @@
+     force_driver = 1;
+     return 1;
+ }
++
++#ifdef IPPP_FILTER
++/*
++ * setpassfilter - Set the pass filter for packets
++ */
++static int
++setpassfilter(argc, argv)
++    int argc;
++    char **argv;
++{
++    if (pcap_compile_nopcap(PPP_HDRLEN, DLT_PPP, &pass_filter, *argv, 1, netmask) == 0)
++        return 1;
++    option_error("error in pass-filter expression.\n");
++    return 0;
++}
++
++/*
++ * setactivefilter - Set the active filter for packets
++ */
++static int
++setactivefilter(argc, argv)
++    int argc;
++    char **argv;
++{
++    if (pcap_compile_nopcap(PPP_HDRLEN, DLT_PPP, &active_filter, *argv, 1, netmask) == 0)
++        return 1;
++    option_error("error in active-filter expression.\n");
++    return 0;
++}
++#endif /* IPPP_FILTER */
+diff -urN a/ipppd/sys-linux.c b/ipppd/sys-linux.c
+--- a/ipppd/sys-linux.c	2000-10-05 22:45:25.000000000 +0200
++++ b/ipppd/sys-linux.c	2003-09-05 00:06:42.000000000 +0200
+@@ -57,6 +57,7 @@
+ #if defined __GLIBC__ && __GLIBC__ >= 2
+ # include </usr/include/net/ppp_defs.h>
+ # include </usr/include/net/if_ppp.h>
++# include "ippp-filter-compat.h"
+ # include </usr/include/net/ethernet.h>
+ # include "route.h"
+ #else
+@@ -70,6 +71,11 @@
+ # include <netipx/ipx.h>
+ #endif
+ 
++#ifdef IPPP_FILTER
++#include <net/bpf.h>
++#include <linux/filter.h>
++#endif /* IPPP_FILTER */
++
+ #include "fsm.h"
+ #include "ipppd.h"
+ #include "ipcp.h"
+@@ -515,6 +521,40 @@
+ 	return 1;
+ }
+ 
++#ifdef IPPP_FILTER
++/*
++ * set_filters - set the active and pass filters in the kernel driver.
++ */
++int set_filters(int u, struct bpf_program *pass, struct bpf_program *active)
++{       
++        struct sock_fprog fp;
++
++	/*
++	 *  unfortunately there is no way of checking for kernel support. the
++	 *  driver just returns 0 for unsupported ioctls, which means without
++	 *  kernel support we won't even notice the error.
++	 */
++
++	if (pass) {
++		fp.len = pass->bf_len;
++		fp.filter = (struct sock_filter *) pass->bf_insns;
++		if (ioctl(lns[u].fd, PPPIOCSPASS, &fp) < 0) {
++			syslog(LOG_ERR, "Couldn't set pass-filter in kernel.");
++			return 0;
++		}
++	}
++	if (active) {
++		fp.len = active->bf_len;
++		fp.filter = (struct sock_filter *) active->bf_insns;
++		if (ioctl(lns[u].fd, PPPIOCSACTIVE, &fp) < 0) {
++			syslog(LOG_ERR, "Couldn't set active-filter in kernel.");
++	        	return 0;
++		}
++	}
++	return 1;
++}
++#endif /* IPPP_FILTER */
++
+ /*
+  * sifup - Config the interface up and enable IP packets to pass.
+  */

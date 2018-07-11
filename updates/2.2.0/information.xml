@@ -1,0 +1,30 @@
+<ipcop>
+    <update>
+        <version>2.2.0</version>
+        <releasedate>2016-02-dd</releasedate>
+        <size>0</size>
+        <isoimages>yes</isoimages>
+        <description>Language updates.&lt;br /&gt;
+        Upgrade linux kernel to 3.10-1 (3.10.101).&lt;br /&gt;
+        Upgrade acpid to 2.0.26, bind to 9.10.3-P2, coreutils to 8.25,
+        db to 6.1.26, dhcpcd to 6.10.1, dnsmasq to 2.75,
+        ethtool to 4.2, glib to 2.42.2, gmp to 6.0.0a, gnupg to 1.4.20,
+        hdparm to 9.48, iproute2 to 4.4.0, iw to 4.3, less to 481,
+        libffi to 3.2.1, libgcrypt to 1.6.4, libgpg-error to 1.19, libnl to 3.2.27, libpcap to 1.7.4, 
+        libpng to 1.6.21, libtool to 2.4.6, lzo to 2.09,
+        mdadm to 3.3.4, nano to 2.4.3, ntp to 4.2.8p6,
+        openssh to 7.2p2, openssl to 1.0.2f, openvpn to 2.3.10,
+        patch to 2.7.5, pciutils to 3.4.1, perl to 5.20.2-2,
+        rp-pppoe to 3.12, rrdtool to 1.5.5, rsyslog to 8.11.0,
+        shadow to 4.2.1, smartmontools to 6.4, sqlite to 3.11.1, squid to 3.4.14,
+        tcpdump to 4.7.4, tzdata to 2016a, wget to 1.17.1, xz to 5.2.2, several Perl CPAN modules.
+        &lt;br /&gt;
+        Upgrade e1000e network driver to 3.3.3, igb network driver to 5.3.3.5. Drop CnxADSL and pulsar drivers.
+        &lt;br /&gt;
+        &lt;b&gt;Mandatory reboot after upgrade.&lt;/b&gt;
+        </description>
+        <previousversion>2.1.9</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

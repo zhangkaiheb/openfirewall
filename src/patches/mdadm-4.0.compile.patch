@@ -1,0 +1,11 @@
+--- Makefile	2018-06-18 20:55:02.560135813 -0700
++++ Makefile.new	2018-06-18 20:58:57.439207889 -0700
+@@ -43,7 +43,7 @@ KLIBC_GCC = gcc -nostdinc -iwithprefix i
+ 
+ CC ?= $(CROSS_COMPILE)gcc
+ CXFLAGS ?= -ggdb
+-CWFLAGS = -Wall -Werror -Wstrict-prototypes -Wextra -Wno-unused-parameter
++CWFLAGS = -Wall -Wstrict-prototypes -Wextra -Wno-unused-parameter
+ ifdef WARN_UNUSED
+ CWFLAGS += -Wp,-D_FORTIFY_SOURCE=2 -O3
+ endif

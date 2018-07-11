@@ -1,0 +1,20 @@
+<ipcop>
+    <update>
+        <version>2.0.1</version>
+        <releasedate>2011-11-07</releasedate>
+        <size>11654</size>
+        <description>Language updates.&lt;br /&gt;
+            Add firewall logging to logsummary.&lt;br /&gt;
+            Add 'classroom extension' to proxy.&lt;br /&gt;
+            Upgrade acpid to 2.0.12, bind to 9.8.1, coreutils-8.14, dnsmasq to 2.59,
+            iptables to 1.4.12.1, iw to 3.1, krb5 to 1.9.2, libpng to 1.5.5, module-init-tools to 3.16,
+            ncurses to 5.9, ntp to 4.2.6p4,, openssh to 5.9, openssl to 1.0.0e, openswan to 2.6.37,
+            pciutils to 3.1.8, pixman to 0.22.2, smartmontools to 5.41, sqlite to 3.7.8,
+            squid to 3.1.16, squid-langpack to 20110902, tzdata to 2011m,
+            usb-modeswitch to 1.2.0, usb-modeswitch-data to 20111023,
+            util-linux to 2.20.1, several Perl CPAN modules.</description>
+        <previousversion>2.0.0</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

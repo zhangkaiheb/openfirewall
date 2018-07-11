@@ -1,0 +1,117 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+#     2006-jan  Gilles Espinasse                                              #
+#                                                                             #
+# $Id: bc 7400 2014-04-04 12:48:55Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = attr
+VER        = 2.4.47
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).src.tar.gz
+DL_FROM    = $(URL_AGNU)/$(PKG_NAME)
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = 84f58dec00b60f2dc8fd1c9709291cc7
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+	# Modify the documentation directory so that it is a versioned directory
+	cd $(DIR_APP) && sed -i -e 's|/@pkg_name@|&-@pkg_version@|' include/builddefs.in
+
+	# Prevent installation of manual pages that were already installed by the man pages package
+	cd $(DIR_APP) && sed -i -e "/SUBDIRS/s|man[25]||g" man/Makefile
+
+	# Fix a problem in the test procedures caused by changes in perl-5.26
+	cd $(DIR_APP) && sed -i 's:{(:\\{(:' test/run
+
+	cd $(DIR_APP) && ./configure \
+				--prefix=/usr \
+				--bindir=/bin  \
+				--disable-static
+
+	cd $(DIR_APP) && make
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# The tests need to be run on a filesystem that supports extended attributes
+	# such as the ext2, ext3, or ext4 filesystems. The tests are also known to fail
+	# if running multiple simultaneous tests (-j option greater than 1).
+	# To test the results, issue
+	cd $(DIR_APP) && make -j1 tests root-tests
+endif
+
+	cd $(DIR_APP) && make install install-dev install-lib
+	chmod -v 755 /usr/lib/libattr.so
+
+	# The shared library needs to be moved to /lib, and as a result the .so file
+	# in /usr/lib will need to be recreated
+	mv -v /usr/lib/libattr.so.* /lib
+	ln -sfv /lib/$$(readlink /usr/lib/libattr.so) /usr/lib/libattr.so
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

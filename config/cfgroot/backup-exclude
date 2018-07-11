@@ -1,0 +1,13 @@
+var/ipcop/addons/lang
+var/ipcop/backup/*.system
+var/ipcop/backup/backup.key
+var/ipcop/eciadsl/modems.db
+var/ipcop/eciadsl/firmware00.bin
+var/ipcop/firewall/defaultservices
+var/ipcop/firewall/icmptypes
+var/ipcop/key
+var/ipcop/main/flashsettings
+var/ipcop/main/language.lst
+var/ipcop/patches
+var/ipcop/ppp/fake-resolv.conf
+var/ipcop/red

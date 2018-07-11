@@ -1,0 +1,10 @@
+--- pulsar-4.0.24.orig/callbacks.c	2007-06-26 08:49:37.000000000 +0200
++++ pulsar-4.0.24/callbacks.c	2013-07-09 17:52:23.000000000 +0200
+@@ -14,7 +14,6 @@
+ #include <linux/errno.h>  /* error codes */
+ #include <linux/pci.h>  
+ #include <linux/types.h>
+-#include <asm/system.h>
+ #include <asm/io.h>
+ #include <linux/delay.h>
+ #include <linux/timer.h>

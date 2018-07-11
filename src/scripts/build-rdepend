@@ -1,0 +1,73 @@
+#!/bin/sh
+
+# build the packages list that a package should depend to warrant it is rebuild when parent is rebuild
+
+# use inside the chroot with
+# ./usr/src/src/scripts/build-rdepend
+
+# TODO
+# - each package has it's own name in the dependency list, that name should be removed
+# - rootfile list is wrong for some packages, worst is bash as bin/bash is not in the list
+#   as bin/bash symlink is added on stage2
+# - plug the resulting files in our build infrastructure, but I have no idea yet how. Gilles
+
+RDEPEND_LIBS=/tmp/rdepend_libs          # lib list needed to run a binary include in a package
+RDEPEND_PACKAGES=/tmp/rdepend_packages  # packages list that provide lib to run a package
+rm -rf /tmp/rdep*
+
+MACHINE=`uname -m`
+case ${MACHINE} in
+    i?86)
+        MACHINE=i486
+        ;;
+    x86_64)
+        MACHINE=i486
+        ;;
+    alpha)
+        MACHINE=alpha
+        ;;
+    sparc|sparc64)
+        MACHINE=sparc
+        ;;
+    ppc|ppc64)
+        MACHINE=ppc
+        ;;
+esac
+
+mkdir -p ${RDEPEND_LIBS}
+mkdir -p ${RDEPEND_PACKAGES}
+
+# find on which lib a program depend
+for logdir in $(ls -d /usr/src/log_${MACHINE}/0{2,3,4}*); do
+    for rootfile in $(ls ${logdir});do
+        for prog in $(cat $logdir/$rootfile | grep -v '^#'); do
+            #echo "prog is $prog"
+            if [ -f $prog ]; then
+                ldd $prog 2>/dev/null | awk '/=>/ { print $3 }' | grep / >>${RDEPEND_LIBS}/${rootfile}
+            fi
+        done
+    done
+    echo "$logdir processed"
+done
+
+# have each lib name only once for each list
+for rootfile in $(ls ${RDEPEND_LIBS}/*);do
+    cat ${rootfile} | sort -u > ${rootfile}
+done
+
+# resolve on which package a lib come from
+for rootfile in $(ls ${RDEPEND_LIBS});do
+    for lib in $(cat ${RDEPEND_LIBS}/$rootfile | sed 's|^/||'); do
+        # suppress the path as perl has MACHINE encoded there
+        baselib=$(basename $lib)
+        #echo "rootfile is $rootfile, lib is $baselib"
+        if [ -s ${RDEPEND_LIBS}/$rootfile ]; then
+            # only take first line and find correspond lfs package name
+            grep -l $baselib /usr/src/config/rootfiles/*/* | awk 'NR==1' | xargs basename >> ${RDEPEND_PACKAGES}/${rootfile}
+        fi
+    done
+    # suppress package duplicate
+    if [ -s ${RDEPEND_LIBS}/$rootfile ]; then
+        cat ${RDEPEND_PACKAGES}/${rootfile} | sort -u > ${RDEPEND_PACKAGES}/${rootfile}
+    fi
+done

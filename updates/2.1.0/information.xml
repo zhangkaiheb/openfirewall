@@ -1,0 +1,32 @@
+<ipcop>
+    <update>
+        <version>2.1.0</version>
+        <releasedate>2014-02-13</releasedate>
+        <size>23985</size>
+        <description>setserial, pcmciautils, perl, ppp, openvpn radiusplugin patched&lt;br /&gt;
+            cairo recompiled with -O3, isdn4k-utils with -Os -fno-strict-aliasing&lt;br /&gt;
+            Add libnetfilter_acct, libnetfilter_log, xz&lt;br /&gt;
+            Language updates.&lt;br /&gt;
+            Fix SF bug #805, undefined value in connections webui.&lt;br /&gt;
+            Upgrade acpid to 2.0.20, arping to 2.13, bash to 4.2.45, bind to 9.8.6-P2, CnxADSL to ..PIM-2.6-2.7
+            conntrack-tools to 1.2.2, coreutils to 8.21, db to 6.0.20, dejavu to 2.34, dhcpcd to 5.6.8, diffutils-3.3, dnsmasq to 2.68,
+            e2fsprogs to 1.42.8, ethtool to 3.12.1, expat to 2.1.0, fontconfig to 2.11.0, freetype to 2.5.0,
+            gawk to 4.0.2, GD to 2.49, gettext to 0.18.3, glib to 2.30.3, gmp to 5.0.5, gnupg to 1.4.13, grep to 2.15, gzip to 1.6,
+            hdparm to 9.43, httpd to 2.2.26,
+            iproute2 to 3.11.0, iptables to 1.4.20, iptstate to 2.2.5, iputils to s20121221, iw to 3.11, krb5 to 1.10.7,
+            less to 458, libffi to 3.0.13, libgd to 2.1.0, libgcrypt to 1.5.3, libnet to 1.1.6,
+            libnfnetlink to 1.0.1, libnetfilter_conntrack to 1.0.4, libnl to 3.2.16, libpcap to 1.4.0, libpng to 1.6.7,
+            libusb to 1.0.9, libusb-compat to 0.1.4, libtool to 2.4.2, libxml2 to 2.9.1, logrotate to 3.8.6, lsof to 4.87,
+            mdadm to 3.3, net-tools to 1.60-p20120127084908, openldap to 2.4.38, openssh to 6.4p1, openssl to 1.0.1e, openswan to 2.6.39,
+            openvpn to 2.3.2,
+            parted to 3.1, patch to 2.7.1, pciutils to 3.2.1, pcre to 8.33, perl to 5.14.2-21, pixman to 0.32.4, procps to 3.3.8, psmisc to 22.20,
+            rp-pppoe to 3.11, rsyslog to 5.10.1, sed to 4.2.2, shadow to 4.1.5.1, smartmontools to 6.2, sqlite to 3.8.1
+            tcpdump to 4.4.0, traceroute to 2.0.19, ulogd to 2.0.2,
+            usb-modeswitch to 2.0.1, usb-modeswitch-data to 20131113, usbutils to 007, util-linux to 2.22.2,
+            zlib to 1.2.8, several Perl CPAN modules.
+        </description>
+        <previousversion>2.0.6</previousversion>
+        <nextversion>2.1.1</nextversion>
+        <installdate>INSTALLDATE</installdate>
+    </update>
+</ipcop>

@@ -1,0 +1,115 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: kbd 6121 2011-11-21 09:35:49Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = kbd
+VER        = 1.15.3
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+#DL_FROM    = $(URL_KERNEL)/linux/utils/kbd
+DL_FROM    = ftp://ftp.altlinux.org/pub/people/legion/kbd
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+PATCH1     = $(PKG_NAME)-1.15.3-backspace-1.patch
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+objects = $(DL_FILE) \
+	$(PATCH1)
+
+$(DL_FILE)		= $(DL_FROM)/$(DL_FILE)
+$(PATCH1)		= $(URL_LFS)/$(PKG_NAME)/$(PATCH1)
+
+$(DL_FILE)_MD5		= 8143e179a0f3c25646ce5085e8777200
+$(PATCH1)_MD5		= f75cca16a38da6caa7d52151f7136895
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_DL)/$(PATCH1)
+
+ifeq "$(MACHINE)" "sparc"
+	# Sparc compilation breaks because of 'cast increases required alignment of target type' warning
+	# so do not break on warning until a proper fix is found
+	cd $(DIR_APP) && sed -i 's:-Werror::' src/Makefile.in
+endif
+	cd $(DIR_APP) && ./configure --prefix=/usr \
+					--datadir=/usr/share/kbd \
+					--disable-nls
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+	cd $(DIR_APP) && make install
+	# LFS book moves kbd_mode,openvt,setfont to /bin, 
+	# we do not need that as /usr/bin is never on a seperate partition
+
+ifeq "$(MACHINE)" "sparc"
+	# getkeycodes and setkeycodes don't exist on sparc
+	install -D -m 755 $(DIR_PATCHES)/doesnt_exist.sh /usr/bin/getkeycodes
+	install -D -m 755 $(DIR_PATCHES)/doesnt_exist.sh /usr/bin/setkeycodes
+endif
+
+	# Remove once instead of removing from iso, initramfs, floppies...
+	rm -f /usr/share/kbd/keymaps/i386/qwerty/{hypermap.m4,no-latin1.doc} # unused
+	rm -rf /usr/share/kbd/keymaps/i386/olpc
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

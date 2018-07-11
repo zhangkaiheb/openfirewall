@@ -1,0 +1,75 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: fix-up 7664 2014-10-01 09:08:19Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = fix-up
+HOST_ARCH  = all
+OTHER_SRC  = no
+
+THISAPP    = $(PKG_NAME)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+install :
+
+	# Reset settings made just for build (at every stage as easier to add later from a know content)
+	# Remove fqdn localhost alias entire line and full IPv6 localhost
+###	sed -i -e 's/localhost.*/localhost/' -e '/^127.0.1.1.*$$/d' -e '/^::1.*\|fe00::0.*\|ff00::0.*\|ff02::.*/d' /etc/hosts
+	# Needed for util-linux and coreutils tests
+###	sed -i '/dummy/d' /etc/group
+
+ifeq "$(STAGE)" "base"
+	# Initialize settings needed during build, but not include in .iso
+	# Set hostname for perl, libwww-perl. Add hostname fqdn for localhost and IPv6 localhost (krb5)
+###	sed -i "s/localhost/localhost\n127.0.1.1\t$$(hostname).dummydomain $$(hostname)/" /etc/hosts
+###	echo '::1		localhost ipv6-localhost ipv6-loopback' >>/etc/hosts
+###	echo 'fe00::0		ipv6-localnet'		>>/etc/hosts
+###	echo 'ff00::0		ipv6-mcastprefix'	>>/etc/hosts
+###	echo 'ff02::1		ipv6-allnodes'		>>/etc/hosts
+###	echo 'ff02::2		ipv6-allrouters'	>>/etc/hosts
+###	echo 'ff02::3		ipv6-allhostsf'		>>/etc/hosts
+###
+###	echo "dummy:x:1000:nobody" >> /etc/group
+endif

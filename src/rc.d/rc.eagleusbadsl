@@ -1,0 +1,104 @@
+#!/bin/bash
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (c) 2003-2011 The IPCop Team
+#
+# $Id: rc.eagleusbadsl 5949 2011-10-15 20:42:40Z owes $
+#
+
+DEBUG="off"
+eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
+
+# Debugging. Comment it out to use DEBUG from ppp settings
+DEBUG="on"
+
+msg() {
+    if [ "$DEBUG" = "on" ] ; then
+        /usr/bin/logger -t red "EAGLE-USB: $*"
+    fi
+    echo "$*"
+}
+
+# TODO: is this still needed?
+DSPstr="Please send DSP (eaglectrl -d)"
+
+
+# TODO: everything below this line needs verification
+# eagle-usb module replaced by (kernel standard) ueagle-atm
+# handling fully different, more automated due to udev (?)
+# As-is it is working in Germany, might not apply for other ISP with differing settings/technology.
+
+
+# See how we were called.
+case "$1" in
+start)
+    if [ ! -d "/sys/bus/usb/devices/usb1" ]; then
+        msg "No USB enabled"
+        exit 1
+    fi
+
+    # TODO: unsure how to best handle this section
+#    if [ "$LINE" != "WO" -a "$LINE" != "FR" -a "$LINE" != "IT" -a "$LINE" != "ES" ]; then
+#        LINE='WO' # default CMV value
+#    fi
+
+#    /bin/ln -f -s /etc/eagle-usb/CMVep$LINE.txt /etc/eagle-usb/CMVep.txt
+#    /bin/ln -f -s /etc/eagle-usb/CMVeiWO.txt /etc/eagle-usb/CMVei.txt
+
+    if ( ! /bin/lsmod | /bin/grep -q [u]eagle-atm ); then
+        /sbin/modprobe ueagle-atm
+        # let some time to load firmware
+        /bin/sleep 8
+    fi
+
+    if [ ! -d "/sys/bus/usb/drivers/ueagle-atm" ]; then
+        msg "ueagle-atm isn't loaded"
+        exit 1
+    fi
+
+    # TODO: unsure how to best handle this section
+#    if [[ ( -e /var/ipcop/ppp/updatesettings) ||
+#            ( `/usr/sbin/eaglestat | /bin/grep "$DSPstr"` = "$DSPstr" ) ]]; then
+#        /usr/sbin/eaglectrl -d -o/var/ipcop/eagle-usb/eagle-usb.conf
+#        if [ $? -ne 0 ]; then
+#            msg "init fail"
+#            exit 1
+#        fi
+#    fi
+
+    # TODO: unsure how to best handle this section
+#    /usr/sbin/eaglectrl -s90
+#    if [ $? -ne 0 ]; then
+#        msg "synchronisation fail"
+#        exit 1
+#    fi
+    ;;
+stop)
+    msg "stop"
+    ;;
+cleanup)
+    msg "driver cleanup"
+
+    /sbin/modprobe -r ueagle-atm
+    ;;
+*)
+    /bin/echo "Usage: $0 {start|stop|cleanup}"
+    exit 1
+    ;;
+esac
+
+exit 0

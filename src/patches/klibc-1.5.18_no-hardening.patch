@@ -1,0 +1,11 @@
+--- klibc-1.5.18/scripts/Kbuild.klibc.old	2010-04-22 02:08:49.000000000 +0200
++++ klibc-1.5.18/scripts/Kbuild.klibc	2011-01-05 08:32:37.000000000 +0100
+@@ -66,7 +66,7 @@
+ # Defines used when compiling early userspace (klibc programs)
+ # ---------------------------------------------------------------------------
+ 
+-KLIBCREQFLAGS     := $(call cc-option, -fno-stack-protector, )
++KLIBCREQFLAGS     := $(call cc-option, -fno-stack-protector, ) $(call cc-option, -U_FORTIFY_SOURCE, ) $(call cc-option, -fno-PIE, ) $(call cc-option, -nopie, ) $(call cc-option, -norelro, ) $(call cc-option, -nonow, ) $(call cc-option, -nocombreloc, )
+ KLIBCARCHREQFLAGS :=
+ KLIBCOPTFLAGS     :=
+ KLIBCWARNFLAGS    := -W -Wall -Wno-sign-compare -Wno-unused-parameter

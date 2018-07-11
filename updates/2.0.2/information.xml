@@ -1,0 +1,15 @@
+<ipcop>
+    <update>
+        <version>2.0.2</version>
+        <releasedate>2011-11-18</releasedate>
+        <size>12839</size>
+        <description>Fix creating SSL CA certificate.&lt;br /&gt;
+            Language updates.&lt;br /&gt;
+            Upgrade bind to 9.8.1-P1, binutils to 2.21.1a, kernel to 2.6.32.48, rsyslog to 5.8.6,
+            tzdata to 2011n.&lt;br /&gt;
+            &lt;b&gt;Mandatory reboot after upgrade.&lt;/b&gt;</description>
+        <previousversion>2.0.1</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

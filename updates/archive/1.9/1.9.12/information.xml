@@ -1,0 +1,14 @@
+<ipcop>
+    <update>
+        <version>1.9.12</version>
+        <releasedate>2010-02-16</releasedate>
+        <description>Language updates.&lt;br /&gt;
+            Upgrade coreutils to 8.4, dhcpcd to 5.1.5, e2fsprogs to 1.41.10,
+            gzip to 1.4, iproute2 to 2.6.31, iptstate to 2.2.2,
+            linux-atm to 2.5.1, lsof to 4.83, pciutils to 3.1.7, psmisc to 22.10,
+            traceroute to 2.0.13, usb-modeswitch to 1.1.0, util-linux-ng to 2.17.</description>
+        <previousversion>1.9.11</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

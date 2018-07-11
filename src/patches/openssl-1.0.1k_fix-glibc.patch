@@ -1,0 +1,11 @@
+--- a/ssl/ssltest.c	2015-01-13 13:53:10.000000000 +0100
++++ a/ssl/ssltest.c	2015-01-13 13:53:03.984826227 +0100
+@@ -143,6 +143,8 @@
+ #define _BSD_SOURCE 1		/* Or gethostname won't be declared properly
+ 				   on Linux and GNU platforms. */
+ 
++#define _DEFAULT_SOURCE 1
++
+ #include <assert.h>
+ #include <errno.h>
+ #include <limits.h>

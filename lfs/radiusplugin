@@ -1,0 +1,104 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: radiusplugin 6747 2012-08-05 07:55:13Z gespinasse $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = radiusplugin
+VER        = v2.1
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)_$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+DL_FROM    = http://www.nongnu.org/radiusplugin
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = c4715d9cc220a8f9f708408a84cf89bc
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	# unpacks into radiusplugin directory, not in radiusplugin_v2.1
+	@rm -rf $(DIR_SRC)/radiusplugin $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+	mv $(DIR_SRC)/radiusplugin $(DIR_APP)
+	# debian package name is openvpn-auth-radius http://patch-tracker.debian.org/package/openvpn-auth-radius
+	# Only had the fix-fd-leak.patch
+
+	# To allow using defined CFLAGS as FORTIFY did not apply without optimization, send upstream, will see
+	cd $(DIR_APP) && patch -p0 -i $(DIR_PATCHES)/$(PKG_NAME)_cvs_Makefile.patch
+
+	# cherry-picked from CVS
+	cd $(DIR_APP) && patch -p0 -i $(DIR_PATCHES)/$(PKG_NAME)_non-standard-port.patch # CVS 2010-11-11 21:48
+	cd $(DIR_APP) && patch -p1 -i $(DIR_PATCHES)/$(PKG_NAME)_fix-fd-leak.patch	# CVS 2010-12-16 21:11
+	# not yet
+	#cd $(DIR_APP) && patch -p0 -i $(DIR_PATCHES)/$(PKG_NAME)_no-username.patch	# CVS 2011-05-14 06:02
+	#cd $(DIR_APP) && patch -p0 -i $(DIR_PATCHES)/$(PKG_NAME)_libgcrypt-init.patch	# CVS 2011-09-24 19:21
+	#cd $(DIR_APP) && patch -p0 -i $(DIR_PATCHES)/$(PKG_NAME)_unused.patch		# CVS 2011-11-26 08:38
+
+	cd $(DIR_APP) && make V=1
+	install -m 0655 $(DIR_APP)/radiusplugin.so /usr/lib/radiusplugin.so
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

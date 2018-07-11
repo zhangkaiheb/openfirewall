@@ -1,0 +1,144 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: krb5 7750 2014-12-15 07:15:26Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = krb5
+##VER        = 1.12.2
+VER        = 1.16.1
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+##DL_FROM    = http://web.mit.edu/kerberos/dist/krb5/1.12
+DL_FROM    = https://kerberos.org/dist/krb5/1.16
+##DL_FROM    = https://github.com/krb5/krb5/archive
+DIR_APP    = $(DIR_SRC)/$(THISAPP)/src
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+CFLAGS    += -fno-strict-aliasing
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+##$(DL_FILE)_MD5 = 357f1312b7720a0a591e22db0f7829fe
+$(DL_FILE)_MD5 = 848e9b80d6aaaa798e3f3df24b83c407
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+##	cd $(DIR_SRC) && tar xf $(THISAPP).tar.gz && rm $(THISAPP).tar.gz*
+
+	# Hack : disable -Werror=uninitialized or build fail, probably gcc-4.4 is less smart than later versions for uninitialized matter
+	# Skip rpc udp tests that fail on kernel 3.2 or higher, upstream does the same (commit 11bd102c0e3793204111f712e5bd4bf54f2d9573)
+###	cd $(DIR_APP) && sed -i -e 's/ error=uninitialized //' -e 's/PASS="tcp udp"/PASS="tcp"/' configure
+
+	# gcc-4.4 don't know about #pragma GCC diagnostic push/pop and warn during compilation.
+	# gcc-4.6 is required for that push/pop feature.
+	# That mean gcc-4.4 can't pop diagnostic ignored "-Wuninitialized" and not ignore that warning
+	# Remove push and replace pop with diagnostic error
+	# Remove -Wmaybe-uninitialized line as no understood by gcc-4.4
+###	cd  $(DIR_APP) && sed -i -e 's/^#pragma GCC diagnostic push$$//g' \
+###				-e 's/^#pragma GCC diagnostic pop/#pragma GCC diagnostic error "-Wuninitialized"/g' \
+###				-e '/Wmaybe-uninitialized/d' lib/krb5/krb/{x-deltat.y,deltat.c}
+
+	# Hack against generated file by rpcgen, so probably not right for upstream
+	# Add static to function to solve 'no previous prototype for'
+###	cd $(DIR_APP) && sed -i '$$!N;s/^bool_t\nxdr_int16_t/static &/;P;D' lib/kdb/iprop_xdr.c
+###	cd $(DIR_APP) && sed -i '$$!N;s/^bool_t\nxdr_int32_t/static &/;P;D' lib/kdb/iprop_xdr.c
+###	cd $(DIR_APP) && sed -i '$$!N;s/^bool_t\nxdr_uint16_t/static &/;P;D' lib/kdb/iprop_xdr.c
+###	cd $(DIR_APP) && sed -i '$$!N;s/^bool_t\nxdr_uint32_t/static &/;P;D' lib/kdb/iprop_xdr.c
+
+	# Fix initialization discards qualifiers from pointer target type,  accepted upstream (for 1.12)
+###	cd $(DIR_APP) && sed -i 's/  krb5_crypto_iov/  const krb5_crypto_iov/' lib/crypto/openssl/hmac.c
+
+	# Don't care that much about libverto that may be used too on a more recent glib.
+	# libverto linked code (krb5kdc kadmind) is not include.
+	cd $(DIR_APP) && \
+		./configure						\
+			CPPFLAGS="-I/usr/include/et -I/usr/include/ss"	\
+			--prefix=/usr					\
+			--localstatedir=/var/lib			\
+			--with-crypto-impl=openssl			\
+			--without-tcl               \
+			--with-system-et				\
+			--with-system-ss
+
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+
+	cd $(DIR_APP) && make install
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# make install before make check, just to be sure
+	# http://web.mit.edu/kerberos/krb5-latest/doc/build/doing_build.html#testing-the-build
+
+	# Tests work fine if not offline
+	# des : kprop test fail if host if offline
+	# ./t_iprop.py test stall if offline
+	-cd $(DIR_APP) && make -k check &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+	# Some files may remain after tests
+	@rm -rf /var/tmp/*
+endif
+
+	@rm -rf $(DIR_SRC)/$(THISAPP) $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/squid-*
+	@$(POSTBUILD)

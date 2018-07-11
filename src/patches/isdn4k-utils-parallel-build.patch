@@ -1,0 +1,11 @@
+--- isdn4k-utils/eicon/Makefile	2007-11-24 17:14:54.000000000 +0000
++++ isdn4k-utils-para/eicon/Makefile	2007-11-24 17:13:13.000000000 +0000
+@@ -7,6 +7,8 @@
+ # (C) 1999,2000 Cytronics & Melware
+ #
+ 
++.NOTPARALLEL:
++
+ SHELL			= /bin/sh
+ CFLAGS			= -Wall -O2 -DUNIX -DLINUX
+ INCLUDES		= -I. -Iinclude

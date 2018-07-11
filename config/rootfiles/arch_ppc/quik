@@ -1,0 +1,11 @@
+## quik-2.1-7
+##
+boot/first.b
+boot/second
+boot/second.b
+boot/quik-NOT_CONFIGURED.conf
+sbin/quik
+usr/local/bin/install-quik.sh
+#usr/share/man/man5/quik.conf.5
+#usr/share/man/man8/bootstrap.8
+#usr/share/man/man8/quik.8

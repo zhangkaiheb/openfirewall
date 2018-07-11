@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Regularly called by fcron to save logs from ramdisk to flashdisk.
+#
+# $Id: rc.flash.down 1902 2008-09-16 19:54:54Z owes $
+
+# test for flash installation, return silently to avoid error messages in fcron log
+if [ ! -f /etc/FLASH ]; then
+    exit 0
+fi
+
+# tar and gzip log, rrd etc. exclude proxy cache
+tar -czf /var/log_compressed/log.tgz --exclude=/var/log/cache/* /var/log/*
+
+# tar and gzip fcrontab
+tar -czf /var/log_compressed/spool.tgz -C /var/spool cron

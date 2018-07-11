@@ -1,0 +1,115 @@
+Submitted By: Robert Connolly (robert at linuxfromscratch dot org)
+Date: 2010-11-07
+Initial Package Version: 4.5.1
+Upstream Status: Not submitted - Hack
+Origin: ALT Linux - gcc43-alt-defaults-FORTIFY_SOURCE.patch and
+	gcc44-alt-escalate-always-overflow.patch
+Description: This patch adds "-D_FORTIFY_SOURCE=2" to GCC's default options.
+An extra function is also added to GCC to cause a compiler error when GCC
+detects, at compile time, that a buffer will always overflow.
+
+Disable "-D_FORTIFY_SOURCE=2" with "-U_FORTIFY_SOURCE" or "-D_FORTIFY_SOURCE=0"
+in CPPFLAGS.
+
+Disable the "always overflow error" by setting "GCC_TOLERATE_ALWAYS_OVERFLOW"
+in the shell environment.
+
+diff -Naur gcc-4.5.1.orig/gcc/builtins.c gcc-4.5.1/gcc/builtins.c
+--- gcc-4.5.1.orig/gcc/builtins.c	2010-06-14 16:00:39.000000000 +0000
++++ gcc-4.5.1/gcc/builtins.c	2010-11-08 01:35:53.941651175 +0000
+@@ -11648,6 +11648,31 @@
+   return object_size_type < 2 ? constm1_rtx : const0_rtx;
+ }
+ 
++static void
++report_always_overflow_diagnostic (tree exp)
++{
++  static int tolerate_always_overflow = 0;
++
++  if (tolerate_always_overflow == 0)
++    {
++      const char *p = getenv("GCC_TOLERATE_ALWAYS_OVERFLOW");
++
++      if (p && p[0] == '1')
++	tolerate_always_overflow = 1;
++      else
++	tolerate_always_overflow = -1;
++    }
++
++  if (tolerate_always_overflow > 0)
++    warning_at (tree_nonartificial_location (exp),
++		0, "%Kcall to %D will always overflow destination buffer",
++		exp, get_callee_fndecl (exp));
++  else
++    error_at (tree_nonartificial_location (exp),
++	      "%Kcall to %D will always overflow destination buffer",
++	      exp, get_callee_fndecl (exp));
++}
++
+ /* Expand EXP, a call to the __mem{cpy,pcpy,move,set}_chk builtin.
+    FCODE is the BUILT_IN_* to use.
+    Return NULL_RTX if we failed; the caller should emit a normal call,
+@@ -11681,9 +11706,7 @@
+ 
+       if (! integer_all_onesp (size) && tree_int_cst_lt (size, len))
+ 	{
+-	  warning_at (tree_nonartificial_location (exp),
+-		      0, "%Kcall to %D will always overflow destination buffer",
+-		      exp, get_callee_fndecl (exp));
++	  report_always_overflow_diagnostic (exp);
+ 	  return NULL_RTX;
+ 	}
+ 
+@@ -11834,8 +11857,7 @@
+   else if (! host_integerp (len, 1) || ! tree_int_cst_lt (size, len))
+     return;
+ 
+-  warning_at (loc, 0, "%Kcall to %D will always overflow destination buffer",
+-	      exp, get_callee_fndecl (exp));
++  report_always_overflow_diagnostic (exp);
+ }
+ 
+ /* Emit warning if a buffer overflow is detected at compile time
+@@ -11890,9 +11912,7 @@
+     return;
+ 
+   if (! tree_int_cst_lt (len, size))
+-    warning_at (tree_nonartificial_location (exp),
+-		0, "%Kcall to %D will always overflow destination buffer",
+-		exp, get_callee_fndecl (exp));
++    report_always_overflow_diagnostic (exp);
+ }
+ 
+ /* Emit warning if a free is called with address of a variable.  */
+diff -Naur gcc-4.5.1.orig/gcc/gcc.c gcc-4.5.1/gcc/gcc.c
+--- gcc-4.5.1.orig/gcc/gcc.c	2010-04-18 17:46:08.000000000 +0000
++++ gcc-4.5.1/gcc/gcc.c	2010-11-08 01:36:07.934649041 +0000
+@@ -873,6 +873,7 @@
+  %{!E:%{!M:%{!MM:%{!MT:%{!MQ:%{MD|MMD:%{o*:-MQ %*}}}}}}}\
+  %{remap} %{g3|ggdb3|gstabs3|gcoff3|gxcoff3|gvms3:-dD}\
+  %{H} %C %{D*&U*&A*} %{i*} %Z %i\
++ %{!D_FORTIFY_SOURCE:%{!D_FORTIFY_SOURCE=*:%{!U_FORTIFY_SOURCE:-D_FORTIFY_SOURCE=2}}}\
+  %{fmudflap:-D_MUDFLAP -include mf-runtime.h}\
+  %{fmudflapth:-D_MUDFLAP -D_MUDFLAPTH -include mf-runtime.h}\
+  %{E|M|MM:%W{o*}}";
+diff -Naur gcc-4.5.1.orig/libjava/java/lang/natClass.cc gcc-4.5.1/libjava/java/lang/natClass.cc
+--- gcc-4.5.1.orig/libjava/java/lang/natClass.cc	2010-01-26 18:59:16.000000000 +0000
++++ gcc-4.5.1/libjava/java/lang/natClass.cc	2010-11-08 01:35:53.962649720 +0000
+@@ -1165,7 +1165,7 @@
+ 	int cindex = read_u2 (bytes, last);
+ 	check_constant (pool, cindex, JV_CONSTANT_Double);
+ 	_Jv_word2 word;
+-	memcpy (&word, &pool->data[cindex], 2 * sizeof (_Jv_word));
++	memcpy (&word, &pool->data[cindex], sizeof (word));
+ 	result = Double::valueOf (word.d);
+       }
+       break;
+@@ -1181,7 +1181,7 @@
+ 	int cindex = read_u2 (bytes, last);
+ 	check_constant (pool, cindex, JV_CONSTANT_Long);
+ 	_Jv_word2 word;
+-	memcpy (&word, &pool->data[cindex], 2 * sizeof (_Jv_word));
++	memcpy (&word, &pool->data[cindex], sizeof (word));
+ 	result = Long::valueOf (word.l);
+       }
+       break;

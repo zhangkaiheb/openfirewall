@@ -1,0 +1,17 @@
+#usr/include/pci
+#usr/include/pci/config.h
+#usr/include/pci/header.h
+#usr/include/pci/pci.h
+#usr/include/pci/types.h
+#usr/lib/libpci.so
+usr/lib/libpci.so.3
+usr/lib/libpci.so.3.4.1
+#usr/lib/pkgconfig/libpci.pc
+usr/sbin/lspci
+usr/sbin/setpci
+#usr/sbin/update-pciids
+#usr/share/man/man7/pcilib.7
+#usr/share/man/man8/lspci.8
+#usr/share/man/man8/setpci.8
+#usr/share/man/man8/update-pciids.8
+usr/share/pci.ids.gz

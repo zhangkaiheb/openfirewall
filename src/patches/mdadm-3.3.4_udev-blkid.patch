@@ -1,0 +1,11 @@
+--- mdadm-3.3/udev-md-raid-arrays.rules.orig	2014-01-11 17:11:31.000000000 +0100
++++ mdadm-3.3/udev-md-raid-arrays.rules	2014-01-11 17:12:38.000000000 +0100
+@@ -26,7 +26,7 @@
+ ENV{DEVTYPE}=="partition", ENV{MD_DEVNAME}=="*[^0-9]", SYMLINK+="md/$env{MD_DEVNAME}%n"
+ ENV{DEVTYPE}=="partition", ENV{MD_DEVNAME}=="*[0-9]", SYMLINK+="md/$env{MD_DEVNAME}p%n"
+ 
+-IMPORT{builtin}="blkid"
++IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
+ OPTIONS+="link_priority=100"
+ OPTIONS+="watch"
+ ENV{ID_FS_USAGE}=="filesystem|other|crypto", ENV{ID_FS_UUID_ENC}=="?*", SYMLINK+="disk/by-uuid/$env{ID_FS_UUID_ENC}"

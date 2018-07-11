@@ -1,0 +1,119 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: lsof 7711 2014-11-25 11:25:24Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = lsof
+VER        = 4.88
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)_$(VER)
+#DL_FILE    = $(THISAPP).tar.bz2
+DL_FILE    = $(THISAPP).tar.gz
+#DL_FROM    = ftp://lsof.itap.purdue.edu/pub/tools/unix/lsof
+DL_FROM    = https://launchpad.net/lsof/main/4.88/+download
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+# Used to include same timestamp for all
+# This is the release date
+DATESTAMP = "2014-11-24 14:20:00"
+
+# A bit too noisy for now and mostly uninteresting warnings
+# CFLAGS += -Wall
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+#$(DL_FILE)_MD5 = 1b29c10db4aa88afcaeeaabeef6790db
+$(DL_FILE)_MD5 = cbf05e6a7cc1cef6e6c78242febfaccb
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar axf $(DIR_DL)/$(DL_FILE)
+	cd $(DIR_APP) && tar xf $(PKG_NAME)_$(VER)_src.tar
+
+	# LSOF_VSTR is set by Configure from kernel headers version and LSOF_VERS is derivated from LSOF_VSTR
+	cd $(DIR_APP)/$(PKG_NAME)_$(VER)_src && ./Configure -n linux
+
+	# Use release date instead of `date` so everyone that compile has same md5
+	cd $(DIR_APP)/$(PKG_NAME)_$(VER)_src && sed -i -e 's|'\`date\`'|$(DATESTAMP)|' Makefile
+
+	# Slightly increase security
+	cd $(DIR_APP)/$(PKG_NAME)_$(VER)_src && sed -i -e 's|.*#define\s*HASSECURITY\s*1.*|#define HASSECURITY 1)|' \
+			-e 's|.*#define\s*HASNOSOCKSECURITY\s*1.*|#define HASNOSOCKSECURITY 1)|' machine.h
+
+	# Pass our CFLAGS to DEBUG variable
+	cd $(DIR_APP)/$(PKG_NAME)_$(VER)_src && LSOF_HOST=IPCop LSOF_USER=builder LSOF_SYSINFO=none make -j $(PARALLELISM) DEBUG="${CFLAGS}"
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# Want the test to run, without interactive effect, so change standard input with yes pipe and hack tty detection to exit with success
+	cd $(DIR_APP)/$(PKG_NAME)_$(VER)_src && sed -i 's/exit 1/exit 0/' tests/CkTestDB
+	# opt tests are not run as nfs test fail without a path to nfs
+	-cd $(DIR_APP)/$(PKG_NAME)_$(VER)_src && yes '' | make -C tests all &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+
+	cd $(DIR_APP)/$(PKG_NAME)_$(VER)_src && install lsof /usr/sbin
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

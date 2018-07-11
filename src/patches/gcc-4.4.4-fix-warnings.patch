@@ -1,0 +1,527 @@
+Debian http://patch-tracker.debian.org/patch/series/view/gcc-4.4/4.4.4-5/fix-warnings.diff
+with fortran part removed (as we don't care and one part did not apply)
+# DP: Fix warnings with -D_FORTIFY_SOURCE and -Wformat-security.
+
+libcpp/
+
+	* macro.c (create_iso_definition): Avoid warnings with
+	-Wformat-security.
+	* lex.c (cpp_output_token): Avoid warnings with -D_FORTIFY_SOURCE.
+
+gcc/
+
+	* toplev.c (print_to_asm_out_file, print_to_stderr): Avoid warnings with
+	-Wformat-security, (pch_option_mismatch) avoid warnings with
+	-D_FORTIFY_SOURCE.
+
+	* c-convert.c (convert): Avoid warnings with -Wformat-security.
+	* c-typeck.c (convert_arguments, build_unary_op, build_binary_op): Likewise.
+	* c-common.c (c_parse_error): Likewise.
+	* cfg.c (dump_cfg_bb_info): Likewise.
+	* fold-const.c (fold_overflow_warning): Likewise.
+	* ira-conflicts.c (print_hard_reg_set): Likewise.
+	* opts.c (print_filtered_help): Likewise.
+	* tree-switch-conversion.c (do_switchconv): Likewise.
+	* collect2.c (collect_execute, scan_prog_file): Likewise.
+
+	* c-ppoutput.c (print_lines_directives_only,scan_translation_unit_trad):
+	Avoid warnings with -D_FORTIFY_SOURCE.
+	* dbxout.c (dbxout_finish_complex_stabs): Likewise.
+	* diagnostic.c (build_message_string): Likewise.
+	* final.c (output_operand_lossage): Likewise.
+	* tree-data-ref.c (dot_rdg): Likewise.
+	* tree-ssa-structalias.c (create_function_info_for,
+	create_variable_info_for): Likewise.
+
+gcc/cp/
+
+	* pt.c (tsubst_copy_and_build): Avoid warnings with -Wformat-security.
+	* parser.c (cp_parser_check_type_definition,
+	cp_parser_non_integral_constant_expression): Likewise.
+	* typeck.c (cp_build_binary_op, cp_build_unary_op): Likewise.
+	* cvt.c (ocp_convert): Likewise.
+
+gcc/objc/
+
+	* objc-act.c (objc_lookup_protocol): Avoid warnings with
+	-Wformat-security.
+
+---
+ gcc/c-common.c               |    4 +-
+ gcc/c-convert.c              |    2 +-
+ gcc/c-ppoutput.c             |    6 ++-
+ gcc/c-typeck.c               |    6 +-
+ gcc/cfg.c                    |    2 +-
+ gcc/collect2.c               |    8 ++--
+ gcc/cp/cvt.c                 |    2 +-
+ gcc/cp/parser.c              |    4 +-
+ gcc/cp/pt.c                  |    2 +-
+ gcc/cp/typeck.c              |    4 +-
+ gcc/dbxout.c                 |    5 +-
+ gcc/diagnostic.c             |    3 +-
+ gcc/final.c                  |    5 +-
+ gcc/fold-const.c             |    2 +-
+ gcc/fortran/cpp.c            |    3 +-
+ gcc/fortran/decl.c           |    4 +-
+ gcc/fortran/intrinsic.c      |    8 ++--
+ gcc/fortran/match.c          |    4 +-
+ gcc/fortran/matchexp.c       |   18 ++++----
+ gcc/fortran/module.c         |   30 +++++++-------
+ gcc/fortran/openmp.c         |    2 +-
+ gcc/fortran/primary.c        |    6 +-
+ gcc/fortran/symbol.c         |   24 +++++-----
+ gcc/fortran/trans-array.c    |   94 +++++++++++++++++++++++++----------------
+ gcc/fortran/trans-decl.c     |    2 +-
+ gcc/fortran/trans-expr.c     |   22 ++++++----
+ gcc/fortran/trans-io.c       |    9 +++-
+ gcc/fortran/trans.c          |   11 +++--
+ gcc/ira-conflicts.c          |    2 +-
+ gcc/objc/objc-act.c          |    2 +-
+ gcc/opts.c                   |    2 +-
+ gcc/toplev.c                 |    9 +++-
+ gcc/tree-data-ref.c          |    3 +-
+ gcc/tree-ssa-structalias.c   |   13 ++++--
+ gcc/tree-switch-conversion.c |    2 +-
+ libcpp/lex.c                 |    6 ++-
+ libcpp/macro.c               |    4 +-
+ 37 files changed, 190 insertions(+), 145 deletions(-)
+
+--- a/src/gcc/c-common.c
++++ b/src/gcc/c-common.c
+@@ -7493,11 +7493,11 @@ c_parse_error (const char *gmsgid, enum cpp_ttype token, tree value)
+       message = NULL;
+     }
+   else
+-    error (gmsgid);
++    error ("%s", gmsgid);
+ 
+   if (message)
+     {
+-      error (message);
++      error ("%s", message);
+       free (message);
+     }
+ #undef catenate_messages
+--- a/src/gcc/c-convert.c
++++ b/src/gcc/c-convert.c
+@@ -79,7 +79,7 @@ convert (tree type, tree expr)
+   if ((invalid_conv_diag
+        = targetm.invalid_conversion (TREE_TYPE (expr), type)))
+     {
+-      error (invalid_conv_diag);
++      error ("%s", invalid_conv_diag);
+       return error_mark_node;
+     }
+ 
+--- a/src/gcc/c-ppoutput.c
++++ b/src/gcc/c-ppoutput.c
+@@ -223,8 +223,9 @@ scan_translation_unit (cpp_reader *pfile)
+ static void
+ print_lines_directives_only (int lines, const void *buf, size_t size)
+ {
++  size_t rv_neverused ATTRIBUTE_UNUSED;
+   print.src_line += lines;
+-  fwrite (buf, 1, size, print.outf);
++  rv_neverused = fwrite (buf, 1, size, print.outf);
+ }
+ 
+ /* Writes out the preprocessed file, handling spacing and paste
+@@ -256,8 +257,9 @@ scan_translation_unit_trad (cpp_reader *pfile)
+   while (_cpp_read_logical_line_trad (pfile))
+     {
+       size_t len = pfile->out.cur - pfile->out.base;
++      size_t rv_neverused ATTRIBUTE_UNUSED;
+       maybe_print_line (pfile->out.first_line);
+-      fwrite (pfile->out.base, 1, len, print.outf);
++      rv_neverused = fwrite (pfile->out.base, 1, len, print.outf);
+       print.printed = 1;
+       if (!CPP_OPTION (pfile, discard_comments))
+ 	account_for_newlines (pfile->out.base, len);
+--- a/src/gcc/c-typeck.c
++++ b/src/gcc/c-typeck.c
+@@ -2730,7 +2730,7 @@ convert_arguments (int nargs, tree *argarray,
+       else if ((invalid_func_diag =
+ 		targetm.calls.invalid_arg_for_unprototyped_fn (typelist, fundecl, val)))
+ 	{
+-	  error (invalid_func_diag);
++	  error ("%s", invalid_func_diag);
+ 	  return -1;
+ 	}
+       else
+@@ -2947,7 +2947,7 @@ build_unary_op (location_t location,
+   if ((invalid_op_diag
+        = targetm.invalid_unary_op (code, TREE_TYPE (xarg))))
+     {
+-      error_at (location, invalid_op_diag);
++      error_at (location, "%s", invalid_op_diag);
+       return error_mark_node;
+     }
+ 
+@@ -8095,7 +8095,7 @@ build_binary_op (location_t location, enum tree_code code,
+   if ((invalid_op_diag
+        = targetm.invalid_binary_op (code, type0, type1)))
+     {
+-      error_at (location, invalid_op_diag);
++      error_at (location, "%s", invalid_op_diag);
+       return error_mark_node;
+     }
+ 
+--- a/src/gcc/cfg.c
++++ b/src/gcc/cfg.c
+@@ -908,7 +908,7 @@ dump_cfg_bb_info (FILE *file, basic_block bb)
+ 	else
+ 	  fprintf (file, ", ");
+ 	first = false;
+-	fprintf (file, bb_bitnames[i]);
++	fprintf (file, "%s", bb_bitnames[i]);
+       }
+   if (!first)
+     fprintf (file, ")");
+--- a/src/gcc/collect2.c
++++ b/src/gcc/collect2.c
+@@ -1647,10 +1647,10 @@ collect_execute (const char *prog, char **argv, const char *outname,
+       if (err != 0)
+ 	{
+ 	  errno = err;
+-	  fatal_perror (errmsg);
++	  fatal_perror ("%s", errmsg);
+ 	}
+       else
+-	fatal (errmsg);
++	fatal ("%s", errmsg);
+     }
+ 
+   if (response_arg)
+@@ -2137,10 +2137,10 @@ scan_prog_file (const char *prog_name, enum pass which_pass)
+       if (err != 0)
+ 	{
+ 	  errno = err;
+-	  fatal_perror (errmsg);
++	  fatal_perror ("%s", errmsg);
+ 	}
+       else
+-	fatal (errmsg);
++	fatal ("%s", errmsg);
+     }
+ 
+   int_handler  = (void (*) (int)) signal (SIGINT,  SIG_IGN);
+--- a/src/gcc/cp/cvt.c
++++ b/src/gcc/cp/cvt.c
+@@ -591,7 +591,7 @@ ocp_convert (tree type, tree expr, int convtype, int flags)
+   if ((invalid_conv_diag
+        = targetm.invalid_conversion (TREE_TYPE (expr), type)))
+     {
+-      error (invalid_conv_diag);
++      error ("%s", invalid_conv_diag);
+       return error_mark_node;
+     }
+ 
+--- a/src/gcc/cp/parser.c
++++ b/src/gcc/cp/parser.c
+@@ -2204,7 +2204,7 @@ cp_parser_check_type_definition (cp_parser* parser)
+     {
+       /* Don't use `%s' to print the string, because quotations (`%<', `%>')
+ 	 in the message need to be interpreted.  */
+-      error (parser->type_definition_forbidden_message);
++      error ("%s", parser->type_definition_forbidden_message);
+       return false;
+     }
+   return true;
+@@ -2291,7 +2291,7 @@ cp_parser_non_integral_constant_expression (cp_parser  *parser,
+ 	  char *message = concat (thing,
+ 				  " cannot appear in a constant-expression",
+ 				  NULL);
+-	  error (message);
++	  error ("%s", message);
+ 	  free (message);
+ 	  return true;
+ 	}
+--- a/src/gcc/cp/pt.c
++++ b/src/gcc/cp/pt.c
+@@ -11060,7 +11060,7 @@ tsubst_copy_and_build (tree t,
+ 				     &error_msg,
+ 				     input_location);
+ 	if (error_msg)
+-	  error (error_msg);
++	  error ("%s", error_msg);
+ 	if (!function_p && TREE_CODE (decl) == IDENTIFIER_NODE)
+ 	  decl = unqualified_name_lookup_error (decl);
+ 	return decl;
+--- a/src/gcc/cp/typeck.c
++++ b/src/gcc/cp/typeck.c
+@@ -3373,7 +3373,7 @@ cp_build_binary_op (location_t location,
+   if ((invalid_op_diag
+        = targetm.invalid_binary_op (code, type0, type1)))
+     {
+-      error (invalid_op_diag);
++      error ("%s", invalid_op_diag);
+       return error_mark_node;
+     }
+ 
+@@ -4254,7 +4254,7 @@ cp_build_unary_op (enum tree_code code, tree xarg, int noconvert,
+ 				    : code),
+ 				   TREE_TYPE (xarg))))
+     {
+-      error (invalid_op_diag);
++      error ("%s", invalid_op_diag);
+       return error_mark_node;
+     }
+ 
+--- a/src/gcc/dbxout.c
++++ b/src/gcc/dbxout.c
+@@ -847,6 +847,7 @@ dbxout_finish_complex_stabs (tree sym, STAB_CODE_TYPE code,
+   int line ATTRIBUTE_UNUSED;
+   char *str;
+   size_t len;
++  size_t rv_neverused ATTRIBUTE_UNUSED;
+ 
+   line = sym ? DECL_SOURCE_LINE (sym) : 0;
+   if (DBX_CONTIN_LENGTH > 0)
+@@ -867,7 +868,7 @@ dbxout_finish_complex_stabs (tree sym, STAB_CODE_TYPE code,
+       for (;;)
+ 	{
+ 	  chunklen = strlen (chunk);
+-	  fwrite (chunk, 1, chunklen, asm_out_file);
++	  rv_neverused = fwrite (chunk, 1, chunklen, asm_out_file);
+ 	  fputs ("\",", asm_out_file);
+ 
+ 	  /* Must add an extra byte to account for the NUL separator.  */
+@@ -894,7 +895,7 @@ dbxout_finish_complex_stabs (tree sym, STAB_CODE_TYPE code,
+       len = obstack_object_size (&stabstr_ob);
+       str = XOBFINISH (&stabstr_ob, char *);
+       
+-      fwrite (str, 1, len, asm_out_file);
++      rv_neverused = fwrite (str, 1, len, asm_out_file);
+       DBX_FINISH_STABS (sym, code, line, addr, label, number);
+     }
+   obstack_free (&stabstr_ob, str);
+--- a/src/gcc/diagnostic.c
++++ b/src/gcc/diagnostic.c
+@@ -70,9 +70,10 @@ build_message_string (const char *msg, ...)
+ {
+   char *str;
+   va_list ap;
++  size_t rv_neverused ATTRIBUTE_UNUSED;
+ 
+   va_start (ap, msg);
+-  vasprintf (&str, msg, ap);
++  rv_neverused = vasprintf (&str, msg, ap);
+   va_end (ap);
+ 
+   return str;
+--- a/src/gcc/final.c
++++ b/src/gcc/final.c
+@@ -2989,12 +2989,13 @@ output_operand_lossage (const char *cmsgid, ...)
+   char *new_message;
+   const char *pfx_str;
+   va_list ap;
++  int rv_neverused ATTRIBUTE_UNUSED;
+ 
+   va_start (ap, cmsgid);
+ 
+   pfx_str = this_is_asm_operands ? _("invalid 'asm': ") : "output_operand: ";
+-  asprintf (&fmt_string, "%s%s", pfx_str, _(cmsgid));
+-  vasprintf (&new_message, fmt_string, ap);
++  rv_neverused = asprintf (&fmt_string, "%s%s", pfx_str, _(cmsgid));
++  rv_neverused = vasprintf (&new_message, fmt_string, ap);
+ 
+   if (this_is_asm_operands)
+     error_for_asm (this_is_asm_operands, "%s", new_message);
+--- a/src/gcc/fold-const.c
++++ b/src/gcc/fold-const.c
+@@ -1025,7 +1025,7 @@ fold_overflow_warning (const char* gmsgid, enum warn_strict_overflow_code wc)
+ 	}
+     }
+   else if (issue_strict_overflow_warning (wc))
+-    warning (OPT_Wstrict_overflow, gmsgid);
++    warning (OPT_Wstrict_overflow, "%s", gmsgid);
+ }
+ 
+ /* Return true if the built-in mathematical function specified by CODE
+--- a/src/gcc/ira-conflicts.c
++++ b/src/gcc/ira-conflicts.c
+@@ -664,7 +664,7 @@ print_hard_reg_set (FILE *file, const char *title, HARD_REG_SET set)
+ {
+   int i, start;
+ 
+-  fprintf (file, title);
++  fputs (title, file);
+   for (start = -1, i = 0; i < FIRST_PSEUDO_REGISTER; i++)
+     {
+       if (TEST_HARD_REG_BIT (set, i))
+--- a/src/gcc/objc/objc-act.c
++++ b/src/gcc/objc/objc-act.c
+@@ -988,7 +988,7 @@ objc_lookup_protocol (tree proto, tree cls, tree typ, bool warn)
+       strcat (errbuf, " the \'");
+       strcat (errbuf, IDENTIFIER_POINTER (PROTOCOL_NAME (proto)));
+       strcat (errbuf, "\' protocol");
+-      warning (0, errbuf);
++      warning (0, "%s", errbuf);
+     }
+ 
+   return false;
+--- a/src/gcc/opts.c
++++ b/src/gcc/opts.c
+@@ -1287,7 +1287,7 @@ print_filtered_help (unsigned int include_flags,
+ 		      if (* (const char **) option->flag_var != NULL)
+ 			snprintf (new_help + strlen (new_help),
+ 				  sizeof (new_help) - strlen (new_help),
+-				  * (const char **) option->flag_var);
++				  "%s", * (const char **) option->flag_var);
+ 		    }
+ 		  else
+ 		    sprintf (new_help + strlen (new_help),
+--- a/src/gcc/toplev.c
++++ b/src/gcc/toplev.c
+@@ -1182,7 +1182,7 @@ print_to_asm_out_file (print_switch_type type, const char * text)
+     case SWITCH_TYPE_ENABLED:
+       if (prepend_sep)
+ 	fputc (' ', asm_out_file);
+-      fprintf (asm_out_file, text);
++      fputs (text, asm_out_file);
+       /* No need to return the length here as
+ 	 print_single_switch has already done it.  */
+       return 0;
+@@ -1211,7 +1211,7 @@ print_to_stderr (print_switch_type type, const char * text)
+       /* Drop through.  */
+ 
+     case SWITCH_TYPE_DESCRIPTIVE:
+-      fprintf (stderr, text);
++      fputs (text, stderr);
+       /* No need to return the length here as
+ 	 print_single_switch has already done it.  */
+       return 0;
+@@ -1437,8 +1437,11 @@ static const char *
+ pch_option_mismatch (const char *option)
+ {
+   char *r;
++  int rv_neverused ATTRIBUTE_UNUSED;
+ 
+-  asprintf (&r, _("created and used with differing settings of '%s'"), option);
++  rv_neverused = asprintf (&r,
++			   _("created and used with differing settings of '%s'"),
++			   option);
+   if (r == NULL)
+     return _("out of memory");
+   return r;
+--- a/src/gcc/tree-data-ref.c
++++ b/src/gcc/tree-data-ref.c
+@@ -4607,13 +4607,14 @@ dot_rdg_1 (FILE *file, struct graph *rdg)
+ void
+ dot_rdg (struct graph *rdg)
+ {
++  int rv_neverused ATTRIBUTE_UNUSED;
+   FILE *file = fopen ("/tmp/rdg.dot", "w");
+   gcc_assert (file != NULL);
+ 
+   dot_rdg_1 (file, rdg);
+   fclose (file);
+ 
+-  system ("dotty /tmp/rdg.dot");
++  rv_neverused = system ("dotty /tmp/rdg.dot");
+ }
+ 
+ 
+--- a/src/gcc/tree-ssa-structalias.c
++++ b/src/gcc/tree-ssa-structalias.c
+@@ -4240,6 +4240,7 @@ create_function_info_for (tree decl, const char *name)
+   tree arg;
+   unsigned int i;
+   bool is_varargs = false;
++  int rv_neverused ATTRIBUTE_UNUSED;
+ 
+   /* Create the variable info.  */
+ 
+@@ -4279,7 +4280,7 @@ create_function_info_for (tree decl, const char *name)
+ 	argdecl = arg;
+ 
+       newindex = VEC_length (varinfo_t, varmap);
+-      asprintf (&tempname, "%s.arg%d", name, i-1);
++      rv_neverused = asprintf (&tempname, "%s.arg%d", name, i-1);
+       newname = ggc_strdup (tempname);
+       free (tempname);
+ 
+@@ -4315,7 +4316,7 @@ create_function_info_for (tree decl, const char *name)
+ 	resultdecl = DECL_RESULT (decl);
+ 
+       newindex = VEC_length (varinfo_t, varmap);
+-      asprintf (&tempname, "%s.result", name);
++      rv_neverused = asprintf (&tempname, "%s.result", name);
+       newname = ggc_strdup (tempname);
+       free (tempname);
+ 
+@@ -4474,9 +4475,11 @@ create_variable_info_for (tree decl, const char *name)
+ 	  newindex = VEC_length (varinfo_t, varmap);
+ 	  if (dump_file)
+ 	    {
+-	      asprintf (&tempname, "%s." HOST_WIDE_INT_PRINT_DEC
+-			"+" HOST_WIDE_INT_PRINT_DEC,
+-			vi->name, fo->offset, fo->size);
++	      int rv_neverused ATTRIBUTE_UNUSED;
++
++	      rv_neverused = asprintf (&tempname, "%s." HOST_WIDE_INT_PRINT_DEC
++				       "+" HOST_WIDE_INT_PRINT_DEC,
++				       vi->name, fo->offset, fo->size);
+ 	      newname = ggc_strdup (tempname);
+ 	      free (tempname);
+ 	    }
+--- a/src/gcc/tree-switch-conversion.c
++++ b/src/gcc/tree-switch-conversion.c
+@@ -858,7 +858,7 @@ do_switchconv (void)
+ 	      {
+ 		gcc_assert (info.reason);
+ 		fprintf (dump_file, "Bailing out - ");
+-		fprintf (dump_file, info.reason);
++		fprintf (dump_file, "%s", info.reason);
+ 		fprintf (dump_file, "--------------------------------\n");
+ 	      }
+ 	  }
+--- a/src/libcpp/lex.c
++++ b/src/libcpp/lex.c
+@@ -1512,6 +1512,8 @@ cpp_type2name (enum cpp_ttype type)
+ void
+ cpp_output_token (const cpp_token *token, FILE *fp)
+ {
++  size_t rv_neverused ATTRIBUTE_UNUSED;
++
+   switch (TOKEN_SPELL (token))
+     {
+     case SPELL_OPERATOR:
+@@ -1545,7 +1547,7 @@ cpp_output_token (const cpp_token *token, FILE *fp)
+ 	    {
+ 	      unsigned char buffer[10];
+ 	      i += utf8_to_ucn (buffer, name + i) - 1;
+-	      fwrite (buffer, 1, 10, fp);
++	      rv_neverused = fwrite (buffer, 1, 10, fp);
+ 	    }
+ 	  else
+ 	    fputc (NODE_NAME (token->val.node)[i], fp);
+@@ -1553,7 +1555,7 @@ cpp_output_token (const cpp_token *token, FILE *fp)
+       break;
+ 
+     case SPELL_LITERAL:
+-      fwrite (token->val.str.text, 1, token->val.str.len, fp);
++      rv_neverused = fwrite (token->val.str.text, 1, token->val.str.len, fp);
+       break;
+ 
+     case SPELL_NONE:
+--- a/src/libcpp/macro.c
++++ b/src/libcpp/macro.c
+@@ -1701,7 +1701,7 @@ create_iso_definition (cpp_reader *pfile, cpp_macro *macro)
+ 	     function-like macros, but not at the end.  */
+ 	  if (following_paste_op)
+ 	    {
+-	      cpp_error (pfile, CPP_DL_ERROR, paste_op_error_msg);
++	      cpp_error (pfile, CPP_DL_ERROR, "%s", paste_op_error_msg);
+ 	      return false;
+ 	    }
+ 	  break;
+@@ -1714,7 +1714,7 @@ create_iso_definition (cpp_reader *pfile, cpp_macro *macro)
+ 	     function-like macros, but not at the beginning.  */
+ 	  if (macro->count == 1)
+ 	    {
+-	      cpp_error (pfile, CPP_DL_ERROR, paste_op_error_msg);
++	      cpp_error (pfile, CPP_DL_ERROR, "%s", paste_op_error_msg);
+ 	      return false;
+ 	    }
+ 

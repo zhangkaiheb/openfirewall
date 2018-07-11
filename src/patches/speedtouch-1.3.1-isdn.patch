@@ -1,0 +1,11 @@
+--- src/modem_run.c.old	2005-05-10 12:11:44.000000000 +0100
++++ src/modem_run.c	2005-05-10 12:11:56.000000000 +0100
+@@ -321,7 +321,7 @@
+ 		} else {
+ 			report(1, REPORT_INFO, "Modem revision: %04x\n", revision);
+ 			switch(revision) {
+-			case 0x0000:
++			case 0x0000: case 0x000a:
+ 			case 0x0100:
+ 				revision = 0;
+ 				break;

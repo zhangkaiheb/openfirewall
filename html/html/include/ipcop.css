@@ -1,0 +1,281 @@
+body {
+    margin: 5px 0px 0px 0px;
+    padding: 0px;
+    background-color: #ffffff;
+    color: #000000;
+    font-family: Verdana, Tahoma, Arial, Sans-serif;
+    font-size: 11px;
+}
+
+td {
+    font-size: 11px;
+}
+
+.boldbase {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+img {
+    border: 0;
+    border-width : 0; 
+    border-style : none; 
+    border-color : inherit; 
+}
+
+pre {
+    font-family: monospace;
+    font-size: 12px;
+    vertical-align: top;
+}
+
+a {
+    color: #000000;
+}
+
+form {
+    margin: 0;
+    padding: 0;
+}
+
+td.ipcop_menuLocationMain {
+    color: #FFFFFF;
+    font-family: Verdana, Tahoma, Arial, Sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: left;
+    vertical-align: bottom;
+}
+
+td.ipcop_Version {
+    color: #CCCCCC;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    padding: 5px 0px 0px 5px;
+}
+
+.ipcop_box {
+    color: #E0E0E0;
+}
+
+.ipcop_box_bg {
+    background-color: #E0E0E0;
+}
+
+/* Dommenu */
+.ipcop_menuElementTD {
+    border: 0;
+    color: #C00000;
+    font-size: 12px;
+    font-weight: bold;
+    text-decoration: none;
+    width: 90px;
+    padding: 0px 0px 5px 0px;
+    margin: 0px 10px 0px 10px;
+}
+
+.ipcop_menuElementNoJS {
+    color: #CCCCCC;
+    font-size: 11px;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 0px 0px 5px 0px;
+    margin: 0px 10px 0px 10px;
+}
+
+div.ipcop_menuBar {
+    margin-bottom: 1px;
+}
+
+div.ipcop_subMenuBar {
+    border: 0;
+    background-color: #000000;
+}
+
+div.ipcop_menuElement, div.ipcop_subMenuElement {
+    border: 0;
+    color: #CCCCCC;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+div.ipcop_menuElement {
+    width: 70px;
+    margin: 4px 10px 4px 10px;
+}
+
+div.ipcop_menuElementHover {
+    color: #FFFFFF;
+}
+
+div.ipcop_subMenuElement {
+    padding: 3px;
+    color: #CCCCCC;
+}
+
+div.ipcop_subMenuElementHover {
+    padding: 3px;
+    color: #FFFFFF;
+    background-color: #999999;
+}
+
+/* Connection Status */
+.ipcop_StatusBig {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.ipcop_StatusBigRed {
+    color: #C00000;
+    font-weight: bold;
+}
+
+/* used in status.cgi (among others) */
+.ipcop_running {
+    color: #F2F2F2;
+    background-color: #209040;
+    font-weight: bold;
+}
+
+/* used in status.cgi (among others) */
+.ipcop_stopped {
+    color: #F2F2F2;
+    background-color: #C00000;
+    font-weight: bold;
+}
+
+/* used in ipsec.cgi and openvpn.cgi */
+.ipcop_closed {
+    color: #F2F2F2;
+    background-color: #2060C0;
+    font-weight: bold;
+}
+
+/* for error boxes etc. */
+.ipcop_error {
+    color: #000000;
+    background-color: #C00000;
+}
+
+/* bg colors are used in connections.cgi and addresses.cgi */
+.ipcop_iface_bg_fw {
+    color: #F2F2F2;
+    background-color: #000000;
+}
+
+.ipcop_iface_green {
+    color: #009000;
+}
+
+.ipcop_iface_bg_green {
+    color: #F2F2F2;
+    background-color: #009000;
+}
+
+.ipcop_iface_red {
+    color: #C00000;
+}
+
+.ipcop_iface_bg_red {
+    color: #F2F2F2;
+    background-color: #C00000;
+}
+
+.ipcop_iface_blue {
+    color: #2060C0;
+}
+
+.ipcop_iface_bg_blue {
+    color: #F2F2F2;
+    background-color: #2060C0;
+}
+
+.ipcop_iface_orange {
+    color: #E07000;
+}
+
+.ipcop_iface_bg_orange {
+    color: #F2F2F2;
+    background-color: #E07000;
+}
+
+.ipcop_iface_ipsec {
+    color: #704070;
+}
+
+.ipcop_iface_bg_ipsec {
+    color: #F2F2F2;
+    background-color: #704070;
+}
+
+.ipcop_iface_ovpn {
+    color: #A060A0;
+}
+
+.ipcop_iface_bg_ovpn {
+    color: #F2F2F2;
+    background-color: #A060A0;
+}
+
+tr.table1colour {
+    background-color: #C0C0C0;
+}
+
+tr.table2colour {
+    background-color: #F2F2F2;
+}
+
+tr.selectcolour {
+    background-color: #FFFF00;
+}
+
+table.percentbar {
+    width: 100px;
+    height: 10px;
+    border: 1px;
+    border-spacing: 0;
+    padding: 0;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #A0A0A0;
+}
+
+td.percent1 {
+    background-color: #A0A0A0;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #F2F2F2;
+}
+
+td.percent0 {
+    background-color: #F2F2F2;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #F2F2F2;
+}
+
+td.onlinehelp {
+    width: 5%;
+    text-align: right;
+}
+
+td.comment1button {
+    width: 55%;
+    vertical-align: top;
+}
+
+td.button1button {
+    width: 40%;
+    text-align: center;
+}
+
+td.comment2buttons {
+    width: 35%;
+    vertical-align: top;
+}
+
+td.button2buttons {
+    width: 30%;
+    text-align: center;
+}

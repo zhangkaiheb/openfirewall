@@ -1,0 +1,75 @@
+http://gcc.gnu.org/ml/gcc-patches/2009-05/msg01188.html
+
+Rediffed for some gcc-4.4.5 space/tab issues
+
+This patch silences the following warnings when building libgcc:
+
+unwind-dw2-fde.c:321: warning: dereferencing type-punned pointer will break strict-aliasing rules
+unwind-dw2-fde.c:322: warning: dereferencing type-punned pointer will break strict-aliasing rules
+unwind-dw2-fde.c:677: warning: dereferencing type-punned pointer will break strict-aliasing rules
+unwind-dw2-fde.c:795: warning: dereferencing type-punned pointer will break strict-aliasing rules
+unwind-dw2-fde.c:843: warning: dereferencing type-punned pointer will break strict-aliasing rules
+
+Tested with a bootstrap on x86_64-linux and a regression test run on
+powerpc-linux, x86_64-linux and powerpc64-linux.  Okay for the trunk?
+
+
+2009-05-18  Ben Elliston  <bje@au.ibm.com>
+
+        * unwind-dw2-fde.c (fde_unencoded_compare): Replace type punning
+        assignments with memcpy calls.
+        (add_fdes): Likewise.
+        (binary_search_unencoded_fdes): Likewise.
+        (linear_search_fdes): Eliminate type puns.
+
+
+--- gcc-4.4.5/gcc/unwind-dw2-fde.c.orig	2009-09-20 13:07:05.000000000 +0200
++++ gcc-4.4.5/gcc/unwind-dw2-fde.c	2012-07-20 08:43:33.000000000 +0200
+@@ -318,8 +318,9 @@
+ fde_unencoded_compare (struct object *ob __attribute__((unused)),
+ 		       const fde *x, const fde *y)
+ {
+-  const _Unwind_Ptr x_ptr = *(const _Unwind_Ptr *) x->pc_begin;
+-  const _Unwind_Ptr y_ptr = *(const _Unwind_Ptr *) y->pc_begin;
++  _Unwind_Ptr x_ptr, y_ptr;
++  memcpy (&x_ptr, x->pc_begin, sizeof (_Unwind_Ptr));
++  memcpy (&y_ptr, y->pc_begin, sizeof (_Unwind_Ptr));
+ 
+   if (x_ptr > y_ptr)
+     return 1;
+@@ -674,7 +675,9 @@
+ 
+       if (encoding == DW_EH_PE_absptr)
+ 	{
+-	  if (*(const _Unwind_Ptr *) this_fde->pc_begin == 0)
++          _Unwind_Ptr ptr;
++          memcpy (&ptr, this_fde->pc_begin, sizeof (_Unwind_Ptr));
++          if (ptr == 0)
+ 	    continue;
+ 	}
+       else
+@@ -792,8 +795,9 @@
+ 
+       if (encoding == DW_EH_PE_absptr)
+ 	{
+-	  pc_begin = ((const _Unwind_Ptr *) this_fde->pc_begin)[0];
+-	  pc_range = ((const _Unwind_Ptr *) this_fde->pc_begin)[1];
++	  const _Unwind_Ptr *pc_array = (const _Unwind_Ptr *) this_fde->pc_begin;
++	  pc_begin = pc_array[0];
++	  pc_range = pc_array[1];
+ 	  if (pc_begin == 0)
+ 	    continue;
+ 	}
+@@ -840,8 +844,10 @@
+     {
+       size_t i = (lo + hi) / 2;
+       const fde *const f = vec->array[i];
+-      const void *pc_begin = ((const void *const*) f->pc_begin)[0];
+-      const uaddr pc_range = ((const uaddr *) f->pc_begin)[1];
++      void *pc_begin;
++      uaddr pc_range;
++      memcpy (&pc_begin, (const void * const *) f->pc_begin, sizeof (void *));
++      memcpy (&pc_range, (const uaddr *) f->pc_begin + 1, sizeof (uaddr));
+ 
+       if (pc < pc_begin)
+ 	hi = i;

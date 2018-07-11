@@ -1,0 +1,6 @@
+## sparc-utils-1.9
+##
+usr/bin/elftoaout
+#usr/sbin/piggyback64
+usr/sbin/prtconf
+usr/sbin/eeprom

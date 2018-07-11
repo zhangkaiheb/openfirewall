@@ -1,0 +1,114 @@
+--- a/pulsar.c	2008/09/15 01:18:09	1.21
++++ b/pulsar.c	2010/05/25 18:03:27	1.22
+@@ -1109,19 +1109,16 @@
+ 
+ 	/* Get MAC address */		// XXX: Todo
+ 
+-	/* Start training modem */
+-
+ 	/* Create /proc/pulsar/pulsarX */
+ 	sprintf(proc_name, "driver/pulsar/pulsar%d", dev_number);
+-	pulsar_proc = create_proc_read_entry(proc_name, 0, NULL,pulsar_read_procmem,NULL);
+-	if (pulsar_proc == NULL){ //failed to create proc file, therefore directory /proc/driver/pulsar doesn't exist
+-	  pulsar_dir = proc_mkdir("driver/pulsar", NULL); //create the missing directory
+-	  pulsar_proc = create_proc_read_entry(proc_name, 0, NULL,pulsar_read_procmem,NULL); //try to create file again
+-	}
+-	if ((pulsar_proc == NULL) && (pulsar_dir != NULL)){
+-	  remove_proc_entry("driver/pulsar",NULL); //still failed, so give up and remove directory.
++	pulsar_dir = proc_mkdir("driver/pulsar", NULL);
++	if (pulsar_dir) {
++		pulsar_proc = create_proc_read_entry(proc_name, 0, NULL, pulsar_read_procmem, NULL);
++		if (!pulsar_proc)
++			remove_proc_entry("driver/pulsar",NULL);
+ 	}
+ 
++	/* Start training modem */
+ 	start_training(pmodem);
+ 	err = 0;
+ 	goto pulsar_init_exit;
+@@ -1143,6 +1140,9 @@
+ 	pci_disable_device(pci_dev);
+ pulsar_init_exit_free:
+ 	pci_set_drvdata(pci_dev, NULL);
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33))
++	pci_dev_put(pci_dev);
++#endif
+ 	kfree(txb);
+ 	kfree(oam_cell); 
+ 	kfree(pmodem->handle);
+@@ -1190,6 +1190,10 @@
+ #endif
+ 	pci_disable_device(pci_dev);
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)
++	pci_dev_put(pci_dev);
++#endif
++
+ 	//sarlib_close(vcc_list);
+ 	
+ 	/* Remove /proc/driver/pulsar/pulsarX */
+@@ -1211,7 +1215,6 @@
+ 	
+ 	kfree(pmodem->handle);
+ 	kfree(pmodem);
+-	
+ }	
+ 
+ #ifdef PULSAR_NEWPCISTYLE
+@@ -1245,20 +1248,23 @@
+ 
+ 	printk(KERN_INFO "%s: PCI ADSL ATM Driver %s Lib %s loaded\n", PTAG, VERSION, getlibver());
+ 
++	printk(KERN_INFO "%s: Searching for card %d\n", PTAG, dev_number);
++
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)
++	while ((pci_dev = pci_get_device(VID, DID, pci_dev)) != NULL) {
++#else
+ 	while ((pci_dev = pci_find_device(VID, DID, pci_dev)) != NULL) {
++#endif
+ 		if (dev_found == dev_number) // we've found the one were looking for
+-        		break;
++			return pulsar_init_one(pci_dev, NULL);
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)
++		pci_dev_put(pci_dev);
++#endif
+ 	        dev_found++;
+ 	}
+ 
+-	printk(KERN_DEBUG "%s: dev_found = %d, dev_number = %d\n", PTAG, dev_found, dev_number);
+-
+-	if ((pci_dev) && (dev_found == dev_number)) {
+-		return pulsar_init_one(pci_dev, NULL);
+-	} else {
+-		printk(KERN_ERR "%s: No PCI card found\n", PTAG);
+-		return -ENODEV;
+-	}
++	printk(KERN_ERR "%s: No card found\n", PTAG);
++	return -ENODEV;
+ #endif
+ }
+ 
+@@ -1268,9 +1274,21 @@
+ 	pci_unregister_driver(&pulsar_driver);
+ #else
+ 	struct pci_dev *pci_dev = NULL;
++	int dev_found = 0;
+ 
+-	pci_dev = pci_find_device(VID, DID, pci_dev); // just one device at the moment
+-	pulsar_remove_one(pci_dev);
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)
++	while ((pci_dev = pci_get_device(VID, DID, pci_dev)) != NULL) {
++#else
++	while ((pci_dev = pci_find_device(VID, DID, pci_dev)) != NULL) {
++#endif
++		if (dev_found == dev_number)
++			pulsar_remove_one(pci_dev);
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)
++		else
++			pci_dev_put(pci_dev);
++#endif
++		dev_found++;
++	}
+ #endif
+ 	printk(KERN_INFO "%s: PCI ADSL ATM Driver %s Lib %s unloaded\n", PTAG, VERSION, getlibver());
+ }

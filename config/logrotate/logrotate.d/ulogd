@@ -1,0 +1,9 @@
+# logrotate fragment for ulogd
+#
+
+/var/log/ulogd.log {
+    missingok
+    postrotate
+        /usr/bin/killall -HUP ulogd 2> /dev/null || true
+    endscript
+}

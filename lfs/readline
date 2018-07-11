@@ -1,0 +1,123 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: readline 7299 2014-03-08 06:41:53Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = readline
+#VER        = 6.3
+VER        = 7.0
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+#DL_FROM    = $(URL_GNU)/$(PKG_NAME)
+DL_FROM    = http://ftp.gnu.org/gnu/readline
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+CFLAGS     =
+CXXFLAGS   =
+
+# There is no update once LFS book is released
+# So include patches directly from the source with a name that look like a patch
+#PATCH1     = $(THISAPP)-001.patch
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects	= $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+# patches names are different from names of files downloaded
+#$(PATCH1)  = $(URL_GNU)/$(PKG_NAME)/$(THISAPP)-patches/$(PKG_NAME)62-001
+
+
+#$(DL_FILE)_MD5 = 33c8fb279e981274f485fd91da77e94a
+$(DL_FILE)_MD5 = 205b03a87fc83dab653b628c59b9fc91
+#$(PATCH1)_MD5  = 83287d52a482f790dfb30ec0a8746669
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+	# No patch yet
+	#cd $(DIR_APP) && patch -Np0 -i $(DIR_DL)/$(PATCH1)
+
+	# don't create old lib on rebuild
+	cd $(DIR_APP) && sed -i '/MV.*old/d' Makefile.in
+	cd $(DIR_APP) && sed -i '/{OLDSUFF}/c:' support/shlib-install
+
+	# remove RPATH
+##	cd $(DIR_APP) && sed -i.bak 's|-Wl,-rpath,$$(libdir) ||' support/shobj-conf
+
+	cd $(DIR_APP) && ./configure	--prefix=/usr \
+					--disable-static
+
+###					--libdir=/usr/lib \
+##	cd $(DIR_APP) && make -j $(PARALLELISM) SHLIB_LIBS=-lncurses
+	cd $(DIR_APP) && make -j $(PARALLELISM) SHLIB_LIBS="-L/$(TOOLS_DIR)/lib -lncursesw"
+##	cd $(DIR_APP) && make install
+	cd $(DIR_APP) && make SHLIB_LIBS="-L/$(TOOLS_DIR)/lib -lncurses" install
+	# LFS book installs lib{readline,history}.so.x.y in /lib,
+	# we do not need that as /usr/lib is never on a seperate partition
+
+	mv -v /usr/lib/lib{readline,history}.so.* /lib
+	ln -sfv /lib/$$(readlink /usr/lib/libreadline.so) /usr/lib/libreadline.so
+	ln -sfv /lib/$$(readlink /usr/lib/libhistory.so ) /usr/lib/libhistory.so
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

@@ -1,0 +1,17 @@
+General
+-------
+These are the sourcefiles to build IPCop.
+
+License
+-------
+All of the code included in this release has been distributed under the GPL. 
+You should find a copy of the GPL included.  
+
+Building
+------------
+First, do    : chmod 755 make.sh
+Build using  : ./make.sh build
+Cleanup using: ./make.sh clean
+
+To reduce building environment requirements: ./make.sh gettoolchain
+To only retrieve the external source packages: ./make.sh prefetch

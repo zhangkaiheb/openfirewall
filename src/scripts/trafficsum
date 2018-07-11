@@ -1,0 +1,252 @@
+#!/usr/bin/perl
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+#
+# $Id: trafficsum 5559 2011-03-25 08:33:48Z owes $
+#
+
+use DBI;
+use strict;
+use Getopt::Long;
+
+#use warnings;
+
+require '/usr/lib/ipcop/protocols.pl';
+require '/usr/lib/ipcop/traffic-lib.pl';
+
+# Detailed aggregation on(1)/off(0)
+my $detailed = 0;
+
+# Debug level:
+#	0 - no debug print
+#	1 - print debug info
+my $debugLevel = 0;
+
+my $fixed_quantity = "-";
+my $printHelp      = 0;
+
+my @now = localtime(time);
+$now[5] += 1900;
+$now[4]++;
+my $starttime = "00000000";
+my $endMonth = $now[4] < 10 ? "0".$now[4] : $now[4];
+my $endDay = $now[3] < 10 ? "0".$now[3] : $now[3];
+my $endtime   = "$now[5]$endMonth$endDay";
+
+# read options (inspired/copied from ipacsum/ipac-ng)
+my @options = (
+    "debug"              => \$debugLevel,
+    "d|detailed"         => \$detailed,
+    "e|endtime=s"        => \$endtime,
+    "f|fixed-quantity=s" => \$fixed_quantity,
+    "h|help"             => \$printHelp,
+    "s|starttime=s"      => \$starttime
+);
+if (!&GetOptions(@options)) {
+    die "$0: illegal option specified. \"$0 --help\" for help.\n";
+}
+
+if ($debugLevel) {
+    print "--detailed        : $detailed\n";
+    print "--endtime         : $endtime\n";
+    print "--fixed-quantity  : $fixed_quantity\n";
+    print "--help            : $printHelp\n";
+    print "--starttime       : $starttime\n";
+}
+
+if ($printHelp) {
+    &usage();
+}
+if ($starttime !~ /^\d\d\d\d\d\d\d\d$/) {
+    die "option --starttime requires a date in format YYYYMMDD\n";
+}
+if ($endtime !~ /^\d\d\d\d\d\d\d\d$/) {
+    die "option --endtime requires a date in format YYYYMMDD\n";
+}
+if ($fixed_quantity ne '-' && $fixed_quantity !~ /^(|K|M|G|T)$/) {
+    die "option --fixed-quantity requires an argument '', K, M, G or T\n";
+}
+
+my $dbh           = DBI->connect("dbi:SQLite:dbname=/var/log/traffic/aggregate.db", "", "", {RaiseError => 1});
+my $groupDetailed = "";
+my $selectColumns = "";
+my %services      = ();
+
+if ($detailed) {
+    ### display detailed
+    $selectColumns = " ip_saddr, ip_protocol, tcp_dport, udp_dport, ";
+    $groupDetailed = " , ip_saddr, ip_protocol, tcp_dport, udp_dport ";
+
+    foreach my $protoName (keys %Protocols::protocols) {
+        $services{$Protocols::protocols{$protoName}} = $protoName;
+    }
+}
+else {
+    ### display simple
+    $selectColumns = " NULL AS ip_saddr, NULL AS ip_protocol, NULL AS tcp_dport, NULL AS udp_dport, ";
+    $groupDetailed = "";
+}
+
+my $whereClause = " WHERE date>=$starttime AND date<=$endtime ";
+
+my $statementSelect = "SELECT oob_prefix, ";
+$statementSelect .= $selectColumns;
+$statementSelect .= " SUM(ip_totlen) ";
+$statementSelect .= " FROM daily ";
+$statementSelect .= $whereClause;
+$statementSelect .= " GROUP BY oob_prefix ";
+$statementSelect .= $groupDetailed;
+$statementSelect .= ";";
+
+print "$statementSelect \n" if ($debugLevel);
+
+eval {
+    my $sthSelect        = $dbh->prepare($statementSelect);
+    my $sthSelectMaxDate = $dbh->prepare("SELECT max(date) FROM daily $whereClause;");
+    my $sthSelectMinDate = $dbh->prepare("SELECT min(date) FROM daily $whereClause;");
+
+    $sthSelect->execute();
+
+    # Bind Perl variables to columns:
+    my ($prefix, $srcAdr, $proto, $tcpPort, $udpPort, $bytes);
+
+    $sthSelect->bind_columns(\$prefix, \$srcAdr, \$proto, \$tcpPort, \$udpPort, \$bytes);
+
+    my $firstday = 999999;
+    my $lastday  = 0;
+    $sthSelectMinDate->bind_columns(\$firstday);
+    $sthSelectMaxDate->bind_columns(\$lastday);
+    $sthSelectMinDate->execute();
+    $sthSelectMaxDate->execute();
+    $sthSelectMinDate->fetch();
+    $sthSelectMaxDate->fetch();
+
+    $firstday =~ s/^(\d\d\d\d)(\d\d)(\d\d)$/$1-$2-$3/;
+    $lastday  =~ s/^(\d\d\d\d)(\d\d)(\d\d)$/$1-$2-$3/;
+
+    my $timenow = localtime();
+    print "Traffic accounting summary\n";
+    print "Time created: $timenow\n";
+    if (defined($firstday) && defined($lastday)) {
+        print "Data from $firstday to $lastday:\n";
+    }
+    else {
+        print "  No data found in given timeframe\n";
+        print "    Starttime: $starttime\n";
+        print "    Endtime:   $endtime\n";
+    }
+    my %devices = ();
+    my %ifaceCounts = ();
+    my %interfaces = ();
+    &DATA::setup_default_interfaces(\%interfaces, \%ifaceCounts);
+
+    &TRAFFIC::getDeviceNames(\%devices, \%interfaces);
+
+    while ($sthSelect->fetch()) {
+        print("->  $prefix|$srcAdr|$proto|$tcpPort|$udpPort|$bytes \n") if ($debugLevel > 0);
+
+        $prefix =~ /^(.*?)_(FORWARD_IN|FORWARD_OUT|INPUT|OUTPUT)$/;
+        my $dev  = $1;
+        my $trafficTyp = $2;
+        my $interface = $devices{$dev};
+        # If we do not know about this interface, use the DEV (GREEN_1, BLUE_1 etc.) name
+        $interface = $dev if ($interface eq "");
+
+        if ($trafficTyp eq "FORWARD_IN") {
+            $trafficTyp = "forwarded incoming";
+        }
+        elsif ($trafficTyp eq "FORWARD_OUT") {
+            $trafficTyp = "forwarded outgoing";
+        }
+        elsif ($trafficTyp eq "INPUT") {
+            $trafficTyp = "incoming";
+        }
+        elsif ($trafficTyp eq "OUTPUT") {
+            $trafficTyp = "outgoing";
+        }
+
+        my $dimension = "";
+        if (($bytes > 1099511627776 && $fixed_quantity eq "-") || $fixed_quantity eq "T") {
+            $bytes     = $bytes / 1099511627776;
+            $dimension = "T";
+        }
+        elsif (($bytes > 1073741824 && $fixed_quantity eq "-") || $fixed_quantity eq "G") {
+            $bytes     = $bytes / 1073741824;
+            $dimension = "G";
+        }
+        elsif (($bytes > 1048576 && $fixed_quantity eq "-") || $fixed_quantity eq "M") {
+            $bytes     = $bytes / 1048576;
+            $dimension = "M";
+        }
+        elsif (($bytes > 1024 && $fixed_quantity eq "-") || $fixed_quantity eq "K") {
+            $bytes     = $bytes / 1024;
+            $dimension = "K";
+        }
+
+        if ($detailed == 0) {
+            printf("  %-29s     : %15.0f $dimension\n", "$trafficTyp $interface", $bytes);
+        }
+        else {
+            if (!defined($srcAdr)) {
+                $srcAdr = "n/a";
+            }
+
+            my $service = "n/a";
+            if (defined($proto)) {
+                if (defined($services{$proto})) {
+                    $service = $services{$proto};
+                    if ($proto eq "6") {
+                        $service .= ":$tcpPort";
+                    }
+                    elsif ($proto eq "17") {
+                        $service .= ":$udpPort";
+                    }
+                }
+                else {
+                    $service = $proto;
+                }
+            }
+
+            printf("  %-29s | %-15s | %-12s : %15.0f $dimension\n", "$trafficTyp $interface", $srcAdr, $service,
+                $bytes);
+        }
+    }
+
+    $sthSelect->finish();
+};
+if ($@) {
+    warn "Transaction aborted because $@";
+}
+
+$dbh->disconnect() or warn $dbh->errstr;
+
+sub usage
+{
+    print <<EOF;
+trafficsum
+Generates summary of traffic accounting
+Usage:$0 [Options]
+Options:
+ --starttime t, -s t 	Start time, default: The epoch
+ --endtime t, -e t	End time, default: now
+Times are absolute in format YYYYMMDD !Note year is 4 digit!
+--detailed, -d      Print detailed traffic data
+ --fixed-quantity Q	show values in quantity Q; can be '', K, M, G or T
+ --help, -h 		Print this help
+EOF
+    exit 0;
+}

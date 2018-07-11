@@ -1,0 +1,135 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:
+#     2011-03-23 Perry Valdez <perryv@gmail.com>
+#               - Modified Makefile for IPCop build
+#
+# $Id: squidGuard 7997 2015-07-11 07:28:37Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = squidGuard
+VER        = 1.5-beta
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+DL_FROM    = http://www.squidguard.org/Downloads/Devel
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+PATCH1     = squidguard_1.5-1.debian.tar.gz
+
+CFLAGS += -Wall
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE) $(PATCH1)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+$(PATCH1)  = $(URL_DEBIAN)/s/squidguard/$(PATCH1)
+
+$(DL_FILE)_MD5 = 85216992d14acb29d6f345608f21f268
+$(PATCH1)_MD5  = 780576da1f75eebf752f60160d42c616
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+	cd $(DIR_APP) && tar xf $(DIR_DL)/$(PATCH1)
+	cd $(DIR_APP) && for patch in `cat debian/patches/series` ; do echo "Using $$patch"; patch -p1 -i debian/patches/$$patch; done
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/$(THISAPP)_helper-protocol.patch
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/$(THISAPP)_stdout-always.patch
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/$(THISAPP)_db_v4_up.patch
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/$(THISAPP)_remove-debug-logging.patch
+	# Fix implicit declaration of function 'HTUnEscape'
+	cd $(DIR_APP) && sed -i 's/sgEx.h.*/&\n#include "HTEscape.h"/' src/sgDiv.c.in
+	# Fix format %d vs size_t
+	cd $(DIR_APP) && sed -i '/userquota->time/s/s->userquota.seconds\|userquota->time\|userquota->last/(int)&/g' src/sgDiv.c.in
+	# Fix implicit declaration of ldap functions deprecated since openldap-2.3
+	cd $(DIR_APP) && sed -i 's/lber.h.*/&\n#define LDAP_DEPRECATED 1/' src/sg.y.in
+	# Unused variables
+	cd $(DIR_APP) && sed -i '/struct IpInfo uq;/d;/    struct UserInfo uq;/d' src/sg.y.in
+	# Fix 'yyunput' and 'input' defined but not used
+	cd $(DIR_APP) && sed -i 's/ignore  /%option noinput\n%option nounput\n&/' src/sg.l
+	# add additional version info
+	cd $(DIR_APP) && sed -i 's:#define VERSION\(.*\):#define VERSION\1 \" \(IPCop patchlevel 3\)\":g' src/version.h
+
+	# Use --with-db, so /usr/local does not appear for db
+	cd $(DIR_APP) && ./configure --prefix=/usr \
+				--with-db=/usr \
+				--with-ldap \
+				--with-squiduser=squid \
+				--with-sg-config=/var/ipcop/proxy/squidGuard.conf \
+				--with-sg-dbhome=/var/lib/squidguard/db \
+				--with-sg-logdir=/var/log/squidGuard \
+				--with-syslog=yes
+
+	cd $(DIR_APP) && make
+
+	# Create log, so tests could run without write error
+	mkdir -p /var/log/squidGuard
+	> /var/log/squidGuard/squidGuard.log
+	chown squid:root /var/log/squidGuard /var/log/squidGuard/squidGuard.log
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# Do not to stop on error in tests
+	-cd $(DIR_APP) && make test &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+	# Empty log after tests
+	> /var/log/squidGuard/squidGuard.log
+	cd $(DIR_APP) && make install
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

@@ -1,0 +1,9 @@
+#etc/Conexant
+etc/Conexant/CnxTgF.hex
+etc/Conexant/cnxadsl.conf
+etc/Conexant/cnxadslload
+#lib/modules/KVER/extra
+lib/modules/KVER/extra/CnxADSL.ko.gz
+#usr/sbin/cnxadslautolog
+usr/sbin/cnxadslconfig
+usr/sbin/cnxadslstatus

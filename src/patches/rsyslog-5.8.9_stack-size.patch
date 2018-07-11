@@ -1,0 +1,23 @@
+--- rsyslog-4.4.2/runtime/wtp.c.orig	2010-01-11 10:21:53.000000000 +0100
++++ rsyslog-4.4.2/runtime/wtp.c	2010-01-11 10:24:51.000000000 +0100
+@@ -422,6 +422,9 @@
+ 
+ 	pWti = pThis->pWrkr[i];
+ 	wtiSetState(pWti, WRKTHRD_RUNNING);
++
++	/* Give threads a smaller stack, 512 KiB should be sufficient */
++	pthread_attr_setstacksize(&pThis->attrThrd, 512 * 1024);
+ 	iState = pthread_create(&(pWti->thrdID), &pThis->attrThrd, wtpWorker, (void*) pWti);
+ 	ATOMIC_INC(&pThis->iCurNumWrkThrd, &pThis->mutCurNumWrkThrd); /* we got one more! */
+ 
+--- rsyslog-5.8.6/runtime/rsyslog.c.orig	2011-11-17 22:09:21.000000000 +0100
++++ rsyslog-5.8.6/runtime/rsyslog.c	2011-11-17 22:10:24.000000000 +0100
+@@ -150,6 +150,8 @@ rsrtInit(char **ppErrObj, obj_if_t *pObj
+ 			    		      &default_thr_sched_policy,
+ 					      &default_sched_param));
+ 		CHKiRet(pthread_attr_init(&default_thread_attr));
++		/* Give threads a smaller stack, 512 KiB should be sufficient */
++		CHKiRet(pthread_attr_setstacksize(&default_thread_attr, 512 * 1024));
+ 		CHKiRet(pthread_attr_setschedpolicy(&default_thread_attr,
+ 			    			    default_thr_sched_policy));
+ 		CHKiRet(pthread_attr_setschedparam(&default_thread_attr,

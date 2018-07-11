@@ -1,0 +1,23 @@
+http://patch-tracker.debian.org/package/openvpn-auth-radius/2.1-4
+
+There is a file descriptor leak in an errors path in AccountingProcess.cpp.
+
+Index: openvpn-auth-radius/AccountingProcess.cpp
+===================================================================
+--- openvpn-auth-radius.orig/AccountingProcess.cpp	2010-12-16 17:34:41.000000000 +0100
++++ openvpn-auth-radius/AccountingProcess.cpp	2010-12-16 17:34:55.000000000 +0100
+@@ -478,12 +478,14 @@
+ 	string exe=string(context->conf.getVsaScript()) + " " + string(context->conf.getVsaNamedPipe());
+ 	if (write (fd_fifo, buf, buflen) != buflen)
+ 	{
++	  close(fd_fifo);
+ 	  cerr << getTime() << "RADIUS-PLUGIN: Could not write in Pipe to VSAScript!";
+       return -1;
+ 	}
+ 	
+ 	if(system(exe.c_str())!=0)
+ 	{
++		close(fd_fifo);
+ 		cerr << getTime() << "RADIUS-PLUGIN: Error in VSAScript!";
+ 		return -1;
+ 	}

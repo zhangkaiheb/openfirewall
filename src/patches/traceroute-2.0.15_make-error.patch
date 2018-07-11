@@ -1,0 +1,9 @@
+--- traceroute-2.0.15/default.rules.orig	2010-08-06 21:20:56.000000000 +0000
++++ traceroute-2.0.15/default.rules	2010-08-06 20:21:05.000000000 +0000
+@@ -189,5 +189,5 @@
+ 	cp -f $(1) $(DESTDIR)$(mandir)/man$(patsubst .%,%,$(suffix $(1)))
+ 	
+ endef
+-	$(foreach man,$(install_manuals),$(call inst_man,$(man)))
++	#$(foreach man,$(install_manuals),$(call inst_man,$(man)))
+ endif

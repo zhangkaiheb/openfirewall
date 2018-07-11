@@ -1,0 +1,142 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: udev 7473 2014-04-14 10:14:16Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = udev
+VER        = 166
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+#DL_FILE    = $(THISAPP).tar.bz2
+DL_FILE    = $(THISAPP).tar.gz
+#DL_FROM    = $(URL_KERNEL)/linux/utils/kernel/hotplug
+#DL_FROM    = http://ipcop-addons.mooo.com/misc/IPCop
+DL_FROM    = https://git.kernel.org/pub/scm/linux/hotplug/udev.git/snapshot
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+LDFLAGS    =
+
+TESTFILE   = $(THISAPP)-testfiles.tar.bz2
+
+# For the record, the way to get the testfiles is to go to
+# http://git.kernel.org/?p=linux/hotplug/udev.git;a=summary
+# and get the snapshot for the release.
+# Extract the tarball and rename to udev-1xx.
+# Then delete everything except the test directory (including
+# .gitignore) and tar up the remaining.
+# mv udev-885a09a udev-160
+# cd udev-160
+# rm -r COPYING INSTALL NEWS TODO configure.ac init m4 ChangeLog \
+#   Makefile.am README autogen.sh extras libudev rules udev \
+#   udev.conf .gitignore
+#
+# cd ..
+# tar -jcf udev-160-testfiles.tar.bz2 udev-160
+# 
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE) $(TESTFILE)
+#objects = $(DL_FILE)
+
+$(DL_FILE)				= $(DL_FROM)/$(DL_FILE)
+#$(TESTFILE)				=  http://anduin.linuxfromscratch.org/sources/other/$(TESTFILE)
+# in case anduin does not have the file yet, use a different location
+$(TESTFILE)				=  http://ipcop-addons.mooo.com/misc/IPCop/$(TESTFILE)
+
+#$(DL_FILE)_MD5				= 4db27d73fdbe94f47fd89fdd105c2dfb
+$(DL_FILE)_MD5				= 3c4e45df312e69b34b27be5e47ca0b46
+#$(TESTFILE)_MD5				= 64ada14e464dee3388787e3aebf2ac34
+$(TESTFILE)_MD5				= dfe1fa5eb32b0729743c6e37169a13c9
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+	# required with linux-header >= 2.6.38
+	cd $(DIR_APP) && patch -p1 -i $(DIR_PATCHES)/$(THISAPP)_videodev.patch
+
+	install -dv /lib/{firmware,udev/devices/{pts,shm}}
+
+	cd $(DIR_APP) && ./autogen.sh
+	# different from LFS due to initramfs usage
+	# /dev/null is created in init script
+	cd $(DIR_APP) && ./configure    --prefix=/usr \
+					--with-rootlibdir=/lib \
+					--sbindir=/sbin \
+					--libexecdir=/lib/udev \
+					--sysconfdir=/etc \
+					--disable-introspection \
+					--disable-extras
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+
+ifeq "$(RUNNING_TEST)" "yes"
+	cd $(DIR_APP) && tar xf $(DIR_DL)/$(TESTFILE) --strip-components=1
+	# no test should fail
+	cd $(DIR_APP) && make check &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+
+	cd $(DIR_APP) && make install
+
+	# And finally copy our ipcop rules
+	cp $(DIR_SRC)/config/udev/rules.d/*.rules /etc/udev/rules.d/
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

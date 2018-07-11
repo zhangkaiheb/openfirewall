@@ -1,0 +1,12 @@
+#!/bin/sh
+echo "Shutting down ... "
+echo "Sending all processes the TERM signal ... "
+killall5 -15
+sleep 3
+echo "Sending all processes the KILL signal ... "
+killall5 -9
+sleep 3
+echo "Unmounting filesystems ... "
+/bin/umount -a -r
+echo "Reboot ... "
+reboot -f

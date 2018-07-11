@@ -1,0 +1,83 @@
+IPCop coding style
+==================
+
+
+Coding style applies to C source files, Perl scripts (also .CGI) and where applicable to shell scripts.
+Coding style is based on Apache Style Guide [1].
+
+
+In short:
+
+- Opening braces are given on the same lines as statements,
+  or on the following line at the start of a function definition.
+- Code inside a block (whether surrounded by braces or not) is indented by four space characters.
+  Tab characters are not used. Comments are indented to the same level as the surrounding code.
+- Closing braces are always on a separate line from surrounding code,
+  and are indented to line up with the start of the text on the line containing the corresponding opening brace.
+- Functions are declared with ANSI-style arguments.
+- There is no space between the function name and the opening bracket of the arguments to the function.
+  There is a single space following commas in argument lists and the semi-colons in for statements.
+- Inside a switch() statement, the case keywords are indented to the same level as the switch line.
+- Operators in expressions should be surrounded by a single space before and after,
+  except for unary increment (++), decrement (--), and negation (!) operators.
+- There is no whitespace between a cast and the item modified (e.g., "(int)j" and not "(int) j").
+- If a cast is to a pointer type, there is a space between the type and the * character
+  (e.g., "(char *)i" instead of "(char*)i")
+
+
+Additions:
+- 80 columns is a prefered limit lenght and not a hard limit.
+- Hard limit is at 120 characters.
+- Variable names all lower case, except for shell scripts.
+- #defines all upper case.
+
+
+C source files can be generated to match style using GNU indent:
+# indent -l120 -i4 -npsl -di0 -br -nce -d0 -cli0 -npcs -nfc1 -nut
+
+
+Perl source files can be generated to match style using perltidy (http://perltidy.sourceforge.net/):
+# perltidy -b -l=120 -i=4 -ci=4 -pt=2 -bt=2 -nsfs -sbl
+(TODO: verify if correct and if more options are needed)
+
+
+License snippet for bash and perl scripts
+=========================================
+
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+
+
+License snippet for C sources
+=============================
+
+ * This file is part of the IPCop Firewall.
+ *
+ * IPCop is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * IPCop is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+
+============
+
+[1] http://httpd.apache.org/dev/styleguide.html

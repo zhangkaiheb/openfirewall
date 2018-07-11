@@ -1,0 +1,10 @@
+# logrotate fragment for squidGuard
+#
+
+/var/log/squidGuard/*.log {
+    missingok
+    compress
+    delaycompress
+    copytruncate
+    notifempty
+}

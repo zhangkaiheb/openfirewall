@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# start/stop dnsmasq
+#   No need for SUID helper since this will only be used by other programs
+#
+#
+# $Id: rc.dnsmasq 5183 2010-11-28 16:07:15Z owes $
+#
+
+# read variables 
+eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
+eval $(/usr/local/bin/readhash /var/ipcop/ethernet/settings)
+eval $(/usr/local/bin/readhash /var/ipcop/main/settings)
+[ "$DOMAINNAME" ] && LOCALDOMAIN="-s $DOMAINNAME --local=/$DOMAINNAME/"
+
+# See how we were called.
+case "$1" in
+start|--start)
+    if [ -e "/var/ipcop/red/dial-on-demand" -a "$DIALONDEMANDDNS" == "on" -a ! -e "/var/ipcop/red/active" ]; then
+        /usr/sbin/dnsmasq -r /var/ipcop/ppp/fake-resolv.conf $LOCALDOMAIN
+    else
+        /usr/sbin/dnsmasq -r /var/ipcop/red/resolv.conf $LOCALDOMAIN
+    fi
+    ;;
+stop|--stop)
+    $0 sigusr1
+    /usr/bin/killall -KILL dnsmasq 2> /dev/null
+    ;;
+restart|--restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ## add your 'reload' rules here
+    ;;
+sighup|--sighup)
+    # clears cache and reloads several config files
+    [ -e /var/run/dnsmasq/dnsmasq.pid ] && /bin/kill -SIGHUP `cat /var/run/dnsmasq/dnsmasq.pid`
+    ;;
+sigusr1|--sigusr1)
+    # write statistics to log
+    [ -e /var/run/dnsmasq/dnsmasq.pid ] && /bin/kill -SIGUSR1 `cat /var/run/dnsmasq/dnsmasq.pid`
+    ;;
+
+*)
+    echo "Usage: $0 {start|stop|restart}"
+    ;;
+esac

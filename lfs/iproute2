@@ -1,0 +1,113 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: iproute2 8076 2016-01-18 21:08:33Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = iproute2
+#VER        = 4.4.0
+VER        = 4.15.0
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.xz
+DL_FROM    = $(URL_KERNEL)/linux/utils/net/iproute2
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+#$(DL_FILE)_MD5 = d762653ec3e1ab0d4a9689e169ca184f
+$(DL_FILE)_MD5 = 0681bf4664b2649ad4e12551a3a7a1f9
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+	# The arpd program included in this package will not be built since it is 
+	# dependent on Berkeley DB, which is not installed in LFS. However, a directory
+	# for arpd and a man page will still be installed. Prevent this by running the commands below
+	cd $(DIR_APP) && sed -i /ARPD/d Makefile
+	cd $(DIR_APP) && rm -fv man/man8/arpd.8
+
+	# It is also necessary to disable building one module that requires 
+	# http://www.linuxfromscratch.org/blfs/view/8.2/postlfs/iptables.html.
+
+	cd $(DIR_APP) && sed -i 's/m_ipt.o//' tc/Makefile
+
+##	cd $(DIR_APP) && make DESTDIR= CCOPTS="$(CFLAGS)" Config
+	# Let us be able to rebuild this package the same, even after linux-atm and iptables were build
+	# First, we compile linux-atm after iproute2 and it is doubtfull atm support for tc is needed
+	# Secondly, if iptables is already installed, TC_CONFIG_XT is set to y, m_xt.so is added to compilation
+	# configure test for TC_CONFIG_XT use (pkg-config xtables --cflags --libs) and pkg-config is not yet build
+##	cd $(DIR_APP) && sed -i -e /^TC_CONFIG_ATM/d -e /^TC_CONFIG_XT/d Config
+##	cd $(DIR_APP) && echo -e "\nTC_CONFIG_ATM:=n\nTC_CONFIG_XT:=n\n" >> Config
+
+##	cd $(DIR_APP) && sed -i '/^TARGETS/s@arpd@@g' misc/Makefile
+##	cd $(DIR_APP) && make -j $(PARALLELISM) DESTDIR= CCOPTS="$(CFLAGS)"
+##	cd $(DIR_APP) && make DESTDIR= DOCDIR=/usr/share/doc/iproute2 MANDIR=/usr/share/man install
+
+	cd $(DIR_APP) && make
+	cd $(DIR_APP) && make DOCDIR=/usr/share/doc/iproute2-4.15.0 install
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

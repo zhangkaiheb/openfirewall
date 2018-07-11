@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# $Id: compile.help 1174 2008-03-09 12:56:59Z eoberlander $
+
+echo "You really should read the documentation available on www.ipcop.org!"
+echo
+echo "To compile, first read the Building How-to:"
+echo "http://www.ipcop.org/docs/buildinghowto.html"
+echo
+echo "You can ask for a driver to be included in IPCop."
+echo "Preferably post a 'Request For Enhancement' in IPCop's Sourceforge Tracker menu including a patch against recent source tree:"
+echo "https://sourceforge.net/svn/?group_id=40604"
+
+# return an error to the caller
+exit 1

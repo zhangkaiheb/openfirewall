@@ -1,0 +1,10 @@
+<ipcop>
+    <update>
+        <version>1.9.17</version>
+        <releasedate>2010-10-04</releasedate>
+        <description>Fix reconnecting after PPPoE line problem/disconnection.</description>
+        <previousversion>1.9.16</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

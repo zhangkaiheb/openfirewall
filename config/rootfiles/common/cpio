@@ -1,0 +1,7 @@
+## cpio-2.11
+##
+bin/cpio
+#bin/mt
+#usr/share/info/cpio.info
+#usr/share/man/man1/cpio.1
+#usr/share/man/man1/mt.1

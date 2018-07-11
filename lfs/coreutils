@@ -1,0 +1,135 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: coreutils 8082 2016-01-21 21:22:41Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = coreutils
+VER        = 8.29
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.xz
+#DL_FROM    = $(URL_GNU)/$(PKG_NAME)
+DL_FROM    = http://ftp.gnu.org/gnu/coreutils
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = 960cfe75a42c9907c71439f8eb436303
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+	cd $(DIR_APP) && patch -p1 -i $(DIR_PATCHES)/$(PKG_NAME)-8.22_uname-cpu-vendor.patch
+
+ifeq "$(STAGE)" "toolchain"
+	# hostname is used on base stage by coreutils configure and perl base tests
+	# use --disable-nls just to be smaller
+	cd $(DIR_APP) && FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/$(TOOLS_DIR) --disable-nls --enable-install-program=hostname
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+	cd $(DIR_APP) && make install-exec
+endif
+
+ifeq "$(STAGE)" "base"
+	# build the right list of installed files even if we cheat for stage2 symlinks to toolchain
+	sed -i -e '/\.\/bin\/cat$$/d' -e '/\/echo$$/d' -e '/\/pwd$$/d' /usr/src/lsalr
+	# no hostname here since we use hostname from net-tools in ISO
+	cd $(DIR_APP) && FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr --disable-nls --enable-no-install-program=kill,uptime
+
+	# check after 8.20 where some issues with perl and parallel build get fixed for the doc
+	# doc and manpage generation is causing trouble when building with full hardening, so completely remove it
+	cd $(DIR_APP) && sed -i 's/doc man//' Makefile
+	cd $(DIR_APP) && make -j $(PARALLELISM) V=1
+ifeq "$(RUNNING_TEST)" "yes"
+	# To run just one test, add TESTS=[full-test-name] VERBOSE=yes
+
+	# To not skip rm/fail-eperm test
+	touch /tmp/root-owned
+	# To not skip ls/root-rel-symlink-color
+	ln -sf ../usr /foo
+	# The user running make.sh own exclusive right to tty, allow root to read stdin in mv/i-3
+	# This change the setting even outside of the chroot
+	# Commented for now. Never certain to restore permission if you stop during tests and restart the tests from another tty.
+	#chmod o+r `tty`
+
+	-cd $(DIR_APP) && make -j 1 NON_ROOT_USERNAME=nobody check-root &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+
+	# To be able to run non-root tests as nobody
+	chown -R nobody $(DIR_APP)
+	-cd $(DIR_APP) && su nobody -s /bin/bash -c "PATH=${PATH} make -j 1 -k RUN_EXPENSIVE_TESTS=yes check" \
+					>> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log 2>&1
+endif
+	rm -f /tmp/root-owned /foo
+	#chmod o-r `tty`
+
+	cd $(DIR_APP) && make install-exec
+	mv -v /usr/bin/{cat,chgrp,chmod,chown,cp,date,dd,df,echo} /bin
+	mv -v /usr/bin/{false,ln,ls,mkdir,mknod,mv,pwd,readlink,rm} /bin
+	mv -v /usr/bin/{rmdir,stty,sync,true,uname} /bin
+	mv -v /usr/bin/chroot /usr/sbin
+	mv -v /usr/bin/{head,sleep,nice} /bin
+endif
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

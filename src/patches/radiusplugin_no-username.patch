@@ -1,0 +1,21 @@
+? Makefile.2
+? radiusplugin_no-username.patch
+Index: radiusplugin.cpp
+===================================================================
+RCS file: /sources/radiusplugin/radiusplugin/radiusplugin.cpp,v
+retrieving revision 1.19
+retrieving revision 1.20
+diff -u -r1.19 -r1.20
+--- radiusplugin.cpp	14 Nov 2010 11:37:20 -0000	1.19
++++ radiusplugin.cpp	14 May 2011 06:02:14 -0000	1.20
+@@ -1176,6 +1176,10 @@
+     {
+         user->setCommonname ( get_env ( "common_name", envp ) );
+     }
++    else if(context->conf.getClientCertNotRequired()==true) // if there is no username, set it to UNDEF, this is what OPENVPN does
++    {
++      user->setCommonname ("UNDEF");
++    }
+     
+     //rewrite the commonname if OpenVPN use the option username-as-comon-name
+     if ( context->conf.getUsernameAsCommonname() == true )

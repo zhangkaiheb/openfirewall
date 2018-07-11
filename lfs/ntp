@@ -1,0 +1,109 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: ntp 8091 2016-02-14 17:55:45Z eoberlander $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = ntp
+##VER        = 4.2.8p6
+VER        = 4.2.8p11
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+DL_FROM    = http://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-4.2
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+# Used to include same timestamp for all
+# This is the release date
+DATESTAMP = "Jan 20 2016"
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+##$(DL_FILE)_MD5 = 60049f51e9c8305afe30eb22b711c5c6
+$(DL_FILE)_MD5 = 00950ca2855579541896513e78295361
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/ntp-4.2.6_droproot.patch
+	# linux and glibc headers don't define MOD_NANO, define it here
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/ntp-4.2.6_MOD_NANO.patch
+	# Use release date instead of __DATE__ so everyone that compile has same md5
+	cd $(DIR_APP) && sed -i -e 's|__DATE__|$(DATESTAMP)|' -e 's|__TIME__|"12:00:00"|' libntp/ntp_calendar.c
+
+	cd $(DIR_APP) && ./configure	--prefix=/usr \
+					--enable-linuxcaps \
+					--disable-nls
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+	cd $(DIR_APP) && make install
+	
+	# create configdir and symlink the ntp configfile to /var/ipcop/time/ntp.conf
+	mkdir -p /var/log/ntp
+	chown -R ntp:ntp /var/log/ntp
+	ln -sf /var/ipcop/time/ntp.conf /etc/ntp.conf
+
+	rm -rf /usr/share/doc/ntp /usr/share/doc/sntp
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

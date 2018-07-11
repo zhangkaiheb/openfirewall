@@ -1,0 +1,7 @@
+#
+# Used for private dnsmasq (DHCP) options.
+# See dnsmasq manual http://www.thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html
+# After making modifications restart the DHCP server using the web interface 
+# or restartdhcp.
+# Changes made will then propagate to the DHCP server.
+#

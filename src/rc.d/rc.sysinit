@@ -1,0 +1,434 @@
+#!/bin/sh
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# 
+# (c) 2001-2015, the IPCop team
+#
+# $Id: rc.sysinit 7884 2015-02-09 16:54:04Z owes $
+#
+# bash -c help show the list of builtin command
+# external command should be with full path
+
+
+# $1 is return value of fsck
+function fs_check_result() {
+    if [ 0$1 -eq 0 ]; then
+        echo "$STRING: Success"
+    fi
+
+    if [ 0$1 -eq 1 ]; then
+        echo "$STRING: Passed"
+        echo -ne "WARNING:\n\nFile system errors"
+        echo -ne " were found and have been corrected."
+        echo -ne "  You may want to double-check that"
+        echo " everything was fixed properly."
+    fi
+
+    if [ 0$1 -eq 2 -o 0$1 -eq 3 ]; then
+        echo "$STRING: Passed, but reboot is required"
+        echo -ne "WARNING:\n\nFile system errors"
+        echo -ne " were found and have been"
+        echo -ne " corrected, but the nature of the"
+        echo -ne " errors require this system to be"
+        echo -ne " rebooted.\n\nAfter you press enter,"
+        echo -ne " this system will be rebooted"
+        echo -ne "\n\nRestarting in 10 seconds..."
+        sleep 10
+        /sbin/reboot -f
+
+    fi
+
+    if [ 0$1 -gt 3 -a 0$1 -lt 16 ]; then
+        echo "$STRING: Failed ($1)"
+        echo -ne "FAILURE:\n\nFile system errors"
+        echo -ne " were encountered that could not be"
+        echo -ne " fixed automatically.\n\n"
+        echo -ne "Dropping you to a shell; the system will reboot"
+        echo -ne " when you leave the shell.\n"
+        export PS1="(Repair filesystem) \# # "
+        /sbin/sulogin
+        echo "Unmounting filesystems"
+        /bin/umount -a
+        /bin/mount -n -o remount,ro /
+        echo "Automatic reboot in progress."
+        /sbin/reboot -f
+    fi
+
+    if [ 0$1 -ge 16 ]; then
+        echo "$STRING: Failed ($1)"
+        echo -ne "FAILURE:\n\nUnexpected Failure"
+        echo -ne " running fsck.  Exited with error"
+        echo -ne " code: $1.\n"
+    fi
+}
+
+test_ok()
+{
+    if [ $? -eq 0 ]; then
+        echo -e "${DONE}"
+    else
+        echo -e "${FAIL}"
+        sleep 2
+    fi
+}
+
+
+# Define color for messages
+BOLD="\\033[1;39m"
+NORMAL="\\033[0;39m"
+COLUMNS=$(stty size)
+COLUMNS=$((${COLUMNS##* } - 10 )) # left 10 to right border
+DONE="\\033[${COLUMNS}G\\033[0;32mDone${NORMAL}" # 'Done' in green
+FAIL="\\033[${COLUMNS}G\\033[0;31mFail${NORMAL}" # 'Fail' in red
+
+eval $(/usr/local/bin/readhash /var/ipcop/main/settings)
+
+umask 022
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export PATH
+
+# /dev, /proc and /sys are mount moved from initramfs
+# Still we check for /proc for those systems that boot without an initramfs like RaQ Cobalt
+if ! /bin/mountpoint -q /proc; then
+    echo -ne "Mounting /proc ... "
+    /bin/mount -t proc proc /proc
+    test_ok
+    echo -ne "Mounting /sys ... "
+    /bin/mount -t sysfs sysfs /sys
+    test_ok
+    echo -ne "Mounting /dev ... "
+    /bin/mount -t tmpfs tmpfs /dev -o mode=755
+    test_ok
+    cp -a /lib/udev/devices/* /dev
+    echo -ne "Setting udev as hotplug event handler ... "
+    echo > /proc/sys/kernel/hotplug
+    test_ok
+fi
+
+# Start udev
+echo -ne "Starting udev ... "
+
+# Start the udev daemon to continually watch for, and act on, uevents
+/sbin/udevd --daemon
+# Now traverse /sys in order to "coldplug" devices that have already been discovered
+/sbin/udevadm trigger
+# Now wait for udevd to process the uevents we triggered
+/sbin/udevadm settle --timeout=15
+test_ok
+
+if [ "$KEYMAP" != "" ]; then
+    echo -ne "Loading keymap $(basename $KEYMAP) ... "
+    /usr/bin/loadkeys -q $KEYMAP
+    test_ok
+fi
+
+# We store needed modules in /etc/modules so we don't hardcode any modules here
+for MODULE in `cat /etc/modules | /bin/grep "^[^#]"`; do
+    echo -ne "Loading module ${MODULE} ... "
+    /sbin/modprobe ${MODULE}
+    test_ok
+done
+
+STRING="Checking filesystems integrity"
+if [ -e /forcefsck ]; then
+    FORCEFSCK="-f"
+fi
+/sbin/fsck -a -A -C -T ${FORCEFSCK} 2>/dev/null
+fs_check_result $?
+
+echo -ne "Mounting root read/write ... "
+/bin/mount -n -o remount,rw /
+test_ok
+# Can only do this if / is mounted rw
+rm -f /forcefsck
+
+# Remove the reboot required flagfile
+rm -f /rebootrequired
+
+# Copy the udev rules generated before root was mounted read/write
+# Multiple rulefiles can exist, but we only care for 70-persistent-net
+if [ -e /dev/.udev/tmp-rules--70-persistent-net.rules ]; then
+    echo -ne "Copying early udev rules ... "
+    cat /dev/.udev/tmp-rules--70-persistent-net.rules >> /etc/udev/rules.d/70-persistent-net.rules
+    rm -f /dev/.udev/tmp-rules--70-persistent-net.rules
+    test_ok
+fi
+
+echo -ne "Create and update mtab ... "
+rm -f /etc/mtab
+touch /etc/mtab
+/bin/mount -f -t proc proc /proc
+/bin/mount -f -t sysfs sysfs /sys
+/bin/mount -f -t tmpfs tmpfs /dev -o mode=755
+/bin/mount -f /
+test_ok
+
+echo -ne "Mounting other filesystems ... "
+mount -a -t noproc
+test_ok
+
+# Unmount the initrd, if necessary
+if [ ! -e /etc/FLASH ]; then
+    if /bin/grep -q /initrd /proc/mounts && ! /bin/grep -q /initrd/loopfs /proc/mounts ; then
+        /bin/umount /initrd/hd
+        /bin/umount /initrd
+        /sbin/blockdev --flushbufs /dev/ram0
+    fi
+fi
+
+IPCOPVERSION=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::version;"`
+IPCOPKERNEL=`/bin/uname -r`
+
+echo -ne "Setting hostname ... "
+if [ -z "$DOMAINNAME" ]; then
+    /bin/hostname $HOSTNAME
+else
+    /bin/hostname ${HOSTNAME}.${DOMAINNAME}
+fi
+test_ok
+
+if [ -e /swapfile ]; then
+    SWAPSIZE=`/usr/bin/stat -c%s /swapfile`
+    if [ $SWAPSIZE -gt 70000000 ]; then
+        # During 2.1 development max swap was decreased. Adjust older installations.
+        echo -ne "Shrinking swapfile.  This may take several minutes ... "
+        /bin/dd if=/dev/zero of=/swapfile bs=1024k count=64 2>/dev/null
+        test_ok
+        echo -ne "Set up swapfile ... "
+        /sbin/mkswap /swapfile >/dev/null
+        test_ok
+    fi
+    echo -ne "Turning on swap ... "
+    /bin/chmod 600 /swapfile
+    /sbin/swapon /swapfile
+    test_ok
+fi
+
+if [ -L /boot/System.map -a -r /boot/System.map-${IPCOPKERNEL} -a \
+    ! /boot/System.map -ef /boot/System.map-${IPCOPKERNEL} ]; then
+    echo -ne "Updating System.map file location ... "
+    /bin/ln -s -f System.map-${IPCOPKERNEL} /boot/System.map
+    test_ok
+fi
+if [ ! -e /boot/System.map -a -r /boot/System.map-${IPCOPKERNEL} ]; then
+    echo -ne "Updating System.map file location ... "
+    /bin/ln -s -f System.map-${IPCOPKERNEL} /boot/System.map
+    test_ok
+fi
+
+if [ -e /etc/FLASH ]; then
+    if [ -e /etc/rc.d/rc.flash.up ]; then
+        echo -ne "Decompressing Flash ... "
+        /etc/rc.d/rc.flash.up
+        test_ok
+    fi
+fi
+
+echo -ne "Setting kernel settings ... "
+/sbin/sysctl -e -p /etc/sysctl.conf >/dev/null
+test_ok
+
+echo -ne "Setting locale ... "
+LANG=en_US.utf8
+export LANG
+test_ok
+
+echo -ne "Setting consolefonts ... "
+eval $(/usr/local/bin/readhash /var/ipcop/main/settings)
+for i in 2 3 4 5 6; do
+    > /dev/tty$i
+done
+test_ok
+
+echo -ne "Setting numlock ... "
+# Care only where we have input
+for i in 1 2; do
+    /usr/bin/setleds -D +num < /dev/tty${i}
+done
+test_ok
+
+if [ "$LANGUAGE" = "el" ]; then
+    /usr/bin/unicode_start iso07u-16
+elif [ "$LANGUAGE" = "pt" -o "$LANGUAGE" = "bz" ]; then
+    /usr/bin/unicode_start lat1-16
+elif [ "$LANGUAGE" = "cs" -o "$LANGUAGE" = "hu" -o "$LANGUAGE" = "pl" ]; then
+    /usr/bin/unicode_start lat2-16
+elif [ "$LANGUAGE" = "tr" ]; then
+    /usr/bin/unicode_start lat5-16
+elif [ "$LANGUAGE" = "vi" ]; then
+    /usr/bin/unicode_start viscii10-8x16
+else
+    /usr/bin/unicode_start lat0-16
+fi
+
+echo -ne "Clearing old files ... "
+/bin/rm -f /var/run/{*.pid,*.sem,*.tdb}
+/bin/rm -f /var/run/dhcpcd-*.pid
+/bin/rm -f /var/lock/LCK..tty*
+/bin/rm -f /var/log/dhcpclient.info
+/bin/rm -f /var/lib/squidguard/db/.lock
+test_ok
+
+echo -ne "Setting the clock ... "
+/sbin/hwclock --hctosys --utc
+test_ok
+
+echo  -ne "Initializing random number generator ... "
+random_seed=/var/run/random-seed
+# Carry a random seed from start-up to start-up
+# Load and then save the whole entropy pool
+if [ -f $random_seed ]; then
+    /bin/cat $random_seed >/dev/urandom
+else
+    /usr/bin/touch $random_seed
+fi
+/bin/chmod 600 $random_seed
+poolfile=/proc/sys/kernel/random/poolsize
+[ -r $poolfile ] && bytes=`/bin/cat $poolfile` || bytes=512
+/bin/dd if=/dev/urandom of=$random_seed count=1 bs=$bytes &>/dev/null
+test_ok
+
+# Cleaning up wtmp/utmp files
+>/var/run/utmp
+/usr/bin/touch /var/log/wtmp
+/bin/chgrp utmp /var/run/utmp /var/log/wtmp
+/bin/chmod 0664 /var/run/utmp /var/log/wtmp
+
+if [ ! -e /etc/ssh/ssh_host_key ]; then
+    echo -ne "Generating SSH RSA1 key.  This may take several minutes ... "
+    /usr/bin/ssh-keygen -q -t rsa1 -f /etc/ssh/ssh_host_key -N ""
+    test_ok
+fi
+if [ ! -e /etc/ssh/ssh_host_rsa_key ]; then
+    echo -ne "Generating SSH RSA key.  This may take several minutes ... "
+    /usr/bin/ssh-keygen -q -t rsa -f /etc/ssh/ssh_host_rsa_key -N ""
+    test_ok
+fi
+if [ ! -e /etc/ssh/ssh_host_dsa_key ]; then
+    echo -ne "Generating SSH DSA key.  This may take several minutes ... "
+    /usr/bin/ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_dsa_key -N ""
+    test_ok
+fi
+if [ ! -e /etc/ssh/ssh_host_ed25519_key ]; then
+    echo -ne "Generating SSH EdDSA key.  This may take several minutes ... "
+    /usr/bin/ssh-keygen -q -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ""
+    test_ok
+fi
+
+if [ ! -e /var/ipcop/backup/backup.key ]; then
+    echo -ne "Generating backup key.  This may take several minutes ... "
+    /usr/sbin/ipsec ranbits --quick 256 > /var/ipcop/backup/backup.key
+    /bin/chmod 400 /var/ipcop/backup/backup.key
+    test_ok
+fi
+# https certificate
+if [ -f /etc/httpd/server.key -a -f /etc/httpd/server.crt -a -f /etc/httpd/server.csr ]; then
+    /usr/local/bin/httpscert read
+else
+    echo -ne "Generating new http server SSL certificate keys ... "
+    /usr/local/bin/httpscert new > /dev/null 2>&1
+    test_ok
+fi
+if [ ! -e /usr/lib/ipcop/menu.pl ]; then
+    echo -ne "Generating GUI menu ... "
+    /usr/local/bin/updatemenu.pl
+    test_ok
+fi
+
+echo -ne "Rotating logs ... "
+/usr/sbin/logrotate /etc/logrotate.conf
+test_ok
+
+echo -ne "Starting rsyslogd ... "
+/usr/local/bin/restartsyslogd
+test_ok
+
+# TODO: Test for i486 here?
+# Initializing Power Management ACPI first (if enabled), then APM.
+# APM won't load if ACPI is initialized anyway.
+echo -ne "Initializing Power Management ... "
+if [ -e /proc/acpi ]; then
+    /sbin/modprobe evdev > /dev/null 2>&1
+    /sbin/modprobe ac > /dev/null 2>&1
+    /sbin/modprobe battery > /dev/null 2>&1
+    /sbin/modprobe button > /dev/null 2>&1
+    /sbin/modprobe fan > /dev/null 2>&1
+    /sbin/modprobe processor > /dev/null 2>&1
+    /sbin/modprobe thermal > /dev/null 2>&1
+    /usr/sbin/acpid -n > /dev/null 2>&1
+fi
+/sbin/modprobe apm > /dev/null 2>&1
+# APM not loading is not really an error, so be positive
+true && test_ok
+
+echo "Starting network ... "
+/etc/rc.d/rc.net --init
+
+echo -ne "Rotate and dump boot messages ... "
+if [ -e /var/log/dmesg ]; then
+    /usr/local/bin/savelog -q -p -l -c 5 /var/log/dmesg
+fi
+/bin/dmesg > /var/log/dmesg
+test_ok
+
+echo -ne "Starting ntpd (if enabled) ... "
+/usr/local/bin/restartntpd
+test_ok
+touch /var/run/ntpdate-red
+
+if [ -e /var/log/rrd/disk.rrd ]; then
+    echo -ne "Adjusting graphs to compensate for boot ... "
+    /usr/bin/perl -e 'use RRDs;RRDs::update("/var/log/rrd/disk.rrd","-t","readsect:writesect","N:U:U");'
+    test_ok
+fi
+
+echo -ne "Starting fcrond ... "
+if [ -e /etc/FLASH ]; then
+    # Save fcrontabs daily instead of every 1800 seconds
+    /usr/sbin/fcron -s 86400
+else
+    /usr/sbin/fcron
+fi
+test_ok
+
+echo -ne "Starting httpd ... "
+/usr/local/bin/restarthttpd
+test_ok
+echo -ne "Starting dhcpd (if enabled) ... "
+/usr/local/bin/restartdhcp --boot
+test_ok
+echo -ne "Starting sshd (if enabled) ... "
+/usr/local/bin/restartssh --boot
+test_ok
+echo -ne "Starting squid (if enabled) ... "
+/usr/local/bin/restartsquid
+test_ok
+echo -ne "Starting OpenVPN (if enabled) ... "
+/usr/local/bin/restartopenvpn --start
+test_ok
+
+echo -ne "Setting post-init kernel settings ... "
+/sbin/sysctl -e -p /etc/sysctlpostinit.conf >/dev/null
+test_ok
+
+echo "Running rc.event"
+/etc/rc.d/rc.event system up
+
+/usr/bin/logger -t ipcop "IPCop ${IPCOPVERSION} started with kernel ${IPCOPKERNEL}."
+
+# Start RED if 'Connect on IPCop restart' enabled
+/etc/rc.d/rc.net --startred

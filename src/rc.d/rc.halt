@@ -1,0 +1,142 @@
+#!/bin/sh
+#
+# $Id: rc.halt 4774 2010-08-07 07:02:45Z gespinasse $
+#
+
+
+# From Debian S40umountfs, to umount mountpoints with large names first
+# 
+#
+# Print in order of decreasing length
+#
+# Algorithm: Find and print longest argument, then call self
+# to print remaining arguments in order of decreasing length
+#
+# This function runs at one tenth the speed of the sort program
+# but we use the function because we don't want to rely on any
+# programs in /usr/.
+#
+# N.B.: Arguments must not be null and must not contain whitespace
+#
+pioodl() {
+    [ "$1" ] || return 0
+    ARGNUM=1
+    ARGNUM_LONGEST=0
+    ARGLENGTH_LONGEST=0
+    for ARG in "$@"
+    do
+        ARGLENGTH="${#ARG}"
+        if [ "$ARGLENGTH" -gt "$ARGLENGTH_LONGEST" ]
+        then
+            ARGLENGTH_LONGEST="$ARGLENGTH"
+            ARGNUM_LONGEST="$ARGNUM"
+        fi
+        ARGNUM=$(($ARGNUM + 1))
+    done
+    # The method of passing prevargs assumes that args can be
+    # delimited with spaces
+    ARGNUM=1
+    PREVARGS=""
+    while [ "$ARGNUM" -lt "$ARGNUM_LONGEST" ]
+    do
+        PREVARGS="$PREVARGS $1"
+        shift
+        ARGNUM=$(($ARGNUM + 1))
+    done
+    echo "$1"
+    shift
+    pioodl $PREVARGS "$@"
+}
+
+
+echo "Stopping the RED interface..."
+/etc/rc.d/rc.red stop 2>/dev/null
+/etc/rc.d/rc.red clear 2>/dev/null
+echo "Shutting down..."
+/bin/sleep 3
+echo "Saving the clock"
+/sbin/hwclock --systohc --utc
+
+# Carry a random seed from shut-down to start-up
+# Save the whole entropy pool
+echo "Saving random seed"
+random_seed=/var/run/random-seed
+/usr/bin/touch $random_seed
+/bin/chmod 600 $random_seed
+poolfile=/proc/sys/kernel/random/poolsize
+[ -r $poolfile ] && bytes=`/bin/cat $poolfile` || bytes=512
+/bin/dd if=/dev/urandom of=$random_seed count=1 bs=$bytes &>/dev/null
+
+echo "Sending all processes the TERM signal..."
+/sbin/killall5 -15
+/bin/sleep 3
+echo "Sending all processes the KILL signal..."
+/sbin/killall5 -9
+/bin/sleep 3
+
+if [ -e /etc/FLASH ]; then
+    if [ -e /etc/rc.d/rc.flash.down ]; then
+        /etc/rc.d/rc.flash.down
+    fi
+fi
+
+# Get all mounts
+exec 9<&0 </proc/mounts
+
+REG_MOUNTPTS=""
+TMPFS_MOUNTPTS=""
+
+# Filter out dev, proc, sys etc.
+while read DEV MOUNTPT FSTYPE REST
+do
+    case "$MOUNTPT" in
+          /)
+            continue
+            ;;
+          /proc|/proc/*|/sys)
+            continue
+            ;;
+          /dev|/.dev|/dev/pts|/dev/shm|/dev/.static/dev)
+            continue
+            ;;
+    esac
+    case "$FSTYPE" in 
+      proc|procfs|linprocfs|devfs|sysfs|usbfs|usbdevfs|devpts)
+        continue
+        ;;
+      tmpfs)
+        TMPFS_MOUNTPTS="$TMPFS_MOUNTPTS $MOUNTPT"
+        ;;
+      *)
+        REG_MOUNTPTS="$REG_MOUNTPTS $MOUNTPT"
+        ;;
+    esac
+done
+
+# From Debian S40umountfs, 
+#   first umount tmpfs file systems, turn off swap after to avoid running out of memory.
+echo "Unmounting tmpfs file systems"
+if [ "$TMPFS_MOUNTPTS" ]; then
+    TMPFS_MOUNTPTS="$(pioodl $TMPFS_MOUNTPTS)"
+    umount -f -r -d $TMPFS_MOUNTPTS
+fi
+
+echo "Turning off swap"
+/sbin/swapoff -a
+
+echo "Unmounting file systems"
+if [ "$REG_MOUNTPTS" ]; then
+    REG_MOUNTPTS="$(pioodl $REG_MOUNTPTS)"
+    umount -f -r -d $REG_MOUNTPTS
+fi
+
+echo "Unmounting root"
+/bin/mount -n -o remount,ro /
+
+/etc/rc.d/rc.event system down
+
+if [ "$1" = "halt" ]; then
+    /sbin/halt -i -d -p
+else
+    /sbin/reboot -i -d
+fi

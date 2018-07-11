@@ -1,0 +1,111 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: grep 7712 2014-11-25 11:26:58Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = grep
+VER        = 3.1
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.xz
+#DL_FROM    = $(URL_GNU)/$(PKG_NAME)
+DL_FROM    = http://ftp.gnu.org/gnu/grep
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = feca7b3e7c7f4aab2b42ecbfc513b070
+
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	# tar host version may not support natively xz, so use a pipe
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && xz -dc $(DIR_DL)/$(DL_FILE) | tar xf -
+
+ifeq "$(STAGE)" "toolchain"
+	# use --disable-nls just to be smaller
+	cd $(DIR_APP) && ./configure	--prefix=/$(TOOLS_DIR) \
+					--disable-perl-regexp \
+					--disable-nls
+endif
+
+ifeq "$(STAGE)" "base"
+	# libc regex is used instead of grep internal is the meaning of 'Included lib/regex.c not used' warning
+	cd $(DIR_APP) && ./configure --prefix=/usr --bindir=/bin --disable-nls
+endif
+
+	cd $(DIR_APP) && make -j $(PARALLELISM) V=1
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# on toolchain 34 tests + 104 gnulib should pass
+	# on final stage 45 tests + 117 gnulib should pass
+	cd $(DIR_APP) && make -j 1 -k check &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+
+	cd $(DIR_APP) && make install-exec
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

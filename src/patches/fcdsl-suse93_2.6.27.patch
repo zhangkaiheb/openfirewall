@@ -1,0 +1,185 @@
+diff -ur fritz/src/tools.h fritz.new/src/tools.h
+--- fritz/src/tools.h	2005-07-07 00:00:00.000000000 +0200
++++ fritz.new/src/tools.h	2006-01-26 17:29:53.000000000 +0100
+@@ -71,13 +71,14 @@
+ 
+ /*---------------------------------------------------------------------------*\
+ \*---------------------------------------------------------------------------*/
++#ifndef atomic_xchg
+ static inline unsigned long atomic_xchg (
+ 	volatile atomic_t *	v, 
+ 	unsigned		value
+ ) {
+ 	return __xchg (value, &v->counter, sizeof (unsigned));
+ } /* atomic_xchg */
+-
++#endif
+ /*---------------------------------------------------------------------------*\
+ \*---------------------------------------------------------------------------*/
+ #ifndef NDEBUG
+diff -urp fritz/src.org/main.c fritz/src/main.c
+--- fritz/src.org/main.c	2007-09-29 18:44:31.000000000 +0000
++++ fritz/src/main.c	2007-09-30 12:06:45.000000000 +0000
+@@ -22,7 +22,6 @@
+ 
+ #include <asm/uaccess.h>
+ #include <linux/pci.h>
+-#include <linux/config.h>
+ #include <linux/version.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+diff -urp fritz/src.org/driver.h fritz/src/driver.h
+--- fritz/src.org/driver.h	2007-09-29 18:44:31.000000000 +0000
++++ fritz/src/driver.h	2007-09-30 11:54:32.000000000 +0000
+@@ -23,7 +23,6 @@
+ #ifndef __have_driver_h__
+ #define __have_driver_h__
+ 
+-#include <linux/config.h>
+ #include <linux/pci.h>
+ #include <linux/list.h>
+ #include <linux/skbuff.h>
+diff -urp fritz/src.org/main.c fritz/src/main.c
+--- fritz/src.org/main.c	2007-09-29 18:44:31.000000000 +0000
++++ fritz/src/main.c	2007-09-30 12:06:45.000000000 +0000
+@@ -47,6 +46,8 @@
+ #include "lib.h"
+ #include "defs.h"
+ 
++#define pci_module_init	pci_register_driver
++
+ MODULE_LICENSE ("Proprietary");
+ MODULE_DESCRIPTION ("CAPI4Linux: Driver for " PRODUCT_LOGO);
+ 
+--- fritz/src/driver.c.orig	2005-07-06 22:00:00.000000000 +0000
++++ fritz/src/driver.c	2007-09-30 13:14:26.000000000 +0000
+@@ -122,7 +122,7 @@ static void			tx_task (unsigned long dat
+ static void			rx_task (unsigned long data);
+ static void			tx_handler (card_p cp);
+ static void			rx_handler (card_p cp);
+-static irqreturn_t		irq_handler (int, void *, struct pt_regs *);
++static irqreturn_t		irq_handler (int, void *);
+ static void			enable_thread (void);
+ static void			disable_thread (void);
+ static int			make_thread (void);
+@@ -200,7 +200,7 @@ static int alloc_resources (struct pci_d
+ 		cp->rx_dmabuf = NULL;
+ 		goto dma_rx_exit;
+ 	}
+-	res = request_irq (cp->irq, &irq_handler, SA_INTERRUPT | SA_SHIRQ, TARGET, cp);
++	res = request_irq (cp->irq, &irq_handler, IRQF_DISABLED | IRQF_SHARED, TARGET, cp);
+ 	if (res) {
+ 		LOG("Could not install irq handler.\n");
+ 		goto dma_tx_exit;
+@@ -1549,7 +1549,7 @@ static void rx_task (unsigned long data)
+ 
+ /*---------------------------------------------------------------------------*\
+ \*---------------------------------------------------------------------------*/
+-static irqreturn_t irq_handler (int irq, void * args, struct pt_regs * regs) {
++static irqreturn_t irq_handler (int irq, void * args) {
+ 	unsigned long	flags;
+ 	int		tx_flag	= 0;
+ 	int		rx_flag	= 0;
+@@ -1557,7 +1557,6 @@ static irqreturn_t irq_handler (int irq,
+ 	card_p		cp;
+ 	
+ 	UNUSED_ARG (irq);
+-	UNUSED_ARG (regs);
+ 	if (capi_card != (card_p) args) {
+ 		return IRQ_NONE;
+ 	}
+diff -urp fritz/src.org/driver.h fritz/src/driver.h
+--- fritz/src.org/driver.h	2007-09-29 18:44:31.000000000 +0000
++++ fritz/src/driver.h	2007-09-30 11:54:32.000000000 +0000
+@@ -98,7 +97,7 @@ extern int fcpcmcia_delcard (unsigned, u
+ 
+ /*---------------------------------------------------------------------------*\
+ \*---------------------------------------------------------------------------*/
+-extern int driver_init (void);
++extern int avm_driver_init (void);
+ extern void driver_exit (void);
+ 
+ /*---------------------------------------------------------------------------*\
+--- fritz/src/driver.c.orig	2007-09-30 13:16:12.000000000 +0000
++++ fritz/src/driver.c	2007-09-30 13:18:16.000000000 +0000
+@@ -1796,10 +1796,10 @@ void __stack init (unsigned len, void (_
+ 
+ /*---------------------------------------------------------------------------*\
+ \*---------------------------------------------------------------------------*/
+-int driver_init (void) {
++int avm_driver_init (void) {
+ 
+ 	return (NULL != (capi_lib = link_library (&capi_card)));
+-} /* driver_init */
++} /* avm_driver_init */
+ 
+ /*---------------------------------------------------------------------------*\
+ \*---------------------------------------------------------------------------*/
+--- fritz/src/main.c.orig	2007-09-30 13:16:12.000000000 +0000
++++ fritz/src/main.c	2007-09-30 13:19:42.000000000 +0000
+@@ -116,7 +116,7 @@ static int __devinit fcdsl_probe (
+ 		return -ENODEV;
+ 	}
+ 	NOTE( "Loading...\n");
+-	if (!driver_init ()) {
++	if (!avm_driver_init ()) {
+ 		ERROR("Error: Driver library not available.\n");
+ 		ERROR("Not loaded.\n");
+ 		return -ENOSYS;
+diff -ur  fritz/src/driver.c.orig fritz/src/driver.c
+--- fritz/src/driver.c.orig	2008-07-13 08:02:06.000000000 +0200
++++ fritz/src/driver.c	2008-07-13 08:11:41.000000000 +0200
+@@ -111,7 +111,8 @@
+ 
+ static DECLARE_WAIT_QUEUE_HEAD(wait);
+ static DECLARE_WAIT_QUEUE_HEAD(capi_wait);
+-static DECLARE_MUTEX_LOCKED(hotplug);
++//static DECLARE_MUTEX_LOCKED(hotplug);
++static DECLARE_COMPLETION(thread_sync);
+ 
+ #define SCHED_WAKEUP_CAPI       { atomic_set (&thread_capi_flag, 1); wake_up_interruptible (&capi_wait); }
+ #define SCHED_WAKEUP            { atomic_set (&got_kicked, 1); wake_up_interruptible (&wait); }
+@@ -1367,7 +1368,8 @@
+ 		}
+ 	}
+ 	LOG("Scheduler thread stopped.\n");
+-	up (&hotplug);
++	//up (&hotplug);
++	complete(&thread_sync);
+ 	return 0;
+ } /* sched_thread */
+ 
+@@ -1401,7 +1403,8 @@
+ 			SCHED_WAKEUP;
+ 		}
+ 		LOG("Thread signalled, waiting for termination...\n");
+-		down (&hotplug);
++		//down (&hotplug);
++		complete(&thread_sync);
+ 		LOG("Thread[%d] terminated.\n", thread_pid);
+ 	}
+ 	thread_pid = -1;
+--- fritz/src/driver.c	2012-02-04 17:22:10.000000000 +0100
++++ fritz/src/driver.c	2012-02-04 17:25:58.000000000 +0100
+@@ -1394,9 +1394,9 @@
+ static void kill_thread (void) {
+ 
+ 	atomic_set (&thread_flag, 0);
+-	if (NULL == find_task_by_pid (thread_pid)) {
+-		LOG("Thread[%d] has died before!\n", thread_pid);
+-	} else {
++//	if (NULL == find_task_by_pid (thread_pid)) {
++//		LOG("Thread[%d] has died before!\n", thread_pid);
++//	} else {
+ 		if (!atomic_read (&thread_capi_flag)) {
+ 			SCHED_WAKEUP_CAPI;
+ 		} else {
+@@ -1406,7 +1406,7 @@
+ 		//down (&hotplug);
+ 		complete(&thread_sync);
+ 		LOG("Thread[%d] terminated.\n", thread_pid);
+-	}
++//	}
+ 	thread_pid = -1;
+ } /* kill_thread */
+ /*---------------------------------------------------------------------------*\

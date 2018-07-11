@@ -1,0 +1,371 @@
+#!/bin/sh
+#
+# init, used both for cd installer booting and for normal hard drive booting
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) 2007-2012, the IPCop team.
+#
+#
+# $Id: init 7873 2015-02-06 14:35:26Z owes $
+#
+
+# Modes can be:
+# normal: we boot into ipcop
+# install: this is when we perform an installation
+# rescue: when we boot to fix a broken ipcop
+MODE=install
+
+# Define color for messages
+BOLD="\\033[1;39m"
+NORMAL="\\033[0;39m"
+COLUMNS=$(stty size)
+COLUMNS=$((${COLUMNS##* } - 10 )) # left 10 to right border
+DONE="\\033[${COLUMNS}G\\033[0;32mDone${NORMAL}" # 'Done' in green
+FAIL="\\033[${COLUMNS}G\\033[0;31mFail${NORMAL}" # 'Fail' in red
+
+# The filesystem type of the rootfs
+ROOT_FSTYPE=ext3
+
+# The default init.  Can be overwritten by passing init=<something> to the kernel
+INIT=/sbin/init
+
+# Other variables
+ROOTDELAY=
+
+test_ok()
+{
+	if [ $? -eq 0 ]; then
+		echo -e "${DONE}"
+	else
+		echo -e "${FAIL}"
+		sleep 5
+	fi
+}
+
+test_mdadm_ok()
+{
+	# if mdadm has nothing to do when the raid is already loaded it exits with 2
+	if [ $? -eq 0 -o $? -eq 2 ]; then
+		echo -e "${DONE}"
+	else
+		echo -e "${FAIL}"
+		sleep 5
+	fi
+}
+
+start_raid()
+{
+	MDCONFIG=/etc/mdadm/mdadm.conf
+
+	if [ ! -x /sbin/mdadm ]; then
+		return 0
+	fi
+	if [ ! -f /proc/mdstat ]; then
+		return 0
+	fi
+
+	if [ ! -e $MDCONFIG ]; then
+		echo -ne "Missing RAID config file, creating one ... "
+		mkdir -p ${MDCONFIG%/*}
+		echo DEVICE partitions > $MDCONFIG
+		mdadm --examine --scan >> $MDCONFIG
+		test_mdadm_ok
+	fi
+
+	echo -ne "Assembling RAID arrays ... "
+	# TODO: need a different, better way to make sure devices are added.
+	sleep 1
+	echo -ne "."
+	sleep 1
+	echo -ne ". "
+	mdadm --assemble --scan --run --auto=yes --homehost=ipcop --quiet
+	test_mdadm_ok
+}
+
+
+#########################################################################################################
+# This is the function we invoke when booting ipcop normally, ie from a hard drive installation		#
+#########################################################################################################
+start_normal_mode()
+{
+	echo "Running in normal mode"
+	start_raid
+
+	if [ ! -b ${ROOT} ]; then
+		echo -ne "Waiting for ${ROOT} "
+		COUNT=15
+
+		while [ ! -b ${ROOT} -a ${COUNT} -ge 0 ]
+		do
+			echo -ne "." && sleep 1
+			COUNT=$(( ${COUNT} - 1 ))
+		done
+
+		if [ ! -b ${ROOT} ]; then
+			echo -e "${FAIL}"
+			# Something's very wrong, go into rescue mode
+			start_rescue_mode
+		fi
+		echo -e "${DONE}"
+	fi
+
+	echo -ne "Mounting real rootfs ... "
+	mount -o ro -t ${ROOT_FSTYPE} ${ROOT} /harddisk
+	test_ok
+
+
+	echo -ne "Stopping udevd daemon ... "
+	pkill udevd
+	test_ok
+
+	echo -ne "Stopping syslogd daemon ... "
+	killall syslogd
+	test_ok
+
+	echo -ne "Move /proc to the real filesystem ... "
+	mount -o move /proc /harddisk/proc
+	test_ok
+
+	echo -ne "Move /sys to the real filesystem ... "
+	mount -o move /sys /harddisk/sys
+	test_ok
+
+	echo -ne "Move /dev to the real filesystem ... "
+	mount -o move /dev /harddisk/dev
+	test_ok
+
+	echo "Now switching root ... "
+	exec switch_root /harddisk ${INIT}
+}
+
+
+
+#########################################################################################################
+# This is the function we invoke when installing ipcop							#
+#########################################################################################################
+start_install_mode()
+{
+	echo "Running in install mode"
+	export PS1="[\[${BOLD}\]install-`uname -m`\[${NORMAL}\]] :\w $ "
+
+	if [ "x${CURRENT_TTY}" == "xtty1" ]; then
+		openvt -c 5
+		openvt -c 6
+
+		# Enable numlock where we have input
+		for i in 1 5 6; do
+			setleds -D +num < /dev/tty${i}
+		done
+
+		# declare DEBUGDEV=sda on (sys|pxe)linux.cfg APPEND line to save log on that device
+		# we may have to have wait for usb debug dev
+		if [ -n "${DEBUGDEV}" ]; then
+			echo -ne "Waiting for ${DEBUGDEV} "
+			COUNT=15
+
+			while [ ! -d /sys/block/${DEBUGDEV} -a ${COUNT} -ge 0 ]
+			do
+				echo -ne "." && sleep 1
+				COUNT=$(( ${COUNT} - 1 ))
+			done
+
+			if [ ! -d /sys/block/${DEBUGDEV} ]; then
+				echo -e "${FAIL}"
+				echo "${DEBUGDEV} not available"
+			else
+				echo -e "${DONE}"
+				sleep 1
+				mount -t vfat /dev/${DEBUGDEV} /mnt
+				# save whatever debug log file you want there,
+				# fat does not support : in the name
+				# cp -v /udev.log /mnt/udev-$(date '+%Y-%m-%d_%H-%M-%S').log
+				sync
+				ls /mnt
+				umount /dev/${DEBUGDEV}
+			fi
+		fi
+
+		# do not use cttyhack etc. as that currently does not work with special characters
+		# if you want to strace, uncomment strace install in lfs/initramfs
+		# and probably change to exec busybox /bin/ash
+		exec busybox init
+	else
+		# use cttyhack etc. to be able to display ASCII line drawing
+####		setsid cttyhack /bin/ash -c /bin/installer
+		setsid cttyhack /bin/bash
+	fi
+}
+
+
+
+#########################################################################################################
+# This is the function we invoke when starting ipcop in rescue/export mode				#
+#########################################################################################################
+start_rescue_mode()
+{
+	echo "Running in rescue mode"
+	export PS1="[\[${BOLD}\]rescue-`uname -m`\[${NORMAL}\]] :\w $ "
+	# Create an alias while in rescue (ie expert) mode
+	#alias start-installer="iowrap /dev/${CURRENT_TTY} /bin/ash --login -c /bin/installer"
+
+	# We need this trick so we don't start the installer
+	sed -i "s, -c /bin/installer,,g" /etc/inittab
+	exec busybox init
+}
+
+#########################################################################################################
+# Common start												#
+#########################################################################################################
+
+# Link /proc/mounts to /etc/mtab to make mke2fs happy and not need -n with mount
+######ln -s /proc/mounts /etc/mtab
+
+# Mount /proc first so we know in what mode we booted
+echo -ne "Mounting /proc ... "
+mount -t proc proc /proc
+test_ok
+
+# What machine are we running on (do this early so we can use it later)
+MACHINE=`uname -m`
+
+# Set default TTY, can overwrite with console=
+####CURRENT_TTY=tty1
+CURRENT_TTY=console
+
+# Now check what mode=, root=, and init= parameters we passed to the kernel
+for i in $(cat /proc/cmdline); do
+	case ${i} in
+		mode=*)
+			MODE=${i#mode=}
+			;;
+		root=*)
+			ROOT=${i#root=}
+			case $ROOT in
+			LABEL=*)
+				ROOT="/dev/disk/by-label/${ROOT#LABEL=}"
+				;;
+			UUID=*)
+				ROOT="/dev/disk/by-uuid/${ROOT#UUID=}"
+				;;
+			esac
+			;;
+		init=*)
+			INIT=${i#init=}
+			;;
+		rootdelay=*)
+			ROOTDELAY="${i#rootdelay=}"
+			;;
+		nodma)
+			# 1 parameter to easily disable dma for hda, hdb, hdc, hdd
+			IDE_CORE_OPTS="${IDE_CORE_OPTS} nodma=0.0 nodma=0.1 nodma=1.0 nodma=1.1"
+			;;
+		ide=*)
+			IDE_CORE_OPTS="${IDE_CORE_OPTS} $i"
+			;;
+		console=*)
+			CONSOLE="${i#console=}"
+			# We currently only accept ttyS0,38400n81 style parameter
+			# please inform if other formats are required
+			CURRENT_TTY="${CONSOLE%%,*}"
+			;;
+	esac
+done
+
+# Information only
+echo "Machine=${MACHINE} console=${CONSOLE} tty=${CURRENT_TTY}"
+
+# Put any ide parameters in modprobe.conf, for later use when modprobing
+if [ -n "$IDE_CORE_OPTS" ] ; then
+	echo -ne "Writing IDE parameters to modprobe.conf"
+	IDE_CORE_OPTS="${IDE_CORE_OPTS# }"
+	echo "options ide-core $IDE_CORE_OPTS" >> /etc/modprobe.conf
+	test_ok
+fi
+
+echo -ne "Mounting /sys ... "
+mount -t sysfs sysfs /sys
+test_ok
+
+echo -ne "Silencing kernel ... "
+echo >/proc/sys/kernel/printk "1 4 1 7"
+test_ok
+
+echo -ne "Disabling screen blanking ... \033[9;0]"
+test_ok
+
+# If booting from floppy on ppc oldworld, remount / (ext2) rw
+if [ x"${MACHINE}" == x"ppc" -a -f /FLOPPYBOOT ]; then
+	mount -o remount,rw /
+fi
+
+echo -ne "Mounting /dev ... "
+mount -t tmpfs tmpfs /dev -o mode=755
+test_ok
+# Create /dev/null to avoid udevd message
+mknod -m0666 /dev/null c 1 3
+
+echo -ne "Starting syslogd ... "
+syslogd -O /dev/tty4
+test_ok
+
+# This is important and it eliminates the need to use udevstart to discover new
+# devices after we've loaded a module.  And since we're including LFS udev rules
+# in the initramfs, then pretty much any device is supported.
+echo -ne "Setting udev as hotplug event handler ... "
+echo > /proc/sys/kernel/hotplug
+test_ok
+
+# Devices from /lib/udev/devices are copied automatically by udevd
+echo -ne "Starting udevd ... "
+udevd --daemon --resolve-names=never
+test_ok
+echo -ne "Starting udevadm ... "
+udevadm trigger
+udevadm settle --timeout=15
+test_ok
+
+# We store all needed modules in /etc/modules so we don't hardcode any modules here
+for MODULE in `cat /etc/modules`; do
+	echo -ne "Loading module ${MODULE} ... "
+	modprobe ${MODULE}
+	test_ok
+done
+
+# Modify /etc/inittab to use configured (or default) TTY
+sed -i -e "s,CURRENT_TTY,${CURRENT_TTY},g" /etc/inittab
+
+# Wait if rootdelay is set
+if [ "$ROOTDELAY" ]; then
+	echo -ne "Delay ${ROOTDELAY} ... "
+	sleep $ROOTDELAY
+	test_ok
+fi
+
+case ${MODE} in
+	normal)
+		start_normal_mode
+		;;
+	install)
+		start_install_mode
+		;;
+	rescue|expert)
+		start_rescue_mode
+		;;
+	*)
+		start_rescue_mode
+		;;
+esac

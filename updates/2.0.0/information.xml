@@ -1,0 +1,19 @@
+<ipcop>
+    <update>
+        <version>2.0.0</version>
+        <releasedate>2011-09-23</releasedate>
+        <size>0</size>
+        <description>Language updates.&lt;br /&gt;
+        Use utf-8 when sending system email (traffic warning etc.).&lt;br /&gt;
+        Fix logging of console logons in Login/Logout section.&lt;br /&gt;
+        Fix Pulsar DSL.&lt;br /&gt;
+        Fix SF bug #3403666, firewall timeframe rules.&lt;br /&gt;
+        Fix timestamp on rrdtool.&lt;br /&gt;
+        Fix USB modeswitch for 3G flip-flop modems.&lt;br /&gt;
+        Upgrade apache httpd to 2.2.21, coreutils to 8.13, squid to 3.1.15, tzadata-2011j, usb-modeswitch-data to 20110805&lt;br /&gt;
+        Upgrade usb-modeswitch to 1.1.9 and add jimsh mini-tcl</description>
+        <previousversion>1.9.20</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

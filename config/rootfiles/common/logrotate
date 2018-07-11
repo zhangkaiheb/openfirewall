@@ -1,0 +1,14 @@
+etc/logrotate.conf
+etc/logrotate.conf.FLASH
+etc/logrotate.conf.HDD
+#etc/logrotate.d
+etc/logrotate.d/apache2
+etc/logrotate.d/rsyslog
+etc/logrotate.d/squid
+etc/logrotate.d/squidGuard
+etc/logrotate.d/ulogd
+usr/local/sbin/logrotate
+#usr/share/man/man5/logrotate.conf.5
+#usr/share/man/man8/logrotate.8
+#var/lib/logrotate
+var/lib/logrotate/status

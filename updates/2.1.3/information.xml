@@ -1,0 +1,21 @@
+<ipcop>
+    <update>
+        <version>2.1.3</version>
+        <releasedate>2014-04-03</releasedate>
+        <size>12231</size>
+        <isoimages>no</isoimages>
+        <description>Language updates.&lt;br /&gt;
+        Add harfbuzz.&lt;br /&gt;
+        Upgrade apcid to 2.0.22, Archive-Zip to 1.37, bash to 4.3, bind to 9.9.5,
+        cairo to 1.12.16, coreutils to 8.22, db to 6.0.30, e2fsprogs to 1.42.9,  ethtool to 3.13,
+        fcron to 3.1.2, freetype to 2.5.3, glib to 2.40.0, gnupg to 1.4.16, iproute2 to 3.12.0,
+        libgcrypt to 1.6.1, libgpg-error to 1.12, libnl to 3.2.24, libpng to 1.6.10, logrotate to 3.8.7,
+        Net-DNS to 0.74, Net-SSLeay to 1.58, openldap to 2.4.39, openssh to 6.6p1, openssl to 1.0.1f,
+        pango to 1.36.3, pcre to 8.34, procps to 3.3.9, psmisc to 22.21, readline to 6.3,
+        sqlite to 3.8.4.2, squid to 3.3.12, squid-langpack to 20140220,
+        tzdata to 2014b, ulogd to 2.0.3, util-linux to 2.24.1.</description>
+        <previousversion>2.1.2</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

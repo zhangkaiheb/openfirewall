@@ -1,0 +1,11 @@
+#usr/bin/maketext
+#usr/lib/perl5/site_perl/PERLVER/Locale
+usr/lib/perl5/site_perl/PERLVER/Locale/Maketext
+usr/lib/perl5/site_perl/PERLVER/Locale/Maketext/Gettext
+usr/lib/perl5/site_perl/PERLVER/Locale/Maketext/Gettext.pm
+usr/lib/perl5/site_perl/PERLVER/Locale/Maketext/Gettext/Functions.pm
+#usr/lib/perl5/site_perl/PERLVER/MACHINE-linux/auto/Locale-Maketext-Gettext
+#usr/lib/perl5/site_perl/PERLVER/MACHINE-linux/auto/Locale-Maketext-Gettext/.packlist
+#usr/share/man/perl/man1/maketext.1
+#usr/share/man/perl/man3/Locale::Maketext::Gettext.3
+#usr/share/man/perl/man3/Locale::Maketext::Gettext::Functions.3

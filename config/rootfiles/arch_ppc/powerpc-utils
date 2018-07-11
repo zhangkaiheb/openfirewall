@@ -1,0 +1,6 @@
+##
+## powerpc-utils-1.1.3
+##
+usr/sbin/clock
+usr/sbin/macos
+usr/sbin/nvsetenv

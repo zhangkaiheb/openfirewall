@@ -1,0 +1,37 @@
+#
+# $Id: crontab 7339 2014-03-17 06:33:16Z owes $
+#
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+HOME=/
+#!mailto()
+
+# Log rotation
+0 * * * *	/usr/sbin/logrotate /etc/logrotate.conf
+
+# Logwatch
+%daily 10 *	/usr/local/bin/logwatch > /var/log/logwatch/`date -I -d yesterday`; \
+		LOGWATCH_KEEP=$(sed -ne 's/^LOGWATCH_KEEP=\([0-9]\+\)$/\1/p' /var/ipcop/logging/settings); \
+		find /var/log/logwatch/ -ctime +${LOGWATCH_KEEP=56} -exec rm -f '{}' ';'
+
+# Backup logs to flashdisk
+30 * * * *	/etc/rc.d/rc.flash.down
+
+# Make some nice graphs
+*/5 * * * *	/usr/local/bin/makegraphs.pl >/dev/null
+
+# Scheduler
+*/5 * * * *	/usr/local/bin/scheduler.pl --cron >/dev/null
+
+# Update dynamic dns registrations when needed
+# Use the scheduler to force an update
+*/5 * * * *	/usr/local/bin/setddns.pl --cron
+
+# Check (every 5 minutes) if iptables rules need an update
+*/5 * * * *	/usr/local/bin/setfwrules --cron > /dev/null
+
+# Aggregate traffic data (every 5 minutes)
+*/5 * * * *	/usr/local/bin/aggregatetraffic.pl > /dev/null
+
+# Run traffic monitoring (every 5 minutes)
+*/5 * * * *	/usr/local/bin/monitorTraffic.pl > /dev/null

@@ -1,0 +1,26 @@
+From 598f8904acf640fdf6866cd06d1e9a65bd32982a Mon Sep 17 00:00:00 2001
+From: NeilBrown <neilb@suse.com>
+Date: Wed, 5 Aug 2015 14:50:34 +1000
+Subject: [PATCH] raid6check: don't ignore return value from posix_memalign.
+
+Compilers don't like that.
+
+Signed-off-by: NeilBrown <neilb@suse.de>
+---
+ raid6check.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/raid6check.c b/raid6check.c
+index cb8522e..ad7ffe7 100644
+--- a/raid6check.c
++++ b/raid6check.c
+@@ -349,7 +349,8 @@ int check_stripes(struct mdinfo *info, int *source, unsigned long long *offsets,
+ 	if (!tables_ready)
+ 		make_tables();
+ 
+-	posix_memalign((void**)&stripe_buf, 4096, raid_disks * chunk_size);
++	if (posix_memalign((void**)&stripe_buf, 4096, raid_disks * chunk_size) != 0)
++		exit(4);
+ 	block_index_for_slot += 2;
+ 	blocks += 2;
+ 	blocks_page += 2;

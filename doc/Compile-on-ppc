@@ -1,0 +1,63 @@
+Compile IPCop on powerpc
+
+Short installation notes for those like me (Gilles) unfamiliar with powerpc
+
+Goal : install debian etch with powerpc netboot (work for me on a G 3 300)
+First, install from cd has fail reading my cdrw, so I boot from network for a debian netinstall
+( netboot work only on 'new world' machines G3 blue/white or newer )
+
+On the ppc machine
+Before or not to late after the starting sound, you could enter in openfirware
+and stop booting from harddisk with:
+ command + alt + O +F
+( with a PC keyboard command is the windows key, the apple on original keyboard )
+
+This is the openfirmware prompt
+0 >
+
+You could try too stop normal booting with 
+ ctrl + z (z appear as a w on french keyboard)
+
+Read ethernet local-mac-address on openfirmware and note mac value
+0 > dev enet .properties
+...
+local-mac-address : 00050211 0d4b
+...
+
+On the tftp server
+- load those files (boot.msg  initrd.gz  vmlinux  yaboot  yaboot.conf) on the tftp server
+from http://ftp.nl.debian.org/debian/dists/etch/main/installer-powerpc/current/images/powerpc/netboot/
+- copy files in /var/tftp/debian-installer/ppc (you path may vary, adjust for your case)
+
+When booting, yaboot search for the mac addres at the root of the tfpt server and if not found yaboot.conf.
+You could select an individual powerpc machine to use a specific yaboot.conf like this
+cd /var/tftp && ln -sf debian-installer/ppc/yaboot.conf 01-00-05-02-11-0d-4b <=this is the mac address with 01- prepended
+or make every powerpc machines use same yaboot.conf
+cd /var/tftp && ln -sf debian-installer/ppc/yaboot.conf yaboot.conf
+
+Ajust inside yaboot.conf the path for boot.msg, initrd and vmlinux
+message=/debian-installer/ppc/boot.msg
+image=/debian-installer/ppc/vmlinux
+initrd=/debian-installer/ppc/initrd.gz
+
+On the dhcp server
+- wrrite a fixed lease on the network dhcp server (could be an IPCop) :
+	MAC address,
+	corresponding IP,
+	IP of the tftp server (next-server),
+	file to boot from (debian-installer/ppc/yaboot)
+	no root path (not supported by yaboot to find yaboot.conf)
+	root-path dhcp option look to have no effect
+
+On the ppc machine
+- in openfirmware, type
+	boot enet:0
+or during boot hold the 'n' letter on the keyboard to start from Network
+
+yaboot start and should find yaboot.conf and boot.msg and other files
+Once system is installed, it will boot from the disk.
+
+More complete details in debian installation manual.
+
+Netbooting ipcop installation
+- to be coded and described

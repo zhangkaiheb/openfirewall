@@ -1,0 +1,71 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: avmdrv 5659 2011-05-01 21:28:11Z gespinasse $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = avmdrv
+HOST_ARCH  = i486
+OTHER_SRC  = yes
+
+THISAPP    = avmdrv
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+install : $(TARGET)
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST))
+	@$(PREBUILD)
+
+	# Create packages for avm drivers
+	cp /lib/modules/$(KVER)/extra/license.txt /
+	cd / && tar cvfz /$(INSTALLER_DIR)/images/$(SNAME)-$(VERSION)-install-$(THISAPP).$(MACHINE).tgz \
+		lib/modules/$(KVER)/extra/fcdsl*.ko.gz \
+		usr/lib/isdn/fds?base.bin \
+		etc/fcdsl/fcdsl*.conf \
+		etc/drdsl/{drdsl,drdsl.ini} \
+		license.txt
+	rm -f /license.txt
+
+	# yes we want it rebuild at each time, so no POSTBUILD

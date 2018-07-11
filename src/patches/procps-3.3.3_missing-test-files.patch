@@ -1,0 +1,14 @@
+--- /dev/null	2012-06-16 11:48:42.885320141 +0200
++++ procps-ng-3.3.3/testsuite/lib.test/fileutils_badfd.sh	2012-06-16 16:02:55.000000000 +0200
+@@ -0,0 +1,4 @@
++#!/bin/sh
++
++BASEDIR=$(dirname ${0})
++${BASEDIR}/../../lib/test_fileutils >&-
+--- /dev/null	2012-06-16 11:48:42.885320141 +0200
++++ procps-ng-3.3.3/testsuite/lib.test/fileutils_full.sh	2012-06-16 16:02:52.000000000 +0200
+@@ -0,0 +1,4 @@
++#!/bin/sh
++
++BASEDIR=$(dirname ${0})
++${BASEDIR}/../../lib/test_fileutils > /dev/full

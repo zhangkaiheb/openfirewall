@@ -1,0 +1,194 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: perl 8016 2015-12-31 11:54:13Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = perl
+VER        = 5.26.1
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+#DL_FILE    = $(PKG_NAME)_$(VER).orig.tar.bz2
+DL_FILE    = $(PKG_NAME)-$(VER).tar.xz
+#DL_FROM    = $(URL_DEBIAN)/p/$(PKG_NAME)
+#DL_FROM    = http://www.cpan.org/src/5.0
+DL_FROM    = http://www.cpan.org/src/5.0
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+#PATCH1     = $(PKG_NAME)_$(VER)-6.debian.tar.xz
+
+# Used to include same timestamp for everyone
+TIMESTAMP = "Feb 14 2015 19:27"
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+#objects = $(DL_FILE) $(PATCH1)
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+#$(PATCH1)  = $(URL_DEBIAN)/p/$(PKG_NAME)/$(PATCH1)
+#$(PATCH1)  = http://ipcop-addons.mooo.com/misc/IPCop/$(PATCH1)
+
+#$(DL_FILE)_MD5 = 21062666f1c627aeb6dbff3c6952738b
+$(DL_FILE)_MD5 = 70e988b4318739b0cf3ad5e120bfde88
+#$(PATCH1)_MD5  = c57d43ab169b281cde7dc6eda97a5276
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+	# avoid warning on patching files read-only with patch-2.7.x
+#	cd $(DIR_APP) && chmod -Rf a+rX,u+w,g-w,o-w .
+#
+#	cd $(DIR_APP) && tar xf $(DIR_DL)/$(PATCH1)
+#	# apply on debian order the patches not specific to debian
+#	# debian/patches/debian contains Debian specific patches, remove them from patch series
+#	cd $(DIR_APP) && sed -i -e /^debian/d debian/patches/series
+#	# debian/patches/fixes contains 'generic' patches, usually from upstream
+#	cd $(DIR_APP) && for patch in `cat debian/patches/series` ; do \
+#		patch -Np1 -i debian/patches/$$patch; \
+#	done
+#	# patchlevel contain reference to applied patches visible with perl -V
+#	# remove DEBPKG: prefix
+#	cd $(DIR_APP) && sed -i -e 's/^prefix=.*/prefix=""/' debian/gen-patchlevel
+#	# generate ipcop patchlevel info from patches
+#	cd $(DIR_APP) && debian/gen-patchlevel > patchlevel-ipcop.h
+#	# include ipcop patchlevel info in patchlevel.h
+#	cd $(DIR_APP) && sed -i -e '/do not remove this line/a #include "patchlevel-ipcop.h"' patchlevel.h
+#
+#	# Use our own TIMESTAMP instead of __DATE__ and __TIME__ so everyone has same md5
+#	cd $(DIR_APP) && sed -i -r 's|(.*)Compiled at ".*__DATE__.*__TIME__(.*)|\1Compiled at " $(TIMESTAMP)\2|' perl.c
+
+ifeq "$(STAGE)" "toolchain"
+	# static_ext and Errno are needed to run coreutils test suite
+#	cd $(DIR_APP) && ./configure.gnu	--prefix=/$(TOOLS_DIR) \
+#						-Dmyhostname=localhost
+
+	cd $(DIR_APP) && sh Configure -des -Dprefix=/$(TOOLS_DIR) -Dlibs=-lm
+
+	cd $(DIR_APP) && make
+
+	# Only a few of the utilities and libraries need to be installed at this time
+	cd $(DIR_APP) && cp -v perl cpan/podlators/scripts/pod2man /$(TOOLS_DIR)/bin
+	cd $(DIR_APP) && mkdir -pv /$(TOOLS_DIR)/lib/perl5/$(VER)
+	cd $(DIR_APP) && cp -Rv lib/* /$(TOOLS_DIR)/lib/perl5/$(VER)
+endif
+
+ifeq "$(STAGE)" "base"
+	# build the right list of installed files even if we cheat for stage2 symlinks to toolchain
+##	sed -i -e '/\.\/usr\/bin\/perl$$/d' /usr/src/lsalr
+	# Use Zlib library from system, not Perl internal (sed modification from LFS)
+##	cd $(DIR_APP) && sed -i -e "s|BUILD_ZLIB\s*= True|BUILD_ZLIB = False|" \
+##				-e "s|INCLUDE\s*= ./zlib-src|INCLUDE    = /usr/include|" \
+##				-e "s|LIB\s*= ./zlib-src|LIB        = /lib|" \
+##			cpan/Compress-Raw-Zlib/config.in
+
+	# This version of Perl now builds the Compress::Raw::Zlib and Compress::Raw::BZip2 modules.
+	# By default Perl will use an internal copy of the sources for the build.
+	# Issue the following command so that Perl will use the libraries installed on the system
+	export BUILD_ZLIB=False
+	export BUILD_BZIP2=0
+
+##	cd $(DIR_APP) && ./configure.gnu	--prefix=/usr \
+##						-Dman1dir=/usr/share/man/perl/man1 \
+##						-Dman3dir=/usr/share/man/perl/man3 \
+##						-Dpager="/usr/bin/less -isR" \
+##						-Ui_db \
+##						-Ui_gdbm \
+##						-Ui_ndbm \
+##						-Ui_dbm \
+##						-Dmyhostname=localhost \
+##						-Uoptimize \
+##						-Duseshrplib \
+##						-Darchname=$(MACHINE)-linux
+
+	cd $(DIR_APP) && sh Configure -des -Dprefix=/usr                 \
+						-Dvendorprefix=/usr           \
+						-Dman1dir=/usr/share/man/man1 \
+						-Dman3dir=/usr/share/man/man3 \
+						-Dpager="/usr/bin/less -isR"  \
+						-Duseshrplib                  \
+						-Dusethreads
+
+
+	cd $(DIR_APP) && make
+	cd $(DIR_APP) && make install
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# hostname configuration needed to pass lib/Net/t/hostname test is made on lfs/fix-up
+	# op/rand.t may fail 0.1 % of the time : sorry, restart
+	# lib/Benchmark can fail if machine load changes during test
+	-cd $(DIR_APP) && make -j 1 test &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+
+	# remove manpages to keep the rootfile smaller
+	rm -rf /usr/share/man/perl
+	# readd man1, man3 directory to avoid noise in module rootfiles
+	mkdir -p /usr/share/man/perl/{man1,man3}
+
+	unset BUILD_ZLIB BUILD_BZIP2
+endif
+
+	@rm -rf $(DIR_APP)
+ifeq "$(STAGE)" "base"
+	# Finally, force the rebuilding of the CPAN modules. Note that the modules are build in stage 03.
+	@rm -f $(DIR_INFO)/03_ipcop/perl-*
+endif
+	@$(POSTBUILD)

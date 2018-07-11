@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# Used for private event handling
+# Called on events like system up/down, network up/down, red up/down
+# 
+# $Id: rc.event.local 4071 2010-01-03 17:10:33Z owes $
+#
+
+# First parameter is event: system, network, red
+# Second parameter is value: up, down
+#
+# Do something like:
+#   if [ ${1} == "red" -a ${2} == "up" ]; then
+#       echo "RED up"
+#   fi
+#
+# this replaces rc.local:
+#   if [ ${1} == "system" -a ${2} == "up" ]; then
+#       echo "up and running"
+#   fi

@@ -1,0 +1,16 @@
+--- a/src/cf.data.pre-noipv6	2014-04-19 08:34:14.000000000 +0200
++++ a/src/cf.data.pre	2014-04-19 08:34:38.000000000 +0200
+@@ -827,8 +827,13 @@
+ ENDIF
+ DEFAULT: all src all
+ DEFAULT: manager url_regex -i ^cache_object:// +i ^https?://[^/]+/squid-internal-mgr/
++IF USE_IPV6
+ DEFAULT: localhost src 127.0.0.1/32 ::1
+ DEFAULT: to_localhost dst 127.0.0.0/8 0.0.0.0/32 ::1
++ELSE
++DEFAULT: localhost src 127.0.0.1/32
++DEFAULT: to_localhost dst 127.0.0.0/8 0.0.0.0/32
++ENDIF
+ DEFAULT_DOC: ACLs all, manager, localhost, and to_localhost are predefined.
+ DOC_START
+ 	Defining an Access List

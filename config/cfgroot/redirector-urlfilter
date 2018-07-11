@@ -1,0 +1,5 @@
+ENABLED=off
+ORDER=10
+NAME=URL filter
+CMD=/usr/bin/squidGuard
+OPTION_CHAIN=-f

@@ -1,0 +1,192 @@
+Monitoring package release depend on the infrastructure used.
+On sourceforge, that's easy to monitor a package release.
+You need to be logged and use links supplied, this will update the Monitoring
+section of your profile.
+
+With many packages, an annouce is send from http://freshmeat.net.
+It is sometime forgotted and freshmeat page is often late.
+
+Some GNU packages use a common info-gnu mailing list (see at the bottom)
+On other cases, an announce mailing list may be available.
+Announce list should be not verbose.
+I (Gilles) didn't find the proper way for cpan packages announces
+
+3c5x9setup
+Archive-Zip		http://www.cpan.org/modules/by-module/Archive/Archive-Zip-1.23.tar.gz
+CnxADSL			http://www.zweije.nl.eu.org/~vzweije/accessrunner/
+Compress-Zlib		http://www.cpan.org/modules/by-module/Compress/Compress-Zlib-1.42.tar.gz
+Digest			http://www.cpan.org/modules/by-module/Digest/Digest-1.08.tar.gz
+Digest-HMAC		http://www.cpan.org/modules/by-module/Digest/Digest-HMAC-1.01.tar.gz
+Digest-SHA1		http://www.cpan.org/modules/by-module/Digest/Digest-SHA1-2.10.tar.gz
+GD			http://www.cpan.org/modules/by-module/GD/GD-2.12.tar.gz
+HTML-Parser		http://www.cpan.org/modules/by-module/HTML/HTML-Parser-3.45.tar.gz
+HTML-Tagset		http://www.cpan.org/modules/by-module/HTML/HTML-Tagset-3.04.tar.gz
+Locale-Maketext-Gettext	http://www.cpan.org/modules/by-module/Locale/Locale-Maketext-Gettext-1.22.tar.gz
+Net-DNS			http://www.cpan.org/modules/by-module/Net/Net-DNS-0.60.tar.gz
+Net-IP			http://www.cpan.org/modules/by-module/Net/Net-IP-1.25.tar.gz
+Net-IPv4Addr		http://www.cpan.org/modules/by-module/Net/Net-IPv4Addr-0.10.tar.gz
+Net-Netmask		http://www.cpan.org/modules/by-module/Net/Net-Netmask-1.9015.tar.gz
+Net_SSLeay		http://www.cpan.org/modules/by-module/Net/FLORA/Net_SSLeay.pm-1.30.tar.gz
+Python			http://www.python.org/ftp/python/2.5.1/Python-2.5.1.tar.bz2
+Text-Parsewords		http://www.cpan.org/modules/by-module/Text/Text-ParseWords-3.1.tar.gz
+URI			http://www.cpan.org/modules/by-module/URI/URI-1.35.tar.gz
+aboot			https://sourceforge.net/projects/aboot/
+httpd-2.2.6.tar.gz	http://www.apache.org/foundation/mailinglists.html#foundation-announce (a bit verbose with the numerous projects)
+bash			http://freshmeat.net/projects/gnubash (http://lists.gnu.org/mailman/listinfo/bash-announce exist but not updated at all patches)
+beep			http://www.johnath.com/beep/beep-1.2.2.tar.gz
+bind			http://www.isc.org/index.pl?/sw/bind/bind-lists.php
+busybox			http://www.busybox.net/news.html (no announce list) http://freshmeat.net/projects/busybox/ is late
+bzip2			http://freshmeat.net/projects/bzip2 http://www.bzip.org (no announce list)
+cairo			http://lists.cairographics.org/archives/cairo-announce/ 
+capi4k-utils		ftp://ftp.in-berlin.de/pub/capi4linux (no announce list)
+ccache			https://lists.samba.org/mailman/listinfo/ccache (no announce list, usually not verbose)
+cppunit			(??) libreoffice@lists.freedesktop.org
+dejavu			https://sourceforge.net/projects/dejavu
+dhcpcd			http://roy.marples.name/projects/dhcpcd/wiki (freshmeat exists but is not updated anymore)
+distcc			http://freshmeat.net/projects/distcc/
+dnsmasq			http://freshmeat.net/projects/dnsmasq
+dosfstools		ftp://ftp.uni-erlangen.de/pub/Linux/LOCAL/dosfstools/ (no announce list)
+e2fsprogs		https://sourceforge.net/projects/e2fsprogs
+eciadsl-usermode	http://eciadsl.flashtux.org (no announce list)
+ethtool			http://www.kernel.org/pub/software/network/ethtool
+expat			https://sourceforge.net/projects/expat
+expect			https://sourceforge.net/projects/expect
+ez-ipupdate	 (1/3)Check: http://www.whyi.org/help/software/ez-ipupdate-3.0.11b8.tar.gz
+fcdsl	 (1/3)Check: ftp://ftp.avm.de/cardware/fritzcrd.dsl/linux/suse.93/fcdsl-suse93-3.11-07.tar.gz
+fcdsl2	 (1/3)Check: ftp://ftp.avm.de/cardware/fritzcrd.dsl_v20/linux/suse.93//fcdsl2-suse93-3.11-07.tar.gz
+fcdslsl	 (1/3)Check: ftp://ftp.avm.de/cardware/fritzcrd.dsl_sl/linux/suse.93//fcdslsl-suse93-3.11-07.tar.gz
+fcron			http://fcron.free.fr/contact.php#ml
+file			http://freshmeat.net/projects/file
+flex			https://sourceforge.net/projects/flex
+freetype		https://sourceforge.net/projects/freetype
+fontconfig		http://lists.freedesktop.org/mailman/listinfo/fontconfig (no announce list)
+libgd			http://freshmeat.net/projects/gd
+gdb			http://sourceware.org/ml/gdb-announce/
+gettext			http://freshmeat.net/projects/gettext
+gmp			http://gmplib.org/mailman/listinfo/gmp-announce
+hdparm			https://sourceforge.net/projects/hdparm
+hfsutils	 (1/3)Check: http://http.us.debian.org/debian/pool/main/h/hfsutils/hfsutils_3.2.6.orig.tar.gz
+iana-etc		http://freshmeat.net/projects/iana-etc/
+iftop			http://lists.beasts.org/mailman/listinfo/iftop-users
+inetutils		http://freshmeat.net/projects/inetutils
+iperf			https://sourceforge.net/projects/iperf
+iproute2	 (1/3)Check: http://developer.osdl.org/dev/iproute2/download/iproute2-2.6.20-070313.tar.gz
+iptables		https://lists.netfilter.org/mailman/listinfo/netfilter-announce
+iptstate		https://sourceforge.net/projects/iptstate
+iputils			https://sourceforge.net/projects/iputils
+isdn4k-utils	 (1/3)Check: ftp://ftp.isdn4linux.de/pub/isdn4linux/utils/isdn4k-utils.v3.2p1.tar.bz2
+kbd			https://lists.altlinux.org/mailman/listinfo/kbd
+klibc	 (1/3)Check: http://http.us.debian.org/debian/pool/main/k/klibc/klibc_1.5.7.orig.tar.gz
+krb5			http://mailman.mit.edu/mailman/listinfo/kerberos-announce
+less			http://www.greenwoodsoftware.com/less/less-announce.html
+libcap	 (1/3)Check: http://www.kernel.org/pub/linux/libs/security/linux-privs/kernel-2.4/libcap-1.10.tar.gz
+libnet			https://sourceforge.net/projects/libnet-dev
+libpcap			https://cod.sandelman.ca/cgi-bin/mj_wwwusr/domain=lists.tcpdump.org
+libpng			https://sourceforge.net/projects/libpng
+libusb			https://sourceforge.net/projects/libusb
+libwww-perl	 (1/3)Check: http://www.cpan.org/modules/by-module/Net/libwww-perl-5.805.tar.gz
+libxml2  (1/3)Check: http://xmlsoft.org/sources/libxml2-2.7.1.tar.gz
+linux	 (1/3)Check: http://www.kernel.org/pub/linux/kernel/v2.6/linux-2.6.22.tar.bz2
+linux	 (1/3)Check: http://www.grsecurity.net/grsecurity-2.1.10-2.6.19.2-200701222307.patch.gz
+linux-atm		https://sourceforge.net/projects/linux-atm
+logrotate	 (1/3)Check: http://http.us.debian.org/debian/pool/main/l/logrotate/logrotate_3.7.orig.tar.gz
+logwatch		https://sourceforge.net/projects/logwatch
+lzo			http://www.oberhumer.com/opensource/lzo/
+macutils	 (1/3)Check: http://http.us.debian.org/debian/pool/main/m/macutils/macutils_2.0b3.orig.tar.gz
+memtest			http://www.memtest.org/#ml
+miboot	 (1/3)Check: http://people.debian.org/~luther//miboot/miboot_1.0d4.orig.tar.gz
+mklibs	 (1/3)Check: http://http.us.debian.org/debian/pool/main/m/mklibs/mklibs_0.1.26.tar.gz
+mktemp	 (1/3)Check: ftp://ftp.mktemp.org/pub/mktemp/mktemp-1.5.tar.gz
+module-init-tools	 (1/3)Check: http://www.kernel.org/pub/linux/kernel/people/jcm/module-init-tools/module-init-tools-3.4.tar.bz2
+nasm			http://www.nasm.us/
+net-tools		https://sourceforge.net/projects/net-tools
+newt	 (1/3)Check: http://http.us.debian.org/debian/pool/main/n/newt/newt_0.52.2.orig.tar.gz
+noip_updater	 (1/3)Check: http://www.no-ip.com/client/linux/noip_updater_v1.6.tar.gz
+ntp			http://support.ntp.org/bin/view/Main/ReleaseNotifications
+openssh	 (1/3)Check: ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-4.7p1.tar.gz
+openssl	 (1/3)Check: http://www.openssl.org/source/openssl-0.9.8g.tar.gz
+openswan		http://lists.openswan.org/mailman/listinfo/announce
+openvpn	 (1/3)Check: http://openvpn.net/release/openvpn-2.0.9.tar.gz
+pciutils		http://freshmeat.net/projects/pciutils/
+pcmciautils	 (1/3)Check: http://www.kernel.org/pub/linux/utils/kernel/pcmcia/pcmciautils-014.tar.bz2
+pcre			https://sourceforge.net/projects/pcre
+perl	 (1/3)Check: http://www.cpan.org/src/perl-5.8.8.tar.bz2
+pixman			http://lists.cairographics.org/archives/cairo-announce/ 
+pkg-config	 (1/3)Check: http://pkgconfig.freedesktop.org/releases/pkg-config-0.20.tar.gz
+popt	 (1/3)Check: http://gd.tuwien.ac.at/utils/rpm.org/dist/rpm-4.1.x/popt-1.7.tar.gz
+powerpc-utils	 (1/3)Check: http://penguinppc.org/bootloaders/quik/powerpc-utils-1.1.3.tar.gz
+ppp	 (1/3)Check: http://samba.org/ftp/ppp/ppp-2.4.3.tar.gz
+pptp			https://sourceforge.net/projects/pptpclient
+procps			https://sourceforge.net/projects/procps-ng
+psmisc			https://sourceforge.net/projects/psmisc
+pulsar			https://sourceforge.net/projects/openadsl
+quik	 (1/3)Check: http://http.us.debian.org/debian/pool/main/q/quik/quik_2.1.orig.tar.gz
+rp-pppoe	 (1/3)Check: http://www.roaringpenguin.com/files/download/rp-pppoe-3.8.tar.gz
+rrdtool			https://lists.oetiker.ch/cgi-bin/listinfo
+rsrce	 (1/3)Check: http://http.us.debian.org/debian/pool/main/r/rsrce/rsrce_0.1.orig.tar.gz
+setserial		https://sourceforge.net/projects/setserial
+shadow	 (1/3)Check: ftp://ftp.osuosl.org/pub/lfs/lfs-packages/conglomeration/shadow/shadow-4.0.18.1.tar.bz2
+silo	 (1/3)Check: http://www.sparc-boot.org/pub/silo/silo-1.4.13.tar.bz2
+slang	 (1/3)Check: ftp://ftp.fu-berlin.de/pub/unix/misc/slang/v2.0//slang-2.0.7.tar.bz2
+smartmontools		https://sourceforge.net/projects/smartmontools
+sparc-utils	 (1/3)Check: ftp://ftp.debian.org/debian/pool/main/s/sparc-utils/sparc-utils_1.9.orig.tar.gz
+speedtouch		https://sourceforge.net/projects/speedtouch
+squid			http://www.squid-cache.org/Support/mailing-lists.html#squid-announce
+squid-graph		https://sourceforge.net/projects/squid-graph
+strace			https://sourceforge.net/projects/strace
+syslinux		http://freshmeat.net/projects/syslinux/
+sysvinit	 (1/3)Check: ftp://ftp.cistron.nl/pub/people/miquels/sysvinit/sysvinit-2.86.tar.gz
+tcl			https://sourceforge.net/projects/tcl
+tcpdump	 (		https://cod.sandelman.ca/cgi-bin/mj_wwwusr/domain=lists.tcpdump.org
+traceroute		https://sourceforge.net/projects/traceroute
+udev	 (1/3)Check: http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev-113.tar.bz2 http://freshmeat.net/projects/udev/ is late
+unzip			https://sourceforge.net/projects/infozip
+usbutils		http://sourceforge.net/project/filemodule_monitor.php?filemodule_id=142529
+util-linux		http://git.kernel.org/?p=utils/util-linux-ng/util-linux-ng.git http://vger.kernel.org/vger-lists.html#util-linux-ng (no announce list)
+vim			http://freshmeat.net/projects/vim/
+vlan			http://freshmeat.net/projects/vlan/
+wanpipe	 (1/3)Check: ftp://ftp.sangoma.com/linux/current_wanpipe/wanpipe-2.3.4-3.tgz
+which			http://www.xs4all.nl/~carlo17/which/
+wireless_tools	 (1/3)Check: http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/wireless_tools.28.tar.gz
+yaboot			http://freshmeat.net/projects/httppenguinppc.orgprojectsyaboot/
+zlib			https://sourceforge.net/projects/libpng
+
+GNU packages should be announced on http://lists.gnu.org/mailman/listinfo/info-gnu. Some have too another announce mailing list
+autoconf		http://lists.gnu.org/mailman/listinfo/autotools-announce
+automake		http://lists.gnu.org/mailman/listinfo/autotools-announce
+binutils		http://www.gnu.org/software/binutils	(no special announce list)
+bison			http://www.gnu.org/software/bison	(no special announce list)
+coreutils		http://lists.gnu.org/mailman/listinfo/coreutils-announce
+cpio			http://savannah.gnu.org/news/?group=cpio (no special announce list)
+dejagnu			http://www.gnu.org/software/dejagnu	(no special announce list)
+diffutils		http://ftp.gnu.org/pub/gnu/diffutils	(no special announce list)
+findutils		http://www.gnu.org/software/findutils	(no special announce list)
+freetype		https://lists.nongnu.org/mailman/listinfo/freetype-announce
+gawk			http://ftp.gnu.org/gnu/gawk/?C=M;O=D http://freshmeat.net/projects/gawk is late
+gcc			http://gcc.gnu.org/lists.html#subscribe
+gdb			http://sourceware.org/lists.html#gdb
+glibc			http://sourceware.org/lists.html#glibc	(no special announce list)
+grep			http://savannah.gnu.org/projects/grep	(no special announce list)
+groff			http://www.gnu.org/software/groff	(no special announce list)
+gzip			http://savannah.gnu.org/projects/gzip	(no special announce list)
+libtool			https://lists.gnu.org/mailman/listinfo/autotools-announce
+m4			http://lists.gnu.org/mailman/listinfo/m4-announce, https://lists.gnu.org/mailman/listinfo/autotools-announce
+make			http://www.gnu.org/software/make	(no special announce list)
+mtools			http://lists.gnu.org/mailman/listinfo/info-mtools
+nano			http://lists.gnu.org/mailman/listinfo/info-nano
+ncurses			http://www.gnu.org/software/ncurses	(no special announce list)
+parted			http://savannah.gnu.org/projects/parted	(no special announce list)
+patch			http://savannah.gnu.org/projects/patch	(no special announce list)
+readline		http://www.gnu.org/software/readline	(no special announce list)
+sed			http://www.gnu.org/software/sed		(no special announce list)
+tar			http://savannah.gnu.org/projects/tar	(no special announce list)
+
+gnupg			http://www.gnupg.org/documentation/mailing-lists.en.html
+libgcrypt		http://www.gnupg.org/documentation/mailing-lists.en.html
+libgpg-error		http://www.gnupg.org/documentation/mailing-lists.en.html
+
+
+Packages announced on http://mail.gnome.org/mailman/listinfo/gnome-announce-list (a bit verbose)
+glib
+pango
+

@@ -1,0 +1,3 @@
+usr/bin/squidGuard
+var/log/squidGuard
+var/log/squidGuard/squidGuard.log

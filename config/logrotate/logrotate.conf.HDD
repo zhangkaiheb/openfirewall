@@ -1,0 +1,36 @@
+# logrotate cfg for harddisk installations
+#
+
+# use date in filenames when rotating
+dateext
+dateyesterday
+
+# rotate log files daily
+daily
+
+# default is to keep 8 weeks worth of backlogs
+rotate 56
+
+# create new (empty) log files after rotating old ones
+create
+
+# uncomment this if you want your log files compressed
+compress
+
+# packages drop log rotation information into this directory
+include /etc/logrotate.d
+
+# no packages own wtmp, or btmp -- we'll rotate them here
+/var/log/wtmp {
+    missingok
+    weekly
+    create 0664 root utmp
+    rotate 1
+}
+
+/var/log/btmp {
+    missingok
+    weekly
+    create 0600 root root
+    rotate 1
+}

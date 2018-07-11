@@ -1,0 +1,118 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: logrotate 7288 2014-03-06 06:19:08Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME  := logrotate
+##VER       := 3.8.7
+VER       := 3.14.0
+HOST_ARCH := all
+OTHER_SRC := yes
+
+THISAPP   := $(PKG_NAME)-$(VER)
+DL_FILE   := $(THISAPP).tar.gz
+##DL_FROM   := $(URL_FEDORAH)/l/o/logrotate
+DL_FROM   := https://github.com/logrotate/logrotate/releases/download/3.14.0
+DIR_APP   := $(DIR_SRC)/$(THISAPP)
+TARGET    := $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+##PATCH1    := $(PKG_NAME)_$(VER)-1.debian.tar.xz
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+###$(PATCH1)
+
+$(DL_FILE):= $(DL_FROM)/$(DL_FILE)
+##$(PATCH1) :=$(URL_DEBIAN)/l/$(PKG_NAME)/$(PATCH1)
+
+#$(DL_FILE)_MD5:= 99e08503ef24c3e2e3ff74cc5f3be213
+##$(DL_FILE)_MD5:= e91099cd3658454bee79957896dd3b12
+$(DL_FILE)_MD5:= 8b9a87bb7b0c3f4b92f270a5bded20f4
+##$(PATCH1)_MD5 := d1d2acc2207b89609608bb64d675fce1
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	# --no-same-owner --no-same-permissions is needed by ./test
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar --no-same-owner --no-same-permissions -xf $(DIR_DL)/$(DL_FILE)
+	# Apply patches on debian order
+##	cd $(DIR_APP) && tar xf $(DIR_DL)/$(PATCH1)
+##	cd $(DIR_APP) && for patch in `cat debian/patches/series` ; do echo "Using $$patch"; patch -p1 -i debian/patches/$$patch; done
+
+	cd $(DIR_APP) && ./configure
+	cd $(DIR_APP) && make RPM_OPT_FLAGS="$(CFLAGS)"
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# no test should fail
+	cd $(DIR_APP)/test && ./test &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+
+	cd $(DIR_APP) && make install
+	# debian patches location of statefile to /var/lib/logrotate/status
+	mkdir -p /var/lib/logrotate
+	touch /var/lib/logrotate/status
+
+	cp -fR $(DIR_SRC)/config/logrotate/* /etc
+	find /etc/logrotate.d -name .svn -print | xargs --no-run-if-empty rm -rf
+
+	# HDD logrotate will be default
+	ln -sf /etc/logrotate.conf.HDD /etc/logrotate.conf
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

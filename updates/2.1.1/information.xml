@@ -1,0 +1,16 @@
+<ipcop>
+    <update>
+        <version>2.1.1</version>
+        <releasedate>2014-02-13</releasedate>
+        <size>13473</size>
+        <description>Add URL filter.&lt;br /&gt;
+            Upgrade e1000e network driver to 2.5.4, igb network driver to 5.1.2, linux kernel to 3.4.71, solos-pci atm driver to 1.0.4,
+            squid to 3.3.10, squid-langpack to 20131111, tzdata to 2013h.
+            &lt;br /&gt;
+            &lt;b&gt;Mandatory reboot after upgrade.&lt;/b&gt;
+        </description>
+        <previousversion>2.1.0</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

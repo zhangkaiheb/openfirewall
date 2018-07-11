@@ -1,0 +1,21 @@
+#
+# $Id: inittab 5994 2011-10-26 14:42:11Z owes $
+#
+id:3:initdefault:
+
+l0:0:wait:/etc/rc.d/rc.halt halt
+l6:6:wait:/etc/rc.d/rc.halt reboot
+
+si::sysinit:/etc/rc.d/rc.sysinit
+
+# Trap CTRL-ALT-DELETE
+ca::ctrlaltdel:/sbin/shutdown -r now
+
+# Run gettys in standard runlevels
+1:2345:respawn:/sbin/agetty --noclear tty1 9600
+2:2345:respawn:/sbin/agetty tty2 9600
+3:2345:off:/sbin/agetty tty3 9600
+4:2345:off:/sbin/agetty tty4 9600
+5:2345:off:/sbin/agetty tty5 9600
+6:2345:off:/sbin/agetty tty6 9600
+#7:2345:respawn:/sbin/agetty -I '\033(K' ttyS0 9600 vt102

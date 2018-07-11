@@ -1,0 +1,189 @@
+How To Update Languages from IPCop Language Database
+
+$Id: How-to-update-languages 3206 2009-07-10 11:20:09Z owes $
+
+
+Temporary development how-to
+- add new phrases to langs/(install|ipcop).new.en.pl
+- execute this to generate the new .po files:
+  ./make.sh language
+- check the svn diff
+- execute this to generate the new .mo files for target IPCop:
+  ./make.sh build
+- check that you are happy with your new phrases
+- svn commit langs/(install|ipcop).new.en.pl and .po files
+
+
+
+*** Following does not fully apply to IPCop v2 ***
+
+
+Prerequisites to update from web database
+
+- Have a working copy of svn
+- Have shell access to SourceForge 
+- Have developer rights for IPCop Language Database (configured in langs/add/.htaccess)
+
+
+Adding a username/password pair to provide editing rights to Database
+- Login to a shell on SourceForge
+- execute:
+  htpasswd /home/groups/i/ip/ipcop/htdocs/langs/.htpasswd username
+
+  where 'username' is whatever you need it to be. You can only add new passwords,
+  there is no way of confirming existing passwords.  
+ 
+
+Adding new phrases to the Database
+
+- Go to the 'Developer's Pages', linked at the foot of the Main Index page on 
+  http://www.ipcop.org/langs/
+- Locate the 'Add a Variable' section, and input the variable name, and select 'SETUP'
+  or 'WEB' from the drop down menu. 
+- Web variables are all lowercase with a space between words, Installer variable strings
+  are all uppercase, start with TR_ and words are separated by underscores.
+
+
+Editing a Variable Name
+
+- If you make an input mistake, contact the Database Developer, Marco van Beek, and ask 
+  him to change it, or delete it (his email address is on Credits page).
+
+
+Removing phrases from the Database
+
+- In the English Index, edit the variable and change the data to 'TO BE REMOVED' (without
+  quotes) and save it.
+- Contact the Database Developer, Marco van Beek, and ask for all phrases marked 'TO BE 
+  REMOVED' to be deleted from the database.
+
+
+Add a Language
+
+- Go to the 'Developer's Pages', linked at the foot of the Main Index page on 
+  http://www.ipcop.org/langs/
+- Pick a language from the list and click 'Proceed'. The list should only show you languages
+  that aren't already in the database.
+
+
+Edit a Language
+
+- Pick a language from the list (Only currently active ones will be shown) and you will
+  be able to edit the details.
+- The 'Copyright Notice' Section is the place to add Translator's names and the latest date 
+  to the files.
+- Save any changes by pressing the 'Update' button.
+
+Tip: Do NOT add the CVS Id Tag anywhere within the file or the copyright notice, otherwise
+     you will get lots of false change warnings, when the Id Tag can be the only change. 
+
+
+Tools
+
+- There are some scripts in the ipcop/tools/ directory to simplify some tasks.
+
+- fetchlangs.pl
+
+  From the ipcop directory run this command:
+  ipcop$ ./tools/fetchlangs.pl
+
+  This will generate and download ALL the language files from the current data in the 
+  Language Database.
+
+  fetchlangs.pl has been improved to load only a language install set if that install
+  directory exist. This happen when a lang is not yet include in installer (JA, ZH, ZT,
+  and others). You would get an error message 'Failed to rename downloaded file'
+  if that directory was not available.
+
+
+- check_strings.pl
+
+  From the ipcop directory run this command:
+  ipcop$ ./tools/check_strings.pl
+
+  This script checks for unused translation strings, or untranslated strings, within the 
+  cgis. Use with care, as it will not find strings concatenated to form variables.
+  Double-check before deciding a string is redundant.
+
+
+Summary
+
+- Regularly check for changes in the Database by first updating your working copy of CVS:
+  cvs update -P -d
+- Run fetchlangs.pl script
+- Check for changes by diffing against CVS Repository:
+  cvs -Q diff
+- If you see any errors which you can fix, go into the Language Database and repair them,
+  run fetchlangs.pl script again.
+  TIP: Remove leading or trailing whitespace from any strings used as button
+       text. Also, buttons won't function correctly if they contact HTML codes 
+       as part of the string.
+- When ready, commit the new changes to CVS with an explanatory message:
+- cvs ci -m "Updates from Language Database."
+- Monitor changes to en.pl and lang_en.c in CVS, as Developers make changes to 
+  these files. Allow a little time for any changes to settle down, then add the 
+  phrases to the Database (or edit them). Fix any spelling, grammer or typos
+  when you add the data.
+  If the text of an existing phrase is changed, you have to go through ALL the 
+  other translations and delete the data, so the untranslated phrase floats to 
+  the top of the Index again, otherwise Translators will be unaware of a change. 
+- If additions or deletions are made to Installer scripts (lang_en.c), it is 
+  important to keep the translations in sync with English. The sort order and 
+  number of text strings in v1.4 Installer IS SIGNIFICANT, and the translations 
+  will break if the phrases are offset, or out order. (A different approach has
+  been adopted in v1.5 which will avoid this particular problem). 
+
+
+Sample Advice to email to New Translators
+
+(Urdu is used as the example. Change ur/UR to the appropriate language code).
+
+Thanks for your offer to help translate IPCop. Here are some notes on adding 
+information to the online Language Database at http://www.ipcop.org/langs
+There is a link to Urdu at the bottom of the page: 
+http://www.ipcop.org/langs/edit/index.php?Language=UR
+
+You will need a username/password to add or edit phrases, which I will send you 
+separately.
+
+When you are ready to work on a translation, click on a phrase to edit it, and 
+input your translation in the field provided. Remember to translate the English 
+Text, and not the Variable Name.
+
+Click 'Update' to save and then go back to the Index page, and continue with 
+another phrase. Completed work sinks to the bottom of the page.
+
+Right at the bottom of the page are two Links, which create the language files 
+used on IPCop. 'ur.pl' is the one used in the web interface. Characters are 
+stored in UTF-8 format.
+
+Don't be put off by the large number of phrases. Just do them in small batches, 
+or get a team together to spread the load. They don't have to be done in any 
+special order. I have a list of some of the most common phrases, used in the 
+menu sub-system, if you are interested - 
+(http://www.eoberlander.freeserve.co.uk/linux/ipcop/header.txt). Leave the 
+phrases that start "TR_" till last, as they are used in the Installer, and our 
+current Installer can't handle non-ISO 8859 character sets. This may change 
+with version v1.5, currently under development.
+
+If you find a phrase containing the text 'TO BE REMOVED', ignore it, as it is 
+redundant, and will be removed from the Database eventually.
+
+If you want to test your newly created language file, go to the bottom of the 
+page.  Click on the 'Create UR.pl' file link, download the file and scp it onto 
+an IPCop box as /var/ipcop/langs/ur.pl
+
+You'll also have to edit your /var/ipcop/langs/list file to add an entry for 
+your language.
+
+Finally to see any recent changes, you need to regenerate the language cache 
+files on IPCop. Execute this command as root:
+perl -e "require '/var/ipcop/lang.pl'; &Lang::BuildCacheLang"
+
+BTW, once your work is added to CVS, which can happen when work has advanced 
+past 100 phrases, you get your name included on the IPCop credits.cgi page. 
+Please let me know if your happy with that, and if you want your email address 
+shown on the page as well (some people prefer not to expose their email address 
+to avoid spam). 
+
+Thanks again.

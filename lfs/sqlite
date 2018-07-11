@@ -1,0 +1,116 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: sqlite 8103 2016-03-28 08:16:15Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = sqlite
+VER        = 3110100
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-autoconf-$(VER)
+DL_FILE    = sqlite-autoconf-$(VER).tar.gz
+DL_FROM    = http://sqlite.org/2016
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+# When compiling DBD-SQLite against system libsql3, DBD-SQLite require a sqlite configuration that is different from
+# sqlite package default or DBD-SQLite tests fail.
+# Needed configuration with some comments could be found in DBD-SQLite Makefile.PL (we haven't compiled core perl with thread support)
+# Only adding SQLITE_ENABLE_COLUMN_METADATA is enought for DBD-SQLite test success
+CFLAGS    += -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_ENABLE_RTREE -DSQLITE_ENABLE_COLUMN_METADATA -DNDEBUG=1 -DHAVE_USLEEP=1
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = c66b4e9d5ca6cfd15471b5b03fc44537
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+	# remove database(s) in case of a partial build
+	rm -f /var/ipcop/traffic/empty-aggregate.db
+	rm -f /var/log/traffic/aggregate.db
+
+	# Beware there is 2 differents sqlite packages (-autoconf tar.gz and -src .zip) that support different extensions/features
+	# -autoconf package does not support 'configure --enable-extension' and does not support 'make test' target
+	# but is smaller and open with tar zxf
+	cd $(DIR_APP) && ./configure --prefix=/usr --disable-static
+	cd $(DIR_APP) && make
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# Tests require the -src zip package, and we don't want to require unzip just for that. So not run tests for now.
+	# Running test require on configure --enable-load-extension --with-tcl=/$TOOLS_DIR/lib (need something else to find libtcl)
+	# As of version 3070800, tests fail on big-endian
+	#-cd $(DIR_APP) && make test &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+	cd $(DIR_APP) && make install
+
+	# Create database
+	mkdir -p /var/log/traffic/
+	sqlite3 /var/ipcop/traffic/empty-aggregate.db < $(DIR_SRC)/config/cfgroot/aggregate.table
+	cp /var/ipcop/traffic/empty-aggregate.db /var/log/traffic/aggregate.db
+
+	rm -f $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/{DBD-SQLite-*,ulogd-*}
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

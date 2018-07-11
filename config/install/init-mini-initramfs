@@ -1,0 +1,291 @@
+#!/bin/sh
+#
+# init-mini-initramfs, small enough to fit on the kernel floppy, it tries to detect an IDE cdrom and start the
+# installer from it.  If it can't find or mount the install cd, it does a floppy installation.  Works on x86 and
+# ppc.
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+#
+# Copyright (C) 2007-2008, the IPCop team.
+#
+# This script was influenced by Debian boot-floppies
+#
+# $Id: init-mini-initramfs 5389 2011-01-30 13:04:54Z gespinasse $
+#
+
+set -e
+
+# The installer kernel version
+KVER=KVER
+
+# Floppy installs are supported on x86 and ppc old-world.  Find out which one we're installing on
+MACHINE=`uname -m`
+
+# Temporary variable
+CDROM=none
+
+# Handle errors
+exiterror()
+{
+	local MESSAGE=${1}
+
+	echo "FATAL ERROR: ${MESSAGE}!"
+	echo "Quitting"
+
+	echo "kernel will panic in 1 mn after last error ..."
+	sleep 60
+}
+
+case ${MACHINE} in
+	i?86)
+		MACHINE=i486
+		INITRAMFS_IMAGE=isolinux/instroot.img
+		FLOPPY_MODULE=floppy.ko
+		;;
+	ppc*)
+		MACHINE=ppc
+		INITRAMFS_IMAGE=instroot-1.9.img
+		FLOPPY_MODULE=swim3.ko
+		;;
+	*)
+		exiterror "Can't decide what floppy module is needed"
+		;;
+esac
+
+# Mount /proc and /sys
+echo -n "Mounting /proc ...\t\t\t"
+if ! mount -t proc proc /proc 2>&1 > /dev/null; then
+	exiterror "Failed"
+else
+	echo "Done"
+fi
+
+echo -n "Mounting /sys ...\t\t\t"
+if ! mount -t sysfs sysfs /sys 2>&1 > /dev/null; then
+	exiterror "Failed"
+else
+	echo "Done"
+fi
+
+
+if [ -f /lib/modules/${KVER}/kernel/drivers/ide/ide-core.ko ]; then
+	# Now try to load an IDE CDROM on both x86 and ppc.  For this we need to load a few modules
+	echo "Loading ide-core.ko ... "
+	if ! insmod /lib/modules/${KVER}/kernel/drivers/ide/ide-core.ko 2>&1 > /dev/null; then
+		exiterror "Failed"
+	fi
+	
+	echo "Loading ide-generic.ko ..."
+	if ! insmod /lib/modules/${KVER}/kernel/drivers/ide/ide-generic.ko 2>&1 > /dev/null; then
+		exiterror "Failed"
+	fi
+
+	echo -n "Loading nls_cp437.ko ...\t\t"
+	if ! insmod /lib/modules/${KVER}/kernel/fs/nls/nls_cp437.ko 2>&1 > /dev/null; then
+		exiterror "Failed"
+	else
+		echo "Done"
+	fi
+
+	echo -n "Loading cdrom.ko ...\t\t\t"
+	if ! insmod /lib/modules/${KVER}/kernel/drivers/cdrom/cdrom.ko 2>&1 > /dev/null; then
+		exiterror "Failed"
+	else
+		echo "Done"
+	fi
+
+	if [ -f /lib/modules/${KVER}/kernel/drivers/ide/ide-cd.ko ]; then
+		echo "Loading ide-cd.ko ..."
+		if ! insmod /lib/modules/${KVER}/kernel/drivers/ide/ide-cd.ko 2>&1 > /dev/null; then
+			exiterror "Failed"
+		fi
+	fi
+	if [ -f /lib/modules/${KVER}/kernel/drivers/ide/ide-cd_mod.ko ]; then
+		echo "Loading ide-cd.ko ..."
+		if ! insmod /lib/modules/${KVER}/kernel/drivers/ide/ide-cd_mod.ko 2>&1 > /dev/null; then
+			exiterror "Failed"
+		fi
+	fi
+fi
+
+for i in a b c d e f g h; do
+	if sys_dev=`cat /sys/block/hd${i}/device/media 2>/dev/null`; then
+		if [ x"${sys_dev}" = x"cdrom" ]; then
+			if cdrom_dev=`cat /sys/block/hd${i}/dev 2>/dev/null`; then
+				case ${cdrom_dev} in
+					3:0) mknod  /dev/hd"${i}" b 3 0
+						;;
+					3:64) mknod  /dev/hd"${i}" b 3 64
+						;;
+					22:0) mknod  /dev/hd"${i}" b 22 0
+						;;
+					22:64) mknod  /dev/hd"${i}" b 22 64
+						;;
+					33:0) mknod  /dev/hd"${i}" b 33 0
+						;;
+					33:64) mknod  /dev/hd"${i}" b 33 64
+						;;
+					34:0) mknod  /dev/hd"${i}" b 34 0
+						;;
+					34:64) mknod  /dev/hd"${i}" b 34 64
+						;;
+					*) echo "Unknown devive major:minor for /dev/hd${i}"
+						;;
+				esac
+
+				# Ok, we found a CDROM device, exit the loop
+				CDROM=/dev/hd${i}
+				break
+			fi
+		else
+			echo "Skipping /dev/hd${i}, not IDE CDROM"
+		fi
+	fi
+done
+
+# If we found a cdrom, try to mount it and load the real initramfs from there
+if [ x"${CDROM}" != x"none" ]; then
+	echo "CDROM device found: ${CDROM}"
+
+	if ! mount -o ro -t iso9660 ${CDROM} /cdrom 2>&1 > /dev/null; then
+		echo "Can't mount cdrom.  Is there a cd inside?"
+	else
+		echo -n "Mounting /initramfs as tmpfs ...\t\t"
+		# DEBUG -- test this with low memory machines ( < 64MB ) and decide what maximum size to use
+		# for the tmpfs
+		# Don't let it get wild and fill up the memory on memory-constrained old machines.
+		# The goal is for this to work on 32MB dinosaurs...
+		#if ! mount -t tmpfs -o size=24M tmpfs /initramfs 2>/dev/null; then
+		if ! mount -t tmpfs tmpfs /initramfs 2>&1 > /dev/null; then
+			echo "Failed"
+		else
+			echo "Done"
+		fi
+
+		echo -n "Copying installer from cdrom ...\t"
+		cd /initramfs
+		if ! xzminidec /cdrom/boot/${INITRAMFS_IMAGE} | cpio -i 2>&1 > /dev/null; then
+			echo "Failed"
+		else
+			echo "Done"
+
+			# We're done with the cdrom (for now), unmount it
+			umount /cdrom
+
+			# Unmont /proc in preparation for run-init
+			umount /proc
+
+			# Run run-init and start the real initramfs installer
+			echo "Starting the installer..."
+			cd /
+			exec run-init initramfs /init
+		fi
+	fi
+fi
+
+# If we didn't find a cdrom, continue loading the installer initramfs from floppy
+# Try to load the appropriate floppy module
+echo "Loading ${FLOPPY_MODULE} ..."
+if ! insmod /lib/modules/${KVER}/kernel/drivers/block/${FLOPPY_MODULE} 2>&1 > /dev/null; then
+	# At this point, all failures are treated as fatal errors
+	exiterror "Failed"
+fi
+
+if sys_dev=`cat /sys/block/fd0/dev 2>/dev/null`; then
+	case ${sys_dev} in
+		2:0) mknod  /dev/fd0 b 2 0
+			;;
+		2:1) mknod  /dev/fd0 b 2 1
+			;;
+		2:2) mknod  /dev/fd0 b 2 2
+			;;
+		2:3) mknod  /dev/fd0 b 2 3
+			;;
+		2:128) mknod  /dev/fd0 b 2 128
+			;;
+		2:129) mknod  /dev/fd0 b 2 129
+			;;
+		2:130) mknod  /dev/fd0 b 2 130
+			;;
+		2:131) mknod  /dev/fd0 b 2 131
+			;;
+		*) exiterror "Unknown device major:minor for /dev/fd0"
+			;;
+	esac
+fi
+
+echo -n "Mounting /initramfs as tmpfs ...\t"
+# DEBUG -- test this with low memory machines ( < 64MB ) and decide what maximum size to use
+# for the tmpfs
+# Don't let it get wild and fill up the memory on memory-constrained old machines.
+# The goal is for this to work on 32MB dinosaurs...
+#if ! mount -t tmpfs -o size=24M tmpfs /initramfs 2>/dev/null; then
+if ! mount -t tmpfs tmpfs /initramfs 2>/dev/null; then
+	exiterror "Failed"
+else
+	echo "Done"
+fi
+
+# where cpio files will go
+cd /initramfs
+
+echo -n "Insert root-1.img floppy and press Enter"
+read ANSWER
+
+# DEBUG -- need to add error checking for the lines below
+echo -n "Loading root-1 initramfs ...\t\t"
+if xzminidec < /dev/fd0 | cpio -i; then
+	echo "Done"
+else
+	echo "Failed"
+	echo -n " Workaround floppy bug, retrying ...\t"
+	sleep 1
+	if xzminidec < /dev/fd0 | cpio -i; then
+		echo "Done"
+	else
+		exiterror "Failed"
+	fi
+fi
+
+echo -n "Insert root-2.img floppy and press Enter"
+read ANSWER
+sleep 3
+# there is a bug somewhere with floppy
+# first access to root-2 will fail will "disk has been changed..." error
+# second access work
+# DEBUG -- need to add error checking for the line below
+echo -n "Loading root-2 initramfs ...\t\t"
+if xzminidec < /dev/fd0 | cpio -i; then
+	echo "Done"
+else
+	echo "Failed"
+	echo -n " Workaround floppy bug, retrying ...\t"
+	sleep 1
+	if xzminidec < /dev/fd0 | cpio -i; then
+		echo "Done"
+	else
+		exiterror "Failed"
+	fi
+fi
+
+# Unmount /proc in preparation for run-init
+umount /proc
+
+# Run run-init and start the real initramfs installer
+echo "Starting the installer..."
+cd /
+exec run-init initramfs /init

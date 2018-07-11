@@ -1,0 +1,20 @@
+Also output to logfile for later reading.
+
+--- a/sbin/update-ca-certificates	2014-04-07 08:57:09.616070707 +0200
++++ b/sbin/update-ca-certificates	2014-04-07 08:59:24.000000000 +0200
+@@ -97,6 +97,7 @@
+      test -f $symlink || rm -f $symlink
+   done
+   echo "done."
++  /usr/bin/logger -t ipcop "Cleared $ETCCERTSDIR"
+ fi
+ 
+ echo -n "Updating certificates in $ETCCERTSDIR... "
+@@ -148,6 +149,7 @@
+ mv -f "$TEMPBUNDLE" "$CERTBUNDLE"
+ 
+ echo "$ADDED_CNT added, $REMOVED_CNT removed; done."
++/usr/bin/logger -t ipcop "CA certificates bundle $ADDED_CNT added, $REMOVED_CNT removed"
+ 
+ # vim:set et sw=2:
+ 

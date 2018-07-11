@@ -1,0 +1,31 @@
+http://lists.nongnu.org/archive/html/radiusplugin-users/2010-11/msg00019.html
+Hi,
+
+you are right, the plugin only considers the first four digits. It's fixed in 
+the CVS version.
+
+Ralf
+
+
+Index: RadiusClass/RadiusConfig.cpp
+===================================================================
+RCS file: /sources/radiusplugin/radiusplugin/RadiusClass/RadiusConfig.cpp,v
+retrieving revision 1.3
+retrieving revision 1.4
+diff -u -r1.3 -r1.4
+--- RadiusClass/RadiusConfig.cpp	23 Nov 2008 15:41:14 -0000	1.3
++++ RadiusClass/RadiusConfig.cpp	11 Nov 2010 21:48:23 -0000	1.4
+@@ -149,11 +149,11 @@
+ 						
+ 					if (strncmp(line.c_str(),"authport=",9)==0) 
+ 					{
+-						tmpServer->setAuthPort(atoi(line.substr(9,4).c_str()));
++						tmpServer->setAuthPort(atoi(line.substr(9,5).c_str()));
+ 					}
+ 					if (strncmp(line.c_str(),"acctport=",9)==0)
+ 					{
+-						tmpServer->setAcctPort(atoi(line.substr(9,4).c_str()));
++						tmpServer->setAcctPort(atoi(line.substr(9,5).c_str()));
+ 					}
+ 					if (strncmp(line.c_str(),"name=",5)==0)
+ 					{

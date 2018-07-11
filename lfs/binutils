@@ -1,0 +1,216 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#         Modified Makefile for IPCop build                                   #
+#                                                                             #
+# $Id: binutils 6772 2012-08-19 19:58:10Z gespinasse $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = binutils
+VER        = 2.30
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.xz
+#DL_FROM    = $(URL_GNU)/$(PKG_NAME)
+DL_FROM    = http://ftp.gnu.org/gnu/binutils
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+
+# nothing is include in iso and hardening flags make some tests unhappy
+CFLAGS     = -O2 -pipe
+CXXFLAGS   = $(CFLAGS)
+LDFLAGS    =
+
+ifeq "$(STAGE)" "toolchain"
+	TARGET        = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)-pass$(PASS)
+endif
+
+ifeq "$(STAGE)" "base"
+	TARGET        = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+endif
+
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE)		= $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5		= ffc476dd46c96f932875d1b2e27e929f
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+# TARGET_2 is <target-machine>-linux-gnu for pass2
+####SETTINGS = --build=$(TARGET_2) --host=$(TARGET_2)
+#SETTINGS = --build=$(TARGET_2) --host=x86_64
+ifeq "$(MACHINE)" "alpha"
+  ENABLETARGET	=
+endif
+ifeq "$(MACHINE)" "i486"
+  ENABLETARGET	=  --enable-targets=x86_64-linux-gnu
+endif
+ifeq "$(MACHINE)" "x86_64"
+#  ENABLETARGET	=  --enable-targets=x86_64-linux-gnu
+endif
+ifeq "$(MACHINE)" "ppc"
+  ENABLETARGET    = --enable-targets=powerpc-linux-gnu,spu
+endif
+ifeq "$(MACHINE)" "sparc"
+  ENABLETARGET    = --enable-targets=sparc64-linux-gnu
+endif
+
+
+$(TARGET) : $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) $(DIR_SRC)/binutils-build
+	cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+	@mkdir -p $(DIR_SRC)/binutils-build
+
+ifeq "$(PASS)" "1"
+	cd $(DIR_SRC)/binutils-build &&				\
+		../$(THISAPP)/configure				\
+			--prefix=/$(TOOLS_DIR)			\
+			--with-sysroot=$(LFS)        \
+			--with-lib-path=/$(TOOLS_DIR)/lib \
+			--target=$(LFS_TGT)			\
+			--disable-nls				\
+			--disable-werror
+
+	cd $(DIR_SRC)/binutils-build && make -j $(PARALLELISM)
+
+	# If building on x86_64, create a symlink to ensure the sanity of the toolchain
+ifeq "$(MACHINE)" "x86_64"
+	@mkdir -vp /$(TOOLS_DIR)/lib && ln -sv lib /$(TOOLS_DIR)/lib64
+endif
+
+	cd $(DIR_SRC)/binutils-build && make install
+endif
+
+ifeq "$(PASS)" "2"
+#		CC="$(LFS_TGT)-gcc -B/$(TOOLS_DIR)/lib/"	\
+
+	cd $(DIR_SRC)/binutils-build &&				\
+		CC=$(LFS_TGT)-gcc	\
+		AR=$(LFS_TGT)-ar				\
+		RANLIB=$(LFS_TGT)-ranlib			\
+		../$(THISAPP)/configure				\
+			--prefix=/$(TOOLS_DIR)			\
+			--with-lib-path=/$(TOOLS_DIR)/lib	\
+			--disable-nls				\
+			--disable-werror           \
+			$(SETTINGS)				\
+			--with-sysroot     \
+			$(ENABLETARGET)
+
+
+	cd $(DIR_SRC)/binutils-build && make -j $(PARALLELISM)
+	cd $(DIR_SRC)/binutils-build && make install
+
+	# Now prepare the linker for the “Re-adjusting” phase in the next chapter
+	cd $(DIR_SRC)/binutils-build && make -C ld clean
+	cd $(DIR_SRC)/binutils-build && make -C ld LIB_PATH=/usr/lib:/lib
+	cd $(DIR_SRC)/binutils-build && cp -v ld/ld-new /$(TOOLS_DIR)/bin
+endif
+
+ifeq "$(STAGE)" "base"
+	# do not install an old standards.info
+#	cd $(DIR_APP) && rm -fv etc/standards.info
+#	cd $(DIR_APP) && sed -i.bak '/^INFO/s/standards.info //' etc/Makefile.in
+###	expect -c "spawn ls"
+
+##	cd $(DIR_SRC)/binutils-build &&				\
+##		../$(THISAPP)/configure				\
+##			--prefix=/usr				\
+##			--disable-nls				\
+##			$(SETTINGS)				\
+##			$(ENABLETARGET)
+
+##			--enable-shared				\
+
+	gcc -dumpspecs > bingcc.log
+
+	cd $(DIR_SRC)/binutils-build &&  \
+		../$(THISAPP)/configure        \
+			--prefix=/usr       \
+			--enable-gold       \
+			--enable-ld=default \
+			--enable-plugins    \
+			--enable-shared     \
+			--disable-werror    \
+			--enable-64-bit-bfd \
+			--with-system-zlib   \
+			$(SETTINGS)				\
+			$(ENABLETARGET)
+
+
+	cd $(DIR_SRC)/binutils-build && make tooldir=/usr -j $(PARALLELISM)
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# use RUNTESTFLAGS=-v for verbose tests (900 kB file)
+	-cd $(DIR_SRC)/binutils-build && make -k check &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+	cd $(DIR_SRC)/binutils-build && make tooldir=/usr install
+#	cd $(DIR_SRC)/binutils-build && cp -v ../$(THISAPP)/include/libiberty.h /usr/include
+	# remove the .la
+#	rm -vf /usr/lib/lib{bfd,opcodes}.la
+
+##ifeq "$(MACHINE)" "x86_64"
+##	ln -sv /usr/lib/libbfd-2.30.so /$(TOOLS_DIR)/lib
+##endif
+endif
+
+
+	@rm -rf $(DIR_APP) $(DIR_SRC)/binutils-build
+	@$(POSTBUILD)

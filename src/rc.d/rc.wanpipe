@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+#
+# (c) 2007-2010, the IPCop team
+#
+# $Id: rc.wanpipe 5209 2010-12-05 15:23:48Z owes $
+#
+
+# Debugging. Activate 'Connection debugging' in Dialup page.
+DEBUG="off"
+
+# Pull dialup settings
+eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
+
+# Debugging, uncomment to overrule setting in Dialup page.
+#DEBUG="on"
+
+msg() {
+    if [ "$DEBUG" == "on" ] ; then
+        /usr/bin/logger -t red "wanpipe: $*"
+    fi
+    # TODO: do we really want output here? And always?
+    /bin/echo "$*"
+}
+
+
+# See how we were called.
+case "$1" in
+start|--start)
+    /sbin/modprobe af_wanpipe
+    # we should not use wanrouter script on the futur
+    # it would be much secure and give us more control from web interface
+    #/usr/sbin/wanconfig -a /etc/wanpipe/wan_adsl.list card wanpipe1 up
+    if [ "$TYPE" = 'wanpipe-adsl' ]; then
+        echo 'wanpipe-adsl not yet operational'
+        exit 1
+    elif [ "$TYPE" = 'wanpipe-serial' ]; then
+        echo 'wanpipe-serial'
+        /bin/cp /etc/wanpipe/samples/wanpipe1.stty /etc/wanpipe/wanpipe1.conf
+    else
+        msg "bad TYPE"
+        exit 1
+    fi
+    /usr/sbin/wanrouter restart || exit 1
+    ;;
+stop|--stop)
+    msg "stop"
+    /usr/sbin/wanrouter stop
+    ;;
+cleanup|--cleanup)
+    msg "driver cleanup"
+    /sbin/modprobe -r af_wanpipe.o
+    /sbin/modprobe -r wanpipe.o
+    /sbin/modprobe -r wanpipe_syncppp.o
+    /sbin/modprobe -r wanrouter.o
+    /sbin/modprobe -r sdladrv.o
+    ;;
+*)
+    /bin/echo "Usage: $0 {start|stop|cleanup}"
+    exit 1
+    ;;
+esac
+
+exit 0

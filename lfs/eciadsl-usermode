@@ -1,0 +1,115 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: eciadsl-usermode 4596 2010-05-21 14:12:42Z gespinasse $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = eciadsl-usermode
+VER        = 0.12
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = eciadsl-usermode-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+DL_FROM    = http://eciadsl.flashtux.org/download
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+# Used to include same timestamp for all
+# This is the release date
+DATESTAMP = '13-Aug-2007'
+TIMESTAMP = '13:42:00'
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = f04186246ecf1dcbc7ca71b15cebd87b
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/$(THISAPP)_2.6.25.patch
+	# Use release date instead of __DATE__ and __TIME__ so everyone that compile has same md5
+	cd $(DIR_APP) && sed -i -e 's|__DATE__|"$(DATESTAMP)"|' -e 's|__TIME__|"$(TIMESTAMP)"|' eciadsl-firmware.c
+	cd $(DIR_APP) && sed -i -e 's|__DATE__|"$(DATESTAMP)"|' -e 's|__TIME__|"$(TIMESTAMP)"|' eciadsl-pppoeci.c
+	cd $(DIR_APP) && sed -i -e 's|__DATE__|"$(DATESTAMP)"|' -e 's|__TIME__|"$(TIMESTAMP)"|' eciadsl-synch.c
+
+ifeq "$(MACHINE)" "ppc"
+	cd $(DIR_APP) && sed -i "s,^#include <asm/page.h>,&\n\n#ifndef PAGE_SIZE\n#define PAGE_SIZE 4096\n#endif,g" \
+		pusb-linux.c
+endif
+
+ifeq "$(MACHINE)" "sparc"
+	cd $(DIR_APP) && sed -i "s,^#include <asm/page.h>,&\n\n#ifndef PAGE_SIZE\n#define PAGE_SIZE 8192\n#endif,g" \
+		pusb-linux.c
+endif
+
+	cd $(DIR_APP) && ./configure --prefix=/usr
+	cd $(DIR_APP) && make
+	#  no more hack GS7070 binary in /usr/bin , GS7470 in /usr/sbin, all in /usr/sbin
+	cd $(DIR_APP) && install -p -m 0755 eciadsl-firmware eciadsl-synch eciadsl-pppoeci /usr/sbin
+	mkdir -p /etc/eciadsl
+	cd $(DIR_APP) && install -p -m 0644 firmware00.bin /etc/eciadsl
+	cd $(DIR_APP) && install -p -m 0644 modems.db /etc/eciadsl
+	touch /etc/eciadsl/eciadsl.conf
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

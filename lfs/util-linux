@@ -1,0 +1,201 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: util-linux 7715 2014-11-30 13:16:19Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = util-linux
+VER        = 2.31.1
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.xz
+#DL_FROM    = $(URL_KERNEL)/linux/utils/util-linux/v2.25
+DL_FROM    = https://www.kernel.org/pub/linux/utils/util-linux/v2.31
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = 7733b583dcb51518944d42aa62ef19ea
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+ifeq "$(STAGE)" "toolchain"
+	# Just try to build only what is required here : mount, setarch (for linux32), libblkid, libuuid
+	# --with-systemdsystemunitdir=no avoid pkg-config not  found
+	cd $(DIR_APP) && PKG_CONFIG="" ./configure --prefix=/$(TOOLS_DIR) \
+					--without-python               \
+					--disable-makeinstall-chown    \
+					--without-systemdsystemunitdir \
+					--without-ncurses              \
+					PKG_CONFIG=""
+
+#					--localstatedir=/var/run \
+#					--disable-static \
+#					--disable-nls \
+#					--enable-mount \
+#					--disable-agetty \
+#					--disable-cramfs \
+#					--disable-eject \
+#					--disable-fallocate \
+#					--disable-fsck \
+#					--disable-kill \
+#					--disable-last \
+#					--disable-login \
+#					--disable-losetup \
+#					--disable-mesg \
+#					--disable-mountpoint \
+#					--disable-nologin \
+#					--disable-partx \
+#					--disable-pivot_root \
+#					--disable-raw \
+#					--disable-rename \
+#					--disable-reset \
+#					--disable-schedutils \
+#					--disable-su \
+#					--disable-sulogin \
+#					--disable-switch_root \
+#					--disable-unshare \
+#					--disable-utmpdump \
+#					--disable-uuidd \
+#					--disable-wall \
+#					--disable-write \
+#					--disable-makeinstall-chown \
+#					--with-systemdsystemunitdir=no --without-python
+
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+	# Hide 'not installed' libtool warnings with .la files
+	touch /$(TOOLS_DIR)/lib/{libblkid,libmount,libuuid}.la
+	cd $(DIR_APP) && make -j $(PARALLELISM) install
+endif
+
+ifeq "$(STAGE)" "base"
+
+	rm -vf /usr/include/{blkid,libmount,uuid}
+# 2.25 should have this to be able to change adjtime: ./configure ADJTIME_PATH=/var/lib/hwclock/adjtime
+	#cd $(DIR_APP) && sed -i 's@etc/adjtime@var/lib/hwclock/adjtime@g' `grep -rl 'etc/adjtime' .`
+	cd $(DIR_APP) && mkdir -p /var/lib/hwclock
+##	cd $(DIR_APP) && ./configure --localstatedir=/var/run --disable-static --disable-nls \
+##				--disable-bash-completion --disable-cramfs --disable-login --disable-nologin \
+##				--disable-schedutils --disable-su --disable-unshare \
+##				ADJTIME_PATH=/var/lib/hwclock/adjtime
+
+
+##	cd $(DIR_APP) && ./configure ADJTIME_PATH=/var/lib/hwclock/adjtime   \
+##			--without-python               \
+##			--disable-makeinstall-chown    \
+##			--without-systemdsystemunitdir \
+##			--without-ncurses              \
+
+
+	cd $(DIR_APP) && ./configure ADJTIME_PATH=/var/lib/hwclock/adjtime   \
+		--docdir=/usr/share/doc/util-linux-2.31.1 \
+		--disable-chfn-chsh  \
+		--disable-login      \
+		--disable-nologin    \
+		--disable-su         \
+		--disable-setpriv    \
+		--disable-runuser    \
+		--disable-pylibmount \
+		--disable-static     \
+		--without-python     \
+		--without-systemd    \
+		--without-systemdsystemunitdir
+
+
+	# CCACHE_CPP2=1 replace the CFLAGS -fPIE hack and workaround a not well identified gcc-4.4 issue that trigger
+	# lscpu.c: In function 'read_hypervisor':
+	# lscpu.c:446: error can't find a register in class 'BREG' while reloading 'asm'
+	# lscpu.c:446: error 'asm' operand has impossible constraints
+	# Testing compilation with ccache is prone to error, CCACHE_RECACHE= is required to avoid ancient cache hit
+##	cd $(DIR_APP) && make -j $(PARALLELISM) V=1 CCACHE_CPP2=1
+	cd $(DIR_APP) && make -j $(PARALLELISM) V=1
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# Run non-root tests first as make check will build the tests programs
+	# To be able to run non-root tests as nobody
+	chown -R nobody $(DIR_APP)
+##	-cd $(DIR_APP) && su nobody -s /bin/bash -c "PATH=$(PATH) make -j 1 check" &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+	-cd $(DIR_APP) && su nobody -s /bin/bash -c "PATH=$(PATH) make -j 1 -k check" &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+	# For as-root tests, not yet ready, modprobe is not yet build, some tests use hardcode loop number
+	# To run the tests for one component (ipcs here), use ./tests/run.sh ipcs
+	#-cd $(DIR_APP) && ./tests/run.sh >> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log 2>&1
+endif
+	# Hide 46 of 48 libtool warnings
+##	touch /usr/lib/{libblkid,libmount,libuuid}.la
+	cd $(DIR_APP) && make -j $(PARALLELISM) install
+##	rm /usr/lib/{libblkid,libmount,libuuid}.la
+
+ifeq "$(MACHINE)" "sparc"
+	# cfdisk and sfdisk don't exist on sparc
+	install -D -m 755 $(DIR_PATCHES)/doesnt_exist.sh /sbin/cfdisk
+	install -D -m 755 $(DIR_PATCHES)/doesnt_exist.sh /sbin/sfdisk
+endif
+
+endif
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

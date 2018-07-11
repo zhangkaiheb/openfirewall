@@ -1,0 +1,131 @@
+#!/bin/bash
+#
+# Upgrade IPCop
+#
+
+UPGRADEVERSION=1.9.16
+PREVIOUSVERSION=1.9.15
+
+
+msg() {
+    /usr/bin/logger -t installpackage "$*"
+    /bin/echo "$*"
+}
+
+
+# Verify architecture
+MACHINE=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::machine;"`
+if [ "$MACHINE" != `/bin/cat ./ARCH` ]; then
+    msg "Update for wrong architecture: `/bin/cat ./ARCH`! We are: $MACHINE. Aborting installation."
+    exit 1
+fi
+
+# Verify version, note we also accept replaying an upgrade
+CURRENTVERSION=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::version;"`
+if [ "$CURRENTVERSION" != "$PREVIOUSVERSION" -a "$CURRENTVERSION" != "$UPGRADEVERSION" ]; then
+    msg "IPCop v$PREVIOUSVERSION or v$UPGRADEVERSION not running. Aborting installation."
+    exit 1
+fi
+
+#####
+#
+# Add version specific handling *before* unpacking the patch here.
+# For example stopping apache, squid, etc...
+#
+#####
+
+
+
+#####
+#
+# End of version specific handling. Continue with universal stuff.
+#
+#####
+
+FAILURE=0
+/bin/tar -zxpf patch.tar.gz -C /
+FAILURE=$?
+if [ $FAILURE -ne 0 ]; then
+    msg "Error extracting patch.tar.gz $1, need more free space on disk. Aborting."
+    exit 4 # ERRORTAR
+fi
+
+# Modify or remove line below, depending on update
+# Update bootloader config
+/usr/local/sbin/updatekernel.pl --add 2.6.32-2 --keep 2.6.32-1
+
+# Modify or remove line below, depending on update
+# Create the new initramfs
+/sbin/mkinitramfs --with-kernel=2.6.32-2 --with-firmware --many-modules --with-list=/etc/modules.initramfs
+
+# Adjust the changed config files
+# /usr/local/bin/upgrade.sh
+
+# Remove old libraries (version specific)
+/bin/rm -f /lib/libbz2.so.1.0.5
+/bin/rm -f /usr/lib/libnetfilter_conntrack.so.3.0.1
+
+# For new shared libs. May not always be required, but makes sure we do not forget
+/sbin/ldconfig
+
+#####
+#
+# Add version specific handling *after* unpacking the patch here.
+# For example restarting apache, squid, etc...
+#
+#####
+
+# restart squid (helper checks whether squid is enabled)
+/usr/local/bin/restartsquid
+
+## Traffic accounting reorganisation
+# Create traffic accounting DB if it does not exist
+if [ ! -e /var/log/traffic/aggregate.db ]; then
+    /bin/mkdir -p /var/log/traffic
+    /bin/cp /var/ipcop/traffic/empty-aggregate.db /var/log/traffic/aggregate.db
+fi
+# Move vnstat DB directory
+if [ ! -e /var/log/traffic/vnstat ]; then
+    if [ -e /var/run/vnstat.pid ]; then 
+        /bin/kill -SIGTERM `cat /var/run/vnstat.pid`
+    fi
+    /bin/mkdir -p /var/log/traffic
+    /bin/mv /var/log/vnstat /var/log/traffic
+fi
+# Create ulogd DB
+if [ ! -e /var/log/traffic/ulogd.db ]; then
+    /usr/bin/killall ulogd 2> /dev/null
+    /bin/mkdir -p /var/log/traffic
+    /bin/cp /var/ipcop/traffic/empty-ulogd.db /var/log/traffic/ulogd.db
+fi
+# Remove old files
+/bin/rm -f /var/ipcop/traffic/empty-account.db
+/bin/rm -fr /var/log/ulogd
+# Restart vnstatd/ulogd
+/usr/local/bin/accountingctrl
+
+# Restart IPsec
+if [ -e /var/run/pluto/pluto.pid ]; then
+    /usr/local/bin/ipsecctrl --start
+fi
+
+# Restart OpenVPN server
+if [ -e /var/run/openvpn.pid ]; then
+    /usr/local/bin/openvpnctrl --restart
+fi
+
+#####
+#
+# End of version specific handling. Continue with universal stuff.
+#
+#####
+
+# Patch general-functions.pl
+/bin/sed -i -e "s+^\(\$General::version\s*=\s*\).*+\1'$UPGRADEVERSION';+" /usr/lib/ipcop/general-functions.pl
+# Patch /etc/issue
+/bin/sed -i -e "s+$PREVIOUSVERSION+$UPGRADEVERSION+" /etc/issue
+
+# Update menu
+/usr/local/bin/updatemenu.pl
+
+msg "$UPGRADEVERSION update installed."

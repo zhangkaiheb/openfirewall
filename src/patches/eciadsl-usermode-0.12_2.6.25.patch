@@ -1,0 +1,21 @@
+--- eciadsl-usermode-0.12/pusb-linux.c.orig	2007-04-03 22:17:44.000000000 +0200
++++ eciadsl-usermode-0.12/pusb-linux.c	2008-10-19 10:16:27.000000000 +0200
+@@ -29,7 +29,6 @@
+ #include <string.h>
+ 
+ #include "pusb-linux.h"
+-#include <asm/page.h>
+ 
+ #include "pusb.h"
+ 
+@@ -438,8 +437,8 @@
+ 
+ 		bulk.len = size;
+ 
+-		if (size > PAGE_SIZE)
+-			bulk.len = PAGE_SIZE;
++		if (size > getpagesize())
++			bulk.len = getpagesize();
+ 
+ 		bulk.timeout = timeout;
+ 		bulk.data    = buf;

@@ -1,0 +1,152 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: udev 7473 2014-04-14 10:14:16Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = eudev
+VER        = 3.2.5
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+DL_FROM    = http://dev.gentoo.org/~blueness/eudev
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+##APP_ESTR = ftp://ftp.lfs-matrix.net/pub/lfs/lfs-packages/8.2/udev-lfs-20171102.tar.bz2
+UDEV_LFS = udev-lfs-20171102
+DL_UDEV_LFS = $(UDEV_LFS).tar.bz2
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE) $(DL_UDEV_LFS)
+
+$(DL_FILE)	= $(DL_FROM)/$(DL_FILE)
+$(DL_UDEV_LFS) = ftp://ftp.lfs-matrix.net/pub/lfs/lfs-packages/8.2/$(DL_UDEV_LFS)
+
+$(DL_FILE)_MD5	= 6ca08c0e14380f87df8e8aceac123671
+$(DL_UDEV_LFS)_MD5	= d92afb0c6e8e616792068ee4737b0d24
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+##	install -dv /lib/{firmware,udev/devices/{pts,shm}}
+
+	# First, fix a test script
+	cd $(DIR_APP) && sed -r -i 's|/usr(/bin/test)|\1|' test/udev-test.pl
+
+	# Next, add a workaround to prevent the /tools_x86_64 directory from 
+	# being hard coded into Eudev binary files library locations
+	cd $(DIR_APP) && echo 'HAVE_BLKID=1' > config.cache
+	cd $(DIR_APP) && echo 'BLKID_LIBS="-lblkid"' >> config.cache
+	cd $(DIR_APP) && echo 'BLKID_CFLAGS="-I/$(TOOLS_DIR)/include"' >> config.cache
+
+	# different from LFS due to initramfs usage
+	# /dev/null is created in init script
+##	cd $(DIR_APP) && ./configure    --prefix=/usr \
+##					--with-rootlibdir=/lib \
+##					--sbindir=/sbin \
+##					--libexecdir=/lib/udev \
+##					--sysconfdir=/etc \
+##					--disable-introspection \
+##					--disable-extras
+
+	cd $(DIR_APP) && ./configure --prefix=/usr           \
+					--bindir=/sbin          \
+					--sbindir=/sbin         \
+					--libdir=/usr/lib       \
+					--sysconfdir=/etc       \
+					--libexecdir=/lib       \
+					--with-rootprefix=      \
+					--with-rootlibdir=/lib  \
+					--enable-manpages       \
+					--disable-static        \
+					--config-cache
+
+
+	cd $(DIR_APP) && LIBRARY_PATH=/$(TOOLS_DIR)/lib make -j $(PARALLELISM)
+
+	# Create some directories now that are needed for tests,
+	# but will also be used as a part of installation
+	mkdir -pv /lib/udev/rules.d
+	mkdir -pv /etc/udev/rules.d
+
+ifeq "$(RUNNING_TEST)" "yes"
+	make LD_LIBRARY_PATH=/$(TOOLS_DIR)/lib check
+endif
+
+	cd $(DIR_APP) && make LD_LIBRARY_PATH=/$(TOOLS_DIR)/lib install
+
+	# And finally copy our ipcop rules
+	cp $(DIR_SRC)/config/udev/rules.d/*.rules /etc/udev/rules.d/
+
+	# Install some custom rules and support files useful in an LFS environment
+	cd $(DIR_APP) && mkdir _deps
+	cd $(DIR_APP)/_deps && tar xf $(DIR_DL)/$(DL_UDEV_LFS)
+	cd $(DIR_APP)/_deps && make -f $(UDEV_LFS)/Makefile.lfs install
+
+	# Information about hardware devices is maintained in the /etc/udev/hwdb.d
+	# and /lib/udev/hwdb.d directories. Eudev needs that information to be compiled
+	#  into a binary database /etc/udev/hwdb.bin. Create the initial database
+	LD_LIBRARY_PATH=/$(TOOLS_DIR)/lib udevadm hwdb --update
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

@@ -1,0 +1,28 @@
+Fix the warning seen with -Wformat-security flag (gcc-4.4.5)
+clif.c:795: warning: format not a string literal and no format arguments
+clif.c:797: warning: format not a string literal and no format arguments
+clif.c:836: warning: format not a string literal and no format arguments
+
+--- traceroute-2.0.18/libsupp/clif.c.old	2007-08-06 17:20:17.000000000 +0200
++++ traceroute-2.0.18/libsupp/clif.c	2012-04-25 19:19:51.000000000 +0200
+@@ -792,9 +792,9 @@
+ 	if (l > 0) {
+ 	    memset (buf, ' ', l);
+ 	    buf[l] = '\0';
+-	    fprintf (stderr, buf);
++	    fprintf (stderr, "%s", buf);
+ 	} else 
+-	    fprintf (stderr, spacer);
++	    fprintf (stderr, "%s", spacer);
+ 
+ 
+ 	endp = buf + width;
+@@ -833,7 +833,7 @@
+ 		    
+ 	    *p = '\0';
+ 	    fprintf (stderr, "%s", buf);
+-	    fprintf (stderr, spacer);
++	    fprintf (stderr, "%s", spacer);
+ 		
+ 	    p++;
+ 	    for (s = buf; *p; *s++ = *p++) ;

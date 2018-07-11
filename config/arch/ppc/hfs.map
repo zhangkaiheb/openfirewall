@@ -1,0 +1,13 @@
+# ext.  xlate  creator  type    comment
+.hqx    Ascii  'BnHx'   'TEXT'  "BinHex file"
+.mov    Raw    'TVOD'   'MooV'  "QuickTime Movie"
+.bin    Raw    'ddsk'   'DDim'  "Floppy or ramdisk image"
+.img    Raw    'ddsk'   'DDim'  "Floppy or ramdisk image"
+.gz     Raw    'ddsk'   'DDim'  "Floppy or ramdisk image"
+.tgz    Raw    'UNIX'   'UNIX'  "Gzipped tar archive"
+.b      Raw    'UNIX'   'tbxi'  "bootstrap"
+yaboot  Raw    'UNIX'   'boot'  "bootstrap"
+vmlinux Raw    'UNIX'   'boot'  "bootstrap"
+vmlinuz Raw    'UNIX'   'boot'  "bootstrap"
+.conf   Raw    'UNIX'   'conf'  "bootstrap"
+*       Ascii  '????'   '????'  "Text file"

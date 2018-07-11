@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# This script reads in variables from a config file, and produces a list of
+# commands to run to set these as shell environment variables, it is
+# intended to be used as follows:
+#
+#   eval $(readhash /var/ipcop/main/settings)
+#
+# $Id: readhash 3163 2009-07-02 07:19:29Z owes $
+# 
+# shell variables must consist of alphanumeric characters and underscores,
+# and begin with an alphabetic character or underscore.
+VARNAME='[A-Za-z_][A-Za-z0-9_]*'
+
+# For the assigned value we only accept a limited number of characters - none
+# of which are shell metachars
+VARCHARS='A-Za-z0-9=/,._@#+-'
+VARVAL="[${VARCHARS}]*"
+
+sed -ne "s/^\(${VARNAME}\)=\(${VARVAL}\)$/\1=\2/p" $1
+
+# Accept space only if it's quoted
+sed -ne "s/^\(${VARNAME}\)=\('[ ${VARCHARS}]*'\)$/\1=\2/p" $1

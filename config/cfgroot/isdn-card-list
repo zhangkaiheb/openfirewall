@@ -1,0 +1,41 @@
+#
+# This is the IPCop list of ISDN adapters for hisax driver
+#   if you want to add your own adapters to IPCop simply add to the list below
+#
+Teles 16.0, 1
+Teles 8.0, 2
+Teles 16.3 (non PnP), 3
+Teles 16.3c, 14	
+Teles PCI, 21	
+Creatix/Teles PnP, 4
+AVM A1 (Fritz), 5
+AVM ISA/PCI, 27	
+AVM PCI/PNP (EXPERIMENTAL driver), 999
+ELSA PCC/PCF cards, 6
+ELSA Quickstep 1000, 7
+ELSA Quickstep 1000PCI, 18
+Eicon Diva ISA Pnp and PCI, 11
+ASUS COM ISDNLink, 12
+HFC-2BS0 based cards, 13
+HFC 2BDS0 PCI, 35	
+Sedlbauer cards, 15
+USR Sportster internal, 16
+MIC Card, 17
+Compaq ISDN S00 ISA, 19
+NETjet PCI card, 20
+Dr. Neuhauss Niccy ISA/PCI, 24
+Teles S0Box, 25
+Sedlbauer Speed Fax+, 28
+Siemens I-Surf 1.0, 29
+ACER P10, 30
+HST Saphir, 31
+Telekom A4T, 32
+Scitel Quadro, 33
+Gazel ISA/PCI, 34
+W6692 based PCI cards, 36
+ITK ix1-micro Rev.2, 9	
+NETspider U PCI card, 38
+USB ST5481, 998
+
+#
+# Add your own modules below this line, format is: description,type

@@ -1,0 +1,125 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: ipcop-boot-net 7540 2014-05-17 08:08:23Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = netboot
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)
+
+# path inside tftp for arch that have multiples files (x86, ppc)
+NETDIR    = $(SNAME)/$(VERSION)/$(MACHINE)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+install :
+	# Create install netboot package as an alternate way to boot during install
+	# rebuild each time, no (PRE|POST)BUILD
+	rm -rf /tmp/*
+	mkdir -p /tmp/$(NETDIR)
+
+ifeq "$(MACHINE)" "i486"
+	mkdir -p /tmp/pxelinux.cfg
+	# read doc/README-netboot.i486 for more details
+	cp /usr/share/syslinux/pxelinux.0 /tmp/$(NETDIR)
+	cp /usr/src/doc/README-netboot.$(MACHINE) /tmp/$(NETDIR)
+	cp /$(INSTALLER_DIR)/cdrom/boot/isolinux/{instroot.img,vmlinuz,splash.rle} /tmp/$(NETDIR)
+	cp /$(INSTALLER_DIR)/cdrom/boot/isolinux/f?.txt /tmp/$(NETDIR)
+	cp /$(INSTALLER_DIR)/cdrom/boot/isolinux/memtest /tmp/$(NETDIR)
+	sed	-e "s|splash|$(NETDIR)/splash|" \
+			/$(INSTALLER_DIR)/cdrom/boot/isolinux/message \
+			> /tmp/$(NETDIR)/message
+	sed	-e "s|message|$(NETDIR)/message|" \
+		-re "s|f(.*)\.txt|$(NETDIR)/f\1.txt|" \
+		-e "s|vmlinuz|$(NETDIR)/vmlinuz|" \
+		-e "s|instroot\.img|$(NETDIR)/instroot.img|" \
+		-e "s|KERNEL memtest|KERNEL $(NETDIR)/memtest|" \
+		-e "s|ipcopboot=|ipcopboot=net|g" \
+		-e "s|LOCALBOOTTYPE|0|" \
+		-e "s|NOHALT.*||" \
+			$(DIR_SRC)/config/arch/$(MACHINE)/syslinux.cfg \
+			> /tmp/pxelinux.cfg/$(SNAME)-pxe-$(VERSION).model
+	sed	-e "s|message|$(NETDIR)/message|" \
+		-re "s|f(.*)\.txt|$(NETDIR)/f\1.txt|" \
+		-e "s|vmlinuz|$(NETDIR)/vmlinuz|" \
+		-e "s|instroot\.img|$(NETDIR)/instroot.img|" \
+		-e "s|ipcopboot=|ipcopboot=net|g" \
+		-e "s|KERNEL memtest|KERNEL $(NETDIR)/memtest|" \
+		-e "s|LOCALBOOTTYPE|0|" \
+		-e "s|NOHALT.*||" \
+			$(DIR_SRC)/config/arch/$(MACHINE)/syslinux-serial.cfg \
+			> /tmp/pxelinux.cfg/$(SNAME)-pxe-serial-$(VERSION).model
+	chmod 444 /tmp/$(NETDIR)/instroot.img
+endif
+ifeq "$(MACHINE)" "ppc"
+	# netboot is for new-world only
+	cp /$(INSTALLER_DIR)/cdrom/boot/{instroot-$(VERSION).img,message,ofboot.b,vmlinuz,yaboot,yaboot.conf} /tmp/$(NETDIR)
+	sed -i 	-e "s|\/boot|/$(NETDIR)|" \
+		-e "s|ipcopboot=cdrom|ipcopboot=net|g" \
+		-e "s|cdrom|netboot|" \
+		-e "s|read-only||g" /tmp/$(NETDIR)/yaboot.conf
+endif
+ifeq "$(MACHINE)" "sparc"
+	cp /usr/src/doc/README-netboot.$(MACHINE) /tmp/$(NETDIR)
+	elftoaout -o /tmp/$(NETDIR)/boot.img /boot/vmlinuz-$(KVER)
+	piggyback64 /tmp/$(NETDIR)/boot.img \
+			/boot/System.map-$(KVER) \
+			/installer/images/cdinitramfs-$(VERSION).img
+	size=`ls -l /tmp/$(NETFILE) | awk '{print $$5}'`; \
+	rem=`expr \( 4 - $$size % 4 \) % 4`; \
+	if [ $$rem -gt 0 ]; then \
+		echo "padding /tmp/$(NETDIR)/boot.img by $$rem bytes"; \
+		dd if=/dev/zero bs=1 count=$$rem >> /tmp/$(NETDIR)/boot.img; \
+	fi
+	echo "TFTP image is `ls -l /tmp/$(NETDIR)/boot.img`"
+endif
+
+	# create a tgz file with the netboot files for all except alpha
+ifneq "$(MACHINE)" "alpha"
+	cd /tmp && tar cvzf \
+		/$(INSTALLER_DIR)/images/$(SNAME)-$(VERSION)-install-netboot.$(MACHINE).tgz *
+endif
+	rm -rf /tmp/*

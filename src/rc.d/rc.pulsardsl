@@ -1,0 +1,88 @@
+#!/bin/bash
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (c) 2002-2011 The IPCop Team
+#
+# $Id: rc.pulsardsl 5931 2011-10-12 08:46:54Z owes $
+#
+
+DEBUG="off"
+eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
+
+PULSARFS='/proc/driver/pulsar'
+
+# Debugging. Comment it out to use DEBUG from ppp settings
+DEBUG="on"
+
+msg() {
+    if [ "$DEBUG" = "on" ] ; then
+        /usr/bin/logger -t red "Pulsar DSL: $*"
+    fi
+    echo "$*"
+}
+
+function wait_for_sync()
+{
+    if [ ! -f "$PULSARFS/pulsar0" ]; then
+        msg "No device 0 found"
+        exit 1
+    fi
+    msg "Waiting for ADSL sync during $1 s"
+    FLREADY=0
+    TIMES=1
+    while [ $TIMES -le $1 ]; do
+        /bin/sleep 3
+        (( TIMES += 3 ))
+        if [ 0`/bin/cat $PULSARFS/pulsar0 | /usr/bin/cut -d ' ' -f2` -eq 0 ]; then
+            msg "sync done"
+            FLREADY=1
+            break
+        fi
+    done
+    if [ 0"$FLREADY" -eq 0 ]; then
+        msg "Failure to sync after $1 s"
+        exit 1
+    fi
+}
+
+# See how we were called.
+case "$1" in
+start)
+    if ( ! /bin/lsmod | /bin/grep -q pulsar ); then
+        /sbin/modprobe pulsar
+        if [ $? -ne 0 ]; then
+            msg "loading failed"
+            exit 2
+        fi
+    fi
+    wait_for_sync 90
+    exit 0
+    ;;
+stop)
+    msg "stop"
+    ;;
+cleanup)
+    msg "driver cleanup"
+    /sbin/modprobe -r pulsar
+    ;;
+*)
+    echo "Usage: $0 {start|stop|cleanup}"
+    exit 1
+    ;;
+esac
+
+exit 0

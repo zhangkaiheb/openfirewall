@@ -1,0 +1,9 @@
+<ipcop>
+    <update>
+        <version>1.9.6</version>
+        <releasedate>2009-07-16</releasedate>
+        <description>This is not really an update, testing purposes only.</description>
+        <previousversion>1.9.5</previousversion>
+        <installdate>INSTALLDATE</installdate>
+    </update>
+</ipcop>

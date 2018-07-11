@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (c) 2012 The IPCop Team
+#
+# $Id: rc.solosdsl 6824 2012-11-02 17:52:29Z owes $
+#
+
+DEBUG="off"
+eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
+
+# Debugging. Comment it out to use DEBUG from ppp settings
+DEBUG="on"
+
+msg() {
+    if [ "$DEBUG" = "on" ] ; then
+        /usr/bin/logger -t red "Solos PCI: $*"
+    fi
+}
+
+# See how we were called.
+case "$1" in
+start)
+    if ( ! /bin/lsmod | /bin/grep -q solos_pci ); then
+        /sbin/modprobe solos_pci
+        if [ $? -ne 0 ]; then
+            msg "loading failed"
+            exit 2
+        fi
+    fi
+    if [ ! -e "/sys/class/atm/solos-pci0" ]; then
+        msg "No device 0 found"
+        exit 1
+    fi
+    C=`cat /sys/class/atm/solos-pci0/parameters/Connected`
+    if [ "${C}" == "true" ]; then
+        MODE=`cat /sys/class/atm/solos-pci0/parameters/OperationalMode`
+        RX=`cat /sys/class/atm/solos-pci0/parameters/RxBitRate`
+        TX=`cat /sys/class/atm/solos-pci0/parameters/TxBitRate`
+        msg "Sync ${MODE} RxBitRate ${RX} TxBitRate ${TX}"
+    else
+        STATE=`cat /sys/class/atm/solos-pci0/parameters/State`
+        msg "No sync, modem state $STATE"
+        exit 1
+    fi
+    exit 0
+    ;;
+stop)
+    msg "stop"
+    ;;
+cleanup)
+    msg "driver cleanup"
+    /sbin/modprobe -r solos_pci
+    ;;
+*)
+    echo "Usage: $0 {start|stop|cleanup}"
+    exit 1
+    ;;
+esac
+
+exit 0

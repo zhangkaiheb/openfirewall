@@ -1,0 +1,117 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: check_files 7798 2015-01-08 08:47:33Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = check_files
+HOST_ARCH  = all
+
+THISAPP    = $(PKG_NAME)
+
+TMPFILE := $(shell mktemp)
+LOG_PREFIX:= /usr/src/log_${MACHINE}/$(PKG_NAME)
+
+###############################################################################
+
+# Top-level Rules
+###############################################################################
+
+
+check :
+
+download :
+
+md5 :
+
+# 'install' target is used because we prefer to re-use chroot_make and so have no choice
+###############################################################################
+# Installation Details
+###############################################################################
+# Produce the md5 of installed files
+install :
+
+	# Adjust the list of files we care
+	# Remove dev/{,console,null} from the list or md5sum hang
+	# Use the list with directories removed to avoid md5sum and scanelf related error messages
+	sed -e '/^dev.*/d' ${ALL_NODIR} >${TMPFILE}
+
+	# Generating md5 for each file include
+	# Result is not in _NODIR.md5 as tools/comp_md5.pl look in ALLFILES
+	xargs md5sum < ${TMPFILE} > ${ALLFILES}.md5
+
+	# Checking everything with scanelf only once is faster, but result is not that easy to read
+	# A bit better with those changes : remove trailing space, split STK/REL/PTL title in 3 columns, replace one or more spaces with 1 tab
+	scanelf -f ${TMPFILE} -a | sed -e 's| *$$||' -e 's|STK/REL/PTL|STK REL PTL|' -e 's| TYPE|TYPE|' -e 's| \{1,\}|\t|g' > $(LOG_PREFIX)-scanelf.log
+
+	cat $(LOG_PREFIX)-scanelf.log | awk '{ printf "%s\t%s\n", $$1, $$11 }' | grep -v ET_DYN > $(LOG_PREFIX)-not-PIE.log
+	cat $(LOG_PREFIX)-scanelf.log | awk '{ printf "%s\t%s\n", $$10, $$11 }' | grep -v NOW > $(LOG_PREFIX)-not-NOW.log
+	# RPATH (I consider log good enought to my understanding)
+	cat $(LOG_PREFIX)-scanelf.log | awk '{ printf "%s\t%s\n", $$9, $$11 }' | grep -v '^-' > $(LOG_PREFIX)-RPATH.log
+
+	# executable stack	http://www.gentoo.org/proj/en/hardened/gnu-stack.xml
+	# klibc related code is compiled without hardening (to save space) and allow execstack, but that code is not installed, so not checked on ALL_NODIR
+	cat $(LOG_PREFIX)-scanelf.log | awk '{ printf "%s\t%s\n", $$5, $$11 }' | grep -v 'RW-' > $(LOG_PREFIX)-execstack.log
+
+	# check already stripped code (that may drive to lib reduction failure for initramfs with mklibs)
+	scanelf -k '!.symtab' -f ${TMPFILE} -q -F%F#k > $(LOG_PREFIX)-stripped.log
+
+	# Our modified gcc is made to stop on TEXTREL, so no need to check that
+
+	# TODO
+	# check for old hash (not using our LDFLAG), probably just matter for size if we have both
+
+	rm ${TMPFILE} ${ALL_NODIR}
+
+	# Find warnings and count them : configure emit WARNING, perl Makefile.PL emit Warning
+	-cd /usr/src/log_${MACHINE} && egrep ' error:|No such file or|not found|WARNING:|Warning:' 0[1-4]*/* >/usr/src/log_${MACHINE}/$(PKG_NAME)-configure_warnings.log
+	-cd /usr/src/log_${MACHINE} && grep ': warning:' 0[1-4]*/* >/usr/src/log_${MACHINE}/$(PKG_NAME)-compilation_warnings_all.log
+	-cd /usr/src/log_${MACHINE} && \
+		for f in 0[1-4]*/* ; do \
+			[ -f $$f ] && long_f="$$f                         "; \
+					echo -n "$${long_f:0:40} : ";grep ': warning:' $$f | wc -l; \
+		done | sort -k 3,3nr >/usr/src/log_${MACHINE}/$(PKG_NAME)-compilation-warnings_per_package_count.log
+
+	# Easy to fix adding -fno-strict-aliasing to CFLAGS
+	-cd /usr/src/log_${MACHINE} && grep ' break strict-aliasing rules' $(PKG_NAME)-compilation_warnings_all.log \
+		>/usr/src/log_${MACHINE}/$(PKG_NAME)-strict-aliasing_warnings.log
+
+	# Very often a security issue, catch 'might' and 'will always' overflow cases
+	-cd /usr/src/log_${MACHINE} && grep 'overflow destination' $(PKG_NAME)-compilation_warnings_all.log \
+		>/usr/src/log_${MACHINE}/$(PKG_NAME)-overflow_warnings.log
+
+	# Find easily bad configure results, add more if you find
+
+	# Don't know yet the consequences of static failure, util-linux failure is related to -fPIE -pie CFLAGS hack
+	-cd /usr/src/log_${MACHINE} && grep 'checking if gcc.*static works... no' 0[1-4]*/* >/usr/src/log_${MACHINE}/$(PKG_NAME)-bad-configure_results.log
+
+	# Look in code what happen behind ifdef HAVE_CLOCK_GETTIME, often not that important like gnupng, or dead detection code (lzo unmodified)
+	-cd /usr/src/log_${MACHINE} && grep -r 'checking for clock_gettime... no' 0[1-4]*/* >>/usr/src/log_${MACHINE}/$(PKG_NAME)-bad-configure_results.log

@@ -1,0 +1,113 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: expect 5118 2010-11-12 16:55:07Z gespinasse $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = expect
+VER        = 5.45.4
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+#DL_FROM    = $(URL_SFNET)/$(PKG_NAME)
+DL_FROM    = http://prdownloads.sourceforge.net/expect
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)-pass$(PASS)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects =	$(DL_FILE)
+
+$(DL_FILE)				= $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5				= 00fce8de158422f5ccd2666512329bd2
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+
+	# Let expect find stty following LFS path as not recompiled in chap6
+#	cd $(DIR_APP) && cp configure configure.bak
+#	cd $(DIR_APP) && sed 's:STTY_BIN=.*stty$$:STTY_BIN=stty:g' configure.bak > configure
+
+	# First, force Expect's configure script to use /bin/stty instead of
+	# a /usr/local/bin/stty it may find on the host system. This will ensure that
+	# our test suite tools remain sane for the final builds of our toolchain
+	cd $(DIR_APP) && cp -v configure{,.orig}
+	cd $(DIR_APP) && sed 's:/usr/local/bin:/bin:' configure.orig > configure
+
+	# tcl-5.8.9 by default is compiled without threads support
+	# but expect default is with threads : --disable-threads silent this warning
+	cd $(DIR_APP) && ./configure	--prefix=/$(TOOLS_DIR) \
+					--with-tcl=/$(TOOLS_DIR)/lib \
+					--with-tclinclude=/$(TOOLS_DIR)/include
+#					--disable-threads
+	cd $(DIR_APP) && make
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# 'via send_tty' message that clutter our screen should be considered as
+	# an expect feature ( it escape our redirection )
+	-cd $(DIR_APP) && make test &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+
+	cd $(DIR_APP) && make SCRIPTS="" install
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

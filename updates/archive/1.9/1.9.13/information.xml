@@ -1,0 +1,15 @@
+<ipcop>
+    <update>
+        <version>1.9.13</version>
+        <releasedate>2010-03-12</releasedate>
+        <description>Add iw, yi.org dyndns provider.&lt;br /&gt;
+        Upgrade apache to 2.2.15, bash-4.0 to patch level 37, dhcpcd to 5.2.1, diffutils to 2.9, dnsmasq to 2.52,
+        fcron to 3.0.5, gmp to 5.0.1, iptables to 1.4.7, openldap to 2.4.19,
+        openssl to 0.9.8m, openssh to 5.4, popt to 1.15, rsyslog to 4.6.1, syslinux to 3.8.5,
+        util-linux-ng to 2.17.1.&lt;br /&gt;
+        Use a more recent popt lib and relink logrotate.</description>
+        <previousversion>1.9.12</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

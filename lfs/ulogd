@@ -1,0 +1,125 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: ulogd 7478 2014-04-14 15:32:46Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = ulogd
+##VER        = 2.0.3
+VER        = 2.0.7
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.bz2
+DL_FROM    = $(URL_NETFILTER)/$(PKG_NAME)/files
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+CFLAGS += -Wall
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+##$(DL_FILE)_MD5 = 4dcd7e7a68022318759b8d3b9fff7519
+$(DL_FILE)_MD5 = 2bb2868cf51acbb90c35763c9f995f31
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar jxf $(DIR_DL)/$(DL_FILE)
+	# Fix 'call to __builtin___strncat_chk might overflow destination buffer'
+	# Fix 'format not a string literal and no format arguments' when -Wformat-nonliteral is used
+	#cd $(DIR_APP) && patch -p0 -i $(DIR_PATCHES)/$(THISAPP)_strfix.patch	# (debian borrowed)
+	# Fix 'this libc does not define HOST_NAME_MAX'
+	#cd $(DIR_APP) && sed -i -e 's:include <stdio.h>:include <limits.h>\n#include <stdio.h>:' extensions/ulogd_LOGEMU.c
+	#cd $(DIR_APP) && sed -i -e 's:include <stdio.h>:include <limits.h>\n#include <stdio.h>:' extensions/printpkt.c
+	# Call gcc instead of ld for linking as only gcc have our hardened by default options (gentoo borrowed)
+	# (prevents build from choking on stuff like "LDFLAGS=-Wl,O1")
+	#cd $(DIR_APP) && for d in pgsql sqlite3 extensions mysql pcap ; do sed -i -e 's/$$(LD)/$$(CC) -nostartfiles/' $$d/Makefile.in; done
+
+	# remove database(s) in case of a partial build
+	rm -f /var/ipcop/traffic/empty-ulogd.db
+	rm -f /var/log/traffic/ulogd.db
+
+	# --with-sqlite3-log-ip-as-string is discouraged,
+	# but we currently use strings for IP addresses in the sqlite3 DB
+	cd $(DIR_APP) && ./configure \
+				--prefix=/usr \
+				--sysconfdir=/etc \
+				--disable-static \
+				--with-sqlite3=/usr \
+				--with-sqlite3-log-ip-as-string
+	cd $(DIR_APP) && make
+	cd $(DIR_APP) && make install
+
+	cp $(DIR_SRC)/config/ulogd/ulogd.conf /etc/
+
+	# database in /var/log/traffic
+	mkdir -p /var/log/traffic/
+	sed -i -e 's+DATABASEDIR+/var/log/traffic+' /etc/ulogd.conf
+	sed -i -e 's+LIBDIR+/usr/lib/ulogd+' /etc/ulogd.conf
+	# Create database, since we currently cannot create a fresh new DB in target system
+	# we create empty-ulogd.db additionally so we can flush the DB and start from scratch.
+	sqlite3 /var/ipcop/traffic/empty-ulogd.db < $(DIR_SRC)/config/ulogd/sqlite3.table
+	cp /var/ipcop/traffic/empty-ulogd.db /var/log/traffic/ulogd.db
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

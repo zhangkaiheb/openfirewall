@@ -1,0 +1,3 @@
+# not a usual rootfile
+# but needed to include mkinitramfs directory structure and code
+usr/lib/mkinitramfs.tar.gz

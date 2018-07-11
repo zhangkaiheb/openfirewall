@@ -1,0 +1,14 @@
+<ipcop>
+    <update>
+        <version>2.1.4</version>
+        <releasedate>2014-04-08</releasedate>
+        <size>1143</size>
+        <isoimages>no</isoimages>
+        <description>Add GUI page for web proxy status.&lt;br /&gt;Language updates.&lt;br /&gt;
+        Upgrade openssl to 1.0.1g.
+        </description>
+        <previousversion>2.1.3</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

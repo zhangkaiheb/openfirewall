@@ -1,0 +1,113 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: slang 6743 2012-08-05 06:28:31Z gespinasse $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = slang
+VER        = 2.2.4
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+# web site http://www.jedsoft.org/slang
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.bz2
+DL_FROM    = ftp://ftp.fu-berlin.de/pub/unix/misc/slang/v2.2
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = 7fcfd447e378f07dd0c0bae671fe6487
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar jxf $(DIR_DL)/$(DL_FILE)
+
+	cd $(DIR_APP) && ./configure --prefix=/usr
+	# Disabling SLANG_OPTIMIZE_FOR_SPEED drive to test compilation errors and doesn't change the installer size : dropped
+	#cd $(DIR_APP) && sed -i 's/^#define SLANG_OPTIMIZE_FOR_SPEED.*$$/#define SLANG_OPTIMIZE_FOR_SPEED 0/' src/sl-feat.h
+	cd $(DIR_APP) && sed -i 's/^#define SLANG_HAS_DEBUGGER_SUPPORT.*$$/#define SLANG_HAS_DEBUGGER_SUPPORT 0/' src/sl-feat.h
+	# Static lib is used
+	# - when linking our installer directly to the static lib
+	# - or when linking our installer to slang shared lib to allow mklibs to reduce the shared lib
+
+	# Installer will link to shared lib if both static and shared lib are installed
+	# Actually shared lib (even reduced by mklibs) + installer produce an overall bigger code than statically linked to installer
+
+	# make sometimes break when using PARALLELISM, don't use it
+	# Avoid compiling slsh as that fail with SLANG_OPTIMIZE_FOR_SPEED 0, compile only the static lib
+	cd $(DIR_APP)/src && make static
+	
+
+ifeq "$(RUNNING_TEST)" "yes"
+	cd $(DIR_APP) && make check &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+
+	cd $(DIR_APP)/src && make install-static
+
+	# In case we want to test linking installer against the shared lib, uncomment that
+	#cd /usr/lib && ln -sf libslang.a libslang_pic.a
+	#cd $(DIR_APP) && install -m 0644 src/slang.ver /usr/lib/libslang_pic.map
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

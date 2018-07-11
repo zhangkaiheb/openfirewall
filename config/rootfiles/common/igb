@@ -1,0 +1,3 @@
+# Info only, lib/modules/KVER/kernel is already included
+#lib/modules/KVER/kernel/drivers/net/igb
+#lib/modules/KVER/kernel/drivers/net/igb/igb.ko.gz

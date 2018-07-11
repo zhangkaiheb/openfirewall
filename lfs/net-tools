@@ -1,0 +1,134 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: net-tools 6658 2012-06-18 18:10:39Z gespinasse $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = net-tools
+#VER        = 1.60_p20120127084908
+#VER        = CVS_20101030
+VER        = 1.60
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+#DL_FILE    = $(THISAPP).tar.xz
+DL_FILE    = $(THISAPP).tar.bz2
+# Should be available on sourceforge in the futur but no new package yet released, so using same snapshoot as others
+#DL_FROM    = $(URL_SFNET)/$(PKG_NAME)
+#DL_FROM    = http://gentoo.osuosl.org/distfiles
+DL_FROM    = http://anduin.linuxfromscratch.org/BLFS/net-tools
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+objects = $(DL_FILE)
+
+$(DL_FILE)			= $(DL_FROM)/$(DL_FILE)
+
+#$(DL_FILE)_MD5			= 72a2e4715834c459282c9b63e8d81f56
+#$(DL_FILE)_MD5			= 6be14ed473cacdd68edeaa9605adc469
+$(DL_FILE)_MD5			= 888774accab40217dde927e21979c165
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+	cd $(DIR_APP) && patch -p1 < $(DIR_PATCHES)/$(THISAPP)_switch-default-compile.patch
+	# Change Makefile before running configure, avoiding configure to update config.h on first make
+	# Move ifconfig and route back to our usual /sbin to save us that trouble
+	# Remove the install warning on ifconfig/route move, configure.sh warning remain
+	# Remove saving previous installed binaries under .old name
+###	cd $(DIR_APP) && sed -i -e '/install.*ifconfig/s/bin/sbin/' \
+###				-e '/install.*route/s/bin/sbin/' \
+###				-e '/^\t@echo*$$/d' \
+###				-e 's/ savebin / /'		Makefile
+
+	cd $(DIR_APP) && sed -i \
+		-e 's/HAVE_AFIPX y/HAVE_AFIPX n/' \
+		-e 's/HAVE_AFATALK y/HAVE_AFATALK n/' \
+		-e 's/HAVE_AFAX25 y/HAVE_AFAX25 n/' \
+		-e 's/HAVE_AFNETROM y/HAVE_AFNETROM n/' \
+		-e 's/HAVE_AFROSE y/HAVE_AFROSE n/' \
+		-e 's/HAVE_AFX25 y/HAVE_AFX25 n/' \
+		-e 's/HAVE_AFECONET y/HAVE_AFECONET n/' \
+		-e 's/HAVE_AFASH y/HAVE_AFASH n/' \
+		-e 's/HAVE_AFX25 y/HAVE_AFX25 n/' \
+		-e 's/HAVE_HWARC y/HAVE_HWARC n/' \
+		-e 's/HAVE_HWSTRIP y/HAVE_HWSTRIP n/' \
+		-e 's/HAVE_HWTR y/HAVE_HWTR n/' \
+		-e 's/HAVE_HWAX25 y/HAVE_HWAX25 n/' \
+		-e 's/HAVE_HWROSE y/HAVE_HWROSE n/' \
+		-e 's/HAVE_HWNETROM y/HAVE_HWNETROM n/' \
+		-e 's/HAVE_HWX25 y/HAVE_HWX25 n/' \
+		-e 's/HAVE_HWFR y/HAVE_HWFR n/' \
+		-e 's/HAVE_HWFDDI y/HAVE_HWFDDI n/' \
+		-e 's/HAVE_HWHIPPI y/HAVE_HWHIPPI n/' \
+		-e 's/HAVE_HWASH y/HAVE_HWASH n/' \
+		-e 's/HAVE_HWHDLCLAPB y/HAVE_HWHDLCLAPB n/' \
+		-e 's/HAVE_HWIRDA y/HAVE_HWIRDA n/' \
+		-e 's/HAVE_HWEC y/HAVE_HWEC n/' \
+		-e 's/HAVE_HWEUI64 y/HAVE_HWEUI64 n/' \
+		-e 's/HAVE_HWIB y/HAVE_HWIB n/' config.in
+
+	cd $(DIR_APP) && yes '' | ./configure.sh config.in
+	cd $(DIR_APP) && make
+	cd $(DIR_APP) && make install
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

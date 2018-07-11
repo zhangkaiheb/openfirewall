@@ -1,0 +1,8 @@
+
+/* Remove /usr/include from include search path. */
+#undef STANDARD_INCLUDE_DIR
+#define STANDARD_INCLUDE_DIR 0
+
+/* Remove /lib and /usr/lib from startfiles search path. */
+#define STANDARD_STARTFILE_PREFIX_1 ""
+#define STANDARD_STARTFILE_PREFIX_2 ""

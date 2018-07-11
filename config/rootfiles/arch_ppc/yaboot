@@ -1,0 +1,16 @@
+etc/yaboot.conf
+usr/lib/yaboot
+usr/lib/yaboot/addnote
+usr/lib/yaboot/ofboot
+usr/lib/yaboot/yaboot
+usr/sbin/mkofboot
+usr/sbin/ofpath
+usr/sbin/yabootconfig
+usr/sbin/ybin
+#usr/share/man/man5/yaboot.conf.5.gz
+#usr/share/man/man8/bootstrap.8.gz
+#usr/share/man/man8/mkofboot.8.gz
+#usr/share/man/man8/ofpath.8.gz
+#usr/share/man/man8/yaboot.8.gz
+#usr/share/man/man8/yabootconfig.8.gz
+#usr/share/man/man8/ybin.8.gz

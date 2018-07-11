@@ -1,0 +1,156 @@
+#!/bin/bash
+#
+# Upgrade IPCop
+#
+
+UPGRADEVERSION=2.1.5
+PREVIOUSVERSION=2.1.4
+
+
+msg() {
+    /usr/bin/logger -t installpackage "$*"
+    /bin/echo "$*"
+}
+
+
+# Verify architecture
+MACHINE=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::machine;"`
+if [ "$MACHINE" != `/bin/cat ./ARCH` ]; then
+    msg "Update for wrong architecture: `/bin/cat ./ARCH`! We are: $MACHINE. Aborting installation."
+    exit 1
+fi
+
+# Verify version, note we also accept replaying an upgrade
+CURRENTVERSION=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::version;"`
+if [ "$CURRENTVERSION" != "$PREVIOUSVERSION" -a "$CURRENTVERSION" != "$UPGRADEVERSION" ]; then
+    msg "IPCop v$PREVIOUSVERSION or v$UPGRADEVERSION not running. Aborting installation."
+    exit 1
+fi
+
+# Stop fcron, to keep tasks from running during update
+FCRONPID=`cat /var/run/fcron.pid`
+/bin/kill $FCRONPID
+COUNT=30
+
+while [ -e /var/run/fcron.pid -a ${COUNT} -ge 0 ]
+do
+    sleep 1
+    COUNT=$(( ${COUNT} - 1 ))
+done
+
+if [ -e /var/run/fcron.pid ]; then
+    msg "kill fron, still running after 30 seconds"
+    /bin/kill -KILL $FCRONPID
+fi
+
+#####
+#
+# Add version specific handling *before* unpacking the patch here.
+# For example stopping dnsmasq(required before update), squid, etc...
+#
+#####
+
+if [ ! -e /var/ipcop/ca/ca-certificates ]; then
+    mkdir -p /var/ipcop/ca/ca-certificates
+fi
+
+# Can't replace dnsmasq whilst active
+/etc/rc.d/rc.dnsmasq --stop
+
+#####
+#
+# End of version specific handling. Continue with universal stuff.
+#
+#####
+
+FAILURE=0
+/bin/tar -zxpf patch.tar.gz -C /
+FAILURE=$?
+if [ $FAILURE -ne 0 ]; then
+    msg "Error extracting patch.tar.gz $1, need more free space on disk. Aborting."
+    exit 4 # ERRORTAR
+fi
+
+# Modify or remove line below, depending on update
+# Update bootloader config
+/usr/local/sbin/updatekernel.pl --add 3.4-2 --keep 3.4-1 --remove 2.6.32-6
+
+# Modify or remove line below, depending on update
+# Create the new initramfs
+/sbin/mkinitramfs --with-kernel=3.4-2 --with-firmware --many-modules --with-list=/etc/modules.initramfs
+
+# Adjust the changed config files
+/usr/local/bin/upgrade.sh
+
+# Remove old libraries (version specific)
+# /bin/rm -f .....
+# apache
+/bin/rm -f /usr/lib/libapr-1.so.0
+/bin/rm -f /usr/lib/libapr-1.so.0.4.8
+/bin/rm -f /usr/lib/libaprutil-1.so.0
+/bin/rm -f /usr/lib/libaprutil-1.so.0.5.2
+# ppp
+/bin/rm -rf /usr/lib/pppd/2.4.5
+# rrdtool
+/bin/rm -f /usr/lib/librrd.so.4
+/bin/rm -f /usr/lib/librrd.so.4.2.0
+/bin/rm -f /usr/lib/librrd_th.so.4
+/bin/rm -f /usr/lib/librrd_th.so.4.2.0
+# squid-graph
+/bin/rm -f /usr/bin/squid-graph
+/bin/rm -f /usr/lib/libgd.so.3
+/bin/rm -f /usr/lib/libgd.so.3.0.0
+/bin/rm -f /usr/lib/perl5/site_perl/5.14.2/i486-linux/GD.pm
+/bin/rm -f /usr/lib/perl5/site_perl/5.14.2/i486-linux/GD/Image.pm
+/bin/rm -f /usr/lib/perl5/site_perl/5.14.2/i486-linux/GD/Polygon.pm
+/bin/rm -f /usr/lib/perl5/site_perl/5.14.2/i486-linux/GD/Polyline.pm
+/bin/rm -f /usr/lib/perl5/site_perl/5.14.2/i486-linux/auto/GD/GD.so
+
+# For new shared libs. May not always be required, but makes sure we do not forget
+/sbin/ldconfig
+
+#####
+#
+# Add version specific handling *after* unpacking the patch here.
+# For example restarting apache, squid, etc...
+#
+#####
+
+# Use new apache
+/usr/local/bin/restarthttpd restart &
+
+# Restart dnsmasq
+/etc/rc.d/rc.dnsmasq --start
+
+# Restart OpenVPN server
+if [ -e /var/run/openvpn.pid ]; then
+    /usr/local/bin/openvpnctrl --restart
+fi
+
+# config changes
+/usr/local/bin/restartsquid --config
+# restart squid (helper checks whether squid is enabled)
+/usr/local/bin/restartsquid
+
+#####
+#
+# End of version specific handling. Continue with universal stuff.
+#
+#####
+
+# Restart fcron
+if [ -e /etc/FLASH ]; then
+    /usr/sbin/fcron -s 86400
+else
+    /usr/sbin/fcron
+fi
+
+# Patch general-functions.pl
+/bin/sed -i -e "s+^\(\$General::version\s*=\s*\).*+\1'$UPGRADEVERSION';+" /usr/lib/ipcop/general-functions.pl
+# Patch /etc/issue
+/bin/sed -i -e "s+$PREVIOUSVERSION+$UPGRADEVERSION+" /etc/issue
+
+# Update menu
+/usr/local/bin/updatemenu.pl
+
+msg "$UPGRADEVERSION update installed."

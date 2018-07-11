@@ -1,0 +1,25 @@
+--- a/Setup	2012-02-26 09:26:09.000000000 +0100
++++ b/Setup	2012-02-26 09:30:04.000000000 +0100
+@@ -912,7 +912,13 @@
+ 
+ 	done < $1/Makefile
+ 
++    if [ -z "$KLVL" ] && [ -z "$KEVER" ]; then
++	KERNEL_VERSION=$KVER"."$KPATCH
++    elif [ -z "$KLVL" ]; then
++	KERNEL_VERSION=$KVER"."$KPATCH$KEVER
++    else
+ 	KERNEL_VERSION=$KVER"."$KPATCH"."$KLVL$KEVER
++    fi
+ 
+ 	if [ "$KVER" -eq "3" ] && [ "$KPATCH" -eq "0" ]; then
+ 		KERN_VER=30;
+@@ -7363,7 +7369,7 @@
+ PROD_PATCH=$PROD_HOME/patches
+ PROD_INIT=/usr/sbin/
+ FILELIST=$PROD_HOME/Filelist
+-SOURCEDIR=/lib/modules/$(uname -r)/build
++SOURCEDIR=/lib/modules/$KERNEL_UNAME/build
+ START_SCRIPT=S11$PROD
+ OLD_START=S05router
+ STOP_SCRIPT=K70$PROD

@@ -1,0 +1,22 @@
+          0fWelcome to IPCop, Licensed under GNU GPL version 2.07
+        PLEASE BEWARE!  This installation process will kill all 
+        existing partitions on your PC or server. Please be aware
+        of this before continuing this installation.  
+
+0c        --------------------------------------------------
+        ----                                          ----
+        ---- ALL YOUR EXISTING DATA WILL BE DESTROYED ----
+        ----                                          ----
+        --------------------------------------------------
+07
+0fKEY     TOPIC07
+<09F107>    Target choice.
+<09F207>*   Advanced installation options.
+<09F307>    More advanced installation options.
+<09F407>    memtest.
+
+Following options can be combined with install:
+    install nopcmcia          to install and disable PCMCIA detection
+    install nousb             to install and disable USB detection
+    install nousb nopcmcia    to install and disable both
+    install modules           to install and add kernelmodules

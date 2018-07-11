@@ -1,0 +1,9 @@
+## eciadsl-usermode-0.11
+##
+#etc/eciadsl
+####etc/eciadsl/eciadsl.conf
+####etc/eciadsl/firmware00.bin
+####etc/eciadsl/modems.db
+####usr/sbin/eciadsl-firmware
+####usr/sbin/eciadsl-pppoeci
+####usr/sbin/eciadsl-synch

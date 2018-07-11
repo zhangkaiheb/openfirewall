@@ -1,0 +1,12 @@
+fixes: error in active-filter expression
+because inbound/outbound not supported on linktype (pppd, ipppd)
+--- a/gencode.c.old	2004-06-21 19:43:24.611308762 +0100
++++ a/gencode.c	2004-06-21 19:43:34.851140716 +0100
+@@ -7617,6 +7617,7 @@
+ 	 */
+ 	switch (linktype) {
+ 	case DLT_SLIP:
++	case DLT_PPP:
+ 		b0 = gen_relation(BPF_JEQ,
+ 			  gen_load(Q_LINK, gen_loadi(0), 1),
+ 			  gen_loadi(0),

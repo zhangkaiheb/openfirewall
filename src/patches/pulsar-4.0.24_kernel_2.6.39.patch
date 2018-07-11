@@ -1,0 +1,20 @@
+--- a/pulsar.c	2011/02/11 19:01:08	1.23
++++ b/pulsar.c	2011/05/19 18:15:35	1.24
+@@ -110,10 +110,17 @@
+ static unsigned char *oam_cell = NULL;
+ 
+ static int retrain_timer;
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39))
++DEFINE_SPINLOCK(oam_lock);
++DEFINE_SPINLOCK(rx_lock);
++DEFINE_SPINLOCK(timer_lock);
++static DEFINE_SPINLOCK(tx_lock);
++#else
+ spinlock_t oam_lock = SPIN_LOCK_UNLOCKED;
+ spinlock_t rx_lock = SPIN_LOCK_UNLOCKED;
+ spinlock_t timer_lock = SPIN_LOCK_UNLOCKED;
+ static spinlock_t tx_lock = SPIN_LOCK_UNLOCKED;
++#endif
+ CBUF_STRUCT rx_cbuf[RX_CBUF_SIZE];
+ int rx_head=0, rx_tail=0;
+ static int tx_dma_count = 0;

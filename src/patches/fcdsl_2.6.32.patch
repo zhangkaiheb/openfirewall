@@ -1,0 +1,33 @@
+--- fritz/src/tools.h.orig	2011-05-02 07:48:54.000000000 +0200
++++ fritz/src/tools.h	2011-05-02 07:51:53.000000000 +0200
+@@ -71,16 +71,6 @@
+ 
+ /*---------------------------------------------------------------------------*\
+ \*---------------------------------------------------------------------------*/
+-#ifndef atomic_xchg
+-static inline unsigned long atomic_xchg (
+-	volatile atomic_t *	v, 
+-	unsigned		value
+-) {
+-	return __xchg (value, &v->counter, sizeof (unsigned));
+-} /* atomic_xchg */
+-#endif
+-/*---------------------------------------------------------------------------*\
+-\*---------------------------------------------------------------------------*/
+ #ifndef NDEBUG
+ extern unsigned hallocated (void);
+ extern int hvalid (void *);
+--- fritz/src/driver.c.orig	2011-05-02 07:57:50.000000000 +0200
++++ fritz/src/driver.c	2011-05-02 07:59:44.000000000 +0200
+@@ -898,9 +898,9 @@
+ #endif
+ 	reset_card (cp); 
+ 	if (ctrl_context[0].ctrl != NULL) {
+-		capi_ctr_reseted (capi_controller[0]);
++		capi_ctr_down (capi_controller[0]);
+ 	}
+-	capi_ctr_reseted (capi_controller[1]);
++	capi_ctr_down (capi_controller[1]);
+ } /* reset_ctrl */
+ 
+ /*---------------------------------------------------------------------------*\

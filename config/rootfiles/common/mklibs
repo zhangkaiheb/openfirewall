@@ -1,0 +1,15 @@
+#usr/bin/dpkg-architecture
+#usr/bin/mklibs
+#usr/bin/mklibs-copy
+#usr/bin/mklibs-readelf
+#usr/lib/mklibs
+#usr/lib/mklibs/python
+#usr/lib/mklibs/python/mklibs
+#usr/lib/mklibs/python/mklibs/__init__.py
+#usr/lib/mklibs/python/mklibs/utils
+#usr/lib/mklibs/python/mklibs/utils/__init__.py
+#usr/lib/mklibs/python/mklibs/utils/logging.py
+#usr/lib/mklibs/python/mklibs/utils/main.py
+#usr/share/man/man1/mklibs-copy.1
+#usr/share/man/man1/mklibs-readelf.1
+#usr/share/man/man1/mklibs.1

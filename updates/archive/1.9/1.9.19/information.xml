@@ -1,0 +1,15 @@
+<ipcop>
+    <update>
+        <version>1.9.19</version>
+        <releasedate>2011-04-06</releasedate>
+        <size>0</size>
+        <description>Patch expat for CVE-2009-3560 and CVE-2009-3720. Patch Perl for several CVEs.&lt;br /&gt;
+        Upgrade bash to 4.2.8, iproute2 to 2.6.38, kernel to 2.6.32.36, logwatch to 7.4.0, memtest to 4.20, nano to 2.2.6, ntpd to 4.2.6p3,
+        pcre to 8.11, readline to 6.2, rsyslog to 5.6.5, shadow to 4.1.4.3, udev to 166, util-linux to 2.19, wanpipe to 3.5.18,
+        multiple CPAN libraries.&lt;br /&gt;
+        &lt;b&gt;Mandatory reboot after upgrade.&lt;/b&gt;</description>
+        <previousversion>1.9.18</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

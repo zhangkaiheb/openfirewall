@@ -1,0 +1,105 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: strip 6523 2012-04-01 16:03:42Z gespinasse $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = strip
+HOST_ARCH  = all
+OTHER_SRC  = no
+
+THISAPP    = strip
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+install : $(TARGET)
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST))
+	@$(PREBUILD)
+
+ifeq "$(STAGE)" "toolchain"
+	rm -rf /$(TOOLS_DIR)/{,share/,usr/}{doc,info,man}
+
+	# Remove first stage compiler
+	rm -rf /${TOOLS_DIR}/${LFS_TGT}
+	rm -rf /${TOOLS_DIR}/bin/${LFS_TGT}-*
+	rm -rf /${TOOLS_DIR}/lib{,exec}/gcc/${LFS_TGT}
+	# remove the triplet used to compile glibc and (binutils, gcc) pass2
+	rm -rf /${TOOLS_DIR}/usr/bin/${LFS_TGT}-*
+	# gento remove that on install with comment 'only useful while building gcc'
+###	rm -rf /${TOOLS_DIR}/lib/gcc/${TARGET_2}/*/install-tools
+
+	# Remove static libs from lib
+	# Keep nonshared and libgcc.a used by make headers_check, libtclstub8.5.a required for sqlite testing
+	-find /${TOOLS_DIR}/lib -maxdepth 1 -not -name *_nonshared.a -not -name libtclstub*.a -not -name 'libstdc++.a' -name *.a -delete
+	-find /${TOOLS_DIR}/lib/perl5 -name *.a -delete
+	-find /${TOOLS_DIR}/lib -name *.la -not -name libstdc++.la -delete	# unneeded
+
+	# Remove unneeded perl files (test directories and files, .pod, ChangeLog and name variations)
+	# avoid the error message that -exec rm -r would produce for each t directory
+	-find /${TOOLS_DIR}/lib/perl5 -name t | xargs --no-run-if-empty rm -rf
+	-find /${TOOLS_DIR}/lib/perl5 -name *.t -delete
+	-find /${TOOLS_DIR}/lib/perl5 -name *.pod -delete
+	-find /${TOOLS_DIR}/lib/perl5 -name Change* -delete
+	-find /${TOOLS_DIR}/lib/perl5 -name README -delete
+	rm -rf /${TOOLS_DIR}/lib/perl5/5.*/unicore	# only input file to create output
+	# just a list of directory we should infer by name code will not miss us
+	rm -rf /${TOOLS_DIR}/lib/perl5/5.*/CGI*
+	rm -rf /${TOOLS_DIR}/lib/perl5/5.*/CPAN*
+	rm -rf /${TOOLS_DIR}/lib/perl5/5.*/Test*
+	rm -rf /${TOOLS_DIR}/lib/perl5/5.*/Pod*
+
+	# using --strip-all break static and shared lib, drive later to 'cannot find entry symbol _start'
+	# follow what debian do in debhelper/dh_strip for libs
+	-find /$(TOOLS_DIR)/lib -type f -name *.a -exec strip --strip-debug {} \;
+	-find /$(TOOLS_DIR)/lib -type f -not -name *.a -exec strip --remove-section=.comment --remove-section=.note --strip-unneeded {} \;
+
+	# we can't use strip against itself 'reason: Text file busy', so to spare 3 MB, use a copy
+	cp -f /$(TOOLS_DIR)/bin/strip /$(TOOLS_DIR)/bin/strip2
+	# use strip2 to not bother for strip hardlink
+	-find /$(TOOLS_DIR)/{bin,sbin,usr/bin,libexec} -type f -not -name strip2 -exec strip2 --strip-all {} \;
+	rm -f /$(TOOLS_DIR)/bin/strip2
+endif
+
+	@$(POSTBUILD)

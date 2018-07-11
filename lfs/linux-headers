@@ -1,0 +1,130 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: linux-headers 7874 2015-02-06 20:18:36Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = linux-headers
+# Application Programming Interface (API) for the system's C library (Glibc)
+# has to be stable.
+# DON'T UPGRADE THE VERSION EVEN IF THERE IS A NEW KERNEL.
+# IF YOU DO YOU WILL BREAK THINGS BADLY
+# Now that you're scared :-) please keep in mind that if you upgrade this
+# you have to recompile _every_ single package in all stages
+# Also keep in mind that once we release ipcop-2.0, there can be
+# NO UPGRADING of this package.  You can still upgrade lfs/linux though
+#VER        = 3.10
+VER        = 4.15.3
+#PATCHLEVEL = 3.10.68
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = linux-${VER}
+DL_FILE    = $(THISAPP).tar.xz
+#DL_FROM    = $(URL_KERNEL)/linux/kernel/v3.x
+DL_FROM    = $(URL_KERNEL)/linux/kernel/v4.x
+DIR_APP    = $(DIR_SRC)/$(THISAPP)-headers
+CFLAGS     =
+CXXFLAGS   =
+
+#TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(PKG_NAME)-$(PATCHLEVEL)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(PKG_NAME)-$(VER)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+#objects = $(DL_FILE) patch-$(PATCHLEVEL).xz
+objects = $(DL_FILE)
+
+$(DL_FILE)                  = $(DL_FROM)/$(DL_FILE)
+#patch-$(PATCHLEVEL).xz      = $(DL_FROM)/patch-$(PATCHLEVEL).xz
+
+#$(DL_FILE)_MD5              = 4f25cd5bec5f8d5a7d935b3f2ccb8481
+$(DL_FILE)_MD5              = c74d30ec13491aeb24c237d703eace3e
+#patch-$(PATCHLEVEL).xz_MD5  = dfa635d7e8975f4c765d5fba7d1fad0d
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+# Don't use firstword MAKEFILE_LIST here because it's just wasting time to uncompress the kernel
+$(TARGET) : $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) $(DIR_SRC)/TEMP && mkdir $(DIR_SRC)/TEMP
+	cd $(DIR_SRC)/TEMP && tar --no-same-owner --no-same-permissions -xf $(DIR_DL)/$(DL_FILE)
+	mv $(DIR_SRC)/TEMP/* $(DIR_APP) && rm -fr $(DIR_SRC)/TEMP
+#	cd $(DIR_APP) && xzcat $(DIR_DL)/patch-$(PATCHLEVEL).xz | patch -p1
+	# fix parted-3.0 configure big warning
+#	cd $(DIR_APP) && sed -i -e 's:include <linux/magic.h>:include <linux/magic.h>\n#include <linux/fs.h>:' include/linux/ext2_fs.h
+
+ifeq "$(STAGE)" "toolchain"
+	cd $(DIR_APP) && make mrproper
+	cd $(DIR_APP) && make headers_check
+	# files are not installed directly as make headers_install empty the destination first
+	cd $(DIR_APP) && make INSTALL_HDR_PATH=dest headers_install
+	# remove unneeded files
+	cd $(DIR_APP) && find dest/include \( -name .install -o -name ..install.cmd \) -delete
+	cd $(DIR_APP) && cp -rv dest/include/* /$(TOOLS_DIR)/include
+endif
+
+ifeq "$(STAGE)" "base"
+		cd $(DIR_APP) && make mrproper
+		cd $(DIR_APP) && make headers_check
+		cd $(DIR_APP) && make INSTALL_HDR_PATH=dest headers_install
+		# remove unneeded files
+		cd $(DIR_APP) && find dest/include \( -name .install -o -name ..install.cmd \) -delete
+		cd $(DIR_APP) && cp -r dest/include/* /usr/include
+endif
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)
+

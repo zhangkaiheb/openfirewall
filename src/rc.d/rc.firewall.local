@@ -1,0 +1,29 @@
+#!/bin/sh
+# Used for private firewall rules
+#
+# $Id: rc.firewall.local 1912 2008-09-16 20:11:47Z owes $
+#
+
+# read variables 
+eval $(/usr/local/bin/readhash /var/ipcop/ethernet/settings) 
+if [ -f /var/ipcop/red/iface ]; then
+	REAL_RED=`cat /var/ipcop/red/iface`
+fi
+
+# See how we were called.
+case "$1" in
+start)
+    ## add your 'start' rules here
+    ;;
+stop)
+    ## add your 'stop' rules here
+    ;;
+reload)
+    $0 stop
+    $0 start
+    ## add your 'reload' rules here
+    ;;
+*)
+    echo "Usage: $0 {start|stop|reload}"
+    ;;
+esac

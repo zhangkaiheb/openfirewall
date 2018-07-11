@@ -1,0 +1,14 @@
+<ipcop>
+    <update>
+        <version>UPGRADEVERSION</version>
+        <releasedate>2016-mm-dd</releasedate>
+        <size>0</size>
+        <isoimages>no</isoimages>
+        <description>
+        Description (needs modification, shortly before release at the latest).
+        </description>
+        <previousversion>PREVIOUSVERSION</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

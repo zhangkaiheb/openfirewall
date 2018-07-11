@@ -1,0 +1,125 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: libxml2 7713 2014-11-30 13:11:02Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = libxml2
+VER        = 2.9.2
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+DL_FROM    = http://xmlsoft.org/sources
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+XMLTEST    = xmlts20080827.tar.gz
+
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE) $(XMLTEST)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+$(XMLTEST) = http://www.w3.org/XML/Test/$(XMLTEST)
+
+$(DL_FILE)_MD5 = 9e6a9aca9d155737868b3dc5fd82f788
+$(XMLTEST)_MD5 = ae3d1ebe000a3972afa104ca7f0e1b4a
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+
+
+	# --with-minimum is broken on 2.7.8, not on 2.7.7 but hard to know what to test
+	# maybe we could reduce more the lib, who know?
+	# Removing version from --with-html-subdir limit the noise on upgrade
+	# --without-python because we don't need python support
+	# --without-zlib because no prog use that feature
+	# --without-threads because this is not needed, (and it remove a lot of warnings) rrdtool test only for xmlParseFile feature
+	# --docdir does not work as it should as Copyright, examples goes to hardcoded doc/libxml2-$VERSION
+	cd $(DIR_APP) && sed -i 's/^DOC_MODULE.*/DOC_MODULE=libxml2/' Makefile.in
+	cd $(DIR_APP) && ./configure		\
+				--prefix=/usr \
+				--disable-static \
+				--with-html-subdir=$(PKG_NAME)/html \
+				--without-debug \
+				--without-ftp \
+				--without-http \
+				--without-legacy \
+				--without-python \
+				--without-regexps \
+				--without-threads \
+				--without-zlib
+
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# libxml2-tests-2.8.0.tar.gz exist but hard to understand how to use that and not produce errors
+	# (even with xmlts20080827 providing xmlconf/xmlconf.xml for the tests)
+	cd $(DIR_APP) && tar zxf $(DIR_DL)/$(XMLTEST)
+	cd $(DIR_APP) && make -s -j 1 -k check &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+	rm -f /missing.xml # testapi produce this empty file
+endif
+
+	cd $(DIR_APP) && make install
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

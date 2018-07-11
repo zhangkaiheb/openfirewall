@@ -1,0 +1,31 @@
+Commands available in make.sh in the order you may need them.
+
+Standard use commands
+     prefetch : preload all necessary files from running arch in cache before
+		compilation
+ build [test] : compile (optional 'test' argument run each package tests)
+        clean : erase build and log to recompile everything from scratch
+ gettoolchain : optionally load from sourceforge a precompilated toolchain
+		package. This save 20% of next building time and solve some
+		compilation issue on old or very recent distributions.
+
+Maintainer / advanced commands
+ prefetch all : preload all files (ignoring architecture) in cache
+ buildsingle stage package : compile a single package using stage, use for
+                testing compile only. Example: buildsingle 03 beep
+ ccache_clean : Completely clear the ccache cache. This may take a long time.
+    changelog : Update doc/Changelog from CVS messages log
+    check_url : Test if packages files are still available for download
+		This is faster on http URL with --spider,but may be slow on ftp
+		because of real load.
+check_url_clean : Erase all check_url tags on cache directory to be able to check
+		another time
+check_versions: Compare the versions of packages used in LFS and IPCop
+         dist : Mainly produce a diff from previous version to track wich
+		files have been updated. Export IPCop sources in a .tgz
+     othersrc : Build a .tgz with all source packages necessary to compile
+    toolchain : Create our own toolchain package to speed next rebuild
+     language : Search for all lang entries in source, get translations from 
+                lang DB and create .po files in langs/locale 
+        shell : Enter a shell inside the chroot, used to tune lfs script
+		and / or during kernel upgrade to rebuild a new .config

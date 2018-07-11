@@ -1,0 +1,13 @@
+next-server
+filename
+min-lease-time
+default-lease-time
+max-lease-time
+min-secs
+boot-unknown-clients
+dynamic-bootp-lease-cutoff
+dynamic-bootp-lease-length
+ping-check
+ping-timeout
+server-identifier
+server-name

@@ -1,0 +1,554 @@
+#!/bin/bash
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+#
+# $Id: mkflash 2709 2009-04-13 19:26:06Z owes $
+#
+#
+# Originally by Guy Ellis and Steve Bauer
+# Copyright 2001 Traverse Technologies Australia - http://www.traverse.com.au/
+#
+# Copyright (C) 2002-04-08 Mark Wormgoor <mark@wormgoor.com>
+#               - Modified to use loopback filesystem
+#		- Modified to easily change partition sizes
+# Copyright (C) 2003-04-04 Nick Shore <nick.shore@multithread.co.uk>
+#		- Added disksize calculations
+# Copyright (C) 2003-04-09 Simon Turner <simont@angledata.co.uk>
+#		- Modified to easily change partition sizes and fix
+#		  some bugs.
+# Copyright (C) 2004-01-29 Mark Wormgoor <mark@wormgoor.com>
+#               - Modified for IPCop 1.4 (grub, etc)
+# Copyright (C) 2004-08-17 Dale Haag <dhaag@net-defender.net>
+#               - Fixed grub stage2 problem for CF disks
+#               - Added command line option to select target CF drive
+#               - Modified for creating 256mb, 512mb and 1gb CF disks
+#               - Modified routines for building sym links
+#               - Added ability to define kernel loading parameters needed for large CF disks
+#               - Added ability to define grub install parameters needed for large CF disks
+#               - Flash file is created as /tmp/[size]flash.img to allow storing multiple development images
+# Copyright (C) 2004-08-30 Dale Haag <dhaag@net-defender.net>        
+#               - Fixed issue with ramdisk sym link not properly being created for rc.flash.up
+#               - Added ability to configure ethernet settings for a LEX with 3 RTL8139 during flash build
+# Copyright (C) 2005-08-13 Gilles Espinasse <g.esp.ipcop@free.fr>
+#               - Use a bigger /boot partition to allow easier kernel upgrade and support smp kernel
+#               - Define zlog_MB at 30MB for 512 and 1gb like with 256 flash
+# Copyright (C) 2007-07-23 Mario Zimmermann <zisoft@ipcop-forum.de>        
+#               - Moved directories /home/httpd/html/graphs and /home/httpd/html/sgraph to ramdisk
+#               - Moved directory /var/lock to ramdisk
+#               - Moved directory /var/spool to ramdisk
+#               - Start fcron with parameter -s 86400
+#               - Support for 2GB and 4GB CF cards
+# Copyright (C) 2008-03-06 John Edwards <john@cornerstonelinux.co.uk>
+#               - Modified for IPCop 2.0 (changed partition order and build directories)
+#               - Added start of support for Alpha, PowerPC & SPARC systems
+#               - Switch to using tmpfs for log & spool ramdisk on /ram
+#
+# Features
+# - ext3 file system
+# - auto grub install to CF
+# - compressed logs on flash + log to ramdisk
+#
+#   Some SiS chipset don't like ide=nodma parameter (bug SF 1098510), remove in case of problem
+
+VERSION="2.1.0"
+
+if [ ! -f /etc/logrotate.conf.FLASH ]; then
+    echo "Error! logrotate.conf for flash install is missing?!"
+    exit 1
+fi
+
+# Default Location of final built image file (used to be /tmp in ipcop v1.x)
+# To change at build time run 'export BUILD_DIR=...' before make.sh
+if [ ! $BUILD_DIR ] ; then
+	BUILD_DIR="/var/tmp"
+fi
+# Location of temporary image files (used to be /var/log in ipcop v1.x)
+# To change at build time run 'export TEMP_DIR=...' before make.sh
+if [ ! $TEMP_DIR ] ; then
+	TEMP_DIR="/var/log"
+fi
+
+## Image sizes and layout
+SIZE="$1"
+CF="$2"
+ramdisk_size=64
+boot_MB=8
+zlog_MB=30
+heads=16
+sectors=32
+grub_PARMS="--force-lba"
+#
+# Uncomment the correct kernel parameters!
+#
+#kernel_PARMS="idebus=100 ide=nodma ide0=0x177-0x177,0x376"	#specific to LEX with CF on secondary master
+#kernel_PARMS=""						# Sis chipset workaround, don't use nodma
+kernel_PARMS="ide=nodma"					# Generic
+
+usage="Usage: $0 {image_size} {device}
+image_size can be one of 128 256 512 1gb 2gb 4gb (for 128MB to 4GB)
+device is the linux device name for the compact flash, eg hda, hdb, sda, sdb
+"
+
+# See what we're supposed to do (32 & 64 are too small now for this current script and IPCop 1.4.0)
+case "$SIZE" in
+128)
+	echo "`date '+%b %e %T'`: Creating 128MB Compact Flash"
+	flash_MB=122
+	zlog_MB=10
+	heads=8
+	;;
+256)
+	echo "`date '+%b %e %T'`: Creating 256MB Compact Flash"
+	flash_MB=222
+	;;
+512)
+	echo "`date '+%b %e %T'`: Creating 512MB Compact Flash"
+	flash_MB=485
+	;;
+1gb)
+	echo "`date '+%b %e %T'`: Creating 1 Gigabyte Compact Flash"
+	flash_MB=972
+	;;
+2gb)
+	echo "`date '+%b %e %T'`: Creating 2 Gigabyte Compact Flash"
+	flash_MB=1928
+	;;
+4gb)
+	echo "`date '+%b %e %T'`: Creating 4 Gigabyte Compact Flash"
+	flash_MB=3856
+	;;
+*)
+	echo "$usage"
+	exit 1
+	;;
+esac
+
+
+case "$CF" in
+hd?|sd?)
+	echo "`date '+%b %e %T'`: Creating $CF Compact Flash"
+	;;
+*)
+	echo "$usage"
+	exit 1
+	;;
+esac
+
+
+# Calculate partition info that doesn't depend on the host architecture
+bs=512		# do not change!
+
+ramdisk_KB=$(( $ramdisk_size * 1024 ))
+flash_blocks=$(( $flash_MB * 1024 * 1024 / $bs ))
+cylinders=$(( $flash_blocks / $heads / $sectors ))
+
+root_MB=$(( $flash_MB - $boot_MB - $zlog_MB ))
+
+boot_blocks=$(( $boot_MB * 1024 * 1024 / $bs - 1 ))
+root_blocks=$(( $root_MB * 1024 * 1024 / $bs ))
+zlog_blocks=$(( $zlog_MB * 1024 * 1024 / $bs ))
+
+
+# The partition numbers depends on the host architecture
+MACHINE=`uname -m`
+case ${MACHINE} in
+	i?86|x86_64|alpha)
+#  intel/alpha  partition1 /boot
+#               partition2 /
+#               partition3 /var/log_compressed
+		grub_boot_parition="hd0,0"
+		boot_partition=${CF}1
+		root_partition=${CF}2
+		zlog_partition=${CF}3
+		sfdisk_parameters="# Start,Size,Type,Bootable
+,$boot_MB,,*			# /boot
+,$root_MB,,			# /
+,$zlog_MB,,			# /var/log_compressed
+,0,,				# Unused
+"
+		;;
+	ppc|ppc64)
+#   powerpc     partition1 -- reserved, absolutely can't be used
+#               partition2 -- reserved, absolutely can't be used
+#               partition3 /boot
+#               partition4 /
+#               partition5 /var/log_compressed
+		grub_boot_parition="hd0,2"
+		boot_partition=${CF}3
+		root_partition=${CF}4
+		zlog_partition=${CF}5
+sfdisk_parameters="# Start,Size,Type,Bootable
+,0,,				# Unused
+,0,,				# Unused
+,$boot_MB,,*			# /boot
+,$root_MB,,			# /
+,$zlog_MB,,			# /var/log_compressed
+"
+	;;
+	sparc|sparc64)
+#   sparc       partition1 /boot
+#               partition2 /
+#               partition3 -- reserved, absolutely can't be used
+#               partition4 /var/log_compressed
+		grub_boot_parition="hd0,0"
+		boot_partition=${CF}1
+		root_partition=${CF}2
+		zlog_partition=${CF}4
+sfdisk_parameters="# Start,Size,Type,Bootable
+,$boot_MB,,*			# /boot
+,$root_MB,,			# /
+,0,,				# Unused
+,$zlog_MB,,			# /var/log_compressed
+"
+# Possible bug - partition 3 on SPARC used to be "whole disk"
+# I don't know if we need to state this or if sfdisk does it automatically.
+		;;
+	*)
+		echo "ERROR: Can not determine your architecture ${MACHINE}
+If this is running on a working IPCop then please report this as a bug at:
+http://sourceforge.net/tracker/?group_id=40604
+"
+		exit 1
+		;;
+esac
+
+# Although the partition numbers depend on the host architecture the
+# order does not, so if all unused partitions are of zero size we
+# shouldn't need to change this.
+
+boot_block_offset=1
+root_block_offset=$(( $boot_block_offset + $boot_blocks ))
+zlog_block_offset=$(( $root_block_offset + $root_blocks ))
+
+boot_byte_offset=$(( $boot_block_offset * $bs ))
+root_byte_offset=$(( $root_block_offset * $bs ))
+zlog_byte_offset=$(( $zlog_block_offset * $bs ))
+
+
+############################################################################
+#
+# Check for enough space in BUILD_DIR
+#
+############################################################################
+if [ `df -m $BUILD_DIR | tail -1 | awk '{print $4}'` -lt $flash_MB ];
+then
+	echo "ERROR: Not enough space in $BUILD_DIR"
+	echo "You need at least $flash_MB MB of free space in /tmp"
+	exit 1
+fi
+
+
+############################################################################
+#
+# Check for enough space in TEMP_DIR
+#
+############################################################################
+if [ `df -m $TEMP_DIR | tail -1 | awk '{print $4}'` -lt $flash_MB ];
+then
+	echo "ERROR: Not enough space in $TEMP_DIR"
+	echo "You need at least $flash_MB MB of free space in $TEMP_DIR"
+	exit 1
+fi
+
+
+############################################################################
+#                                                                          #
+# Creating empty flash image in BUILD_DIR                                  #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Creating empty flash image in $BUILD_DIR"
+dd if=/dev/zero of=$BUILD_DIR/flash.img bs=$bs count=$flash_blocks >/dev/null
+dd if=/dev/zero of=$TEMP_DIR/boot.img bs=$bs count=$boot_blocks >/dev/null
+dd if=/dev/zero of=$TEMP_DIR/root.img bs=$bs count=$root_blocks >/dev/null
+dd if=/dev/zero of=$TEMP_DIR/zlog.img bs=$bs count=$zlog_blocks >/dev/null
+
+
+############################################################################
+#                                                                          #
+# Making filesystems                                                       #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Making filesystems"
+for f in boot root zlog  ; do
+	mke2fs -F -j -m 0 -b 1024 $TEMP_DIR/${f}.img >/dev/null 2>&1
+done
+
+
+############################################################################
+#                                                                          #
+# Creating and partitioning Compact Flash image                            #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Creating and partitioning Compact Flash image"
+echo "$sfdisk_parameters" | sfdisk -H $heads -S $sectors -C $cylinders -uM $BUILD_DIR/flash.img >/dev/null 2>&1
+
+dd if=$TEMP_DIR/boot.img of=$BUILD_DIR/flash.img seek=$boot_block_offset bs=$bs
+dd if=$TEMP_DIR/root.img of=$BUILD_DIR/flash.img seek=$root_block_offset bs=$bs
+dd if=$TEMP_DIR/zlog.img of=$BUILD_DIR/flash.img seek=$zlog_block_offset bs=$bs
+rm -f $TEMP_DIR/boot.img $TEMP_DIR/root.img $TEMP_DIR/zlog.img
+
+
+############################################################################
+#                                                                          #
+# Mounting loopback flash image under /mnt                                 #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Mounting loopback flash image under /mnt"
+rm -rf /mnt/flash
+mkdir -p /mnt/flash
+mount -o loop,offset=$root_byte_offset $BUILD_DIR/flash.img /mnt/flash
+mkdir -p /mnt/flash/boot
+mount -o loop,offset=$boot_byte_offset $BUILD_DIR/flash.img /mnt/flash/boot
+mkdir -p /mnt/flash/var/log_compressed
+mount -o loop,offset=$zlog_byte_offset $BUILD_DIR/flash.img /mnt/flash/var/log_compressed
+
+
+############################################################################
+#                                                                          #
+# Creating flash image directory structure                                 #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Creating flash image directory structure"
+mkdir -p /mnt/flash/{ram/,proc/,mnt/,sys/}
+
+
+############################################################################
+#                                                                          #
+# Copying files into flash image                                           #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Copying files into flash image"
+# /boot
+cp -a /boot /mnt/flash/
+
+# /var
+mkdir -p /mnt/flash/var/{log,log_compressed,spool,www/icons}
+cp -a /var/ipcop /var/lib /var/state /var/lock /var/log /mnt/flash/var
+
+#######################################################################################
+# Configure flash image ethernet settings                                             #
+# this allows you to stage on one system and build flash for LEX with 3 RTL8139 NIC's #
+# if a settings file named settings.8139 is placed in your /root directory it will be #
+# used to configure the flash image with the correct ethernet settings for the LEX    #
+# a default settings.8139 file is provided for your use                               # 
+#######################################################################################
+if [ -f /root/settings.8139 ]
+then
+    /bin/echo ""    
+    /bin/echo "Configuring Flash With LEX RTL8139 Ethernet Settings"
+    /bin/echo ""
+    /bin/echo ""
+    cat /root/settings.8139 > /mnt/flash/var/ipcop/ethernet/settings
+else
+    /bin/echo ""    
+    /bin/echo "Flash Is Using Build System Ethernet Settings"
+    /bin/echo ""
+    /bin/echo ""
+fi
+
+# Max amount of RAM used by the tmpfs mount can be set through flashsettings file
+# as a fixed size (eg 32M) or percentage (eg 50%). Default is 64M.
+echo "TMPFS_MAX_SIZE=${ramdisk_size}M" > /mnt/flash/var/ipcop/main/flashsettings
+chown nobody.nobody /mnt/flash/var/ipcop/main/flashsettings
+
+rm -rf /mnt/flash/var/log/lost+found
+cp -a  /var/run /var/empty /mnt/flash/var
+cp -a  /var/spool/cron /mnt/flash/var/spool
+ln -s  /tmp /mnt/flash/var/patches
+ln -sf /ram/squid /var/log/cache
+rm -f  /mnt/flash/var/lib/logrotate.status
+rm -f  /mnt/flash/var/state/dhcp/*
+touch  /mnt/flash/var/state/dhcp/dhcpd.leases
+find /mnt/flash/var/run \( -type f -o -type s \) -exec rm -f {} \;
+touch /mnt/flash/var/run/utmp
+chmod 644 /mnt/flash/var/run/utmp
+chown root:utmp /mnt/flash/var/run/utmp
+touch /mnt/flash/var/log/wtmp
+chmod 664 /mnt/flash/var/log/wtmp
+chown root:utmp /mnt/flash/var/log/wtmp
+
+# /var/log
+find /mnt/flash/var/log -type f -exec rm -f {} \;
+tar -C /mnt/flash -czf /mnt/flash/var/log_compressed/log.tgz var/log/
+rm -rf /mnt/flash/var/log/
+ln -sf /ram/log /mnt/flash/var/log
+
+# Other files
+cp -a  /sbin /mnt/flash/
+cp -a  /bin  /mnt/flash/
+cp -a  /lib  /mnt/flash/
+cp -a  /dev  /mnt/flash/
+
+# create the symlinks
+echo "`date '+%b %e %T'`: Creating $CF Sym Link"
+ln -sf /dev/"$CF" /mnt/flash/dev/harddisk
+
+echo "`date '+%b %e %T'`: Creating "$CF'1'" Sym Link"
+ln -sf /dev/$CF'1' /mnt/flash/dev/harddisk1
+
+echo "`date '+%b %e %T'`: Creating "$CF'2'" Sym Link"
+ln -sf /dev/$CF'2' /mnt/flash/dev/harddisk2
+
+echo "`date '+%b %e %T'`: Creating "$CF'3'" Sym Link"
+ln -sf /dev/$CF'3' /mnt/flash/dev/harddisk3
+
+echo "`date '+%b %e %T'`: Creating "$CF'4'" Sym Link"
+ln -sf /dev/$CF'4' /mnt/flash/dev/harddisk4
+
+
+cp -a  /root /mnt/flash/
+rm -f  /mnt/flash/root/.bash_history
+cp -a  /etc  /mnt/flash/
+rm -rf /mnt/flash/etc/{httpd/conf/ssl*,makedev.d/}
+rm -f  /mnt/flash/etc/ssh/*key
+rm -f  /mnt/flash/etc/httpd/server.*
+cp -a  /home /mnt/flash/
+cp -a  /usr /mnt/flash
+rm -rf /mnt/flash/{tmp/,usr/tmp/,var/tmp/}
+ln -sf /ram/tmp/ /mnt/flash/tmp
+ln -sf /ram/tmp/ /mnt/flash/usr/tmp
+ln -sf /ram/tmp/ /mnt/flash/var/tmp
+
+rm -rf /mnt/flash/home/httpd/html/graphs
+ln -sf /ram/graphs /mnt/flash/home/httpd/html/graphs
+rm -rf /mnt/flash/home/httpd/html/sgraph
+ln -sf /ram/sgraph /mnt/flash/home/httpd/html/sgraph
+rm -rf /mnt/flash/var/lock
+ln -sf /ram/var/lock /mnt/flash/var/lock
+
+tar -czf /mnt/flash/var/log_compressed/spool.tgz -C /var/spool cron
+rm -rf /mnt/flash/var/spool/*
+rmdir /mnt/flash/var/spool
+ln -sf /ram/var/spool /mnt/flash/var/spool
+
+
+############################################################################
+#                                                                          #
+# Reconfiguring logrotate                                                  #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Reconfiguring logrotate"
+ln -sf /mnt/flash/etc/logrotate.conf.FLASH /mnt/flash/etc/logrotate.conf
+
+
+############################################################################
+#                                                                          #
+# Installing new fstab                                                     #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Installing new fstab"
+cat /etc/fstab | sed -e 's/log/log_compressed/' > /mnt/flash/etc/fstab
+df | grep /mnt/flash
+
+
+############################################################################
+#                                                                          #
+# Touching /etc/FLASH                                                      #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Touching /etc/FLASH"
+touch /mnt/flash/etc/FLASH
+
+
+############################################################################
+#                                                                          #
+# Configure apache to follow symlinks in /home/httpd/html                  #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Reconfiguring /etc/httpd/conf/httpd.conf"
+if [ -z "`/bin/grep \"Options ExecCGI FollowSymlinks\" /mnt/flash/etc/httpd/conf/httpd.conf`" ]; then
+  sed -i -e s/"Options ExecCGI"/"Options ExecCGI FollowSymlinks"/1 /mnt/flash/etc/httpd/conf/httpd.conf
+fi
+
+
+############################################################################
+#                                                                          #
+# Create the GRUB menu.lst file with our parameters                        #
+#                                                                          #
+############################################################################
+cat > /mnt/flash/boot/grub/menu.lst <<EOF
+timeout 5
+default saved
+foreground = 16064e
+background = ffffff
+splashimage ($grub_boot_parition)/grub/ipcop.xpm.gz
+title IPCop
+  root ($grub_boot_parition)
+  kernel /vmlinuz mode=normal root=/dev/$root_partition ro panic=10 $kernel_PARMS
+  initrd /ipcoprd.img
+  savedefault
+title IPCop (ACPI disabled)
+  root ($grub_boot_parition)
+  kernel /vmlinuz mode=normal root=/dev/$root_partition ro panic=10 acpi=off $kernel_PARMS
+  initrd /ipcoprd.img
+  savedefault
+title IPCop-rescue
+  root ($grub_boot_parition)
+  kernel /vmlinuz mode=rescue ro panic=10 acpi=off $kernel_PARMS
+  initrd /ipcoprd.img
+  savedefault
+EOF
+
+
+############################################################################
+#                                                                          #
+# Installing grub                                                          #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Installing Grub"
+
+/usr/sbin/grub --batch <<EOF >/dev/null 2>&1
+device (hd0) $BUILD_DIR/flash.img
+geometry (hd0)
+root ($grub_boot_parition)
+makeactive
+install $grub_PARMS ($grub_boot_parition)/grub/stage1 (hd0) ($grub_boot_parition)/grub/stage2 0x8000 p /grub/menu.lst
+quit
+EOF
+
+############################################################################
+#                                                                          #
+# Cleaning up                                                              #
+#                                                                          #
+############################################################################
+echo "`date '+%b %e %T'`: Cleaning up"
+rm -f verinfo
+umount /mnt/flash/var/log_compressed
+umount /mnt/flash/boot
+umount /mnt/flash
+losetup -d /dev/loop0
+losetup -d /dev/loop1
+losetup -d /dev/loop2
+mv $BUILD_DIR/flash.img $BUILD_DIR/$SIZE'flash.img'
+
+echo "`date '+%b %e %T'`: Mkflash For $SIZE Flash Drive On $CF Complete"
+
+echo ""
+echo ""
+echo "You can mount this image's partitions for testing purposes"
+echo "with the following commands:"
+echo ""
+echo "/boot :"
+echo "mount -o loop,offset=$boot_byte_offset ${BUILD_DIR}/${SIZE}flash.img /mnt/flash/"
+echo ""
+echo "/root :"
+echo "mount -o loop,offset=$root_byte_offset ${BUILD_DIR}/${SIZE}flash.img /mnt/flash"
+echo ""
+echo "/var/log_compressed :"
+echo "mount -o loop,offset=$zlog_byte_offset ${BUILD_DIR}/${SIZE}flash.img /mnt/flash/"
+echo ""
+

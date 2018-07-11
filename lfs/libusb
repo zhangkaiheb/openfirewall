@@ -1,0 +1,108 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: libusb 8067 2016-01-10 09:48:12Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = libusb
+# Newer libusb versions (1.0.18, 1.0.19 and 1.0.20) give us problems during install
+VER        = 1.0.9
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.bz2
+DL_FROM    = $(URL_SFNET)/$(PKG_NAME)
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+COMPAT_NAME = libusb-compat-0.1.5
+COMPAT_FILE = $(COMPAT_NAME).tar.bz2
+COMPAT_DIR  = $(DIR_SRC)/$(COMPAT_NAME)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE) \
+	$(COMPAT_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+$(COMPAT_FILE) = $(DL_FROM)/$(COMPAT_FILE)
+
+$(DL_FILE)_MD5 = 7f5a02375ad960d4e33a6dae7d63cfcb
+$(COMPAT_FILE)_MD5 = 2780b6a758a1e2c2943bdbf7faf740e4
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+	# --with-pic is needed for mklibs to reduce the lib for the installer
+	cd $(DIR_APP) && ./configure --prefix=/usr --with-pic
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+	cd $(DIR_APP) && make install
+
+	@rm -rf $(COMPAT_DIR) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(COMPAT_FILE)
+
+	cd $(COMPAT_DIR) && ./configure --prefix=/usr --disable-static
+	cd $(COMPAT_DIR) && make -j $(PARALLELISM)
+	cd $(COMPAT_DIR) && make install
+
+	cd /usr/lib && mv -f libusb-1.0.a libusb-1.0_pic.a
+
+	rm /usr/lib/libusb*.la
+	@rm -rf $(COMPAT_DIR) $(DIR_APP)
+	@$(POSTBUILD)

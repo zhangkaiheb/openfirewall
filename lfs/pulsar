@@ -1,0 +1,99 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# 17-03-2004 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: pulsar 7075 2013-07-10 21:07:57Z dotzball $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = pulsar
+VER        = 4.0.24
+HOST_ARCH  = i486
+OTHER_SRC  = yes
+KERNEL_MOD = yes
+
+THISAPP    = pulsar-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+DL_FROM    = $(URL_SFNET)/openadsl
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/linux-$(KVER)-$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = 72917231df156c1049838418f2dd98d3
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+
+	cd $(DIR_APP) && cp makefile.2.6 Makefile
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/pulsar-4.0.24_kernel_2.6.24.patch
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/pulsar-4.0.24_kernel_2.6.33.patch
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/pulsar-4.0.24_kernel_2.6.37.patch
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/pulsar-4.0.24_kernel_2.6.39.patch
+	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/pulsar-4.0.24_kernel_3.4.patch
+	cd $(DIR_APP) && make KDIR=/lib/modules/$(KVER)/build
+
+	cd $(DIR_APP) && install -D -m 0644 pulsar_atm.ko /lib/modules/$(KVER)/extra/pulsar.ko
+	gzip -fn9 /lib/modules/$(KVER)/extra/pulsar.ko
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

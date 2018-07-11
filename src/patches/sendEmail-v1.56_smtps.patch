@@ -1,0 +1,26 @@
+--- a/sendEmail 
++++ b/sendEmail
+@@ -1865,6 +1865,23 @@
+ printmsg("DEBUG => My IP address is: $conf{'ip'}", 1);
+ 
+ 
++# assume 465 to be smtps
++if ($conf{'port'} == "465") {
++    printmsg("DEBUG => start_SSL");
++    # Do Net::SSLeay initialization
++    Net::SSLeay::load_error_strings();
++    Net::SSLeay::SSLeay_add_ssl_algorithms();
++    Net::SSLeay::randomize();
++
++    if (! IO::Socket::SSL->start_SSL($SERVER)) {
++        quit("ERROR => SSL start failed: ". IO::Socket::SSL::errstr(), 1);
++    }
++
++    printmsg("DEBUG => SSL: Using cipher: ". $SERVER->get_cipher(), 3);
++    printmsg("DEBUG => ". $SERVER->dump_peer_certificate(), 3);
++}
++
++
+ 
+ 
+ 

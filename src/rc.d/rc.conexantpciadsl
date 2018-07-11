@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# $Id: rc.conexantpciadsl 4231 2010-02-12 16:31:09Z gespinasse $
+#
+
+# Debugging. Comment it out to stop logging
+DEBUG="yes"
+msg() {
+    if [ "z$DEBUG" != "z" ] ; then
+        /usr/bin/logger -t red "CnxPCI ADSL: $*"
+    fi
+    /bin/echo "$*"
+}
+
+function wait_for_showtime() {
+    msg "waiting for sync"
+    count=0
+    while [ ! $count = 45 ]; do
+        /bin/sleep 2
+        if ( /usr/sbin/cnxadslstatus | /bin/grep -q -F 'Showtime.' ); then
+            msg "sync done"
+            return 0
+        fi
+        ((++count))
+    done
+    return 1
+}
+
+# See how we were called.
+case "$1" in
+start)
+    msg "starting"
+    # if the driver is not already loaded then
+    if ( /bin/lsmod | /bin/grep -q CnxADSL ); then
+        msg "already loaded"
+    else
+        /sbin/modprobe CnxADSL
+        RETVAL=$?
+        if [ $RETVAL -ne 0 ] ; then
+            msg "error when loading, card present?"
+                exit 1
+        fi
+        if ( /bin/grep -q '14f11611' /proc/bus/pci/devices ); then
+            # Tigris model
+            /bin/ln -f -s /etc/Conexant/CnxTgF.hex /var/ipcop/cnx_pci/firmware.hex
+        else
+            if ( /bin/grep -q '14f11622' /proc/bus/pci/devices ); then
+                # Yukon model
+                /bin/ln -f -s /etc/Conexant/CnxYkF.hex /var/ipcop/cnx_pci/firmware.hex
+            else
+                msg "don't know this model"
+                exit 1
+            fi
+        fi
+
+        # Initialize the firmware and start training
+        /bin/ln -f -s /etc/Conexant/cnxadsl.conf /var/ipcop/cnx_pci/cnxadsl.conf
+        /etc/Conexant/cnxadslload /var/ipcop/cnx_pci
+    fi
+    wait_for_showtime
+    exit $?
+    ;;
+stop)
+    msg "stop"
+    ;;
+cleanup)
+    msg "cleanup"
+    /usr/bin/killall cnxadslload 2>/dev/null
+    /sbin/modprobe -r CnxADSL
+    ;;
+*)
+    echo "Usage: $0 {start|stop|cleanup}"
+    exit 1
+    ;;
+esac
+
+exit 0

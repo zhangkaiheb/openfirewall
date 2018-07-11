@@ -1,0 +1,21 @@
+Running hooks is very Debian specific. Does not work for us.
+
+--- a/sbin/update-ca-certificates	2014-04-07 08:57:09.616070707 +0200
++++ b/sbin/update-ca-certificates	2014-04-07 08:59:24.000000000 +0200
+@@ -149,16 +149,5 @@
+ 
+ echo "$ADDED_CNT added, $REMOVED_CNT removed; done."
+ 
+-HOOKSDIR=/etc/ca-certificates/update.d
+-echo -n "Running hooks in $HOOKSDIR...."
+-VERBOSE_ARG=
+-[ "$verbose" = 0 ] || VERBOSE_ARG=--verbose
+-eval run-parts $VERBOSE_ARG --test -- $HOOKSDIR | while read hook
+-do
+-  ( cat $ADDED
+-    cat $REMOVED ) | $hook || echo E: $hook exited with code $?.
+-done
+-echo "done."
+-
+ # vim:set et sw=2:
+ 

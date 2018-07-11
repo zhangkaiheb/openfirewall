@@ -1,0 +1,140 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: squid-langpack 7749 2014-12-15 07:06:13Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = squid-langpack
+#VER        = 20141030
+##VER        = 20140506.orig
+VER        = 20170901
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+##THISAPP    = $(PKG_NAME)_$(VER)
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+# source location, changes can happen quickly and old files are no longer available:
+#DL_FROM    = http://www.squid-cache.org/Versions/langpack
+# alternative location:
+#DL_FROM    = http://ipcop-addons.mooo.com/misc/IPCop
+DL_FROM    = http://http.debian.net/debian/pool/main/s/squid-langpack
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+ERRMSG_DIR = /usr/lib/squid/errors
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+#$(DL_FILE)_MD5 = 2f65195cab4f750f634a704336f68446
+##$(DL_FILE)_MD5 = 7494c20341c3bab99e7c0436758fa546
+$(DL_FILE)_MD5 = 4930e0da1eec4263e8dcbce08155b7c4
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+IPCOP_ERR_STYLE_CODE = <style type="text/css"><!--body{background-color:\#e0e0e0;margin-left:0px;margin-right:0px;margin-top:0px;margin-bottom:0px;margin-width:0px;margin-height:0px;font-family:verdana,sans-serif}pre{font-family:sans-serif}--></style>
+
+IPCOP_ERR_BODY_CODE  = <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:\#000000"> <tr><td><img src="http://%h:81/images/blacklogo.png" width="480" height="72" alt="IPCop Firewall" /></td></tr> </table>
+
+IPCOP_ERR_POST_CODE  = <div id="footer"><address><small>Generated %T by %h (%s)</small></address></div> </body></html>
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST))
+	# Build every time the exact list, not only on first build.
+	rm -rf $(ERRMSG_DIR) $(ERRMSG_DIR).ipcop $(DIR_SRC)/lsalr $(TARGET)
+	@$(PREBUILD)
+
+	mkdir -p $(ERRMSG_DIR) $(ERRMSG_DIR).ipcop
+
+	# Extract squid error files for all languages
+	cd $(ERRMSG_DIR) && tar --no-same-owner --no-same-permissions -zxf $(DIR_DL)/$(DL_FILE)
+
+	# Delete all unneeded files on first level and the templates directory
+	find $(ERRMSG_DIR) -maxdepth 1 -type f -delete
+	rm -rf $(ERRMSG_DIR)/templates
+
+	# Patch ERR_CACHE_ACCESS_DENIED to link to proper chpasswd
+	for LANGUAGE in $(ERRMSG_DIR)/* ; do \
+		sed -i -e 's#http://%h#http://%h:81#' $${LANGUAGE}/ERR_CACHE_ACCESS_DENIED ; \
+	done
+
+	# Adding IPCop design to the built-in error files
+	cp -rp $(ERRMSG_DIR)/* $(ERRMSG_DIR).ipcop
+
+	# 1 - remove all empty lines and the H1 header tag (if any)
+	# 2 - remove the entire STYLE tag
+	# 3 - insert our stype after the TITLE tag
+	# 4 - insert a table with IPCop graphics after the BODY tag
+	# 5 - disable built-in footer
+	# 6 - add a new footer and close the BODY and HTML tags
+
+	# If that fail, check ERRMSG_FILE is really a file.
+	# If not, we should fix our cleaning
+	for LANGUAGE in $(ERRMSG_DIR).ipcop/* ; do \
+		for ERRMSG_FILE in $${LANGUAGE}/* ; do \
+			sed -i -e 's/^ *//' -e '/^$$/d' -e '/^<h1>.*<\/h1>/d' $${ERRMSG_FILE} ; \
+			sed -i -e '/<style/,/<\/style/'d $${ERRMSG_FILE} ; \
+			sed -i -e '/<title/ a\$(IPCOP_ERR_STYLE_CODE)' $${ERRMSG_FILE} ; \
+			sed -i -e '/<body/ a\$(IPCOP_ERR_BODY_CODE)' $${ERRMSG_FILE} ; \
+			sed -i -e '/<div id="footer">/,$$d' $${ERRMSG_FILE} ; \
+			sed -i -e '$$a\$(IPCOP_ERR_POST_CODE)' $${ERRMSG_FILE} ; \
+		done ; \
+	done
+
+	@$(POSTBUILD)

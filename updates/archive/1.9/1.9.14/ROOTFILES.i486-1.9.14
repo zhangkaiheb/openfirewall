@@ -1,0 +1,17 @@
+## please place IPCop files first, then packages sorted by alphabetical order
+/usr/local/bin/ipcoprestore
+## IPsec relinked to libgmp.so.10
+/usr/lib/ipsec/_copyright
+/usr/libexec/ipsec/addconn
+/usr/libexec/ipsec/eroute
+/usr/libexec/ipsec/ikeping
+/usr/libexec/ipsec/klipsdebug
+/usr/libexec/ipsec/pf_key
+/usr/libexec/ipsec/pluto
+/usr/libexec/ipsec/ranbits
+/usr/libexec/ipsec/rsasigkey
+/usr/libexec/ipsec/showhostkey
+/usr/libexec/ipsec/showpolicy
+/usr/libexec/ipsec/spi
+/usr/libexec/ipsec/spigrp
+/usr/libexec/ipsec/tncfg

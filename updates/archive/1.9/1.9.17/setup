@@ -1,0 +1,97 @@
+#!/bin/bash
+#
+# Upgrade IPCop
+#
+
+UPGRADEVERSION=1.9.17
+PREVIOUSVERSION=1.9.16
+
+
+msg() {
+    /usr/bin/logger -t installpackage "$*"
+    /bin/echo "$*"
+}
+
+
+# Verify architecture
+MACHINE=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::machine;"`
+if [ "$MACHINE" != `/bin/cat ./ARCH` ]; then
+    msg "Update for wrong architecture: `/bin/cat ./ARCH`! We are: $MACHINE. Aborting installation."
+    exit 1
+fi
+
+# Verify version, note we also accept replaying an upgrade
+CURRENTVERSION=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::version;"`
+if [ "$CURRENTVERSION" != "$PREVIOUSVERSION" -a "$CURRENTVERSION" != "$UPGRADEVERSION" ]; then
+    msg "IPCop v$PREVIOUSVERSION or v$UPGRADEVERSION not running. Aborting installation."
+    exit 1
+fi
+
+#####
+#
+# Add version specific handling *before* unpacking the patch here.
+# For example stopping apache, squid, etc...
+#
+#####
+
+# Kill any rc.connectioncheck process still running
+/bin/ps ax | /bin/grep -q "[r]c.connectioncheck reconnect"
+if [ $? -eq 0 ]; then
+    /usr/bin/killall rc.connectioncheck
+fi
+
+#####
+#
+# End of version specific handling. Continue with universal stuff.
+#
+#####
+
+FAILURE=0
+/bin/tar -zxpf patch.tar.gz -C /
+FAILURE=$?
+if [ $FAILURE -ne 0 ]; then
+    msg "Error extracting patch.tar.gz $1, need more free space on disk. Aborting."
+    exit 4 # ERRORTAR
+fi
+
+# Modify or remove line below, depending on update
+# Update bootloader config
+# /usr/local/sbin/updatekernel.pl --add 2.6.27-2 --keep 2.6.27-1 --remove 2.6.27-0
+
+# Modify or remove line below, depending on update
+# Create the new initramfs
+# /sbin/mkinitramfs --with-kernel=2.6.27-2 --with-firmware --many-modules --with-list=/etc/modules.initramfs
+
+# Adjust the changed config files
+# /usr/local/bin/upgrade.sh
+
+# Remove old libraries (version specific)
+# /bin/rm -f .....
+
+# For new shared libs. May not always be required, but makes sure we do not forget
+/sbin/ldconfig
+
+#####
+#
+# Add version specific handling *after* unpacking the patch here.
+# For example restarting apache, squid, etc...
+#
+#####
+
+
+
+#####
+#
+# End of version specific handling. Continue with universal stuff.
+#
+#####
+
+# Patch general-functions.pl
+/bin/sed -i -e "s+^\(\$General::version\s*=\s*\).*+\1'$UPGRADEVERSION';+" /usr/lib/ipcop/general-functions.pl
+# Patch /etc/issue
+/bin/sed -i -e "s+$PREVIOUSVERSION+$UPGRADEVERSION+" /etc/issue
+
+# Update menu
+/usr/local/bin/updatemenu.pl
+
+msg "$UPGRADEVERSION update installed."

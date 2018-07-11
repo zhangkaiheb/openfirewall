@@ -1,0 +1,108 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: pango 7736 2014-12-03 07:59:08Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = pango
+##VER        = 1.36.8
+VER        = 1.41.0
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.xz
+##DL_FROM    = http://ftp.gnome.org/pub/GNOME/sources/pango/1.36
+DL_FROM    = http://ftp.gnome.org/pub/GNOME/sources/pango/1.41
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+##$(DL_FILE)_MD5 = 217a9a753006275215fa9fa127760ece
+$(DL_FILE)_MD5 = f3c0d6931aefd40f5afac2566faf2717
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+	# Workaround for strict-aliasing warnings
+	#cd $(DIR_APP) && CFLAGS="$$CFLAGS -fno-strict-aliasing" ./configure --prefix=/usr --disable-static --sysconfdir=/etc
+	cd $(DIR_APP) && ./configure --prefix=/usr \
+			--sysconfdir=/etc \
+			--mandir=/usr/share/man/pango \
+			--disable-static \
+			--disable-gtk-doc-html
+
+	cd $(DIR_APP) && make -j $(PARALLELISM) V=1
+ifeq "$(RUNNING_TEST)" "yes"
+	-cd $(DIR_APP) && make -j 1 -k check &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+	# Hide what should not be a warning
+	cd $(DIR_APP) && make install 2>&1 | grep -v 'libtool: install: warning. relinking'
+	
+	# be sure the modules are in the same order everytime, so md5 does not vary
+###	sort -o /etc/pango/pango.modules /etc/pango/pango.modules
+
+###	rm -rf /usr/share/man/pango /usr/share/gtk-doc/html/pango
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

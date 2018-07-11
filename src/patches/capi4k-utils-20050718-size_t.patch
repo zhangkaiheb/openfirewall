@@ -1,0 +1,10 @@
+--- capi4k-utils.original/capi20/capi20.h	2000-11-19 10:15:01.000000000 +0000
++++ capi4k-utils/capi20/capi20.h	2008-04-21 02:15:39.386754855 +0000
+@@ -20,6 +20,7 @@
+ #ifndef __CAPI20_H__
+ #define __CAPI20_H__
+ 
++#include <stdio.h>
+ #include <sys/time.h>
+ 
+ #ifdef __cplusplus

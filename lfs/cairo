@@ -1,0 +1,111 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: cairo 7733 2014-12-03 07:51:32Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = cairo
+# odd version (1.11) is development, even (1.10) is stable
+VER        = 1.14.0
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.xz
+DL_FROM    = http://cairographics.org/releases
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+# Silent warning optimizing for size and code size would grow
+CFLAGS += -O3
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = fc3a5edeba703f906f2241b394f0cced
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+	# rrdtools need svg, ps and pdf support
+	cd $(DIR_APP) && ./configure	--prefix=/usr \
+					--disable-static \
+					--enable-trace=no \
+					--enable-interpreter=no
+	cd $(DIR_APP) && make -j $(PARALLELISM) # V=1
+ifeq "$(RUNNING_TEST)" "yes"
+	# So many requirements hard to satisfy, hard to know which tests are broken, which should not fail in our config
+	# Look for requirements in test/README
+	# - but dejavu fonts with matching sha1 can't be found from 1.0 to 2.33 releases
+	# - ft-text-vertical-layout-type1 test require "Nimbus Sans L" (n019003l.pfb) font which can be found in the gsfonts Debian package
+	#   but still fail if that font is installed, may require one (unidentified) freetype version to work
+	# Test only image(png) target as that's the only one we care about. Send result to /dev/null as summary is much nicer to read.
+	-cd $(DIR_APP)/test && make test TARGETS=image &>/dev/null # $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+	-cd $(DIR_APP)/test && make check-summary &> $(DIR_TEST)/$(THISAPP)-summary-$(STAGE_ORDER).log
+	# bitmap.font fail as freetype support for bitmap has been disabled.
+	# Disabling this test require removing bitmap-font.c from test/Makefile.sources, running ./autogen.sh and this is very noisy with 1.10.2
+endif
+	cd $(DIR_APP) && make install
+
+	rm -f $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/pango-*
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

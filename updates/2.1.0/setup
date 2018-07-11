@@ -1,0 +1,259 @@
+#!/bin/bash
+#
+# Upgrade IPCop
+#
+
+UPGRADEVERSION=2.1.0
+PREVIOUSVERSION=2.0.6
+
+
+msg() {
+    /usr/bin/logger -t installpackage "$*"
+    /bin/echo "$*"
+}
+
+
+# Verify architecture
+MACHINE=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::machine;"`
+if [ "$MACHINE" != `/bin/cat ./ARCH` ]; then
+    msg "Update for wrong architecture: `/bin/cat ./ARCH`! We are: $MACHINE. Aborting installation."
+    exit 1
+fi
+
+# Verify version, note we also accept replaying an upgrade
+CURRENTVERSION=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::version;"`
+if [ "$CURRENTVERSION" != "$PREVIOUSVERSION" -a "$CURRENTVERSION" != "$UPGRADEVERSION" ]; then
+    msg "IPCop v$PREVIOUSVERSION or v$UPGRADEVERSION not running. Aborting installation."
+    exit 1
+fi
+
+#####
+#
+# Add version specific handling *before* unpacking the patch here.
+# For example stopping dnsmasq(required before update), squid, etc...
+#
+#####
+
+# Can't replace dnsmasq whilst active
+/etc/rc.d/rc.dnsmasq --stop
+
+# logrotate state file has moved location
+if [ ! -e /var/lib/logrotate/status ]; then
+    mkdir -p /var/lib/logrotate
+    mv /var/lib/logrotate.status /var/lib/logrotate/status
+fi
+
+#  Show urlfilter/redirector section in proxy page
+if [ ! -e /var/ipcop/proxy/redirector/urlfilter ]; then
+    echo "ENABLED=off"              >  /var/ipcop/proxy/redirector/urlfilter
+    echo "ORDER=10"                 >> /var/ipcop/proxy/redirector/urlfilter
+    echo "NAME=URL filter"          >> /var/ipcop/proxy/redirector/urlfilter
+    echo "CMD=/usr/bin/squidGuard"  >> /var/ipcop/proxy/redirector/urlfilter
+
+    chown nobody:nobody /var/ipcop/proxy/redirector/urlfilter
+fi
+
+if [ ! -e /var/lib/squidguard ]; then
+    mkdir -p /var/lib/squidguard
+fi
+if [ ! -e /var/lib/squidguard/db ]; then
+    mkdir -p /var/lib/squidguard/db
+fi
+if [ ! -e /var/lib/squidguard/db/custom ]; then
+    mkdir -p /var/lib/squidguard/db/custom
+fi
+if [ ! -e /var/lib/squidguard/db/custom/allowed ]; then
+    mkdir -p /var/lib/squidguard/db/custom/allowed
+fi
+
+touch    /var/lib/squidguard/db/custom/allowed/domains
+touch    /var/lib/squidguard/db/custom/allowed/urls
+
+if [ ! -e /var/lib/squidguard/db/custom/blocked ]; then
+    mkdir -p /var/lib/squidguard/db/custom/blocked
+fi
+
+touch    /var/lib/squidguard/db/custom/blocked/domains
+touch    /var/lib/squidguard/db/custom/blocked/expressions
+touch    /var/lib/squidguard/db/custom/blocked/files
+touch    /var/lib/squidguard/db/custom/blocked/urls
+
+chown -R nobody:nobody /var/lib/squidguard/db
+
+if [ ! -e /var/log/updates ]; then
+    mkdir -p /var/log/updates
+fi
+chown -R nobody:nobody /var/log/updates
+
+#####
+#
+# End of version specific handling. Continue with universal stuff.
+#
+#####
+
+FAILURE=0
+/bin/tar -zxpf patch.tar.gz -C /
+FAILURE=$?
+if [ $FAILURE -ne 0 ]; then
+    msg "Error extracting patch.tar.gz $1, need more free space on disk. Aborting."
+    exit 4 # ERRORTAR
+fi
+
+# Remove old libraries (version specific)
+# /bin/rm -f .....
+/bin/rm -f /lib/iptables/libipt_addrtype.so
+/bin/rm -f /lib/iptables/libipt_ecn.so
+/bin/rm -f /lib/libip4tc.so.0.0.0
+/bin/rm -f /lib/libip6tc.so.0.0.0
+/bin/rm -f /lib/libproc-3.2.8.so
+/bin/rm -f /lib/libprocps.so.0*
+/bin/rm -f /lib/libprocps.so.1.1.{0,1}
+/bin/rm -f /lib/libsysfs.so*
+/bin/rm -f /lib/libz.so.1.2.{6,7}
+/bin/rm -f /lib/libxtables.so.{7,8,9}*
+/bin/rm -f /usr/lib/libapr-1.so.0.4.{5,6}
+/bin/rm -f /usr/lib/libaprutil-1.so.0.4.1
+/bin/rm -f /usr/lib/libbind9.so.80.0.{3,4,5,7}
+/bin/rm -f /usr/lib/libdb-4.8.so
+/bin/rm -f /usr/lib/libdb-4.so
+/bin/rm -f /usr/lib/libdns.so.81.{3.1,6.0,6.1}
+/bin/rm -f /usr/lib/libdns.so.88
+/bin/rm -f /usr/lib/libdns.so.88.1.1
+/bin/rm -f /usr/lib/libisc.so.83.0.{1,5}
+/bin/rm -f /usr/lib/libisc.so.84.1.0
+/bin/rm -f /usr/lib/libisccc.so.80.0.{0,1,2}
+/bin/rm -f /usr/lib/libisccfg.so.82.0.{0,1,2,3}
+/bin/rm -f /usr/lib/liblwres.so.80.0.{1,2,3}
+/bin/rm -f /usr/bin/gdlib-config
+/bin/rm -f /usr/lib/libexpat.so.1.5.2
+/bin/rm -f /usr/lib/libffi.so.5* /usr/lib/libffi.so.6.0.0
+/bin/rm -f /usr/lib/libfontconfig.so.1.{4.4,5.0}
+/bin/rm -f /usr/lib/libfreetype.so.6.{8.0,9.0,10.0,10.1}
+/bin/rm -f /usr/lib/libgd.so.2
+/bin/rm -f /usr/lib/libgd.so.2.0.0
+/bin/rm -f /usr/lib/libglib-2.0.so.0.2600.1
+/bin/rm -f /usr/lib/libgmodule-2.0.so.0.2600.1
+/bin/rm -f /usr/lib/libgobject-2.0.so.0.2600.1
+/bin/rm -f /usr/lib/libgthread-2.0.so.0.2600.1
+/bin/rm -f /usr/lib/libgcrypt.so.11.{7.0,8.0,8.1}
+/bin/rm -f /usr/lib/libgmp.so.10.0.{2,3,4}
+/bin/rm -f /usr/lib/libkdb5.so.5.0
+/bin/rm -f /usr/lib/liblber-2.4.so.2.8.{1,3,4,5} /usr/lib/liblber-2.4.so.2.9.{0,1}
+/bin/rm -f /usr/lib/libldap-2.4.so.2.8.{1,3,4,5} /usr/lib/libldap-2.4.so.2.9.{0,1}
+/bin/rm -f /usr/lib/libltdl.so
+/bin/rm -f /usr/lib/liblzma.so.5.0.3
+/bin/rm -f /usr/lib/libnet-1.6.0
+/bin/rm -f /usr/lib/libnetfilter_conntrack.so.3.{2,4}.0
+/bin/rm -f /usr/lib/libnl-3.so.200.{5.2,9.0}
+/bin/rm -f /usr/lib/libnl-genl-3.so.200.{5.2,9.0}
+/bin/rm -f /usr/lib/libparted.so.1.0.0
+/bin/rm -f /usr/lib/libpcap.so.1.{2.1,3.0}
+/bin/rm -f /usr/lib/libpci.so.3.1.{9,10}
+/bin/rm -f /usr/lib/libpcre.so.{0.0.1,1.0.0,1.2.0}
+/bin/rm -f /usr/lib/libpixman-1.so.0
+/bin/rm -f /usr/lib/libpixman-1.so.0.{22.2,24.4}
+/bin/rm -f /usr/lib/libpng15.so.15
+/bin/rm -f /usr/lib/libpng15.so.15.{8,9,10,11,12,14,15,16}.0
+/bin/rm -f /usr/lib/libusb-1.0.so.0.0.0
+/bin/rm -f /usr/lib/libxml2.so.2.{7.8,8.0,9.0}
+
+# Empty .bs files are unneeded (non-empty .bs are used by dynaloader, our tree have none)
+/bin/rm -rf /usr/lib/perl5/site_perl/5.14.2/i486-linux/auto/Net/SSLeay/SSLeay.bs
+
+# Remove devel lib that should not be needed
+/bin/rm -f /usr/lib/libatm.so
+/bin/rm -f /usr/lib/libcairo.so
+/bin/rm -f /usr/lib/libdb.so
+/bin/rm -f /usr/lib/libfontconfig.so
+/bin/rm -f /usr/lib/libgcrypt.so
+/bin/rm -f /usr/lib/libgd.so
+/bin/rm -f /usr/lib/libgpg-error.so
+/bin/rm -f /usr/lib/libexpat.so
+/bin/rm -f /usr/lib/libnet.so
+/bin/rm -f /usr/lib/libnfnetlink.so
+/bin/rm -f /usr/lib/libpango-1.0.so
+/bin/rm -f /usr/lib/libpangocairo-1.0.so
+/bin/rm -f /usr/lib/libpangoft2-1.0.so
+/bin/rm -f /usr/lib/libpcre.so
+/bin/rm -f /usr/lib/libusb-1.0.so
+/bin/rm -f /usr/lib/libusb.so
+/bin/rm -f /usr/lib/libxml2.so
+## bind
+/bin/rm -f /usr/lib/libbind9.so
+/bin/rm -f /usr/lib/libdns.so
+/bin/rm -f /usr/lib/libisc.so
+/bin/rm -f /usr/lib/libisccc.so
+/bin/rm -f /usr/lib/libisccfg.so
+/bin/rm -f /usr/lib/liblwres.so
+## e2fsprogs
+/bin/rm -f /usr/lib/libcom_err.so
+/bin/rm -f /usr/lib/libe2p.so
+/bin/rm -f /usr/lib/libss.so
+# glib
+/bin/rm -f /usr/lib/libglib-2.0.so
+/bin/rm -f /usr/lib/libgmodule-2.0.so
+/bin/rm -f /usr/lib/libgobject-2.0.so
+/bin/rm -f /usr/lib/libgthread-2.0.so
+# krb5
+/bin/rm -f /usr/lib/libgssapi_krb5.so
+/bin/rm -f /usr/lib/libgssrpc.so
+/bin/rm -f /usr/lib/libk5crypto.so
+/bin/rm -f /usr/lib/libkrb5.so
+# ulogd
+/bin/rm -f /usr/lib/ulogd/ulogd_BASE.so
+/bin/rm -f /usr/lib/ulogd/ulogd_SQLITE3.so
+
+# Remove old mdadm udev rule
+/bin/rm -f /lib/udev/rules.d/64-md-raid.rules
+
+/bin/chmod -x /lib/libcap.so.*
+
+# For new shared libs. May not always be required, but makes sure we do not forget
+/sbin/ldconfig
+
+#####
+#
+# Add version specific handling *after* unpacking the patch here.
+# For example restarting apache, squid, etc...
+#
+#####
+
+# Cannot unpack to symlinked /var/log on FLASH installation, so copy here
+cp /var/ipcop/traffic/empty-ulogd.db /var/log/traffic/ulogd.db
+
+# Use new sshd
+/usr/local/bin/restartssh
+
+# Patch apache config for flash
+if [ -e /etc/FLASH ]; then
+    sed -i -e s/"^\s*Options ExecCGI.*"/"    Options ExecCGI FollowSymlinks"/1 /etc/httpd/conf/httpd.conf
+fi
+# Use new apache (restart pauses for 10 seconds, should be enough to complete upgrade)
+/usr/local/bin/restarthttpd restart &
+
+# Restart rsyslogd to activate new version
+/usr/local/bin/restartsyslogd
+
+# Restart dnsmasq
+/etc/rc.d/rc.dnsmasq --start
+
+# Restart OpenVPN server
+if [ -e /var/run/openvpn.pid ]; then
+    /usr/local/bin/openvpnctrl --restart
+fi
+
+#####
+#
+# End of version specific handling. Continue with universal stuff.
+#
+#####
+
+# Patch general-functions.pl
+/bin/sed -i -e "s+^\(\$General::version\s*=\s*\).*+\1'$UPGRADEVERSION';+" /usr/lib/ipcop/general-functions.pl
+# Patch /etc/issue
+/bin/sed -i -e "s+$PREVIOUSVERSION+$UPGRADEVERSION+" /etc/issue
+
+# Update menu
+/usr/local/bin/updatemenu.pl
+
+msg "$UPGRADEVERSION update installed."

@@ -1,0 +1,16 @@
+#usr/lib/perl5/site_perl/PERLVER/IO
+#usr/lib/perl5/site_perl/PERLVER/IO/Socket
+#usr/lib/perl5/site_perl/PERLVER/IO/Socket/SSL
+usr/lib/perl5/site_perl/PERLVER/IO/Socket/SSL.pm
+#usr/lib/perl5/site_perl/PERLVER/IO/Socket/SSL.pod
+usr/lib/perl5/site_perl/PERLVER/IO/Socket/SSL/Intercept.pm
+usr/lib/perl5/site_perl/PERLVER/IO/Socket/SSL/PublicSuffix.pm
+usr/lib/perl5/site_perl/PERLVER/IO/Socket/SSL/Utils.pm
+#usr/lib/perl5/site_perl/PERLVER/MACHINE-linux/auto/IO
+#usr/lib/perl5/site_perl/PERLVER/MACHINE-linux/auto/IO/Socket
+#usr/lib/perl5/site_perl/PERLVER/MACHINE-linux/auto/IO/Socket/SSL
+#usr/lib/perl5/site_perl/PERLVER/MACHINE-linux/auto/IO/Socket/SSL/.packlist
+#usr/share/man/perl/man3/IO::Socket::SSL.3
+#usr/share/man/perl/man3/IO::Socket::SSL::Intercept.3
+#usr/share/man/perl/man3/IO::Socket::SSL::PublicSuffix.3
+#usr/share/man/perl/man3/IO::Socket::SSL::Utils.3

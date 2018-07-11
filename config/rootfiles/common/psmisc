@@ -1,0 +1,11 @@
+usr/bin/fuser
+usr/bin/killall
+#usr/bin/peekfd
+#usr/bin/prtstat
+usr/bin/pstree
+#usr/bin/pstree.x11
+#usr/share/man/man1/fuser.1
+#usr/share/man/man1/killall.1
+#usr/share/man/man1/peekfd.1
+#usr/share/man/man1/prtstat.1
+#usr/share/man/man1/pstree.1

@@ -1,0 +1,162 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: rsyslog 8042 2016-01-04 11:43:43Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = rsyslog
+#VER        = 8.11.0
+VER        = 8.35.0
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+DL_FROM    = http://www.rsyslog.com/files/download/$(PKG_NAME)
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+APP_ESTR = libestr-0.1.10
+DL_ESTR = $(APP_ESTR).tar.gz
+APP_EE = libee-0.4.1
+DL_EE = $(APP_EE).tar.gz
+APP_FASTJSON = libfastjson-0.99.8
+DL_FASTJSON = $(APP_FASTJSON).tar.gz
+APP_LOGGING = liblogging-1.0.5
+DL_LOGGING = $(APP_LOGGING).tar.gz
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE) $(DL_ESTR) $(DL_EE)
+## $(DL_LOGGING)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+$(DL_ESTR) = http://libestr.adiscon.com/files/download/$(DL_ESTR)
+$(DL_EE) = http://www.libee.org/files/download/$(DL_EE)
+$(DL_FASTJSON) = http://download.rsyslog.com/libfastjson/$(DL_FASTJSON)
+$(DL_LOGGING) = http://download.rsyslog.com/liblogging/$(DL_LOGGING)
+
+$(DL_FILE)_MD5 = 5c691d1c743a07df855a8c89bd3bc903
+##$(DL_FILE)_MD5 = 35f0b7024ae7b5677e49f14f36304d77
+$(DL_ESTR)_MD5 = f4c9165a23587e77f7efe65d676d5e8e
+$(DL_EE)_MD5 = 7bbf4160876c12db6193c06e2badedb2
+$(DL_FASTJSON)_MD5 = fe7b4eae1bf40499f6f92b51d7e5899e
+$(DL_LOGGING)_MD5 = 44b8ce2daa1bfb84c9feaf42f9925fd7
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+##	cd $(DIR_APP) && patch -p1 -i $(DIR_PATCHES)/$(PKG_NAME)-5.8.9_stack-size.patch
+
+	cd $(DIR_APP) && mkdir _deps
+
+	cd $(DIR_APP)/_deps && tar xf $(DIR_DL)/$(DL_ESTR)
+##	cd $(DIR_APP)/_deps/$(APP_ESTR) && ./configure --disable-static --prefix=/usr
+	cd $(DIR_APP)/_deps/$(APP_ESTR) && ./configure --libdir=/usr/lib --includedir=/usr/include
+	cd $(DIR_APP)/_deps/$(APP_ESTR) && make && make install
+
+	cd $(DIR_APP)/_deps && tar xf $(DIR_DL)/$(DL_EE)
+##	cd $(DIR_APP)/_deps/$(APP_EE) && ./configure --disable-man-pages --disable-journal --disable-static --prefix=/usr
+	cd $(DIR_APP)/_deps/$(APP_EE) && ./configure --libdir=/usr/lib --includedir=/usr/include
+	cd $(DIR_APP)/_deps/$(APP_EE) && make && make install
+
+	cd $(DIR_APP)/_deps && tar xf $(DIR_DL)/$(DL_FASTJSON)
+	cd $(DIR_APP)/_deps/$(APP_FASTJSON) && ./configure
+	cd $(DIR_APP)/_deps/$(APP_FASTJSON) && make && make install
+
+	cd $(DIR_APP)/_deps && tar xf $(DIR_DL)/$(DL_LOGGING)
+	cd $(DIR_APP)/_deps/$(APP_LOGGING) && ./configure --disable-man-pages --disable-journal --disable-static --prefix=/usr
+	cd $(DIR_APP)/_deps/$(APP_LOGGING) && make && make install
+
+	# 'checking for library containing clock_gettime' is required to find the lib to link and set RT_LIBS
+	# 'checking for clock_gettime...' is badly made and unneeded as nothing is under HAVE_CLOCK_GETTIME define.
+	# Code use _POSIX_TIMERS defined in /usr/include/bits/posix_opt.h. Remove the unneeded part.
+##	cd $(DIR_APP) && sed -i 's/alarm clock_gettime/alarm/' configure
+##	cd $(DIR_APP) && ./configure --prefix=/usr \
+##					--exec-prefix=/usr \
+##					--sysconfdir=/etc \
+##					--localstatedir=/var \
+##					--enable-regexp \
+##					--disable-libgcrypt \
+##					--disable-generate-man-pages
+
+	cd $(DIR_APP) && ./configure \
+					--prefix=/usr \
+					--disable-uuid \
+					--disable-libgcrypt \
+					--disable-libcurl    \
+					--disable-systemd
+
+	# Disable strict-aliasing on only the required files
+	# Probably a gcc-4.4 issue as more recent compiler does not warn on debian/fedora build log
+	#cd $(DIR_APP) && sed -i '/nsd_ptcp.c$$/s/(CFLAGS)/(CFLAGS) -fno-strict-aliasing/' ./runtime/Makefile
+	#cd $(DIR_APP) && sed -i '/net.c$$/s/(CFLAGS)/(CFLAGS) -fno-strict-aliasing/' ./runtime/Makefile
+
+	cd $(DIR_APP) && make -j $(PARALLELISM) V=1
+ifeq "$(RUNNING_TEST)" "yes"
+	-cd $(DIR_APP) && make check GCC_TOLERATE_ALWAYS_OVERFLOW=1 &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+	cd $(DIR_APP) && make install
+
+	# create some logfiles with appropriate rights & owner
+	touch /var/log/messages
+	chmod 664 /var/log/messages
+	chown 0:105 /var/log/messages
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

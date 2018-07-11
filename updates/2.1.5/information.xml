@@ -1,0 +1,22 @@
+<ipcop>
+    <update>
+        <version>2.1.5</version>
+        <releasedate>2014-05-02</releasedate>
+        <size>16821</size>
+        <isoimages>yes</isoimages>
+        <description>Language updates.&lt;br /&gt;
+        Add CA certificates bundle. Upgrade linux kernel to 3.4-2 (3.4.87).&lt;br /&gt;
+        Upgrade apache to 2.2.27, conntrack-tools to 1.4.2, dhcpcd to 6.3.2, dnsmasq to 2.70,
+        iproute2 to 3.14.0, e1000e network driver to 3.0.4.1, igb network driver to 5.2.5,
+        openswan to 2.6.41, openvpn to 2.3.3, ppp to 2.4.6, pptp to 1.8.0, rrdtool to 1.4.8,
+        sqlite to 3.8.4.3, squid to 3.4.4, usb-modeswitch to 2.1.1, usb-modeswitch-data to 20140327.
+        &lt;br /&gt;
+        Upgrade Perl modules DBD-SQLite to 1.42, DBI to 1.631, IO-Socket-SSL to 1.981, NetAddr-IP to 4.073.
+        &lt;br /&gt;
+        &lt;b&gt;Mandatory reboot after upgrade.&lt;/b&gt;
+        </description>
+        <previousversion>2.1.4</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

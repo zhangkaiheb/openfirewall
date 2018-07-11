@@ -1,0 +1,170 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: openswan 7866 2015-02-05 16:35:16Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = openswan
+##VER        = 2.6.42
+VER        = 2.6.50
+HOST_ARCH  = all
+OTHER_SRC  = yes
+KERNEL_MOD = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+#DL_FROM    = http://www.openswan.org/download
+DL_FROM    = https://download.openswan.org/openswan/old/openswan-2.6/
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+# Used to include same timestamp for all
+# This is the release date
+DATESTAMP = "Oct 21 2014"
+TIMESTAMP = "15:56:00"
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE) $(PATCH1)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+##$(DL_FILE)_MD5 = 22240ce28be48f051bfdc874083c8947
+$(DL_FILE)_MD5 = 6729e3820c1ebba30fb84d42a9102cf5
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+	cd $(DIR_APP) && ./buildlin.sh
+
+	# Remove Python verify script and patch in an old Perl version 
+##	cd $(DIR_APP) && rm programs/verify/verify.in
+##	cd $(DIR_APP) && patch -p1 -i $(DIR_PATCHES)/$(PKG_NAME)_verify-perl.patch
+
+	cd $(DIR_APP) && sed -i \
+		-e 's%^INC_USRLOCAL.*$$%INC_USRLOCAL=/usr%' \
+		-e 's%^USERCOMPILE.*$$%USERCOMPILE=$(CFLAGS)%' \
+		-e 's%^FINALCONFFILE.*$$%FINALCONFFILE?=/var/ipcop/ipsec/ipsec.conf%' \
+		-e 's%^KLIPSCOMPILE.*$$%KLIPSCOMPILE=$(CFLAGS)%' Makefile.inc
+	# Use release date instead of __DATE__ and __TIME__ so everyone that compile has same md5
+##	cd $(DIR_APP) && sed -i -e 's|__DATE__|$(DATESTAMP)|' \
+##				-e 's|__TIME__|$(TIMESTAMP)|' programs/pluto/plutomain.c
+	# Checking compilation log between different machines is easier with same value for BUILDER
+##	cd $(DIR_APP) && sed -i -e 's|BUILDER.*$$|BUILDER="$(NAME)"|' programs/pluto/Makefile
+	# Make status.cgi capable to detect if pluto is running
+##	cd $(DIR_APP) && sed -i -e 's|chmod 700|chmod 755|' programs/setup/setup.in
+
+ifeq "$(IPSEC_KLIPS)" "yes"
+	# this section is needed for KLIPS not for NETKEY
+####ifeq "$(MACHINE)" "i486"
+####	cd $(DIR_APP) && make KERNELSRC=/usr/src/linux-$(KVER) module
+####endif
+####ifeq "$(MACHINE)" "x86_64"
+####	cd $(DIR_APP) && make KERNELSRC=/usr/src/linux-$(KVER) module
+####endif
+####ifeq "$(MACHINE)" "alpha"
+####	cd $(DIR_APP) && make KERNELSRC=/usr/src/linux-$(KVER) module
+####endif
+####ifeq "$(MACHINE)" "ppc"
+####	cd $(DIR_APP) && ARCH=powerpc make KERNELSRC=/usr/src/linux-$(KVER) module
+####endif
+####ifeq "$(MACHINE)" "sparc"
+####	cd $(DIR_APP) && make CROSS_COMPILE=$(MACHINE_REAL)-linux- KERNELSRC=/usr/src/linux-$(KVER) module
+####endif
+####
+####	# minstall run depmod against the running kernel, not using our KVER
+####	# so install manually
+####	mkdir -p /lib/modules/$(KVER)/kernel/net/ipsec
+####	install -m 0644 $(DIR_APP)/modobj26/ipsec.ko /lib/modules/$(KVER)/kernel/net/ipsec/ipsec.ko
+####	gzip -fn9 /lib/modules/$(KVER)/kernel/net/ipsec/ipsec.ko
+endif # IPSEC_KLIPS yes
+
+	# currently don't use a value higher than 1 for make -j or it fail
+
+###	cd $(DIR_APP) && make -j 1 USERCOMPILE="-fno-strict-aliasing" programs install
+	cd $(DIR_APP) && make -j 1 USE_OBJDIR=true programs install
+	if [ -e /etc/rc.d/init.d/ipsec ]; then \
+		mv -f /etc/rc.d/init.d/ipsec /etc/rc.d/; \
+	fi
+
+	# Make status.cgi capable to detect if pluto is running
+	chmod 755 /var/run/pluto
+
+	rm -f /etc/ipsec.conf /etc/ipsec.secrets
+	ln -sf /var/ipcop/ipsec/ipsec.conf    /etc/ipsec.conf
+	ln -sf /var/ipcop/ipsec/ipsec.secrets /etc/ipsec.secrets
+
+	rm -rf /etc/ipsec.d/{cacerts,certs,crls}
+	ln -sf /var/ipcop/ca      /etc/ipsec.d/cacerts
+	ln -sf /var/ipcop/certs   /etc/ipsec.d/certs
+	ln -sf /var/ipcop/crls    /etc/ipsec.d/crls
+
+	# some of the IPsec scripts use rmmod, which we no longer have
+##	sed -i -e 's%rmmod%modprobe -r%' /usr/lib/ipsec/_realsetup
+##	sed -i -e 's%rmmod -a%modprobe -r%' /usr/lib/ipsec/_startklips
+##	sed -i -e 's%rmmod%modprobe -r%' /usr/lib/ipsec/_startnetkey
+
+	# in case we recompile, remove .old files or they will be included in iso
+	@rm -f /usr/lib/ipsec/*.old /usr/libexec/ipsec/*.old
+
+	# remove the html doc files to keep filelist cleaner
+##	@rm -rf /usr/share/doc/openswan
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

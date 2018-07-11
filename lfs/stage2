@@ -1,0 +1,227 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: stage2 7742 2014-12-10 11:30:23Z owes $
+#                                                                             #
+###############################################################################
+
+# LFS 6.6 Creating Essential Files and Symlinks
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = stage2
+HOST_ARCH  = all
+OTHER_SRC  = no
+
+THISAPP    = stage2
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+install : $(TARGET)
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST))
+	@$(PREBUILD)
+
+	# Change ownership of directories already created by make.sh
+	# use 0:0 as etc is not yet installed
+##	chown 0:0 /usr /usr/src
+	# Create directories not already made by make.sh
+##	mkdir -p /{boot,etc,home,lib/firmware,mnt}
+##	mkdir -p /{root,sbin,tmp,usr/local,var}
+	mkdir -pv /{bin,boot,etc/{opt,sysconfig},home,lib/firmware,mnt,opt}
+
+	mkdir -pv /{media/{floppy,cdrom},sbin,srv,var}
+	install -dv -m 0750 /root
+	install -dv -m 1777 /tmp /var/tmp
+	mkdir -pv /usr/{,local/}{bin,include,lib,sbin,src}
+	mkdir -pv /usr/{,local/}share/{color,dict,doc,info,locale,man}
+	mkdir -pv  /usr/{,local/}share/{misc,terminfo,zoneinfo}
+	mkdir -pv  /usr/libexec
+	mkdir -pv /usr/{,local/}share/man/man{1..8}
+
+
+ifeq "$(MACHINE)" "x86_64"
+	mkdir -vp /lib64
+##	ln -sfv /$(TOOLS_DIR)/lib/ld-linux-x86-64.so.2 /lib64
+endif
+	mkdir -pv /var/{log,mail,spool}
+	ln -sfv /run /var/run
+	ln -sfv /run/lock /var/lock
+	mkdir -pv /var/{opt,cache,lib/{color,misc,locate},local}
+
+##	mkdir -p /var/{lock/subsys,log,mail,run,spool}
+##	mkdir -p /var/{tmp,cache,lib/misc,local,empty}
+
+
+
+#	if [ -d /${TOOLS_DIR}/lib ]; then \
+#		${SUDO} ln -vsf /${TOOLS_DIR}/lib ${LFS}/lib64; \
+#	fi
+
+###	for dirname in /usr /usr/local; do \
+###		mkdir -p $$dirname/{bin,include,lib,sbin,share}; \
+###		ln -sfn share/{man,doc,info} $$dirname; \
+###		mkdir -p $$dirname/share/{dict,doc,info,locale,man}; \
+###		mkdir -p $$dirname/share/{nls,misc,terminfo,zoneinfo}; \
+###		mkdir -p $$dirname/share/man/man{1,2,3,4,5,6,7,8}; \
+###	done
+
+	# Check for some important links and create them if they don't exist
+	# Testing if file exist allow to rebuild stage2
+	# bash links are made inside make.sh as we can't reach that point without
+	[ -e /bin/bash ]		|| ln -sfn /$(TOOLS_DIR)/bin/bash /bin/bash
+	[ -e /bin/cat ]		|| ln -sfn /$(TOOLS_DIR)/bin/cat /bin/cat
+	[ -e /bin/dd ]		|| ln -sfn /$(TOOLS_DIR)/bin/dd /bin/dd
+	[ -e /bin/echo ]	|| ln -sfn /$(TOOLS_DIR)/bin/echo /bin/echo
+	[ -e /bin/ln ]	|| ln -sfn /$(TOOLS_DIR)/bin/ln /bin/ln
+	[ -e /bin/pwd ]		|| ln -sfn /$(TOOLS_DIR)/bin/pwd /bin/pwd
+	[ -e /bin/rm ]		|| ln -sfn /$(TOOLS_DIR)/bin/rm /bin/rm
+	[ -e /bin/stty ]		|| ln -sfn /$(TOOLS_DIR)/bin/stty /bin/stty
+
+	# 'expect'compilation is tweaked for no hardcoded path for stty,
+	# so the one available will be used, first from tools, then from chroot
+	[ -e /usr/bin/install ]		|| ln -sfn /$(TOOLS_DIR)/bin/install /usr/bin/install
+	[ -e /usr/bin/perl ]	|| ln -sfn /$(TOOLS_DIR)/bin/perl /usr/bin/perl
+##	if [ ! -e /usr/lib/libstdc++.so ]; then \
+##		ln -sfn /$(TOOLS_DIR)/lib/libstdc++.so.6 /usr/lib/libstdc++.so.6 && \
+##		ln -sfn libstdc++.so.6 /usr/lib/libstdc++.so; \
+##	fi
+##	# libstdc++.la is for gmp configure. In fact, we didn't need/compile the c++ part actually.
+##	# Previously all .la files were removed from toolchain package, so check if exist
+##	[ ! -e /$(TOOLS_DIR)/lib/libstdc++.la ] || \
+##		sed 's/$(TOOLS_DIR)/usr/' /$(TOOLS_DIR)/lib/libstdc++.la > /usr/lib/libstdc++.la
+
+##	if [ ! -e /usr/lib/libgcc_s.so.1 ]; then \
+##		ln -sfn /$(TOOLS_DIR)/lib/libgcc_s.so.1 /usr/lib/libgcc_s.so.1 && \
+##		ln -sfn libgcc_s.so.1 /usr/lib/libgcc_s.so; \
+##	fi
+
+#ln -sv /tools/bin/{bash,cat,dd,echo,ln,pwd,rm,stty} /bin
+#ln -sv /tools/bin/{install,perl} /usr/bin
+	
+###	if [ ! -e /usr/lib/libstdc++.so ]; then \
+###		ln -sv /$(TOOLS_DIR)/lib/libstdc++.{a,so{,.6}} /usr/lib; \
+###	fi
+###	if [ ! -e /usr/lib/libgcc_s.so.1 ]; then \
+###		ln -sv /$(TOOLS_DIR)/lib/libgcc_s.so{,.1} /usr/lib; \
+###	fi
+	ln -sfv /$(TOOLS_DIR)/lib/libgcc_s.so{,.1} /usr/lib
+	ln -sfv /$(TOOLS_DIR)/lib/libstdc++.{a,so{,.6}} /usr/lib
+	[ -e /bin/sh ]        ||  ln -sv bash /bin/sh
+
+##	mkdir -p /var/{lock/subsys,log,mail,run,spool}
+##	mkdir -p /var/{tmp,cache,lib/misc,local,empty}
+
+	# Permissions
+###	chmod 0750 /root
+###	chmod 1777 /tmp /var/tmp
+###	chmod 0711 /var/empty
+
+	# Config files
+	cp -fR $(DIR_SRC)/config/etc/* /etc
+	find /etc -name .svn -print | xargs --no-run-if-empty rm -rf
+	chown -R 0:0 /etc
+	chmod -R 644 /etc
+	find /etc -type d -exec chmod 755 {} \;
+
+	# Use mtab as regular file. This allow 'df' not to fail during coreutils test with mount points out
+	# of the chroot that didn't exist inside (like debian /lib/init/rw)
+	rm -f /etc/mtab		# In case you experiment with symlink to /proc/mounts
+	# rootfs line need to be absent or coreutils du/bind-mount-dir-cycle.sh fail
+##	grep '^\/dev.* / ' /proc/mounts >/etc/mtab
+##	# Remove the duplicate due to the mount --bind
+##	# shm could appear on /run/shm like with debian V7 where /dev/shm is symlinked to /run/shm
+##	grep -E '/sys sysfs|/proc proc|/dev/pts|/dev/shm|/run/shm' /proc/mounts | sort -u >>/etc/mtab
+##	# Only have /dev/shm, not /run/shm inside the chroot
+##	sed -i 's|/run/shm|/dev/shm|' /etc/mtab
+	ln -sv /proc/self/mounts /etc/mtab
+
+	# To silent fsck on util-linux tests
+##	touch /etc/fstab
+
+	# Enable the serial line console for sparcs
+ifeq "$(MACHINE)" "sparc"
+	sed -i "s,^#7,7,g" /etc/inittab
+endif
+
+	echo "$(NAME) v$(VERSION) for $(MACHINE) - $(SLOGAN) (\l)" > /etc/issue
+	echo "svn-$(PASS)" > /etc/svn-install
+
+	# Nobody user
+	mkdir -p /home/nobody
+	chown -R nobody:nobody /home/nobody
+
+	# Patches directory
+	mkdir -m 1775 -p /var/patches
+	chown -R root:nobody /var/patches
+
+
+###	exec /$(TOOLS_DIR)/bin/bash --login +h
+
+	touch /var/log/{btmp,lastlog,faillog,wtmp}
+	chgrp -v utmp /var/log/lastlog
+	chmod -v 664  /var/log/lastlog
+	chmod -v 600  /var/log/btmp
+
+	echo "env -----------------------"
+	env
+
+	# fix setuid programs in case of direct toolchain build
+	# to workaround mount 'only root can do that' error even when run as root
+	# tar remove setuid bit
+###	chmod u-s /$(TOOLS_DIR)/bin/{u,}mount
+
+	# mknod one /dev/loop allow losetup (from inside) to mount loop module (from running kernel outside the chroot)
+	# That will allow some tests using loop to run
+###	rm -f /dev/loop0 && mknod /dev/loop0 b 7 0
+
+	# Our diff helper is needed before POSTBUILD
+	cp $(DIR_SRC)/src/scripts/install-diff.pl /usr/local/bin
+
+	# show chroot_make existing variables to help debugging
+	env
+
+	@$(POSTBUILD)
+	# Here stage2 rootfile is hacked, so no manual change is needed
+	# Cheat : pretend /dev, /proc and /sys are created here, when in fact they are already mounted before stage2 start
+	# Can't simply suppress them after PREBUILD as /dev, /proc and /sys are excluded from FIND_FILES path
+##	grep '^dev/console$$' $(TARGET) || sed -i -e 's|#boot|&\ndev/console|;s|#boot|&\ndev/null|;s|mnt|&\nproc|;s|#sbin|&\nsys|' $(TARGET)
+	# Cheat : pretend bin/{cat,echo,pwd}, usr/{bin/perl,lib/libgcc_s.so*,lib/libstdc++.so* are not installed here (only as symlink here, replaced later)
+##	sed -i 	-e '/bin\/cat$$/d;/bin\/echo$$/d;/bin\/pwd$$/d;/usr\/bin\/perl$$/d;/usr\/lib\/libgcc_s.so.*/d;/usr\/lib\/libstdc++.so.*/d' $(TARGET)

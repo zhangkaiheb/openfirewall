@@ -1,0 +1,15 @@
+etc/isdn-card-list
+etc/nic-modules-list
+var/lib/squidguard
+var/lib/squidguard/db
+var/lib/squidguard/db/custom
+var/lib/squidguard/db/custom/allowed
+var/lib/squidguard/db/custom/allowed/domains
+var/lib/squidguard/db/custom/allowed/urls
+var/lib/squidguard/db/custom/blocked
+var/lib/squidguard/db/custom/blocked/domains
+var/lib/squidguard/db/custom/blocked/expressions
+var/lib/squidguard/db/custom/blocked/urls
+var/log/dyndns
+var/log/fw_timeframe_log
+var/log/updates

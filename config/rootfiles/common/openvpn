@@ -1,0 +1,16 @@
+#usr/include/openvpn-plugin.h
+#usr/lib/openvpn
+#usr/lib/openvpn/plugins
+#usr/lib/openvpn/plugins/openvpn-plugin-down-root.la
+usr/lib/openvpn/plugins/openvpn-plugin-down-root.so
+usr/sbin/openvpn
+#usr/share/doc/openvpn
+#usr/share/doc/openvpn/COPYING
+#usr/share/doc/openvpn/COPYRIGHT.GPL
+#usr/share/doc/openvpn/README
+#usr/share/doc/openvpn/README.IPv6
+#usr/share/doc/openvpn/README.down-root
+#usr/share/doc/openvpn/README.polarssl
+#usr/share/doc/openvpn/management-notes.txt
+#usr/share/man/man8/openvpn.8
+var/log/openvpnserver.log

@@ -1,0 +1,11 @@
+--- gd-2.0.35/gd_png.c	2010-04-09 06:41:03.000000000 +0000
++++ gd-2.0.35/gd_png.orig.c	2010-04-09 06:40:05.000000000 +0000
+@@ -149,7 +149,7 @@
+ 	return NULL;
+   }
+ 
+-	if (!png_check_sig (sig, 8)) { /* bad signature */
++	if (png_sig_cmp(sig, 0, 8) != 0) { /* bad signature */
+     	return NULL;		/* bad signature */
+ 	}
+ 

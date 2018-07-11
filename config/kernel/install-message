@@ -1,0 +1,23 @@
+             0fWelcome to IPCop, Licensed under GNU GPL version 2.07      
+
+        PLEASE BEWARE!  This installation process will kill all 
+        existing partitions on your PC or server. Please be aware
+        of this before continuing this installation.  
+
+0c        --------------------------------------------------
+        ----                                          ----
+        ---- ALL YOUR EXISTING DATA WILL BE DESTROYED ----
+        ----                                          ----
+        --------------------------------------------------
+07
+0c        This version is pre-pre-pre-pre-alpha. Should you find 
+        something not-working, broken, etc.: don't panic.
+        It is a simple case of S.E.P. and does not need reporting.
+07
+        Press RETURN to boot IPCop default installation.
+
+        Or, if you are having trouble you can try these options....
+        Type:   nopcmcia        to disable PCMCIA detection
+                nousb           to disable USB detection
+                nousborpcmcia   to disable both PCMCIA & USB detection
+                rescue          to boot in rescue mode

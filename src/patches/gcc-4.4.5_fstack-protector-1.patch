@@ -1,0 +1,69 @@
+Submitted By: Robert Connolly (robert at linuxfromscratch dot org)
+Date: 2010-11-07
+Initial Package Version: 4.5.1
+Upstream Status: Not submitted - Hack
+Origin: ALT Linux
+Description: This patch adds "-fstack-protector-all --param=ssp-buffer-size=4"
+to GCC's default options.
+
+Disable "-fstack-protector-all" with "-fno-stack-protector".
+
+See: http://en.wikipedia.org/wiki/Stack-smashing_protection
+     http://www.trl.ibm.com/projects/security/ssp/
+
+diff -Naur gcc-4.5.1.orig/gcc/Makefile.in gcc-4.5.1/gcc/Makefile.in
+--- gcc-4.5.1.orig/gcc/Makefile.in	2010-06-30 13:26:17.000000000 +0000
++++ gcc-4.5.1/gcc/Makefile.in	2010-11-08 01:26:44.052649763 +0000
+@@ -584,7 +584,7 @@
+ #
+ LIBGCC2_DEBUG_CFLAGS = -g
+ LIBGCC2_CFLAGS = -O2 $(LIBGCC2_INCLUDES) $(GCC_CFLAGS) $(TARGET_LIBGCC2_CFLAGS) \
+-		 $(LIBGCC2_DEBUG_CFLAGS) $(GTHREAD_FLAGS) \
++		 $(LIBGCC2_DEBUG_CFLAGS) $(GTHREAD_FLAGS) -fno-stack-protector \
+ 		 -DIN_LIBGCC2 -D__GCC_FLOAT_NOT_NEEDED \
+ 		 $(INHIBIT_LIBC_CFLAGS)
+ 
+@@ -597,7 +597,7 @@
+ 
+ # Options to use when compiling crtbegin/end.
+ CRTSTUFF_CFLAGS = -O2 $(GCC_CFLAGS) $(INCLUDES) $(MULTILIB_CFLAGS) -g0 \
+-  -finhibit-size-directive -fno-inline-functions -fno-exceptions \
++  -finhibit-size-directive -fno-inline-functions -fno-exceptions -fno-stack-protector \
+   -fno-zero-initialized-in-bss -fno-toplevel-reorder -fno-tree-vectorize \
+   $(INHIBIT_LIBC_CFLAGS)
+ 
+diff -Naur gcc-4.5.1.orig/gcc/doc/invoke.texi gcc-4.5.1/gcc/doc/invoke.texi
+--- gcc-4.5.1.orig/gcc/doc/invoke.texi	2010-04-06 14:02:22.000000000 +0000
++++ gcc-4.5.1/gcc/doc/invoke.texi	2010-11-08 01:26:10.357649113 +0000
+@@ -7848,7 +7848,7 @@
+ Emit extra code to check for buffer overflows, such as stack smashing
+ attacks.  This is done by adding a guard variable to functions with
+ vulnerable objects.  This includes functions that call alloca, and
+-functions with buffers larger than 8 bytes.  The guards are initialized
++functions with buffers larger than 4 bytes.  The guards are initialized
+ when a function is entered and then checked when the function exits.
+ If a guard check fails, an error message is printed and the program exits.
+ 
+diff -Naur gcc-4.5.1.orig/gcc/gcc.c gcc-4.5.1/gcc/gcc.c
+--- gcc-4.5.1.orig/gcc/gcc.c	2010-04-18 17:46:08.000000000 +0000
++++ gcc-4.5.1/gcc/gcc.c	2010-11-08 01:26:10.375648953 +0000
+@@ -905,6 +905,7 @@
+  %{!fsyntax-only:%{S:%W{o*}%{!o*:-o %b.s}}}\
+  %{fsyntax-only:-o %j} %{-param*}\
+  %{fmudflap|fmudflapth:-fno-builtin -fno-merge-constants}\
++ %{!fno-stack-protector:%{!nostdlib:-fstack-protector-all}}\
+  %{coverage:-fprofile-arcs -ftest-coverage}";
+ 
+ static const char *asm_options =
+diff -Naur gcc-4.5.1.orig/gcc/params.def gcc-4.5.1/gcc/params.def
+--- gcc-4.5.1.orig/gcc/params.def	2010-04-02 19:54:46.000000000 +0000
++++ gcc-4.5.1/gcc/params.def	2010-11-08 01:26:10.391649209 +0000
+@@ -616,7 +616,7 @@
+ DEFPARAM (PARAM_SSP_BUFFER_SIZE,
+ 	  "ssp-buffer-size",
+ 	  "The lower bound for a buffer to be considered for stack smashing protection",
+-	  8, 1, 0)
++	  4, 1, 0)
+ 
+ /* When we thread through a block we have to make copies of the
+    statements within the block.  Clearly for large blocks the code

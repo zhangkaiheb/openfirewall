@@ -1,0 +1,11 @@
+#lib/firmware/bnx2
+lib/firmware/bnx2/bnx2-mips-09-6.2.1b.fw
+#lib/firmware/rtl_nic
+lib/firmware/rtl_nic/rtl8105e-1.fw
+lib/firmware/rtl_nic/rtl8168d-1.fw
+lib/firmware/rtl_nic/rtl8168d-2.fw
+lib/firmware/rtl_nic/rtl8168e-1.fw
+lib/firmware/rtl_nic/rtl8168e-2.fw
+lib/firmware/rtl_nic/rtl8168e-3.fw
+lib/firmware/rtl_nic/rtl8168f-1.fw
+lib/firmware/rtl_nic/rtl8168f-2.fw

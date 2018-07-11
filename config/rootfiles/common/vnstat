@@ -1,0 +1,7 @@
+etc/vnstat.conf
+usr/bin/vnstat
+usr/sbin/vnstatd
+#usr/share/man/man1/vnstat.1
+#usr/share/man/man1/vnstatd.1
+#usr/share/man/man5/vnstat.conf.5
+var/log/traffic/vnstat

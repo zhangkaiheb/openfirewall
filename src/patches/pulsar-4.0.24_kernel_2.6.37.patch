@@ -1,0 +1,14 @@
+--- a/pulsar.c	2010/05/25 18:03:27	1.22
++++ b/pulsar.c	2011/02/11 19:01:08	1.23
+@@ -1045,7 +1045,11 @@
+ 			name, pci_dev, pci_dev->irq, membase, memlen);
+ 	
+ 	/* Register ATM device */
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,37))
++	atmdev = atm_dev_register(name, &pci_dev->dev, &pulsar_ops, -1, NULL);
++#else
+ 	atmdev = atm_dev_register(name, &pulsar_ops, -1, NULL);
++#endif
+ 	if (!atmdev) {
+ 		printk(KERN_ERR "%s: Could not register ATM device\n", name);
+ 		err = -ENODEV;

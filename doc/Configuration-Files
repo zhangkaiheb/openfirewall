@@ -1,0 +1,168 @@
+This document describes (more or less) IPCop configuration files and contents.
+
+================================================================================
+
+/var/ipcop/main/settings
+        Contains some general settings.
+        Some written by gui.cgi, some by installer/setup.
+
+        IPCOPUPDOWNBEEP             on/off
+        PPPUPDOWNBEEP               on/off
+        REFRESHINDEX                on/off
+        WINDOWWITHHOSTNAME          on/off
+        JAVASCRIPT                  on/off
+        HOSTNAME                    IPCops name
+        DOMAINNAME                  IPCops domainname
+        KEYMAP                      used keyboard map, for example /usr/share/kbd/keymaps/i386/qwertz/de.map.gz
+        LANGUAGE                    short language name, for example de
+        TIMEZONE                    used timezone, for example /usr/share/zoneinfo/posix/Europe/Berlin
+        DISPLAY_CONNECTIONS         display style for connections.cgi, TRAFFIC or STATUS
+        GUIPORT                     https port in use by GUI
+        SSHPORT                     tcp port in use by SSHd
+        CHECKUPDATES                check for updates after IPCop connect
+        PRELOADUPDATES              preload updates when they become available
+
+================================================================================
+
+/var/ipcop/main/flashsettings
+        Specials for flash based IPCops.
+        Some written by gui.cgi, some by installer/setup.
+
+        TMPFS_MAX_SIZE              max. amount of RAM used as tmpfs, either size (64M) or percentage (50%).
+
+================================================================================
+
+/var/ipcop/main/hosts
+        List of hostnames as defined by hosts.cgi
+Format:
+        (on|off),IP address,hostname,domainname,remark
+remark and last seperator are optional
+
+================================================================================
+
+/var/ipcop/main/scheduler
+        List of scheduled actions.
+Format:
+        (on|off),action,time,daytype,days,weekdays,options,comment
+
+================================================================================
+
+/var/ipcop/backup/
+        Include / Exclude files for backup/restore.
+        {include,exclude}.user can be used by addon/user to add additionial information which will not be modified by IPCop.
+
+================================================================================
+
+/var/ipcop/ddns/
+
+================================================================================
+
+/var/ipcop/dhcp/settings
+        Contains config settings for dhcp server.
+        Written by dhcp.cgi.
+
+        ENABLED_GREEN_1             on/off
+        ENABLED_BOOTP_GREEN_1       on/off (currently not used)
+        START_ADDR_GREEN_1          IP address for start of dynamic range
+        END_ADDR_GREEN_1            IP address for end of dynamic range
+        DOMAIN_NAME_GREEN_1         
+        DEFAULT_LEASE_TIME_GREEN_1  lease time in minutes
+        DNS1_GREEN_1         
+        DNS2_GREEN_1         
+        WINS1_GREEN_1         
+        WINS2_GREEN_1         
+        NTP1_GREEN_1         
+        NTP2_GREEN_1         
+
+        same for BLUE
+
+================================================================================
+
+/var/ipcop/dhcp/fixedleases
+        Contains the fixed leases.
+        Written by dhcp.cgi.
+
+================================================================================
+
+/var/ipcop/ethernet/settings
+        Contains all the info for network cards.
+        Written by installer/setup and then needed by various programs, scripts and CGIs.
+
+        GREEN_COUNT                 number of green NICs (0/1)
+        GREEN_1_DEV                 which eth device
+        GREEN_1_ADDRESS             IP address
+        GREEN_1_NETMASK             netmask
+        GREEN_1_NETADDRESS          IP netaddress
+        GREEN_1_BROADCAST           broadcast address
+        GREEN_1_DRIVER              kernel module to modprobe
+        GREEN_1_DRIVER_OPTIONS      module options for modprobe
+
+        same for BLUE, ORANGE and RED
+
+        RED_COUNT                   is 1 if network card is needed for RED connection type
+        RED_1_TYPE                  type of connection, can be ANALOG, ISDN, PPPOE, PPTP, STATIC, DHCP
+
+================================================================================
+
+/var/ipcop/logging/settings
+        Contains settings for log viewing, log rotating, log summaries.
+        Written by logconfig.cgi.
+
+        ENABLE_REMOTELOG            on/off
+        LOGVIEW_REVERSE             on/off
+        LOGVIEW_VIEWSIZE            number of lines when viewing (15,50,100,150,250,500)
+        LOGWATCH_KEEP               number of log summaries to keep (default 56)
+        LOGWATCH_LEVEL              Low/Med/High
+        LOG_KEEP                    number of rotated logfiles to keep (default 14 for Flash, 56 for HDD)
+        REMOTELOG_ADDR              IP or FQDN for remote logging
+        REMOTELOG_PROTO             udp/tcp
+
+================================================================================
+
+/var/ipcop/proxy/settings
+        Contains config settings for squid proxy.
+        Written by proxy.cgi.
+
+        UPSTREAM_PROXY              <ip-address>:<port> of parent proxy (if any)
+        UPSTREAM_USER
+        UPSTREAM_PASSWORD
+        PROXY_PORT
+        ENABLED_GREEN_1             on/off
+        ENABLED_BLUE_1              on/off
+        TRANSPARENT_GREEN_1         on/off
+        TRANSPARENT_BLUE_1          on/off
+        CACHE_SIZE
+        MAX_SIZE
+        MIN_SIZE
+        MAX_OUTGOING_SIZE
+        MAX_INCOMING_SIZE
+        LOGGING
+        EXTENSION_METHODS
+        NO_PROXY_LOCAL
+        NO_PROXY_EXTEND
+
+================================================================================
+
+/var/ipcop/remote/settings
+        Contains SSH settings.
+        Written by remote.cgi.
+
+        ENABLE_SSH                  on/off
+        ENABLE_SSH_KEYS             on/off
+        ENABLE_SSH_PORTFW           on/off
+        ENABLE_SSH_PASSWORDS        on/off
+        ENABLE_SSH_PROTOCOL1        on/off
+
+================================================================================
+
+/var/ipcop/time/settings
+        Contains some config settings for ntp server.
+        Written by time.cgi.
+
+        ENABLED_NTP                 on/off
+        ENABLED_NTP_REDIRECT        on/off
+        NTP_VALID                   yes/no
+        NTP_ADDR_1                  NTP server 1, default 0.ipcop.pool.ntp.org
+        NTP_ADDR_2                  NTP server 2, default 1.ipcop.pool.ntp.org
+        NTP_ADDR_3                  NTP server 3, default 2.ipcop.pool.ntp.org
+

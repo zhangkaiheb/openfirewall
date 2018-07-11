@@ -1,0 +1,5 @@
+ENABLED_NTP=off
+NTP_ADDR_1=0.ipcop.pool.ntp.org
+NTP_ADDR_2=1.ipcop.pool.ntp.org
+NTP_ADDR_3=2.ipcop.pool.ntp.org
+NTP_VALID=yes

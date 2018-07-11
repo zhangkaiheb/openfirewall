@@ -1,0 +1,168 @@
+#!/usr/bin/perl
+#
+# This file is part of the IPCop Firewall.
+#
+# IPCop is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# IPCop is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+#
+# (c) 2001-2015, the IPCop team
+#
+# $Id: rc.updatered 7808 2015-01-13 14:52:16Z owes $
+#
+
+use strict;
+
+require '/usr/lib/ipcop/general-functions.pl';
+
+my %netsettings;
+my %dhcpsettings;
+my %pppsettings;
+my %dhclient;
+
+
+# read vars back from file.
+&General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
+&General::readhash('/var/ipcop/dhcp/settings',     \%dhcpsettings);
+&General::readhash('/var/ipcop/ppp/settings',      \%pppsettings);
+
+&General::readhash('/var/log/dhcpclient.info', \%dhclient) if (-e '/var/log/dhcpclient.info');
+
+
+my $iface = `/bin/cat /var/ipcop/red/iface 2>/dev/null | /usr/bin/tr -d '\012'`;
+my $remote = `/bin/cat /var/ipcop/red/remote-ipaddress 2>/dev/null | /usr/bin/tr -d '\012'`;
+
+
+if (($ARGV[0] eq '') || ($ARGV[1] eq '')) {
+    &General::log('ipcop', 'rc.updatered missing parameters');
+    exit 1;
+}
+
+my $caller = $ARGV[0];
+my $updown = $ARGV[1];
+&General::log('red', "rc.updatered (pid $$) parameters: $caller $updown") if ($pppsettings{'DEBUG'} eq 'on');
+
+
+###
+### Retrieve DHCP Settings
+###
+if ($netsettings{'RED_COUNT'} > 0) {
+    if ($netsettings{'RED_1_TYPE'} eq 'DHCP') {
+        if ($netsettings{'DNS1'} eq '') {
+            system("echo $dhclient{'DHCLIENT_DNS1'} > /var/ipcop/red/dns1");
+            system("echo $dhclient{'DHCLIENT_DNS2'} > /var/ipcop/red/dns2");
+        }
+        else {
+            system("echo $netsettings{'DNS1'} > /var/ipcop/red/dns1");
+            system("echo $netsettings{'DNS2'} > /var/ipcop/red/dns2");
+        }
+        system("echo $dhclient{'DHCLIENT_IPADDR'}  > /var/ipcop/red/local-ipaddress");
+        system("echo $dhclient{'DHCLIENT_GATEWAY'} > /var/ipcop/red/remote-ipaddress");
+    }
+}
+else {
+#    if [ "$PROTOCOL" = "RFC1483" -a "$METHOD" = "DHCP" ]; then
+#        unset DNS1 DNS2
+#        eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
+#        if [ -e /var/log/dhcpclient.info ]; then
+#            eval $(/usr/local/bin/readhash /var/log/dhcpclient.info)
+#        fi
+#        if [ "$DNS" = "Automatic" ]; then
+#            echo "$DHCLIENT_DNS1" > /var/ipcop/red/dns1
+#            echo "$DHCLIENT_DNS2" > /var/ipcop/red/dns2
+#        else
+#            echo "$DNS1" > /var/ipcop/red/dns1
+#            echo "$DNS2" > /var/ipcop/red/dns2
+#        fi
+#        echo "$DHCLIENT_IPADDR"  > /var/ipcop/red/local-ipaddress
+#        echo "$DHCLIENT_GATEWAY" > /var/ipcop/red/remote-ipaddress
+#    fi
+}
+
+
+###
+### Retrieve DNS settings
+###
+my $dns1 = `/bin/cat /var/ipcop/red/dns1 2>/dev/null | /usr/bin/tr -d '\012'`;
+my $dns2 = `/bin/cat /var/ipcop/red/dns2 2>/dev/null | /usr/bin/tr -d '\012'`;
+system('echo > /var/ipcop/red/resolv.conf');
+system("echo 'nameserver $dns1' > /var/ipcop/red/resolv.conf")  if ($dns1 ne '');
+system("echo 'nameserver $dns2' >> /var/ipcop/red/resolv.conf") if ($dns2 ne '');
+
+
+###
+### Restart DNSMASQ
+###
+system('/etc/rc.d/rc.dnsmasq restart');
+
+
+# Reset default route to ippp0 for dial on demand
+if ( -e "/var/ipcop/red/dial-on-demand" && $pppsettings{'TYPE'} eq 'isdn' && ! -e '/var/ipcop/red/active') {
+    system('/sbin/ip route del default 2> /dev/null');
+    if ($remote ne '') {
+        system("/sbin/ip route add default via $remote 2> /dev/null");
+    }
+    else {
+        system('/sbin/ip route add default dev ippp0  2> /dev/null');
+    }
+}
+
+if ($updown eq 'up') {
+    if ($caller eq 'dhcpcd') {
+        &General::log('dhcpcd[]', "$dhclient{'DHCLIENT_INTERFACE'} has been configured with new IP=$dhclient{'DHCLIENT_IPADDR'}");
+        system('/usr/bin/touch /var/ipcop/red/active') if ($netsettings{'RED_1_TYPE'} ne 'PPTP');
+    }
+
+    system('/etc/rc.d/rc.firewall reload');
+    system('/usr/local/bin/setaliases');
+
+    # TODO: do we need to set multicast off?
+    #[ "$IFACE" != "" ] && /sbin/ip link set $IFACE multicast off
+
+    system('/usr/local/bin/restartntpd --red');
+    system('/usr/local/bin/setddns.pl --force');
+    system('/usr/local/bin/restartsquid --test &');
+    system('/usr/local/bin/ipsecctrl --start --wait &');
+    system('/usr/local/bin/updatelists.pl --red &');
+    `/usr/local/bin/blacklistupdate.pl --red < /dev/null > /dev/null &`;
+    system('/usr/local/bin/restartshaping');
+    system('/usr/local/bin/accountingctrl');
+}
+elsif ($updown eq 'renew') {
+    if ($caller eq 'dhcpcd') {
+        &General::log('dhcpcd[]', "$dhclient{'DHCLIENT_INTERFACE'} has been configured with same IP=$dhclient{'DHCLIENT_IPADDR'}");
+    }
+}
+elsif ($updown eq 'down') {
+    if ($caller eq 'dhcpcd') {
+        &General::log('dhcpcd[]', "$dhclient{'DHCLIENT_INTERFACE'} has been brought down");
+        unlink('/var/ipcop/red/active');
+    }
+
+    system('/etc/rc.d/rc.firewall reload');
+    system('/usr/local/bin/setaliases');
+
+    # TODO we really need to rethink stopping IPsec as this will also kill any tunnels we might have on Blue
+    system('/usr/local/bin/ipsecctrl --stop &');
+}
+else {
+    &General::log('ipcop', "rc.updatered unknown updown parameter: $updown");
+}
+
+
+system("/etc/rc.d/rc.event red $updown");
+&General::log('red', "rc.updatered (pid $$) end") if ($pppsettings{'DEBUG'} eq 'on');
+
+unlink('/var/ipcop/red/connecting');
+unlink('/var/ipcop/red/disconnecting');
+
+exit 0;

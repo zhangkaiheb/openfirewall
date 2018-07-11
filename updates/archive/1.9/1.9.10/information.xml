@@ -1,0 +1,10 @@
+<ipcop>
+    <update>
+        <version>1.9.10</version>
+        <releasedate>2009-12-09</releasedate>
+        <description>Fix Updates CGI page, several other minor fixes, language updates</description>
+        <previousversion>1.9.9</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

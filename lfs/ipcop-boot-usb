@@ -1,0 +1,147 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: ipcop-boot-usb 7817 2015-01-25 20:20:48Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = usb-key
+
+THISAPP    = $(PKG_NAME)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+HOST_ARCH  = i486
+OTHER_SRC  = no
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+IMGfdd := /installer/images/$(SNAME)-$(VERSION)-install-usb-fdd.$(MACHINE).img
+IMGhdd := /installer/images/$(SNAME)-$(VERSION)-install-usb-hdd.$(MACHINE).img
+IMGfs  := /installer/images/fs
+
+define COPY_TO_IMG
+	mkdosfs -n IPCOPBOOT -F 16 -I $$IMAGE && \
+	for i in {1..7}; do \
+		if (! losetup /dev/loop$${i} >/dev/null 2>&1 ); then \
+			LOOPDEV="/dev/loop$${i}"; \
+			break; \
+		fi; \
+	done; \
+	mkdir -p /installer/mnt && \
+	losetup $$LOOPDEV $$IMAGE && \
+	mount -t vfat -o codepage=850,iocharset=iso8859-1 $$LOOPDEV /installer/mnt && \
+	cp -R /installer/cdrom/* /installer/mnt && \
+	mv /installer/mnt/boot/isolinux/{instroot.img,memtest,vmlinuz,f?.txt} /installer/mnt && \
+	mv /installer/mnt/boot/isolinux/*.c32 /installer/mnt && \
+	rm -rf /install/mnt/boot && \
+	sed	-e "s|splash|/boot/isolinux/splash|" \
+			/$(INSTALLER_DIR)/cdrom/boot/isolinux/message \
+			> /installer/mnt/message && \
+	sed	-e '/IPAPPEND/d' \
+		-e "s|ipcopboot=|ipcopboot=usb|g" \
+			$(DIR_SRC)/config/arch/$(MACHINE)/syslinux.cfg \
+			> /installer/mnt/syslinux.cfg && \
+	echo -n "-> umount $$LOOPDEV .." && \
+	for i in {1..30}; do \
+		umount /installer/mnt >/dev/null 2>&1 && break || echo -n "."; sleep 1; \
+	done; \
+    echo " done"; \
+	losetup -d $$LOOPDEV && \
+	syslinux $$IMAGE
+
+endef
+
+define MBR_TO_IMG
+	for i in {1..7}; do \
+		if (! losetup /dev/loop$${i} >/dev/null 2>&1 ); then \
+			LOOPDEV="/dev/loop$${i}"; \
+			break; \
+		fi; \
+	done; \
+	mkdir -p /installer/mnt && \
+	losetup $$LOOPDEV $$IMAGE && \
+	cat /usr/share/syslinux/mbr.bin > $$LOOPDEV && sync && \
+	losetup -d $$LOOPDEV
+
+endef
+
+install :
+	# Create install USB key package(s) as an alternate way to boot during install for i486
+	# rebuild each time, no (PRE|POST)BUILD
+
+	for i in {1..7}; do \
+		if [ ! -b /dev/loop$${i} ]; then \
+			mknod /dev/loop$${i} b 7 $${i}; \
+		fi; \
+	done
+
+	# usb-fdd superfloppy (partitionless)
+	# compute size +32 blocks for bootsector/fat/etc...
+	dd bs=1024 count=$$((`du -k -s /installer/cdrom | awk '{print $$1}'` + 32 + 128 )) \
+		if=/dev/zero \
+		of=$(IMGfdd)
+	IMAGE=$(IMGfdd); $(COPY_TO_IMG)
+
+	# Partitionned images : make a file system bigger than iso size
+	# that fit on 96MB key to let free space available
+	# on the unique partition. Image will be compressed later
+	dd bs=1k if=/dev/zero of=$(IMGfs) count=95000
+	IMAGE=$(IMGfs); $(COPY_TO_IMG)
+
+	# usb-hdd (64 heads, 32 sectors geometry, on a partition 1)
+	# use 64 heads as 256 does not work on Award bios (Asus A7V8X-X Gilles)
+	# use 32 sectors a minima or device is not recognised as hard disk (Frank)
+	# add 32 to IMGfs as first partition start at 32
+	COUNT=$$((`du -k -s $(IMGfs) | awk '{print $$1}'` + 32 )); \
+	dd bs=1k if=/dev/zero of=$(IMGhdd) count=$$COUNT
+	# MBR is written but sfdisk still warns with a 'msdos signature missing'
+	IMAGE=$(IMGhdd); $(MBR_TO_IMG)
+	echo -e "0,,6,*\n;\n;\n;" | sfdisk -qLD -H 64 -S 32 $(IMGhdd)
+	# copy the entire partition, make the fs and dd back
+	dd if=$(IMGfs) of=$(IMGhdd) bs=512 seek=32
+
+	gzip -fn9 $(IMGfdd) $(IMGhdd)
+	rm -rf /tmp/* $(IMGfs)
+
+	for i in {1..7}; do \
+		rm -fr /dev/loop$${i}; \
+	done
+
+	# yes we want it rebuild at each time, so no POSTBUILD

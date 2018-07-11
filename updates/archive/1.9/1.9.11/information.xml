@@ -1,0 +1,13 @@
+<ipcop>
+    <update>
+        <version>1.9.11</version>
+        <releasedate>2010-01-21</releasedate>
+        <description>Fix offline update. Fix firewall Internal Traffic rules. Add user proxy password page. Several minor fixes in GUI pages. Language updates.&lt;br /&gt;
+            Add lsof, usb_modeswitch. Upgrade acpid to 2.0.1, dhcpcd to 5.1.4, iptables to 1.4.6, kernel to 2.6.27.44, mdadm to 3.1.1, nano to 2.2.1, ntpd to 4.2.6, pciutils to 3.1.5, smartmontools to 5.39, several others.&lt;br /&gt;
+            Upgrade openvpn server to 2.1.1, you have to save the OpenVPN config before restart.&lt;br /&gt;
+            &lt;b&gt;Mandatory reboot after upgrade.&lt;/b&gt;</description>
+        <previousversion>1.9.10</previousversion>
+        <installdate>INSTALLDATE</installdate>
+        <latest />
+    </update>
+</ipcop>

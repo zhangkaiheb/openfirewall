@@ -1,0 +1,129 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: glib 7945 2015-03-23 06:35:56Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = glib
+# stable is even branch (2.26), odd is development (2.27)
+#VER        = 2.42.2
+VER        = 2.56.1
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(PKG_NAME)-$(VER).tar.xz
+##DL_FROM    = http://ftp.gnome.org/pub/gnome/sources/glib/2.42
+DL_FROM    = http://ftp.acc.umu.se/pub/gnome/sources/glib/2.56
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+LIBFFIVERSION = libffi-$(shell grep 'VER ' libffi | cut -d '=' -f2 | cut -d ' ' -f2 )
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+#$(DL_FILE)_MD5 = ae9ee104932657ed08ef4679556be07f
+$(DL_FILE)_MD5 = 988af38524804ea1ae6bc9a2bad181ff
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+
+	# Skip dbus tests, remove gmenumodel and comment every am__append_ that add to TEST_PROGS
+	# gio tests are not important for us as that lib is not distributed
+##	cd $(DIR_APP) && sed -i -e 's/am__append_. /#&/g' -e 's/gmenumodel resources/resources/' gio/tests/Makefile.in
+
+	# Don't care about zlib flags. zlib matter on gio lib only that is not include in iso.
+	# --with-threads=none break pango-1.28.4
+##	cd $(DIR_APP) &&		\
+##		./configure             \
+##			--prefix=/usr       \
+##			--sysconfdir=/etc   \
+##			--disable-static    \
+##			--disable-dtrace    \
+##			--disable-man       \
+##			--with-pcre=system
+
+	cd $(DIR_APP) &&		\
+		./configure --prefix=/usr --sysconfdir=/etc            \
+
+	# Hack to fix strict aliasing warning present on gobject only, instead of adding for the entire package.
+##	cd $(DIR_APP) && sed -i -e 's/^CFLAGS .*/& -fno-strict-aliasing/' gobject/Makefile
+
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+
+	# Test suite is not reliable before install
+	cd $(DIR_APP) && make install
+ifeq "$(RUNNING_TEST)" "yes"
+	# TZDIR is required or glib search to /usr/share/zoneinfo not /usr/share/zoneinfo/posix
+	-cd $(DIR_APP); make -j 1 check TZDIR=/usr/share/zoneinfo/posix &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+
+##	rm -f /usr/lib/lib{gio-2.0,glib-2.0,gmodule-2.0,gobject-2.0,gthread-2.0}.la
+	# To see only installed file that we care, the easiest is to remove the others after install
+	#   configure --disable-gtk-doc-html shows no effect
+##	rm -rf /etc/bash_completion.d /usr/share/gdb /usr/share/gtk-doc/html/{gio,glib,gobject}
+
+	# Force rebuilding packages that depend on glib
+##	rm -f $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/{pkg-config,cairo}-*
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

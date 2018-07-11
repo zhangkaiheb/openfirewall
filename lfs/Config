@@ -1,0 +1,197 @@
+###############################################################################
+#                                   LFSMake                                   #
+#                    by Rod Roark <rod@sunsetsystems.com>                     #
+#                                                                             #
+#                        Copyright (C) 2002 Rod Roark                         #
+#                                                                             #
+# See http://www.lfsmake.org/ for the most current standard version.          #
+#                                                                             #
+# These Makefiles are made available under the terms of the Artistic License, #
+# found at http://www.opensource.org/licenses/artistic-license.html.          #
+#                                                                             #
+# $Id: Config 7854 2015-02-03 07:51:55Z owes $
+#                                                                             #
+###############################################################################
+
+# URLs that are common sources of downloads.  If you're having trouble with
+# a site you should change its URL to that of a suitable mirror site.
+#
+URL_CPAN	= http://www.cpan.org/authors/id
+URL_AGNU	= http://alpha.gnu.org/gnu
+URL_DEBIAN	= http://http.us.debian.org/debian/pool/main
+URL_FEDORAH	= --no-check-certificate http://fedorahosted.org/releases
+URL_GNU		= http://ftpmirror.gnu.org
+URL_KERNEL	= http://www.kernel.org/pub
+URL_LFS		= http://www.linuxfromscratch.org/patches/downloads
+URL_BLFS	= http://www.linuxfromscratch.org/blfs/downloads
+URL_CLFS	= http://ftp.clfs.org/pub/clfs
+URL_NETFILTER	= http://www.netfilter.org/projects
+URL_SFNET	= http://downloads.sourceforge.net/sourceforge
+URL_TUWIEN	= http://gd.tuwien.ac.at
+
+# For most packages tarballs are unpacked here and then deleted after installation.
+# hack: $LFS is only defined for toolchain_make and is empty when in chroot
+DIR_SRC = $(LFS)/usr/src
+DIR_PATCHES = $(DIR_SRC)/src/patches
+
+# Files are downloaded into DIR_TMP and then moved to DIR_DL, to avoid
+# messes with partially retrieved files.  DIR_DL is where we will
+# save all the files that are downloaded.  DIR_INFO contains the
+# file lists of installed packages.
+#
+DIR_DL      = $(LFS_BASEDIR)/cache
+DIR_CHK     = $(LFS_BASEDIR)/cache/check
+DIR_INFO    = $(LFS_BASEDIR)/files_$(MACHINE)
+DIR_TEST    = $(LFS_BASEDIR)/test_$(MACHINE)/$(BUILDDATE)
+DIR_TMP     = $(LFS_BASEDIR)/cache/tmp
+
+FLOPPY_ROOT_DIR	= /tmp/floppy_root
+
+ALLFILES  := /usr/src/doc/${NAME}-${VERSION}-all-files-list.${MACHINE}.txt
+ALL_NODIR := /usr/src/doc/${NAME}-${VERSION}-all-no-dir.${MACHINE}.txt
+
+# Path where ELF exec code is found to strip, check compiled code
+# Mandatory used from /tmp for strip (don't try to strip from / or you will broke compilation)
+EXEC_PATH  := ./{bin,sbin} ./lib/{,iptables,udev} ./usr/{bin,lib,libexec,local,sbin} ./etc/Conexant
+
+###############################################################################
+# Common Macro Definitions
+###############################################################################
+
+# For each package we create a list of files that it installed under
+# log/<TARGET> name. Modified files are not identified
+#
+define FIND_FILES
+	cd $(LFS)/ && find -mount \
+	-not -path './$(TOOLS_DIR)*' -not -path './tmp*' -not -path './usr/src*' \
+	-not -path './dev*' -not -path './proc*'  -not -path './sys*' -not -path './install*'
+endef
+
+# This is common starting logic for builds.
+#
+ifneq "$(STAGE)" "toolchain"
+define PREBUILD
+	echo "====================================== Installing $(THISAPP) ..."
+	@echo "Install started; saving file list to $(DIR_SRC)/lsalr ..."
+	@if [ ! -f $(DIR_SRC)/lsalr ]; then $(FIND_FILES) > $(DIR_SRC)/lsalr; fi
+##	ccache --zero-stats 1>/dev/null
+endef
+else
+define PREBUILD
+	echo "====================================== Installing $(THISAPP) ..."
+	# Allow tests to fail when ccache is compiled
+##	-[ -f /$(TOOLS_DIR)/usr/bin/ccache ] && ccache --zero-stats 1>/dev/null
+endef
+endif
+
+# Common end-of-installation logic for Stage 2 and beyond.
+#
+ifneq "$(STAGE)" "toolchain"
+define POSTBUILD
+	@echo "Install done; saving file list to $(TARGET) ..."
+	@$(FIND_FILES) > $(DIR_SRC)/lsalrnew
+	@diff $(DIR_SRC)/lsalr $(DIR_SRC)/lsalrnew | grep '^> ' | sed 's+^> \./++' | sort > $(TARGET)_diff
+	@mv -f $(DIR_SRC)/lsalrnew $(DIR_SRC)/lsalr
+	# compare roofile ( same name as lfs script) with the list of installed files
+	# special cases
+	# - if the corresponding rootfile is not found, touch $(TARGET)_missing_rootfile
+	# - on a partial rebuild without a new file inside TARGET_diff, just touch TARGET
+	# $(DIR_INFO)/$(TARGET)_diff : result of the diff
+	# ROOTFILE : reference of include/exclude files
+	# $(TARGET)_rootfile : ROOTFILE with KVER replacement
+	# $(TARGET) : files list result with {commented|include|added} files
+	# _missing_rootfile warning only work when new files has been found
+	if [ -s "$(TARGET)_diff" ]; then \
+		LFS_SCRIPT=$(firstword $(MAKEFILE_LIST)); \
+		ROOTFILE=`find $(DIR_SRC)/config/rootfiles/common -maxdepth 1 -type f -name $$LFS_SCRIPT`; \
+		if [ "$$ROOTFILE" = "" ]; then \
+			ROOTFILE=`find $(DIR_SRC)/config/rootfiles/arch_$(MACHINE) -type f -name $$LFS_SCRIPT`; \
+		fi; \
+		if [ "$$ROOTFILE" = "" ]; then \
+			touch $(TARGET)_missing_rootfile; \
+			ROOTFILE=$(TARGET)_missing_rootfile ; \
+			echo "error $$LFS_SCRIPT not found in config/rootfiles"; \
+		fi; \
+		sed -e "s/KVER/$(KVER)/g" \
+		    -e "s/PERLVER/$(PERLVER)/g" \
+		    -e "s/MACHINE/$(MACHINE)/g" $$ROOTFILE > $(TARGET)_rootfile;	\
+		perl /usr/local/bin/install-diff.pl \
+			$(TARGET)_diff \
+			$(TARGET)_rootfile > $(TARGET);	\
+	else \
+		touch $(TARGET); \
+	fi
+	@rm -f $(TARGET)_diff $(TARGET)_rootfile
+##	(echo $(TARGET) && ccache --show-stats) >>$(LFS_BASEDIR)/log_$(MACHINE)/_build_ccache-stats.log
+	@echo "===================================== Install done for $(THISAPP)."
+endef
+else
+define POSTBUILD
+
+	@echo "===================================== Install done for $(THISAPP)."
+	touch $(TARGET)
+##	[ -f /$(TOOLS_DIR)/usr/bin/ccache ] && \
+##		(echo $(TARGET) && ccache --show-stats) >>$(LFS_BASEDIR)/log_$(MACHINE)/_build_ccache-stats.log
+endef
+endif
+
+define CHECK
+	@echo -e "$(MESSAGE)Check: $($(notdir $@))"
+	wget -T 120 -t 1 --spider -nv $($(notdir $@)) -O /dev/null
+	@touch $(DIR_CHK)/$(notdir $@)
+endef
+
+define LOAD
+	@echo -e "$(MESSAGE)Download: $($(notdir $@))"
+	wget -T 120 -t 1 -c -nv $($(notdir $@)) -O $(DIR_TMP)/$(notdir $@)
+	if [ -e $(DIR_TMP)/$(notdir $@) ]; then \
+		mv $(DIR_TMP)/$(notdir $@) $(DIR_DL); \
+	else \
+		echo "$@ failed to download"; \
+		exit 1;\
+	fi
+endef
+
+define MD5
+	# error mean file signature don't match the one in lfs script
+	# should be only the case when a md5 change but not the file name
+	# _build_06_othersrc-list.log is used to build the list of all external packages
+	if [ ! -e $(DIR_DL)/$@ ]; then \
+		echo "$(DIR_DL)/$@ doesn't exist"; \
+		exit 1; \
+	elif [ "$($@_MD5)" = `md5sum $(DIR_DL)/$@ | awk '{ print $$1 }'` ]; then \
+		echo -e "\t$@ checksum OK"; \
+		echo "$@" >>$(LFS_BASEDIR)/log_$(MACHINE)/_build_06_othersrc-list.log; \
+	else \
+		echo "\"$($@_MD5)\" different from \"`md5sum $(DIR_DL)/$@ | awk '{ print $$1 }'`\""; \
+		echo "A new md5 has been published for $@"; \
+		echo "Previous file is loaded again"; \
+		wget -T 120 -t 1 -nv $($(notdir $@)) -O $(DIR_TMP)/$(notdir $@); \
+		if [ "$($(notdir $@)_MD5)" = `md5sum $(DIR_TMP)/$(notdir $@) | awk '{ print $$1 }'` ]; then \
+			mv $(DIR_TMP)/$(notdir $@) $(DIR_DL); \
+			echo -e "\t$@ checksum OK"; \
+			echo "$@" >>$(LFS_BASEDIR)/log_$(MACHINE)/_build_06_othersrc-list.log; \
+		else \
+			echo -e "\t$@ checksum still bad"; \
+			exit 1; \
+		fi; \
+	fi
+endef
+
+###############################################################################
+# Show size of files include in FLOPPY_ROOT_DIR
+###############################################################################
+# Silly macro to workaround ls -lR ugly behavior with directories
+
+FILELIST=/tmp/file-list
+SIZELIST=/tmp/size-list
+define LIST_FILES_SIZES
+	rm -f $(FILELIST) $(SIZELIST)
+	cd $(FLOPPY_ROOT_DIR) && find . -not -path './dev*' -not -path './proc*' | sed 's!^\./!!g' | sort > $(FILELIST)
+	# List files only with path and size
+	cd $(FLOPPY_ROOT_DIR) && for file in `cat $(FILELIST)`; do \
+			[ -d $$file ] || ls -s1 $$file >> $(SIZELIST); \
+		done
+	sed -i -e 's! !\t!g' $(SIZELIST) # for a better display => space to tab
+	rm $(FILELIST)
+endef

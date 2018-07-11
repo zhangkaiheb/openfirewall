@@ -1,0 +1,37 @@
+##
+##  config.layout -- Pre-defined Installation Path Layouts
+##
+## $Id: config.layout 570 2007-10-27 17:28:07Z owes $
+##
+##  Hints:
+##  - layouts can be loaded with configure's --enable-layout=ID option
+##  - when no --enable-layout option is given, the default layout is `Apache'
+##  - a trailing plus character (`+') on paths is replaced with a
+##    `/<target>' suffix where <target> is currently hardcoded to 'apache2'.
+##    (This may become a configurable parameter at some point.)
+##
+
+#   IPCop Apache path layout (Achim: modified example GNU Layout)
+<Layout IPCop>
+	prefix:        /home/httpd
+	exec_prefix:   /usr
+	bindir:        ${exec_prefix}/bin
+	sbindir:       ${exec_prefix}/sbin
+	libdir:        ${exec_prefix}/lib
+	libexecdir:    ${exec_prefix}/libexec
+	mandir:        /usr/share/man
+	sysconfdir:    /etc/httpd/conf
+	datadir:       ${prefix}
+	installbuilddir: ${datadir}/build
+	errordir:      ${datadir}/error
+	iconsdir:      ${datadir}/icons
+	htdocsdir:     ${datadir}/html
+	manualdir:     ${datadir}/manual
+	cgidir:        ${datadir}/cgi-bin
+	includedir:    /usr/include/apache
+	localstatedir: /var
+	runtimedir:    ${localstatedir}/run
+	logfiledir:    ${localstatedir}/log/httpd
+	proxycachedir: ${localstatedir}/proxy
+</Layout>
+

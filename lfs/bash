@@ -1,0 +1,168 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: bash 7800 2015-01-08 10:49:25Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = bash
+VER        = 4.4.18
+# Unfortunately need to manually add individual patches in several places.
+# PATCHLEVEL for version comparing only.
+#PATCHLEVEL = 4.3.33
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.gz
+#DL_FROM    = $(URL_GNU)/$(PKG_NAME)
+DL_FROM    = http://ftp.gnu.org/gnu/bash
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+# patches 1 to 24 are together
+#PATCH1  = $(THISAPP)-upstream_fixes-3.patch
+#PATCH25 = $(PKG_NAME)43-025
+#PATCH26 = $(PKG_NAME)43-026
+#PATCH27 = $(PKG_NAME)43-027
+#PATCH28 = $(PKG_NAME)43-028
+#PATCH29 = $(PKG_NAME)43-029
+#PATCH30 = $(PKG_NAME)43-030
+#PATCH31 = $(PKG_NAME)43-031
+#PATCH32 = $(PKG_NAME)43-032
+#PATCH33 = $(PKG_NAME)43-033
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+objects = $(DL_FILE)
+#	$(PATCH1) \
+#	$(PATCH25).patch $(PATCH26).patch $(PATCH27).patch $(PATCH28).patch $(PATCH29).patch \
+#	$(PATCH30).patch $(PATCH31).patch $(PATCH32).patch $(PATCH33).patch
+
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+#$(PATCH1)  = $(URL_LFS)/$(PKG_NAME)/$(PATCH1)
+#$(PATCH25).patch = $(DL_FROM)/$(THISAPP)-patches/$(PATCH25)
+#$(PATCH26).patch = $(DL_FROM)/$(THISAPP)-patches/$(PATCH26)
+#$(PATCH27).patch = $(DL_FROM)/$(THISAPP)-patches/$(PATCH27)
+#$(PATCH28).patch = $(DL_FROM)/$(THISAPP)-patches/$(PATCH28)
+#$(PATCH29).patch = $(DL_FROM)/$(THISAPP)-patches/$(PATCH29)
+#$(PATCH30).patch = $(DL_FROM)/$(THISAPP)-patches/$(PATCH30)
+#$(PATCH31).patch = $(DL_FROM)/$(THISAPP)-patches/$(PATCH31)
+#$(PATCH32).patch = $(DL_FROM)/$(THISAPP)-patches/$(PATCH32)
+#$(PATCH33).patch = $(DL_FROM)/$(THISAPP)-patches/$(PATCH33)
+
+$(DL_FILE)_MD5 = 518e2c187cc11a17040f0915dddce54e
+#$(PATCH1)_MD5  = 3266ce3d2f0aa647d4ef068e46899246
+#$(PATCH25).patch_MD5 = 193c06f578d38ffdbaebae9c51a7551f
+#$(PATCH26).patch_MD5 = 922578e2be7ed03729454e92ee8d3f3a
+#$(PATCH27).patch_MD5 = 8ff6948b16f2db5c29b1b9ae1085bbe7
+#$(PATCH28).patch_MD5 = dd51fa67913b5dca45a702b672b3323f
+#$(PATCH29).patch_MD5 = 0729364c977ef4271e9f8dfafadacf67
+#$(PATCH30).patch_MD5 = efb709fdb1368945513de23ccbfae053
+#$(PATCH31).patch_MD5 = 236df1ac1130a033ed0dbe2d2115f28f
+#$(PATCH32).patch_MD5 = 2360f7e79cfb28526f80021025ea5909
+#$(PATCH33).patch_MD5 = b551c4ee7b8713759e4143499d0bbd48
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
+
+	# Combined patch from LFS
+#	cd $(DIR_APP) && patch -p1 -i $(DIR_DL)/$(PATCH1)
+	# For patches directly from GNU bash
+	# Same bash version doesn't like the variable evaluation, use a separate patch var
+#	cd $(DIR_APP) && for nb in `seq 25 33`; do patch="$(DIR_DL)/$(PKG_NAME)43-0$$nb.patch";echo "using $$patch"; patch -p0 -i $$patch; done
+
+	# In bash-3.2, configure and configure.in are patched in that order
+	# if they are not in the same second, autoconf is called.
+	# Toolchain compilation fail if autoconf is not available on the building machine
+	# uncomment to protect against autoconf call if new patch require that
+	# cd $(DIR_APP) && touch configure
+
+ifeq "$(STAGE)" "toolchain"
+	cd $(DIR_APP) && ./configure	--prefix=/$(TOOLS_DIR) \
+					--without-bash-malloc \
+					--disable-nls
+	cd $(DIR_APP) && make
+ifeq "$(RUNNING_TEST)" "yes"
+	-cd $(DIR_APP) && make tests &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+	cd $(DIR_APP) && make install
+	cd $(DIR_APP) && ln -sf bash /$(TOOLS_DIR)/bin/sh
+endif
+
+ifeq "$(STAGE)" "base"
+	# build the right list of installed files even if we cheat for stage2 symlinks to toolchain
+	sed -i -e '/\.\/bin\/sh$$/d' -e '/\.\/bin\/bash$$/d' /usr/src/lsalr
+	cd $(DIR_APP) && ./configure	--prefix=/usr \
+					--bindir=/bin \
+					--without-bash-malloc \
+					--disable-nls \
+					--with-installed-readline
+	cd $(DIR_APP) && make
+ifeq "$(RUNNING_TEST)" "yes"
+	cd $(DIR_APP) && sed -i 's/LANG/LC_ALL/' tests/intl.tests
+	cd $(DIR_APP) && sed -i 's@tests@& </dev/tty@' tests/run-test
+	cd $(DIR_APP) && chown -R nobody ./
+	-cd $(DIR_APP) && su nobody -s /bin/bash -c "make tests" &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+endif
+	cd $(DIR_APP) && make install
+	# contrary to LFS, do not try to 'exec /bin/bash --login +h' or it's hang
+endif
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

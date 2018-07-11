@@ -1,0 +1,8 @@
+#etc/fcdsl
+#etc/fcdsl/fcdsl.conf
+#lib/modules/KVER/extra/fcdsl.ko.gz
+#lib/modules/KVER/extra/license.txt
+#usr/lib/isdn
+#usr/lib/isdn/fdslbase.bin
+#var/lib/fritz
+#var/lib/fritz/fcdsl-lib.o

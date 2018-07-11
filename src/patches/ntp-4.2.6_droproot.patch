@@ -1,0 +1,186 @@
+borrowed from fedora
+http://pkgs.fedoraproject.org/gitweb/?p=ntp.git;a=tree
+patch ntpdate to droot rights to ntp user
+dropt html part of the patch as not applying on p4-RC2 and not used by us
+--- ntp-4.2.4p0/ntpdate/ntpdate.c.droproot	2007-02-22 12:02:08.000000000 +0100
++++ ntp-4.2.4p0/ntpdate/ntpdate.c	2007-03-07 16:06:26.000000000 +0100
+@@ -48,6 +48,12 @@
+ 
+ #include <arpa/inet.h>
+ 
++/* Linux capabilities */
++#include <sys/capability.h>
++#include <sys/prctl.h>
++#include <pwd.h>
++#include <grp.h>
++
+ #ifdef SYS_VXWORKS
+ # include "ioLib.h"
+ # include "sockLib.h"
+@@ -152,6 +158,11 @@
+ int unpriv_port = 0;
+ 
+ /*
++ * Use capabilities to drop privileges and switch uids
++ */
++char *server_user;
++
++/*
+  * Program name.
+  */
+ char *progname;
+@@ -293,6 +304,88 @@
+ static ni_namelist *getnetinfoservers (void);
+ #endif
+ 
++/* This patch is adapted (copied) from Chris Wings drop root patch
++ * for xntpd.
++ */
++void drop_root(uid_t server_uid, gid_t server_gid)
++{
++  cap_t caps;
++
++  if (prctl(PR_SET_KEEPCAPS, 1)) {
++		if (syslogit) {
++			msyslog(LOG_ERR, "prctl(PR_SET_KEEPCAPS, 1) failed");
++		}
++		else {
++			fprintf(stderr, "prctl(PR_SET_KEEPCAPS, 1) failed.\n");
++		}
++    exit(1);
++  }
++
++  if ( setgroups(0, NULL) == -1 ) {
++		if (syslogit) {
++			msyslog(LOG_ERR, "setgroups failed.");
++		}
++		else {
++			fprintf(stderr, "setgroups failed.\n");
++		}
++    exit(1);
++  }
++
++  if ( setegid(server_gid) == -1 || seteuid(server_uid) == -1 ) {
++		if (syslogit) {
++			msyslog(LOG_ERR, "setegid/seteuid to uid=%d/gid=%d failed.", server_uid,
++							server_gid);
++		}
++		else {
++			fprintf(stderr, "setegid/seteuid to uid=%d/gid=%d failed.\n", server_uid,
++							server_gid);
++		}
++    exit(1);
++  }
++
++  caps = cap_from_text("cap_sys_time=epi");
++  if (caps == NULL) {
++		if (syslogit) {
++			msyslog(LOG_ERR, "cap_from_text failed.");
++		}
++		else {
++			fprintf(stderr, "cap_from_text failed.\n");
++		}
++    exit(1);
++  }
++
++  if (cap_set_proc(caps) == -1) {
++		if (syslogit) {
++			msyslog(LOG_ERR, "cap_set_proc failed.");
++		}
++		else {
++			fprintf(stderr, "cap_set_proc failed.\n");
++		}
++    exit(1);
++  }
++  
++  /* Try to free the memory from cap_from_text */
++  cap_free( caps );
++
++  if ( setregid(server_gid, server_gid) == -1 ||
++       setreuid(server_uid, server_uid) == -1 ) {
++		if (syslogit) {
++			msyslog(LOG_ERR, "setregid/setreuid to uid=%d/gid=%d failed.",
++							server_uid, server_gid);
++		}
++		else {
++			fprintf(stderr, "setregid/setreuid to uid=%d/gid=%d failed.\n",
++							server_uid, server_gid);
++		}
++    exit(1);
++  }
++
++	if (syslogit) {
++		msyslog(LOG_DEBUG, "running as uid(%d)/gid(%d) euid(%d)/egid(%d).",
++						getuid(), getgid(), geteuid(), getegid());
++	}
++}
++
+ /*
+  * Main program.  Initialize us and loop waiting for I/O and/or
+  * timer expiries.
+@@ -338,6 +447,7 @@
+ 	clear_globals();
+ #endif
+ 
++	server_user = NULL;
+ 	init_lib();	/* sets up ipv4_works, ipv6_works */
+
+ 	/* Check to see if we have IPv6. Otherwise default to IPv4 */
+@@ -367,7 +460,7 @@
+ 	/*
+ 	 * Decode argument list
+ 	 */
+-	while ((c = ntp_getopt(argc, argv, "46a:bBde:k:o:p:qst:uv")) != EOF)
++ 	while ((c = ntp_getopt(argc, argv, "46a:bBde:k:o:p:qst:uvU:")) != EOF)
+ 		switch (c)
+ 		{
+ 		case '4':
+@@ -445,6 +538,14 @@
+ 		case 'u':
+ 			unpriv_port = 1;
+ 			break;
++ 		case 'U':
++ 			if (ntp_optarg) {
++ 				server_user = strdup(ntp_optarg);
++ 			}
++ 			else {
++ 				++errflg;
++ 			}
++ 			break;
+ 		case '?':
+ 			++errflg;
+ 			break;
+@@ -454,7 +555,7 @@
+ 	
+ 	if (errflg) {
+ 		(void) fprintf(stderr,
+-		    "usage: %s [-46bBdqsuv] [-a key#] [-e delay] [-k file] [-p samples] [-o version#] [-t timeo] server ...\n",
++		    "usage: %s [-46bBdqsuv] [-a key#] [-e delay] [-k file] [-p samples] [-o version#] [-t timeo] [-U username] server ...\n",
+ 		    progname);
+ 		exit(2);
+ 	}
+@@ -574,6 +675,24 @@
+ 	initializing = 0;
+ 	was_alarmed = 0;
+ 
++	if (server_user) {
++		struct passwd *pwd = NULL;
++
++		/* Lookup server_user uid/gid before chroot/chdir */
++		pwd = getpwnam( server_user );
++		if ( pwd == NULL ) {
++			if (syslogit) {
++				msyslog(LOG_ERR, "Failed to lookup user '%s'.", server_user);
++			}
++			else {
++				fprintf(stderr, "Failed to lookup user '%s'.\n", server_user);
++			}
++			exit(1);
++		}
++		drop_root(pwd->pw_uid, pwd->pw_gid);
++	}
++
++
+ 	while (complete_servers < sys_numservers) {
+ #ifdef HAVE_POLL_H
+ 		struct pollfd* rdfdes;

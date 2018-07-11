@@ -1,0 +1,109 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: glibc 7834 2015-01-29 13:33:57Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = libstdc++
+VER        = 7.3.0
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+#DL_FILE    = $(THISAPP).tar.xz
+DL_FILE    = gcc-7.3.0.tar.xz
+#DL_FROM    = $(URL_GNU)/$(PKG_NAME)
+#DL_FROM    = http://ftp.gnu.org/gnu/glibc
+DIR_APP    = $(DIR_SRC)/gcc-7.3.0
+
+# Do not use hardening options to avoid breaking the build
+# we pass CFLAGS with configparms
+CXXFLAGS   =
+LDFLAGS    =
+
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+#objects = $(DL_FILE)
+
+#$(DL_FILE)				= $(DL_FROM)/$(DL_FILE)
+
+#$(DL_FILE)_MD5			= 898cd5656519ffbc3a03fe811dd89e82
+
+install : $(TARGET)
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) :
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) $(DIR_SRC)/libstdc++-build
+	@cd $(DIR_SRC) && xz -dc $(DIR_DL)/$(DL_FILE) | tar xf -
+
+	@mkdir $(DIR_SRC)/libstdc++-build
+
+ifeq "$(STAGE)" "toolchain"
+	# force no nls with ac_cv_prog_MSGFMT="" (and spare 2 MB)
+	# ranlib check is not reliable and fail when it is run after the same
+	# second as the created archive.
+	# Silent that noise on log with libc_cv_ranlib_necessary=no
+	cd $(DIR_SRC)/libstdc++-build &&				\
+		../gcc-7.3.0/libstdc++-v3/configure				\
+			--prefix=/$(TOOLS_DIR)			\
+			--host=$(LFS_TGT)			\
+			--disable-multilib              \
+			--disable-nls                   \
+			--disable-libstdcxx-threads     \
+			--disable-libstdcxx-pch         \
+			--with-gxx-include-dir=/$(TOOLS_DIR)/$(LFS_TGT)/include/c++/7.3.0
+
+	cd $(DIR_SRC)/libstdc++-build && make -j$(PARALLELISM)
+	cd $(DIR_SRC)/libstdc++-build && make install
+endif
+
+ifeq "$(STAGE)" "base"
+
+endif
+
+	# Cleanup
+	@rm -rf $(DIR_APP) $(DIR_SRC)/libstdc++-build
+	@$(POSTBUILD)

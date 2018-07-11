@@ -1,0 +1,163 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: gdb 8018 2016-01-01 11:16:56Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = gdb
+VER        = 7.10.1
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = $(PKG_NAME)-$(VER)
+DL_FILE    = $(THISAPP).tar.xz
+DL_FROM    = $(URL_GNU)/$(PKG_NAME)
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+# -g is needed by a few tests, particulary when gdb test gdb
+# -U_FORTIFY_SOURCE is needed by some tests
+CFLAGS    += -U_FORTIFY_SOURCE -g
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+objects = $(DL_FILE)
+
+$(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+
+$(DL_FILE)_MD5 = 39e654460c9cdd80200a29ac020cfe11
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
+	@$(PREBUILD)
+	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
+	# See WARNING, if we stop before tweaked spec removal
+	rm -f `dirname $$(gcc --print-libgcc-file-name)`/specs
+
+	# Static build with LDFLAGS='-static' and hardened glibc fail.
+	# Compiling hardened would need patching glibc (http://bugs.gentoo.org/293637 ).
+	# Doable to compile using CFLAGS+=-U_FORTIFY_SOURCE and using LDFLAGS+='-static'
+	# but all needed libs are already installed on the machine we want to debug, so actually not using static build
+	# --disable-install-libiberty still install libiberty.a on 7.2
+	# Even --with-system-readline, internal readline-5.1 is always compiled : bug
+	cd $(DIR_APP) && ./configure \
+				--build=$(TARGET_2) \
+				--prefix=/usr \
+				--disable-nls \
+				--disable-install-libbfd \
+				--disable-install-libiberty \
+				--disable-libada \
+				--disable-objc-gc \
+				--disable-sim \
+				--disable-tui \
+				--with-system-readline \
+				--with-python=no
+
+	cd $(DIR_APP) && make -j $(PARALLELISM)
+
+ifeq "$(RUNNING_TEST)" "yes"
+	# pie tests does not like gcc pie as default behavior
+	# Tests not always support CFLAGS, so this is the only way to alter our patched gcc back to normal
+
+	# WARNING : if you stop between this sed, and specs file removal : gcc behavior is different and unhardened
+	sed -e 's@/$(TOOLS_DIR)$(LINKER)@$(LINKER)@g' \
+		-e '/\*startfile_prefix_spec:/{n;s@.*@/usr/lib/ @}' \
+		/$(TOOLS_DIR)/etc/gcc-unhardened.specs \
+		> `dirname $$(gcc --print-libgcc-file-name)`/specs
+
+	# We don't care about those tests
+	cd $(DIR_APP) && sed -i -e 's/gdb\.ada //' -e 's/gdb\.fortran //' \
+				-e 's/gdb\.java //' -e 's/gdb\.objc //' \
+				-e 's/gdb\.pascal //' -e 's/gdb\.python //' \
+				gdb/testsuite/Makefile
+	cd $(DIR_APP) && rm -rf gdb/testsuite/gdb.{ada,fortran,java,objc,pascal,python}
+	# Some tests need gcc-4.5 features at least and will fail with gcc-4.4
+	# like cc1: error: unrecognized command line option "-fsplit-stack"
+
+	# I try to avoid test timeout, I had some with laptop Intel Celeron CPU 540 @ 1.86GHz
+	# First, create site.exp, then we could add a timout value there
+	cd $(DIR_APP)/gdb/testsuite && make site.exp
+	# Some timeout still remain, even with 120 or 240 value
+	cd $(DIR_APP)/gdb/testsuite && echo 'set gdb_test_timeout 60' >>site.exp
+	# Some tests require core dump usage (ulimit -c unlimited)
+	# If apport is plugged to /proc/sys/kernel/core_pattern, gdb will fail to find the core dump.
+	# In that case, you may want switch to root and echo "core.%e.%p" > /proc/sys/kernel/core_pattern
+	# and restore pipe to apport after the tests
+	-cd $(DIR_APP) && \
+		bash -c 'ulimit -c unlimited; \
+			make -j 1 -k check ' &> $(DIR_TEST)/$(THISAPP)-$(STAGE_ORDER).log
+	# Should have approximately 41 failures with core dump working,
+	# philosopher error randomly vary (from machine to machine?)
+
+	# restore gcc default hardened behavior
+	rm `dirname $$(gcc --print-libgcc-file-name)`/specs
+endif
+
+	# install gdb directly to not replace binutils copy of lib{bfd,opcodes}
+	# and not install again the .la files that produce recompilation failure with cairo
+	cd $(DIR_APP) && install gdb/gdb /usr/bin
+	cd $(DIR_APP) && install gdb/gdbserver/gdbserver /usr/bin
+	# and strip them, so they are not enormous and directly usable by copy
+	strip --strip-all /usr/bin/gdb{,server}
+
+	# On installed ipcop, copy manually unstripped program with unstripped corresponding lib (ldd <program>),
+	# and copy gdb (or gdbserver to debug from network)
+	# To debug setup for example, use, gdb --args /usr/local/bin/setup --install
+	# Then, r to run. Once segfault has been reached, bt
+
+	@rm -rf $(DIR_APP)
+	@$(POSTBUILD)

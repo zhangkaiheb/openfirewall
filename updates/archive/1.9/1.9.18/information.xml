@@ -1,0 +1,26 @@
+<ipcop>
+    <update>
+        <version>1.9.18</version>
+        <releasedate>2011-04-06</releasedate>
+        <size>0</size>
+        <description>Language updates.&lt;br /&gt;
+        Upgrade acpid to 2.0.7, apache to 2.2.17, cairo to 1.10.2,
+        conntrack-tools to 1.0.0, coreutils to 8.10, dejavu-fonts to 2.32,
+        dhcpcd to 5.2.11, dnsmqsq to 2.57, e2fsprogs to 1.41.14, ethtool to 2.6.36, freetype to 2.4.4,
+        glib to 2.26.1, glibc to 2.11.3, gnupg to 1.4.11, grep to 2.7, hdparm to 9.36,
+        iptables to 1.4.10, iputils to s20101006, iw to 0.9.21, libcap to 2.20,
+        libnetfilter_conntrack to 0.9.1, libnl to 2.0, libpng to 1.5.0,
+        libxml2 to 2.7.8, linux-atm to 2.5.2, lzo to 2.04, ncurses to 5.8, openssh to 5.8, openssl to 0.9.8r,
+        openswan to 2.6.33, openvpn to 2.1.4, pango to 1.28.3, pixman to 0.20.2, psmisc to 22.13,
+        rrdtool to 1.4.5, smartmontools to 5.40, sqlite to 3.7.4, tar to 1.26, traceroute to 2.0.16,
+        tzdata to 2011e, usb-modeswitch to 1.1.7, usbutils to 001, vim to 7.3&lt;br /&gt;
+        Fixed pcre-8.11 with --enable-unicode-properties,
+        pptp recompiled with hardening flags. Added krb5 1.9, sendEmail 1.56. Remove libmpfr.&lt;br /&gt;
+        Upgrade squid to 3.1.11. Note: squid.conf is not automatically updated
+        by this upgrade. You &lt;b&gt;must&lt;/b&gt; manually re-save the Web Proxy settings,
+        using the GUI, before the Web Proxy server can start.
+        </description>
+        <previousversion>1.9.17</previousversion>
+        <nextversion>1.9.19</nextversion>
+    </update>
+</ipcop>

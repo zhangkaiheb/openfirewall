@@ -1,0 +1,108 @@
+###############################################################################
+# This file is part of the IPCop Firewall.                                    #
+#                                                                             #
+# IPCop is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# IPCop is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with IPCop; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for IPCop build                                #
+#                                                                             #
+# $Id: ipcop-progs 7625 2014-07-16 04:09:15Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = ipcop-progs
+HOST_ARCH  = all
+OTHER_SRC  = yes
+
+THISAPP    = ipcop-progs
+DIR_APP    = $(DIR_SRC)/progs
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+install : $(TARGET)
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST)) $(DIR_SRC)/src/rc.d/* $(DIR_SRC)/src/progs/* $(DIR_SRC)/src/scripts/* $(DIR_SRC)/src/libs/*
+	@$(PREBUILD)
+
+	# rc.d scripts
+	mkdir -p /etc/rc.d
+	cp -fv $(DIR_SRC)/src/rc.d/rc.* /etc/rc.d
+	chmod -R 755 /etc/rc.d
+
+	# Scripts
+	cp -fv $(DIR_SRC)/src/scripts/* /usr/local/bin/
+	for i in `find $(DIR_SRC)/src/scripts -maxdepth 1 -type f`; do \
+		chmod 755 /usr/local/bin/`basename $$i`; \
+	done
+	# Move flash install script
+	mv -f /usr/local/bin/flashfinal.sh /usr/local/sbin/flashfinal.sh
+	# Move updatekernel script
+	mv -f /usr/local/bin/updatekernel.pl /usr/local/sbin/updatekernel.pl
+	# Move mkinitramfs script
+	mv -f /usr/local/bin/mkinitramfs /sbin/mkinitramfs
+	# Move usb modeswitch script
+	mv -f /usr/local/bin/usb_modeswitch.sh /usr/sbin/usb_modeswitch.sh
+	# Symlink compile info
+	for i in cc configure gcc make Make; do \
+		ln -sf /usr/local/bin/compile.help "/usr/local/bin/$$i"; \
+	done
+
+	# lib files containing helper subs
+	mkdir -p /usr/lib/ipcop
+	cp -fv $(DIR_SRC)/src/libs/* /usr/lib/ipcop
+	for i in `find $(DIR_SRC)/src/libs -maxdepth 1 -type f`; do \
+		chmod 644 /usr/lib/ipcop/`basename $$i`; \
+		chown root.root /usr/lib/ipcop/`basename $$i`; \
+	done
+	# Modify variable in general-functions.pl
+	sed -i	-e "s+VERSION+$(VERSION)+g" \
+		-e "s+MACHINE+$(MACHINE)+g"	/usr/lib/ipcop/general-functions.pl
+
+	# miscellaneous programs
+	@rm -rf $(DIR_APP) $(DIR_SRC)/installer && cp -R $(DIR_SRC)/src/progs/ $(DIR_SRC)
+
+	cp -R $(DIR_SRC)/src/installer/ $(DIR_SRC)
+
+	cd $(DIR_SRC)/installer && make CFLAGS="$(CFLAGS) -Wall \
+			-DNAME='\"$(NAME)\"' -DSNAME='\"$(SNAME)\"'" helper
+	cd $(DIR_APP) && make CFLAGS="$(CFLAGS) -Wall \
+			-DNAME='\"$(NAME)\"' -DSNAME='\"$(SNAME)\"'"
+	cd $(DIR_APP) && make install
+
+	@rm -rf $(DIR_APP) $(DIR_SRC)/installer
+	@$(POSTBUILD)
