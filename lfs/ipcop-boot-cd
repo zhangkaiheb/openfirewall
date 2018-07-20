@@ -166,6 +166,10 @@ $(TARGET) : $(patsubst %,$(DIR_DL)/%,$(objects))
 	# Create a tmp directory
 	cd /tmp && mkdir -p tmp
 
+	#####
+	cd /tmp && mkdir -p sys
+	cd /tmp && mkdir -p proc
+
 	# Create a tarball
 	cd /tmp && tar -czf /$(INSTALLER_DIR)/cdrom/ipcop-$(VERSION).tar.gz .
 	cd /tmp && rm -rf *

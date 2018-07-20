@@ -98,6 +98,15 @@ $(TARGET) :
 	cp -a /dev/console					$(INITRAMFS_DIR)/dev/
 	cp -a /dev/null						$(INITRAMFS_DIR)/dev/
 	cp -a /dev/tty*						$(INITRAMFS_DIR)/dev/
+	cp -a /dev/sr*						$(INITRAMFS_DIR)/dev/
+	cp -af /dev/block					$(INITRAMFS_DIR)/dev/
+	cp -a /dev/zero						$(INITRAMFS_DIR)/dev/
+	mknod  -m=660 $(INITRAMFS_DIR)/dev/sda   b 8 0
+	mknod  -m=660 $(INITRAMFS_DIR)/dev/sda1  b 8 1
+	mknod  -m=660 $(INITRAMFS_DIR)/dev/sda2  b 8 2
+	mknod  -m=660 $(INITRAMFS_DIR)/dev/sdb   b 8 16
+	mknod  -m=660 $(INITRAMFS_DIR)/dev/sdb1  b 8 17
+	mknod  -m=660 $(INITRAMFS_DIR)/dev/sdb2  b 8 18
 
 	# Install udev
 	install -D /sbin/udevd					$(INITRAMFS_DIR)/sbin
