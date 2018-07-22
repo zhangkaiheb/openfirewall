@@ -225,8 +225,8 @@ $(TARGET) :
 	rm -f $(INITRAMFS_DIR)/etc/init-mini-initramfs
 
 	# Copy the filesystem modules
-###	mkdir -p $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs
-###	cp -af /lib/modules/$(KVER)/kernel/fs/*			$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs
+	mkdir -p $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs
+	cp -af /lib/modules/$(KVER)/kernel/fs/*			$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs
 
 	# For ATA/IDE disks
 	mkdir -p $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
@@ -234,9 +234,9 @@ $(TARGET) :
 ###		/lib/modules/$(KVER)/kernel/drivers/ide \
 ###								$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
 ###
-###	# For SCSI disks
-###	cp -af	/lib/modules/$(KVER)/kernel/drivers/scsi \
-###								$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+# For SCSI disks
+	cp -af	/lib/modules/$(KVER)/kernel/drivers/scsi \
+							$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
 
 	# Sparcs don't have pcmcia, skip
 ifneq "$(MACHINE)" "sparc"
@@ -257,12 +257,12 @@ endif
 ###								$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
 
 	# Copy the NETWORK modules
-###	cp -af /lib/modules/$(KVER)/kernel/drivers/net		$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+	cp -af /lib/modules/$(KVER)/kernel/drivers/net		$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
 	# a few of them are not needed there as configuration is later than initramfs/install
 ###	rm -rf $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/net/{bonding,bsd_comp.ko.gz,ppp*,tun.ko,usb,wireless}
 
 	# Copy some additional modules and remove those not required by nics and blocks drivers
-###	cp -af /lib/modules/$(KVER)/kernel/lib 			$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel
+	cp -af /lib/modules/$(KVER)/kernel/lib 			$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel
 ###	rm -f $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/lib/{crc-itu-t,ts_*}.ko.gz
 
 	# Raid
