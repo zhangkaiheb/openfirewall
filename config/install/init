@@ -232,7 +232,7 @@ start_rescue_mode()
 #########################################################################################################
 
 # Link /proc/mounts to /etc/mtab to make mke2fs happy and not need -n with mount
-######ln -s /proc/mounts /etc/mtab
+ln -s /proc/mounts /etc/mtab
 
 # Mount /proc first so we know in what mode we booted
 echo -ne "Mounting /proc ... "
@@ -243,8 +243,7 @@ test_ok
 MACHINE=`uname -m`
 
 # Set default TTY, can overwrite with console=
-####CURRENT_TTY=tty1
-CURRENT_TTY=console
+CURRENT_TTY=tty1
 
 # Now check what mode=, root=, and init= parameters we passed to the kernel
 for i in $(cat /proc/cmdline); do
@@ -313,7 +312,7 @@ if [ x"${MACHINE}" == x"ppc" -a -f /FLOPPYBOOT ]; then
 fi
 
 echo -ne "Mounting /dev ... "
-mount -t tmpfs tmpfs /dev -o mode=755
+####mount -t tmpfs tmpfs /dev -o mode=755
 test_ok
 # Create /dev/null to avoid udevd message
 mknod -m0666 /dev/null c 1 3
