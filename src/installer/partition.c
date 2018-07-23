@@ -257,7 +257,7 @@ int make_partitions(char *dev, char *dev2, long int disk_size, int part_options,
          #4 disk size (in MiB) as seen by parted <device> unit MiB print
          #5 install type (onedisk , raid , flash) */
     snprintf(command, STRING_SIZE, "/usr/bin/disk-partition.sh %s %s %ld %ld %s",
-             arch, dev, root_partition, disk_size, install_type);
+             arch, dev, root_partition*1024*2, disk_size*1024*2, install_type);
     if (mysystem(command)) {
         fprintf(flog, "error partitioning %s\n", device);
         goto PARTITION_EXIT;
@@ -266,7 +266,7 @@ int make_partitions(char *dev, char *dev2, long int disk_size, int part_options,
     if (raid) {
         /* Repeat partitioning for 2nd disk */
         snprintf(command, STRING_SIZE, "/usr/bin/disk-partition.sh %s %s %ld %ld %s",
-                 arch, dev2, root_partition, disk_size, install_type);
+                 arch, dev2, root_partition*1024*2, disk_size*1024*2, install_type);
         if (mysystem(command)) {
             fprintf(flog, "error partitioning %s\n", device2);
             goto PARTITION_EXIT;
@@ -485,7 +485,7 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
 
     statuswindow(72, 5, ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_MOUNTING_ROOT_FILESYSTEM"));
     /* load ext3 now */
-    if (mysystem("/sbin/modprobe ext3") || mysystem("/bin/mount /harddisk/")) {
+    if (mysystem("/sbin/modprobe ext4") || mysystem("/bin/mount /harddisk/")) {
         newtPopWindow();
         errorbox(ipcop_gettext("TR_UNABLE_TO_MOUNT_ROOT_FILESYSTEM"));
         return FAILURE;
@@ -629,7 +629,7 @@ static int create_initramfs(void)
     }
 
     /* TODO be more specific which modules to include */
-    fprintf(handle, "ext3\njbd\n");
+    fprintf(handle, "ext4\njbd2\n");
     fprintf(handle, "ehci-hcd\nohci-hcd\nuhci-hcd\nhid\nusbhid\n");
 
     //add each module to module-list
@@ -679,7 +679,7 @@ static int make_bootable(char *dev, char *dev2, int part_options)
     snprintf(device, STRING_SIZE, "/dev/%s", dev);
     snprintf(device2, STRING_SIZE, "/dev/%s", dev2);
 
-#if defined (__i386__)
+#if defined(__i386__) || defined(__x86_64__)
     snprintf(bigstring, STRING_SIZE, "/bin/sed -i -e 's+KVER+%s+g' ", helper_kernel_release());
 
     if (raid) {
