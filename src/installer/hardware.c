@@ -543,8 +543,8 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
                 // mysystem(command);
                 // hardwareadd(specialmodule, "ide-generic", NULL, NULL, NULL, 0, 0);
                 /* Kernel >= 2.6.28 have ide-gd_mod instead of ide-disk */
-                snprintf(command, STRING_SIZE, "/sbin/modprobe %s", "ide-gd_mod");
-                hardwareadd(specialmodule, "ide-gd_mod", NULL, NULL, NULL, 0, 0);
+                ////snprintf(command, STRING_SIZE, "/sbin/modprobe %s", "ide-gd_mod");
+                ////hardwareadd(specialmodule, "ide-gd_mod", NULL, NULL, NULL, 0, 0);
             }
 
             /* USB, probe */
