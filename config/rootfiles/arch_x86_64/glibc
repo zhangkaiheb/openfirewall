@@ -51,7 +51,7 @@ sbin/ldconfig
 #usr/bin/getconf
 #usr/bin/getent
 #usr/bin/iconv
-#usr/bin/ldd
+usr/bin/ldd
 #usr/bin/lddlibc4
 #usr/bin/locale
 #usr/bin/localedef
@@ -1435,3 +1435,5 @@ usr/share/i18n/charmaps/UTF-8.gz
 #usr/share/locale/zh_TW/LC_MESSAGES/libc.mo
 var/cache/ldconfig
 var/cache/ldconfig/aux-cache
+lib64/ld-linux-x86-64.so.2
+lib64/ld-lsb-x86-64.so.3
