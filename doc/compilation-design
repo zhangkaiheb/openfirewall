@@ -1,4 +1,4 @@
-IPCop is compiled following LFS method with first step cross-compiled.
+OpenFirewall is compiled following LFS method with first step cross-compiled.
 Some deviations are inspired by DIY, HLFS or distrib like debian/Fedora/Gentoo.
 In particular, binutils, gcc, glibc are mostly compiled like debian (on sid actually).
 
@@ -28,8 +28,8 @@ TODO
 - evaluate debian gcc-hash-style-gnu patch wich add hash-style=gnu in gcc specs (Fedora do that since long time)
 - evaluate adding -Wl,-O1 to CFLAGS or gcc specs
 - evaluate debian gcc-default-format-security patch?
-- TEXREL on libs (not so good, seen for example using scanelf -qtR ./build_i486/ipcop/*
-- check RPATH (look not to bad, seen for example using scanelf -qrR ./build_i486/ipcop/* )
+- TEXREL on libs (not so good, seen for example using scanelf -qtR ./build_i486/openfirewall/*
+- check RPATH (look not to bad, seen for example using scanelf -qrR ./build_i486/openfirewall/* )
 
 * note scanelf from pax-utils is not a requirement but easier to work
 mklibs-readelf (already available) may be used for RPATH.

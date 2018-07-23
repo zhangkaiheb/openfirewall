@@ -2,7 +2,7 @@ Boot from PXE instructions on x86 machines
 
 To boot a machine with pxe, you need to :
 - have a net card with a boot prom and a not too old boot agent
-- have a dhcp server (could be another IPCop)
+- have a dhcp server (could be another OpenFirewall)
 - have a tfpt server running
 
 To continue installation from network, you probably need an http server too.
@@ -47,8 +47,8 @@ http://www.realtek.com.tw/downloads/downloads1-3.aspx?series=16&Software=True
 * Installing a tftp server *
 You probably should install tftp-hpa from you distrib package.
 Installing another tftp server is possible.
-Using ipcop as tftp server could be possible.
-But ipcop can't act as http server as it always serve https only
+Using openfirewall as tftp server could be possible.
+But openfirewall can't act as http server as it always serve https only
 
 Here is describe how to install tftp-hpa
 - build from source with configure && make install
@@ -57,22 +57,22 @@ Here is describe how to install tftp-hpa
 	- configuration is in /etc/conf.d/in.tftpd, set INTFTPD_PATH="/var/tftp"
 	- start the server with /etc/init.d/in.tftpd start
 
-- install IPCop netboot package inside tftp root (/var/tftp in previous example)
-	- unpack ipcop-<VERSION>-install-netboot-i486 package with
-	tar -C /var/tftp -xvzf ipcop-<VERSION>-install-netboot-i486.tgz
+- install OpenFirewall netboot package inside tftp root (/var/tftp in previous example)
+	- unpack openfirewall-<VERSION>-install-netboot-i486 package with
+	tar -C /var/tftp -xvzf openfirewall-<VERSION>-install-netboot-i486.tgz
 	- make the dhcp server find our pxelinux.0 on root, so you don't need
 	to change dhcp settings booting various distrib
 	cd /var/tftp
-	ln -sf ipcop/<VERSION>/i486/pxelinux.0 pxelinux.0
-	- link or copy ipcop-pxe-<VERSION>.model to a file whose name start with '01-'
+	ln -sf openfirewall/<VERSION>/i486/pxelinux.0 pxelinux.0
+	- link or copy openfirewall-pxe-<VERSION>.model to a file whose name start with '01-'
 	  and end with the MAC address of the card in lower case.
 	cd /var/tftp/pxelinux.cfg
-	ln -sf ipcop-pxe-<VERSION>.model 01-00-90-27-92-44-bd
+	ln -sf openfirewall-pxe-<VERSION>.model 01-00-90-27-92-44-bd
 
 * Configure dhcp server *
 The dhcp server is necessary to give an IP and redirect the request to the
- tftp server. You could use another IPCop to act as the dhcp server.
-For an IPCop dhcp server,
+ tftp server. You could use another OpenFirewall to act as the dhcp server.
+For an OpenFirewall dhcp server,
 - check the 'Allow bootp clients" box
 - add a fixed lease with
 	- the MAC address of the card,
@@ -86,7 +86,7 @@ It is more secure and in this case, you need to not include a path.
 
 For other distrib,refer to http://syslinux.zytor.com/pxe.php#tftp
 
-Once the new IPCop is installed, to retrieve normal boot, you could
+Once the new OpenFirewall is installed, to retrieve normal boot, you could
 - unset the boot agent on the net card
 - or disable the fixed lease on the dhcp server
 - or remove the link of the MAC file inside /var/tftp/pxelinux.cfg

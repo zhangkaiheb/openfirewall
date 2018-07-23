@@ -1,38 +1,38 @@
-This document describes (more or less) IPCop configuration files and contents.
+This document describes (more or less) OpenFirewall configuration files and contents.
 
 ================================================================================
 
-/var/ipcop/main/settings
+/var/openfirewall/main/settings
         Contains some general settings.
         Some written by gui.cgi, some by installer/setup.
 
-        IPCOPUPDOWNBEEP             on/off
+        OPENFIREWALLUPDOWNBEEP      on/off
         PPPUPDOWNBEEP               on/off
         REFRESHINDEX                on/off
         WINDOWWITHHOSTNAME          on/off
         JAVASCRIPT                  on/off
-        HOSTNAME                    IPCops name
-        DOMAINNAME                  IPCops domainname
+        HOSTNAME                    OpenFirewalls name
+        DOMAINNAME                  OpenFirewalls domainname
         KEYMAP                      used keyboard map, for example /usr/share/kbd/keymaps/i386/qwertz/de.map.gz
         LANGUAGE                    short language name, for example de
         TIMEZONE                    used timezone, for example /usr/share/zoneinfo/posix/Europe/Berlin
         DISPLAY_CONNECTIONS         display style for connections.cgi, TRAFFIC or STATUS
         GUIPORT                     https port in use by GUI
         SSHPORT                     tcp port in use by SSHd
-        CHECKUPDATES                check for updates after IPCop connect
+        CHECKUPDATES                check for updates after OpenFirewall connect
         PRELOADUPDATES              preload updates when they become available
 
 ================================================================================
 
-/var/ipcop/main/flashsettings
-        Specials for flash based IPCops.
+/var/openfirewall/main/flashsettings
+        Specials for flash based OpenFirewalls.
         Some written by gui.cgi, some by installer/setup.
 
         TMPFS_MAX_SIZE              max. amount of RAM used as tmpfs, either size (64M) or percentage (50%).
 
 ================================================================================
 
-/var/ipcop/main/hosts
+/var/openfirewall/main/hosts
         List of hostnames as defined by hosts.cgi
 Format:
         (on|off),IP address,hostname,domainname,remark
@@ -40,24 +40,24 @@ remark and last seperator are optional
 
 ================================================================================
 
-/var/ipcop/main/scheduler
+/var/openfirewall/main/scheduler
         List of scheduled actions.
 Format:
         (on|off),action,time,daytype,days,weekdays,options,comment
 
 ================================================================================
 
-/var/ipcop/backup/
+/var/openfirewall/backup/
         Include / Exclude files for backup/restore.
-        {include,exclude}.user can be used by addon/user to add additionial information which will not be modified by IPCop.
+        {include,exclude}.user can be used by addon/user to add additionial information which will not be modified by OpenFirewall.
 
 ================================================================================
 
-/var/ipcop/ddns/
+/var/openfirewall/ddns/
 
 ================================================================================
 
-/var/ipcop/dhcp/settings
+/var/openfirewall/dhcp/settings
         Contains config settings for dhcp server.
         Written by dhcp.cgi.
 
@@ -78,13 +78,13 @@ Format:
 
 ================================================================================
 
-/var/ipcop/dhcp/fixedleases
+/var/openfirewall/dhcp/fixedleases
         Contains the fixed leases.
         Written by dhcp.cgi.
 
 ================================================================================
 
-/var/ipcop/ethernet/settings
+/var/openfirewall/ethernet/settings
         Contains all the info for network cards.
         Written by installer/setup and then needed by various programs, scripts and CGIs.
 
@@ -104,7 +104,7 @@ Format:
 
 ================================================================================
 
-/var/ipcop/logging/settings
+/var/openfirewall/logging/settings
         Contains settings for log viewing, log rotating, log summaries.
         Written by logconfig.cgi.
 
@@ -119,7 +119,7 @@ Format:
 
 ================================================================================
 
-/var/ipcop/proxy/settings
+/var/openfirewall/proxy/settings
         Contains config settings for squid proxy.
         Written by proxy.cgi.
 
@@ -143,7 +143,7 @@ Format:
 
 ================================================================================
 
-/var/ipcop/remote/settings
+/var/openfirewall/remote/settings
         Contains SSH settings.
         Written by remote.cgi.
 
@@ -155,14 +155,14 @@ Format:
 
 ================================================================================
 
-/var/ipcop/time/settings
+/var/openfirewall/time/settings
         Contains some config settings for ntp server.
         Written by time.cgi.
 
         ENABLED_NTP                 on/off
         ENABLED_NTP_REDIRECT        on/off
         NTP_VALID                   yes/no
-        NTP_ADDR_1                  NTP server 1, default 0.ipcop.pool.ntp.org
-        NTP_ADDR_2                  NTP server 2, default 1.ipcop.pool.ntp.org
-        NTP_ADDR_3                  NTP server 3, default 2.ipcop.pool.ntp.org
+        NTP_ADDR_1                  NTP server 1, default 0.openfirewall.pool.ntp.org
+        NTP_ADDR_2                  NTP server 2, default 1.openfirewall.pool.ntp.org
+        NTP_ADDR_3                  NTP server 3, default 2.openfirewall.pool.ntp.org
 

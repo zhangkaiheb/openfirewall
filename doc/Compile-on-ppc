@@ -1,4 +1,4 @@
-Compile IPCop on powerpc
+Compile OpenFirewall on powerpc
 
 Short installation notes for those like me (Gilles) unfamiliar with powerpc
 
@@ -41,7 +41,7 @@ image=/debian-installer/ppc/vmlinux
 initrd=/debian-installer/ppc/initrd.gz
 
 On the dhcp server
-- wrrite a fixed lease on the network dhcp server (could be an IPCop) :
+- wrrite a fixed lease on the network dhcp server (could be an OpenFirewall) :
 	MAC address,
 	corresponding IP,
 	IP of the tftp server (next-server),
@@ -59,5 +59,5 @@ Once system is installed, it will boot from the disk.
 
 More complete details in debian installation manual.
 
-Netbooting ipcop installation
+Netbooting openfirewall installation
 - to be coded and described
