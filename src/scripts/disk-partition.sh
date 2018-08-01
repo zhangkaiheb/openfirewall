@@ -107,12 +107,12 @@ case "$arch" in
         size=$((${disk_size}-1-${root_size}-1))
         echo ${root_size} ${size} ${disk_size} 
         if [ $raid = "yes" ]; then
-            /sbin/sfdisk -fuM $dev << EOF
+            /sbin/sfdisk -f $dev << EOF
 1,${root_size},fd,*
 ,${size},fd
 EOF
         else
-            /sbin/sfdisk -fuM $dev << EOF
+            /sbin/sfdisk -f $dev << EOF
 1,${root_size},83,*
 ,${size},83
 EOF
