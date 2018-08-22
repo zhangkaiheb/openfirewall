@@ -1,11 +1,9 @@
 List of software packages used to build IPCop Version: 2.2.0 for x86_64
  * 3c5x9setup-1.00
  * acl-2.2.52
- * acl-2.2.52_missing_rootfile
  * acpid-2.0.26
  * apache-2.4.29
  * attr-2.4.47
- * attr-2.4.47_missing_rootfile
  * autoconf-2.69
  * automake-1.16
  * bash-4.4.18
@@ -13,7 +11,6 @@ List of software packages used to build IPCop Version: 2.2.0 for x86_64
  * beep-1.3
  * binutils-2.30
  * bison-3.0.4
- * busybox-1.24.1
  * busybox-1.28.4
  * bzip2-1.0.6
  * ca-certificates-20141019
