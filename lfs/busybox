@@ -84,6 +84,9 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects)) $
 	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
 ##	cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/$(PKG_NAME)-1.19.4_linux-3.0.patch
 
+	# e2label is for label the disk, enable when necessary
+	# cd $(DIR_APP) && patch -p0 < $(DIR_PATCHES)/$(PKG_NAME)-1.28.4-e2label.patch
+
 	cd $(DIR_APP) && cp -f $(DIR_SRC)/config/busybox/busybox.config .config
 
 	cd $(DIR_APP) && make -j $(PARALLELISM)
