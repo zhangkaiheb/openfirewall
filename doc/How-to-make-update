@@ -1,12 +1,12 @@
-This section applies to SVN / OpenFirewall v1
-=============================================
+This section applies to SVN / IPCop v2
+======================================
 
 
 Prerequisites
 - have release right on SourceForge to be able to assign uploaded files to a release
-- have 'OpenFirewall development Group' private gpg key (and password) to sign the patch, 
+- have 'IPCop development Group' private gpg key (and password) to sign the patch, 
   import the key with gpg --import (private key file name)
-- you can create your own key (named 'OpenFirewall development Group') and 
+- you can create your own key (named 'IPCop development Group') and 
   replace (temporarily!) the pub key in your box (/root/.gnupg/*) for testing your patch
 
 
@@ -16,19 +16,19 @@ Announce intentions
 
 
 Update SVN
-- finalize and commit updates/<VERSION>/information.xml, use ls -l --block-size=K openfirewall*update*gpg for size.
+- finalize and commit updates/<VERSION>/information.xml, use ls -l --block-size=K ipcop*update*gpg for size.
 - ./make.sh changelog and commit doc/ChangeLog (only the changes since the last update will be added to ChangeLog)
 - create tag for version, not required when update only (no release of image files):
-        svn copy -r <SVNREVISION> https://svn.code.sf.net/p/openfirewall/svn/openfirewall/trunk \
-        https://svn.code.sf.net/p/openfirewall/svn/openfirewall/tags/release-<VERSION> \
+        svn copy -r <SVNREVISION> https://svn.code.sf.net/p/ipcop/svn/ipcop/trunk \
+        https://svn.code.sf.net/p/ipcop/svn/ipcop/tags/release-<VERSION> \
         -m "SVN tag for <VERSION> release."
     -r <SVNREVISION> is optional but avoids possible conflict when another developer makes a commit when not looking
 
 Build, preferably create a fresh directory, checkout the newly created tag and build there
-- svn checkout https://svn.code.sf.net/p/openfirewall/svn/openfirewall/tags/release-<VERSION>
+- svn checkout https://svn.code.sf.net/p/ipcop/svn/ipcop/tags/release-<VERSION>
 - do not forget to activate building of usb images
 - ./make.sh clean && ./make.sh build
-- sign the patch with gpg --local-user "OpenFirewall Development Group" --sign openfirewall-<VERSION>-update-<MACHINE>.tgz
+- sign the patch with gpg --local-user "IPCop Development Group" --sign ipcop-<VERSION>-update-<MACHINE>.tgz
 - ./make.sh dist :
     calculate all md5sum for distribution files
 
@@ -38,7 +38,7 @@ NOTE: in July 2009 the FRS has undergone some dramatic changes, make yourself fa
 - optionally add a new package (rarely needed)
 - add a new release
 - upload files to SourceForge 
-- update patch file on SourceForge /home/project-web/openfirewall/htdocs/patches for previous version
+- update patch file on SourceForge /home/project-web/ipcop/htdocs/patches for previous version
   remove <latest /> and add <nextversion>VERSION</nextversion>
 - copy the updates/<VERSION>/information.xml file to SF and store as VERSION.xml
 - in Tracker, Tracker administration, bugs, add a new group corresponding to the version number
@@ -55,8 +55,8 @@ Update SVN
 
 Prerequisites
 - have release right on sourceforge to be able to affect uploaded files to a release
-- have 'OpenFirewall development Group' private gpg key (and password) to sign the patch, import the key with gpg --import (private key file name)
-- you can create your own key (named 'OpenFirewall development Group') and replace (temporarily!) the pub key in 
+- have 'IPCop development Group' private gpg key (and password) to sign the patch, import the key with gpg --import (private key file name)
+- you can create your own key (named 'IPCop development Group') and replace (temporarily!) the pub key in 
   your box (/root/.gnupg/*) for testing your patch
 
 Build
@@ -64,26 +64,26 @@ Build
 - ./make.sh build
 - ./make.sh dist :
 	build source package by exporting from CVS,
-	calculate md5sum of update-1.4.x.tgz openfirewall-1.4.x.iso fcdsl-1.4.x.tgz sources-openfirewall-1.4.x.tgz
+	calculate md5sum of update-1.4.x.tgz ipcop-1.4.x.iso fcdsl-1.4.x.tgz sources-ipcop-1.4.x.tgz
 	create a check-list of modified files in doc/updated-sources.txt
 - manually check all necessary files are include in updates/1.4.x/ROOTFILES.*.1.4.x comparing with /doc/updated-sources.txt
-- sign the patch with gpg --local-user "OpenFirewall Development Group" --sign update-1.4.x.tgz
+- sign the patch with gpg --local-user "IPCop Development Group" --sign update-1.4.x.tgz
   or simply typing ./sign    (make.sh produces 'sign' batch file for convinience)
 
 Sourceforge
 - upload files via ftp to upload.sourceforge.net in incoming directory
  (may need to have more than 30s inactivity timeout to be able to connect on sourceforge)
-- add a new release on OpenFirewall package and affect uploaded files (web interface Files Release)
+- add a new release on IPCop package and affect uploaded files (web interface Files Release)
 	status hidden for test, active for official update
 	add Changelog and text abstract of the release
-- update every patch list on sourceforge /i/ip/openfirewall/htdocs/patches preceding the previous v1.4.x version with :
+- update every patch list on sourceforge /i/ip/ipcop/htdocs/patches preceding the previous v1.4.x version with :
 	the content of updates/1.4x/information (and add the link to the release on sourceforge at the end of the line)
 - add a new entry corresponding to the version number in the patch list with only "----START LIST----" inside
 - In Tracker, Tracker administration, bugs, add a new group corresponding to the version number
 
 News
 - send news on user devel announce lists (subscribe to announce before if necessary)
-- md5sum for update-1.4.x.tgz openfirewall-1.4.x.iso fcdsl-1.4.x.tgz sources-openfirewall-1.4.x.tgz is in doc/release.txt
+- md5sum for update-1.4.x.tgz ipcop-1.4.x.iso fcdsl-1.4.x.tgz sources-ipcop-1.4.x.tgz is in doc/release.txt
 - md5sum of the tgz.gpg file need to be calculated by hand
 
 Update CVS :

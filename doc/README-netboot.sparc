@@ -1,4 +1,4 @@
-Compile on sparc arch and test openfirewall for sparc (OpenFirewall only support sparc64)
+Compile on sparc arch and test ipcop for sparc (IPCop only support sparc64)
 
 Short installation notes for those like me (Gilles) unfamiliar with sparc
 
@@ -15,7 +15,7 @@ I find more convenient to have a fixed name for the file to load and switch the
 real file to be loaded with a symlink on the tftp server.
 So the file name that the dhcp server send is set to 'sparc'
 
-On the dhcp server (could be an OpenFirewall)
+On the dhcp server (could be an IPCop)
 - write a fixed lease on the network dhcp server:
 	MAC address,
 	corresponding IP,
@@ -31,10 +31,10 @@ On the tftp server
 	cd <tftproot>
 	ln -sf debian-installer/sparc64/boot.img sparc
 
-- to install openfirewall-1.9.3 from netboot
+- to install ipcop-1.9.3 from netboot
 	cd <tftproot>
-	tar zvxf openfirewall-1.9.3-install-netboot-sparc.tgz
-	ln -sf openfirewall/1.9.3/sparc/boot.img sparc
+	tar zvxf ipcop-1.9.3-install-netboot-sparc.tgz
+	ln -sf ipcop/1.9.3/sparc/boot.img sparc
 
 On the sparc machine, in openfirmware (you see ok starting the line), type
 boot net:dhcp

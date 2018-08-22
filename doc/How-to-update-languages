@@ -1,34 +1,34 @@
-How To Update Languages from OpenFirewall Language Database
+How To Update Languages from IPCop Language Database
 
 $Id: How-to-update-languages 3206 2009-07-10 11:20:09Z owes $
 
 
 Temporary development how-to
-- add new phrases to langs/(install|openfirewall).new.en.pl
+- add new phrases to langs/(install|ipcop).new.en.pl
 - execute this to generate the new .po files:
   ./make.sh language
 - check the svn diff
-- execute this to generate the new .mo files for target OpenFirewall:
+- execute this to generate the new .mo files for target IPCop:
   ./make.sh build
 - check that you are happy with your new phrases
-- svn commit langs/(install|openfirewall).new.en.pl and .po files
+- svn commit langs/(install|ipcop).new.en.pl and .po files
 
 
 
-*** Following does not fully apply to OpenFirewall v2 ***
+*** Following does not fully apply to IPCop v2 ***
 
 
 Prerequisites to update from web database
 
 - Have a working copy of svn
 - Have shell access to SourceForge 
-- Have developer rights for OpenFirewall Language Database (configured in langs/add/.htaccess)
+- Have developer rights for IPCop Language Database (configured in langs/add/.htaccess)
 
 
 Adding a username/password pair to provide editing rights to Database
 - Login to a shell on SourceForge
 - execute:
-  htpasswd /home/groups/i/ip/openfirewall/htdocs/langs/.htpasswd username
+  htpasswd /home/groups/i/ip/ipcop/htdocs/langs/.htpasswd username
 
   where 'username' is whatever you need it to be. You can only add new passwords,
   there is no way of confirming existing passwords.  
@@ -37,7 +37,7 @@ Adding a username/password pair to provide editing rights to Database
 Adding new phrases to the Database
 
 - Go to the 'Developer's Pages', linked at the foot of the Main Index page on 
-  http://www.openfirewall.org/langs/
+  http://www.ipcop.org/langs/
 - Locate the 'Add a Variable' section, and input the variable name, and select 'SETUP'
   or 'WEB' from the drop down menu. 
 - Web variables are all lowercase with a space between words, Installer variable strings
@@ -61,7 +61,7 @@ Removing phrases from the Database
 Add a Language
 
 - Go to the 'Developer's Pages', linked at the foot of the Main Index page on 
-  http://www.openfirewall.org/langs/
+  http://www.ipcop.org/langs/
 - Pick a language from the list and click 'Proceed'. The list should only show you languages
   that aren't already in the database.
 
@@ -80,12 +80,12 @@ Tip: Do NOT add the CVS Id Tag anywhere within the file or the copyright notice,
 
 Tools
 
-- There are some scripts in the openfirewall/tools/ directory to simplify some tasks.
+- There are some scripts in the ipcop/tools/ directory to simplify some tasks.
 
 - fetchlangs.pl
 
-  From the openfirewall directory run this command:
-  openfirewall$ ./tools/fetchlangs.pl
+  From the ipcop directory run this command:
+  ipcop$ ./tools/fetchlangs.pl
 
   This will generate and download ALL the language files from the current data in the 
   Language Database.
@@ -98,8 +98,8 @@ Tools
 
 - check_strings.pl
 
-  From the openfirewall directory run this command:
-  openfirewall$ ./tools/check_strings.pl
+  From the ipcop directory run this command:
+  ipcop$ ./tools/check_strings.pl
 
   This script checks for unused translation strings, or untranslated strings, within the 
   cgis. Use with care, as it will not find strings concatenated to form variables.
@@ -138,10 +138,10 @@ Sample Advice to email to New Translators
 
 (Urdu is used as the example. Change ur/UR to the appropriate language code).
 
-Thanks for your offer to help translate OpenFirewall. Here are some notes on adding 
-information to the online Language Database at http://www.openfirewall.org/langs
+Thanks for your offer to help translate IPCop. Here are some notes on adding 
+information to the online Language Database at http://www.ipcop.org/langs
 There is a link to Urdu at the bottom of the page: 
-http://www.openfirewall.org/langs/edit/index.php?Language=UR
+http://www.ipcop.org/langs/edit/index.php?Language=UR
 
 You will need a username/password to add or edit phrases, which I will send you 
 separately.
@@ -154,14 +154,14 @@ Click 'Update' to save and then go back to the Index page, and continue with
 another phrase. Completed work sinks to the bottom of the page.
 
 Right at the bottom of the page are two Links, which create the language files 
-used on OpenFirewall. 'ur.pl' is the one used in the web interface. Characters are 
+used on IPCop. 'ur.pl' is the one used in the web interface. Characters are 
 stored in UTF-8 format.
 
 Don't be put off by the large number of phrases. Just do them in small batches, 
 or get a team together to spread the load. They don't have to be done in any 
 special order. I have a list of some of the most common phrases, used in the 
 menu sub-system, if you are interested - 
-(http://www.eoberlander.freeserve.co.uk/linux/openfirewall/header.txt). Leave the 
+(http://www.eoberlander.freeserve.co.uk/linux/ipcop/header.txt). Leave the 
 phrases that start "TR_" till last, as they are used in the Installer, and our 
 current Installer can't handle non-ISO 8859 character sets. This may change 
 with version v1.5, currently under development.
@@ -171,17 +171,17 @@ redundant, and will be removed from the Database eventually.
 
 If you want to test your newly created language file, go to the bottom of the 
 page.  Click on the 'Create UR.pl' file link, download the file and scp it onto 
-an OpenFirewall box as /var/openfirewall/langs/ur.pl
+an IPCop box as /var/ipcop/langs/ur.pl
 
-You'll also have to edit your /var/openfirewall/langs/list file to add an entry for 
+You'll also have to edit your /var/ipcop/langs/list file to add an entry for 
 your language.
 
 Finally to see any recent changes, you need to regenerate the language cache 
-files on OpenFirewall. Execute this command as root:
-perl -e "require '/var/openfirewall/lang.pl'; &Lang::BuildCacheLang"
+files on IPCop. Execute this command as root:
+perl -e "require '/var/ipcop/lang.pl'; &Lang::BuildCacheLang"
 
 BTW, once your work is added to CVS, which can happen when work has advanced 
-past 100 phrases, you get your name included on the OpenFirewall credits.cgi page. 
+past 100 phrases, you get your name included on the IPCop credits.cgi page. 
 Please let me know if your happy with that, and if you want your email address 
 shown on the page as well (some people prefer not to expose their email address 
 to avoid spam). 

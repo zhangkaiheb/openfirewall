@@ -20,9 +20,9 @@ Maintainer / advanced commands
 		because of real load.
 check_url_clean : Erase all check_url tags on cache directory to be able to check
 		another time
-check_versions: Compare the versions of packages used in LFS and OpenFirewall
+check_versions: Compare the versions of packages used in LFS and IPCop
          dist : Mainly produce a diff from previous version to track wich
-		files have been updated. Export Openfirewall sources in a .tgz
+		files have been updated. Export IPCop sources in a .tgz
      othersrc : Build a .tgz with all source packages necessary to compile
     toolchain : Create our own toolchain package to speed next rebuild
      language : Search for all lang entries in source, get translations from 
