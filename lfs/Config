@@ -28,6 +28,7 @@ URL_CLFS	= http://ftp.clfs.org/pub/clfs
 URL_NETFILTER	= http://www.netfilter.org/projects
 URL_SFNET	= http://downloads.sourceforge.net/sourceforge
 URL_TUWIEN	= http://gd.tuwien.ac.at
+URL_OFPKGS	= https://github.com/zhangkaiheb/ofpkgs/raw/master
 
 # For most packages tarballs are unpacked here and then deleted after installation.
 # hack: $LFS is only defined for toolchain_make and is empty when in chroot
