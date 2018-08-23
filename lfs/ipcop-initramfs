@@ -93,20 +93,11 @@ $(TARGET) :
 	mkdir -p						$(INITRAMFS_DIR)/usr/share/terminfo/v
 	mkdir -p						$(INITRAMFS_DIR)/usr/share/udhcpc
 	mkdir -p						$(INITRAMFS_DIR)/var/run
+	mkdir -p						$(INITRAMFS_DIR)/run
 
 	# Create /dev/console and /dev/null needed by the initramfs
 	cp -a /dev/console					$(INITRAMFS_DIR)/dev/
 	cp -a /dev/null						$(INITRAMFS_DIR)/dev/
-	cp -a /dev/tty*						$(INITRAMFS_DIR)/dev/
-	cp -a /dev/sr*						$(INITRAMFS_DIR)/dev/
-	cp -af /dev/block					$(INITRAMFS_DIR)/dev/
-	cp -a /dev/zero						$(INITRAMFS_DIR)/dev/
-	mknod  -m=660 $(INITRAMFS_DIR)/dev/sda   b 8 0
-	mknod  -m=660 $(INITRAMFS_DIR)/dev/sda1  b 8 1
-	mknod  -m=660 $(INITRAMFS_DIR)/dev/sda2  b 8 2
-	mknod  -m=660 $(INITRAMFS_DIR)/dev/sdb   b 8 16
-	mknod  -m=660 $(INITRAMFS_DIR)/dev/sdb1  b 8 17
-	mknod  -m=660 $(INITRAMFS_DIR)/dev/sdb2  b 8 18
 
 	# Install udev
 	install -D /sbin/udevd					$(INITRAMFS_DIR)/sbin
@@ -385,6 +376,10 @@ endif
 	echo $(MACHINE) > $(INITRAMFS_DIR)/CDROMBOOT
 
 	# Finally, create the cpio archive
+ifeq "$(MACHINE)" "x86_64"
+	cd $(INITRAMFS_DIR) && find . | cpio -o -H newc | lzma -3 > \
+		/$(INSTALLER_DIR)/images/cdinitramfs-$(VERSION).img
+endif
 ifeq "$(MACHINE)" "i486"
 	cd $(INITRAMFS_DIR) && find . | cpio -o -H newc | lzma -3 > \
 		/$(INSTALLER_DIR)/images/cdinitramfs-$(VERSION).img
@@ -639,6 +634,88 @@ endif
 
 	# mini-initramfs is only used for x86. ppc still uses initrd (ext2) as miboot for some reason ignores
 	# initramfs images
+ifeq "$(MACHINE)" "x86_64"
+	#################################################################################################
+	# START of mini-initramfs section								#
+	#################################################################################################
+	# Start from scratch
+	rm -fr /$(INSTALLER_DIR)/mini-initramfs/*
+
+	# Now create a very basic mini-initramfs directory structure
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/bin
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/cdrom
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/dev
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/etc
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/floppy
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/initramfs
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/lib
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/mnt
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/proc
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/sys
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/tmp
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/var
+
+	# klibc builds a shared library with a unique, unpredictable name and all the binaries expect
+	# to find that uniquely named library
+	cp -a /lib/klibc-*.so /$(INSTALLER_DIR)/mini-initramfs/lib
+
+	# klibc has a few more programs, but we're trying to keep the mini-initramfs very very small
+	for binary in cat cpio insmod mknod mount run-init sh.shared sleep umount uname xzminidec; do \
+		cp -a /usr/lib/klibc/bin/$$binary /$(INSTALLER_DIR)/mini-initramfs/bin/; \
+	done
+
+	# Make sure the shell has a normal name
+	mv /$(INSTALLER_DIR)/mini-initramfs/bin/sh.shared /$(INSTALLER_DIR)/mini-initramfs/bin/sh
+
+	# Copy the floppy module into the mini-initramfs
+	mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/block
+	cp /lib/modules/$(KVER)/kernel/drivers/block/floppy.ko.gz \
+		/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/block
+
+	# Following lines are commented as there is not enought space remaining on first floppy
+	# Copy the ide-core, ide-generic, and ide-cd modules into the mini-initramfs
+	#mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/ide
+	#cp -a	/lib/modules/$(KVER)/kernel/drivers/ide/ide-core.ko.gz \
+	#	/lib/modules/$(KVER)/kernel/drivers/ide/ide-generic.ko.gz \
+	#	/lib/modules/$(KVER)/kernel/drivers/ide/ide-cd_mod.ko.gz \
+	#		/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/ide/
+
+	# Copy the cdrom module
+	#mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/cdrom
+	#cp -a	/lib/modules/$(KVER)/kernel/drivers/cdrom/cdrom.ko.gz \
+	#		/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/cdrom/
+
+	# Copy nls_cp437.ko.gz -- not mandatory but since it's so small it's ok to include it to avoid a warning
+	# message when booting the mini-initramfs floppy
+	mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/fs/nls
+	cp -a	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs/nls/nls_cp437.ko.gz \
+			/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/fs/nls/
+
+	# Uncompress each module as klibc insmod does not support compression
+	find /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel -name *.ko.gz -exec gzip -d {} \;
+
+	# Create a modules.dep with modules installed in mini-initramfs
+	# using bb depmod as M-I-T depmod use a relative path (does klibc support that?)
+	$(INITRAMFS_DIR)/sbin/depmod -a $(KVER) -b /$(INSTALLER_DIR)/mini-initramfs
+
+	# Finally copy the init script shamelessly stolen from debian-floppy
+	install -m 755 $(DIR_SRC)/config/install/init-mini-initramfs /$(INSTALLER_DIR)/mini-initramfs/init
+	sed -i "s,^KVER=KVER,KVER=$(KVER),g" /$(INSTALLER_DIR)/mini-initramfs/init
+
+	cd /$(INSTALLER_DIR)/mini-initramfs && find . | cpio -o -H newc | lzma -3 > \
+		/$(INSTALLER_DIR)/images/$(SNAME)-$(VERSION)-mini-initramfs.img
+	
+	# just to be able to list files size to the log
+	cp -R /$(INSTALLER_DIR)/mini-initramfs $(FLOPPY_ROOT_DIR)
+	@$(LIST_FILES_SIZES)
+	mv $(SIZELIST) $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(SNAME)-$(VERSION)-mini-initramfs.img
+	# and cleanup
+	rm -fr $(FLOPPY_ROOT_DIR)/*
+
+	#################################################################################################
+	# END of mini-initramfs section									#
+	#################################################################################################
+endif # eq x86_64
 ifeq "$(MACHINE)" "i486"
 	#################################################################################################
 	# START of mini-initramfs section								#
