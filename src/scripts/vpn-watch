@@ -71,13 +71,13 @@ case "$1" in
 
     'stop' | '--stop')
         # Terminate processes
-        for proc in $(/usr/bin/pidof -x -o %PPID $(basename $0)); do
+        for proc in $(/bin/pidof -x -o %PPID $(basename $0)); do
             /bin/kill -s SIGTERM "$proc"
         done
         /bin/sleep 1
 
         # Kill remaining processes
-        for proc in $(/usr/bin/pidof -x -o %PPID $(basename $0)); do
+        for proc in $(/bin/pidof -x -o %PPID $(basename $0)); do
             /bin/kill -s SIGKILL "$proc"
         done
         /bin/rm -f "/var/run/$(basename $0)"            # Remove pipe
