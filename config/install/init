@@ -2,31 +2,31 @@
 #
 # init, used both for cd installer booting and for normal hard drive booting
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the OpenFirewall project.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# OpenFirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# OpenFirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with OpenFirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2007-2012, the IPCop team.
+# Copyright (C) 2017-2018, the OpenFirewall team.
 #
 #
-# $Id: init 7873 2015-02-06 14:35:26Z owes $
+# $Id: init 7873 2017-07-15 15:10:56 $
 #
 
 # Modes can be:
-# normal: we boot into ipcop
+# normal: we boot into openfirewall
 # install: this is when we perform an installation
-# rescue: when we boot to fix a broken ipcop
+# rescue: when we boot to fix a broken openfirewall
 MODE=install
 
 # Define color for messages
@@ -98,7 +98,7 @@ start_raid()
 
 
 #########################################################################################################
-# This is the function we invoke when booting ipcop normally, ie from a hard drive installation		#
+# This is the function we invoke when booting openfirewall normally, ie from a hard drive installation	#
 #########################################################################################################
 start_normal_mode()
 {
@@ -155,7 +155,7 @@ start_normal_mode()
 
 
 #########################################################################################################
-# This is the function we invoke when installing ipcop							#
+# This is the function we invoke when installing openfirewall							#
 #########################################################################################################
 start_install_mode()
 {
@@ -205,15 +205,15 @@ start_install_mode()
 		exec busybox init
 	else
 		# use cttyhack etc. to be able to display ASCII line drawing
-####		setsid cttyhack /bin/ash -c /bin/installer
-		setsid cttyhack /bin/bash
+		setsid cttyhack /bin/ash -c /bin/installer
+		# setsid cttyhack /bin/bash
 	fi
 }
 
 
 
 #########################################################################################################
-# This is the function we invoke when starting ipcop in rescue/export mode				#
+# This is the function we invoke when starting openfirewall in rescue/export mode				#
 #########################################################################################################
 start_rescue_mode()
 {
@@ -245,6 +245,7 @@ MACHINE=`uname -m`
 # Set default TTY, can overwrite with console=
 CURRENT_TTY=tty1
 
+cat /proc/cmdline
 # Now check what mode=, root=, and init= parameters we passed to the kernel
 for i in $(cat /proc/cmdline); do
 	case ${i} in
@@ -312,10 +313,12 @@ if [ x"${MACHINE}" == x"ppc" -a -f /FLOPPYBOOT ]; then
 fi
 
 echo -ne "Mounting /dev ... "
-####mount -t tmpfs tmpfs /dev -o mode=755
+mount -t devtmpfs devtmpfs /dev -o mode=755
 test_ok
+
 # Create /dev/null to avoid udevd message
-mknod -m0666 /dev/null c 1 3
+##mknod -m0666 /dev/null c 1 3
+mkdir -m 777 /run
 
 echo -ne "Starting syslogd ... "
 syslogd -O /dev/tty4
@@ -334,6 +337,7 @@ udevd --daemon --resolve-names=never
 test_ok
 echo -ne "Starting udevadm ... "
 udevadm trigger
+
 udevadm settle --timeout=15
 test_ok
 
