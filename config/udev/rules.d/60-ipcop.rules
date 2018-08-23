@@ -1,3 +1,3 @@
-KERNEL=="hd[a-z]", SUBSYSTEMS=="ide", ATTRS{removable}=="1", RESULT=="floppy", SYMLINK="floppy%e, NAME{ignore_remove, all_partitions}="%k", GROUP="floppy"
+#KERNEL=="hd[a-z]", SUBSYSTEMS=="ide", ATTRS{removable}=="1", RESULT=="floppy", SYMLINK="floppy%e, NAME{ignore_remove, all_partitions}="%k", GROUP="floppy"
 
-KERNEL=="sd[a-z]", SUBSYSTEMS=="usb", ATTRS{manufacturer}=="TEAC", SYMLINK="floppy%e", GROUP="floppy"
+#KERNEL=="sd[a-z]", SUBSYSTEMS=="usb", ATTRS{manufacturer}=="TEAC", SYMLINK="floppy%e", GROUP="floppy"
