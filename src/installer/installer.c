@@ -1076,7 +1076,7 @@ int main(int argc, char **argv)
     if (medium_sources == cdrom) {
         if (scsi_cdrom) {
             /* Might need something additionally/different here */
-            strcpy(line, "eject /dev/cdrom");
+            strcpy(line, "eject -s /dev/cdrom");
         }
         else {
             strcpy(line, "eject /dev/cdrom");
