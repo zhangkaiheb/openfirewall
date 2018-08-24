@@ -38,11 +38,9 @@ HOST_ARCH  = all
 OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
-#DL_FILE    = $(THISAPP).tar.bz2
 DL_FILE    = $(THISAPP).tar.gz
-#DL_FROM    = $(URL_KERNEL)/linux/utils/kernel/hotplug
-#DL_FROM    = http://ipcop-addons.mooo.com/misc/IPCop
-DL_FROM    = https://git.kernel.org/pub/scm/linux/hotplug/udev.git/snapshot
+#DL_FROM    = https://git.kernel.org/pub/scm/linux/hotplug/udev.git/snapshot
+DL_FROM    = $(URL_OFPKGS)/u
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 LDFLAGS    =
@@ -73,13 +71,11 @@ objects = $(DL_FILE) $(TESTFILE)
 #objects = $(DL_FILE)
 
 $(DL_FILE)				= $(DL_FROM)/$(DL_FILE)
-#$(TESTFILE)				=  http://anduin.linuxfromscratch.org/sources/other/$(TESTFILE)
 # in case anduin does not have the file yet, use a different location
-$(TESTFILE)				=  http://ipcop-addons.mooo.com/misc/IPCop/$(TESTFILE)
+#$(TESTFILE)				=  http://ipcop-addons.mooo.com/misc/IPCop/$(TESTFILE)
+$(TESTFILE)				=  $(URL_OFPKGS)/u/$(TESTFILE)
 
-#$(DL_FILE)_MD5				= 4db27d73fdbe94f47fd89fdd105c2dfb
 $(DL_FILE)_MD5				= 3c4e45df312e69b34b27be5e47ca0b46
-#$(TESTFILE)_MD5				= 64ada14e464dee3388787e3aebf2ac34
 $(TESTFILE)_MD5				= dfe1fa5eb32b0729743c6e37169a13c9
 
 install : $(TARGET)

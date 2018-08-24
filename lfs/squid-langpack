@@ -42,11 +42,8 @@ OTHER_SRC  = yes
 ##THISAPP    = $(PKG_NAME)_$(VER)
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
-# source location, changes can happen quickly and old files are no longer available:
-#DL_FROM    = http://www.squid-cache.org/Versions/langpack
-# alternative location:
-#DL_FROM    = http://ipcop-addons.mooo.com/misc/IPCop
-DL_FROM    = http://http.debian.net/debian/pool/main/s/squid-langpack
+#DL_FROM    = http://http.debian.net/debian/pool/main/s/squid-langpack
+DL_FROM    = $(URL_OFPKGS)/s
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

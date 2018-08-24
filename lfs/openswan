@@ -41,8 +41,8 @@ KERNEL_MOD = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
-#DL_FROM    = http://www.openswan.org/download
-DL_FROM    = https://download.openswan.org/openswan/old/openswan-2.6/
+#DL_FROM    = https://download.openswan.org/openswan/old/openswan-2.6/
+DL_FROM    = $(URL_OFPKGS)/o
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

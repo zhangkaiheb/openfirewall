@@ -41,8 +41,8 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
-#DL_FROM    = https://github.com/json-c/json-c/archive
-DL_FROM    = https://s3.amazonaws.com/json-c_releases/releases
+#DL_FROM    = https://s3.amazonaws.com/json-c_releases/releases
+DL_FROM    = $(URL_OFPKGS)/j
 #DIR_APP    = $(DIR_SRC)/$(THISAPP)
 DIR_APP    = $(DIR_SRC)/$(PKG_NAME)-$(VER)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)

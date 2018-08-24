@@ -38,12 +38,10 @@ VER        = 2.88dsf.orig
 HOST_ARCH  = all
 OTHER_SRC  = yes
 
-#THISAPP    = sysvinit-$(VER)
 THISAPP    = sysvinit_$(VER)
-#DL_FILE    = $(THISAPP).tar.bz2
 DL_FILE    = $(THISAPP).tar.gz
-#DL_FROM    = http://download.savannah.gnu.org/releases/sysvinit
-DL_FROM    = http://archive.ubuntu.com/ubuntu/pool/main/s/sysvinit/sysvinit_2.88dsf.orig.tar.gz
+#DL_FROM    = http://archive.ubuntu.com/ubuntu/pool/main/s/sysvinit
+DL_FROM    = $(URL_OFPKGS)/s
 #DIR_APP    = $(DIR_SRC)/$(THISAPP)
 DIR_APP    = $(DIR_SRC)/sysvinit-2.88dsf
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)

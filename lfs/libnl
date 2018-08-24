@@ -40,7 +40,7 @@ OTHER_SRC  = yes
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
 #DL_FROM    = https://github.com/thom311/libnl/releases/download/libnl3_2_27
-DL_FROM    = ftp://192.168.1.127
+DL_FROM    = $(URL_OFPKGS)/l
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

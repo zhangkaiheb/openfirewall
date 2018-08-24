@@ -40,12 +40,9 @@ HOST_ARCH  = all
 OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
-#DL_FILE    = $(THISAPP).tar.xz
 DL_FILE    = $(THISAPP).tar.bz2
-# Should be available on sourceforge in the futur but no new package yet released, so using same snapshoot as others
-#DL_FROM    = $(URL_SFNET)/$(PKG_NAME)
-#DL_FROM    = http://gentoo.osuosl.org/distfiles
-DL_FROM    = http://anduin.linuxfromscratch.org/BLFS/net-tools
+#DL_FROM    = http://anduin.linuxfromscratch.org/BLFS/net-tools
+DL_FROM    = $(URL_OFPKGS)/n
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

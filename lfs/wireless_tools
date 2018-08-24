@@ -39,8 +39,8 @@ OTHER_SRC  = yes
 
 THISAPP    = wireless_tools.$(VER)
 DL_FILE    = $(THISAPP).tar.gz
-#DL_FROM    = http://pcmcia-cs.sourceforge.net/ftp/contrib
-DL_FROM    = http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux
+#DL_FROM    = http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux
+DL_FROM    = $(URL_OFPKGS)/w
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

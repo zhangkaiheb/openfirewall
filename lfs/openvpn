@@ -41,8 +41,8 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
-#DL_FROM    = http://swupdate.openvpn.net/community/releases
-DL_FROM    = https://github.com/OpenVPN/openvpn/archive/v2.4.5.tar.gz
+#DL_FROM    = https://github.com/OpenVPN/openvpn/archive
+DL_FROM    = $(URL_OFPKGS)/o
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

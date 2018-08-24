@@ -39,7 +39,8 @@ OTHER_SRC  = yes
 
 THISAPP    = isdn4k-utils.$(VER)
 DL_FILE    = $(THISAPP).tar.bz2
-DL_FROM    = ftp://ftp.isdn4linux.de/pub/isdn4linux/utils
+#DL_FROM    = ftp://ftp.isdn4linux.de/pub/isdn4linux/utils
+DL_FROM    = $(URL_OFPKGS)/i
 DIR_APP    = $(DIR_SRC)/isdn4k-utils
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 
