@@ -350,7 +350,7 @@ if [ ! -e /usr/lib/ipcop/menu.pl ]; then
 fi
 
 echo -ne "Rotating logs ... "
-/usr/sbin/logrotate /etc/logrotate.conf
+/usr/local/sbin/logrotate /etc/logrotate.conf
 test_ok
 
 echo -ne "Starting rsyslogd ... "
