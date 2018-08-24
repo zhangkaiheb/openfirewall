@@ -51,6 +51,12 @@ TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(PKG_NAME)-$(VER)
 ## http://mirrors.tuna.tsinghua.edu.cn/apache//apr/apr-util-1.6.1.tar.bz2
 ## 8ff5dc36fa39a2a3db1df196d3ed6086
 
+APP_APR = apr-1.6.3
+DL_APR = $(APP_APR).tar.bz2
+APP_APR-UTIL = apr-util-1.6.1
+DL_APR-UTIL = $(APP_APR-UTIL).tar.bz2
+
+
 # Used to include same timestamp for all
 # This is httpd tar file date
 TIMESTAMP = "2014-09-02 06:57"
@@ -61,12 +67,15 @@ CFLAGS += -Wall
 # Top-level Rules
 ###############################################################################
 
-objects = $(DL_FILE)
+objects = $(DL_FILE) $(DL_APR) $(DL_APR-UTIL)
 
 $(DL_FILE) = $(DL_FROM)/$(DL_FILE)
+$(DL_APR) = http://archive.apache.org/dist/apr/$(DL_APR)
+$(DL_APR-UTIL) = http://archive.apache.org/dist/apr/$(DL_APR-UTIL)
 
-##$(DL_FILE)_MD5 = 579342fdeaa7b8b68d17fee91f8fab6e
 $(DL_FILE)_MD5 = 0c599404ef6b69eee95bcd9fcd094407
+$(DL_APR)_MD5 = 12f2a349483ad6f12db49ba01fbfdbfa
+$(DL_APR-UTIL)_MD5 = 8ff5dc36fa39a2a3db1df196d3ed6086
 
 install : $(TARGET)
 

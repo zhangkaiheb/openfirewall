@@ -57,8 +57,7 @@ DL_LOGGING = $(APP_LOGGING).tar.gz
 # Top-level Rules
 ###############################################################################
 
-objects = $(DL_FILE) $(DL_ESTR) $(DL_EE)
-## $(DL_LOGGING)
+objects = $(DL_FILE) $(DL_ESTR) $(DL_EE) $(DL_FASTJSON) $(DL_LOGGING)
 
 $(DL_FILE) = $(DL_FROM)/$(DL_FILE)
 $(DL_ESTR) = http://libestr.adiscon.com/files/download/$(DL_ESTR)
@@ -67,7 +66,6 @@ $(DL_FASTJSON) = http://download.rsyslog.com/libfastjson/$(DL_FASTJSON)
 $(DL_LOGGING) = http://download.rsyslog.com/liblogging/$(DL_LOGGING)
 
 $(DL_FILE)_MD5 = 5c691d1c743a07df855a8c89bd3bc903
-##$(DL_FILE)_MD5 = 35f0b7024ae7b5677e49f14f36304d77
 $(DL_ESTR)_MD5 = f4c9165a23587e77f7efe65d676d5e8e
 $(DL_EE)_MD5 = 7bbf4160876c12db6193c06e2badedb2
 $(DL_FASTJSON)_MD5 = fe7b4eae1bf40499f6f92b51d7e5899e

@@ -42,10 +42,9 @@ OTHER_SRC  = yes
 # https://github.com/dosfstools/dosfstools/releases/download/v3.0.28/dosfstools-3.0.28.tar.xz
 
 THISAPP    = $(PKG_NAME)-$(VER)
-#DL_FILE    = $(THISAPP).tar.xz
 DL_FILE    = $(THISAPP).tar.gz
-#DL_FROM    = http://ipcop-addons.mooo.com/misc/IPCop
-DL_FROM    = ftp://192.168.1.127
+#DL_FROM    = ftp://192.168.1.127
+DL_FROM    = $(URL_OFPKGS)/d
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 
