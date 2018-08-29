@@ -143,8 +143,9 @@ endif
 ###	if [ ! -e /usr/lib/libgcc_s.so.1 ]; then \
 ###		ln -sv /$(TOOLS_DIR)/lib/libgcc_s.so{,.1} /usr/lib; \
 ###	fi
-	ln -sfv /$(TOOLS_DIR)/lib/libgcc_s.so{,.1} /usr/lib
-	ln -sfv /$(TOOLS_DIR)/lib/libstdc++.{a,so{,.6}} /usr/lib
+
+	[ -e /usr/lib/libstdc++.so ] || ln -sfv /$(TOOLS_DIR)/lib/libstdc++.{a,so{,.6}} /usr/lib
+	[ -e /usr/lib/libgcc_s.so.1 ] || ln -sfv /$(TOOLS_DIR)/lib/libgcc_s.so{,.1} /usr/lib
 	[ -e /bin/sh ]        ||  ln -sv bash /bin/sh
 
 ##	mkdir -p /var/{lock/subsys,log,mail,run,spool}
