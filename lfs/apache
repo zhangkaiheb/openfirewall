@@ -1,18 +1,18 @@
 ###############################################################################
-# This file is part of the IPCop Firewall.                                    #
+# This file is part of the Openfirewall.                                    #
 #                                                                             #
-# IPCop is free software; you can redistribute it and/or modify               #
+# Openfirewall is free software; you can redistribute it and/or modify               #
 # it under the terms of the GNU General Public License as published by        #
 # the Free Software Foundation; either version 2 of the License, or           #
 # (at your option) any later version.                                         #
 #                                                                             #
-# IPCop is distributed in the hope that it will be useful,                    #
+# Openfirewall is distributed in the hope that it will be useful,                    #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of              #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
 # GNU General Public License for more details.                                #
 #                                                                             #
 # You should have received a copy of the GNU General Public License           #
-# along with IPCop; if not, write to the Free Software                        #
+# along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
 # Makefiles are based on LFSMake, which is                                    #
@@ -20,7 +20,7 @@
 #                                                                             #
 # Modifications by:                                                           #
 # ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for IPCop build                                #
+#          - Modified Makefile for Openfirewall build                                #
 #                                                                             #
 # $Id: apache 7704 2014-11-24 14:44:55Z owes $
 #                                                                             #
@@ -124,7 +124,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects)) $
 	# apr_cv value are needed on old host (centos-5.5 kernel 2.6.18) to build same as more recent
 	# epoll_create1, dup3 were added on 2.6.27, accept4 to 2.6.28
 	cd $(DIR_APP) && ./configure \
-		--enable-layout=IPCop \
+		--enable-layout=Openfirewall \
 		--disable-actions \
 		--disable-asis \
 		--disable-autoindex \
@@ -149,8 +149,10 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects)) $
 	cd $(DIR_APP) && make install
 
 	cp -f $(DIR_SRC)/config/httpd/{httpd,port81,portgui}.conf    /etc/httpd/conf/
-	cp -f $(DIR_SRC)/config/httpd/hostname.conf /var/ipcop/main/hostname.conf
-	ln -sf /var/ipcop/main/hostname.conf        /etc/httpd/conf/
+	#cp -f $(DIR_SRC)/config/httpd/hostname.conf /var/ipcop/main/hostname.conf
+	#ln -sf /var/ipcop/main/hostname.conf        /etc/httpd/conf/
+	cp -f $(DIR_SRC)/config/httpd/hostname.conf /var/ofw/main/hostname.conf
+	ln -sf /var/ofw/main/hostname.conf        /etc/httpd/conf/
 
 	# files not needed to be listed on rootfile
 	# don't remove /home/httpd/build or rebuild will fail

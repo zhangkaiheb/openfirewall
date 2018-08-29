@@ -1,18 +1,18 @@
 ###############################################################################
-# This file is part of the IPCop Firewall.                                    #
+# This file is part of the Openfirewall.                                    #
 #                                                                             #
-# IPCop is free software; you can redistribute it and/or modify               #
+# Openfirewall is free software; you can redistribute it and/or modify               #
 # it under the terms of the GNU General Public License as published by        #
 # the Free Software Foundation; either version 2 of the License, or           #
 # (at your option) any later version.                                         #
 #                                                                             #
-# IPCop is distributed in the hope that it will be useful,                    #
+# Openfirewall is distributed in the hope that it will be useful,                    #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of              #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
 # GNU General Public License for more details.                                #
 #                                                                             #
 # You should have received a copy of the GNU General Public License           #
-# along with IPCop; if not, write to the Free Software                        #
+# along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
 # Makefiles are based on LFSMake, which is                                    #
@@ -20,7 +20,7 @@
 #                                                                             #
 # Modifications by:                                                           #
 # ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for IPCop build                                #
+#          - Modified Makefile for Openfirewall build                                #
 #                                                                             #
 # $Id: squid-langpack 7749 2014-12-15 07:06:13Z owes $
 #                                                                             #
@@ -88,16 +88,16 @@ $(subst %,%_MD5,$(objects)) :
 
 IPCOP_ERR_STYLE_CODE = <style type="text/css"><!--body{background-color:\#e0e0e0;margin-left:0px;margin-right:0px;margin-top:0px;margin-bottom:0px;margin-width:0px;margin-height:0px;font-family:verdana,sans-serif}pre{font-family:sans-serif}--></style>
 
-IPCOP_ERR_BODY_CODE  = <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:\#000000"> <tr><td><img src="http://%h:81/images/blacklogo.png" width="480" height="72" alt="IPCop Firewall" /></td></tr> </table>
+IPCOP_ERR_BODY_CODE  = <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:\#000000"> <tr><td><img src="http://%h:81/images/blacklogo.png" width="480" height="72" alt="Openfirewall" /></td></tr> </table>
 
 IPCOP_ERR_POST_CODE  = <div id="footer"><address><small>Generated %T by %h (%s)</small></address></div> </body></html>
 
 $(TARGET) : $(firstword $(MAKEFILE_LIST))
 	# Build every time the exact list, not only on first build.
-	rm -rf $(ERRMSG_DIR) $(ERRMSG_DIR).ipcop $(DIR_SRC)/lsalr $(TARGET)
+	rm -rf $(ERRMSG_DIR) $(ERRMSG_DIR).ofw $(DIR_SRC)/lsalr $(TARGET)
 	@$(PREBUILD)
 
-	mkdir -p $(ERRMSG_DIR) $(ERRMSG_DIR).ipcop
+	mkdir -p $(ERRMSG_DIR) $(ERRMSG_DIR).ofw
 
 	# Extract squid error files for all languages
 	cd $(ERRMSG_DIR) && tar --no-same-owner --no-same-permissions -zxf $(DIR_DL)/$(DL_FILE)
@@ -112,18 +112,18 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST))
 	done
 
 	# Adding IPCop design to the built-in error files
-	cp -rp $(ERRMSG_DIR)/* $(ERRMSG_DIR).ipcop
+	cp -rp $(ERRMSG_DIR)/* $(ERRMSG_DIR).ofw
 
 	# 1 - remove all empty lines and the H1 header tag (if any)
 	# 2 - remove the entire STYLE tag
 	# 3 - insert our stype after the TITLE tag
-	# 4 - insert a table with IPCop graphics after the BODY tag
+	# 4 - insert a table with Openfirewall graphics after the BODY tag
 	# 5 - disable built-in footer
 	# 6 - add a new footer and close the BODY and HTML tags
 
 	# If that fail, check ERRMSG_FILE is really a file.
 	# If not, we should fix our cleaning
-	for LANGUAGE in $(ERRMSG_DIR).ipcop/* ; do \
+	for LANGUAGE in $(ERRMSG_DIR).ofw/* ; do \
 		for ERRMSG_FILE in $${LANGUAGE}/* ; do \
 			sed -i -e 's/^ *//' -e '/^$$/d' -e '/^<h1>.*<\/h1>/d' $${ERRMSG_FILE} ; \
 			sed -i -e '/<style/,/<\/style/'d $${ERRMSG_FILE} ; \

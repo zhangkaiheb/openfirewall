@@ -1,18 +1,18 @@
 ###############################################################################
-# This file is part of the IPCop Firewall.                                    #
+# This file is part of the Openfirewall.                                    #
 #                                                                             #
-# IPCop is free software; you can redistribute it and/or modify               #
+# Openfirewall is free software; you can redistribute it and/or modify        #
 # it under the terms of the GNU General Public License as published by        #
 # the Free Software Foundation; either version 2 of the License, or           #
 # (at your option) any later version.                                         #
 #                                                                             #
-# IPCop is distributed in the hope that it will be useful,                    #
+# Openfirewall is distributed in the hope that it will be useful,             #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of              #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
 # GNU General Public License for more details.                                #
 #                                                                             #
 # You should have received a copy of the GNU General Public License           #
-# along with IPCop; if not, write to the Free Software                        #
+# along with Openfirewall; if not, write to the Free Software                 #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
 # Makefiles are based on LFSMake, which is                                    #
@@ -20,9 +20,9 @@
 #                                                                             #
 # Modifications by:                                                           #
 # ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for IPCop build                                #
+#          - Modified Makefile for Openfirewall build                         #
 #                                                                             #
-# $Id: ipcop-progs 7625 2014-07-16 04:09:15Z owes $
+# $Id: openfirewall-progs 7625 2014-07-16 04:09:15Z owes $
 #                                                                             #
 ###############################################################################
 
@@ -83,15 +83,25 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(DIR_SRC)/src/rc.d/* $(DIR_SRC)/src/p
 	done
 
 	# lib files containing helper subs
-	mkdir -p /usr/lib/ipcop
-	cp -fv $(DIR_SRC)/src/libs/* /usr/lib/ipcop
+##	mkdir -p /usr/lib/ipcop
+##	cp -fv $(DIR_SRC)/src/libs/* /usr/lib/ipcop
+##	for i in `find $(DIR_SRC)/src/libs -maxdepth 1 -type f`; do \
+##		chmod 644 /usr/lib/ipcop/`basename $$i`; \
+##		chown root.root /usr/lib/ipcop/`basename $$i`; \
+##	done
+##	# Modify variable in general-functions.pl
+##	sed -i	-e "s+VERSION+$(VERSION)+g" \
+##		-e "s+MACHINE+$(MACHINE)+g"	/usr/lib/ipcop/general-functions.pl
+
+	mkdir -p /usr/lib/ofw
+	cp -fv $(DIR_SRC)/src/libs/* /usr/lib/ofw
 	for i in `find $(DIR_SRC)/src/libs -maxdepth 1 -type f`; do \
-		chmod 644 /usr/lib/ipcop/`basename $$i`; \
-		chown root.root /usr/lib/ipcop/`basename $$i`; \
+		chmod 644 /usr/lib/ofw/`basename $$i`; \
+		chown root.root /usr/lib/ofw/`basename $$i`; \
 	done
 	# Modify variable in general-functions.pl
 	sed -i	-e "s+VERSION+$(VERSION)+g" \
-		-e "s+MACHINE+$(MACHINE)+g"	/usr/lib/ipcop/general-functions.pl
+		-e "s+MACHINE+$(MACHINE)+g"	/usr/lib/ofw/general-functions.pl
 
 	# miscellaneous programs
 	@rm -rf $(DIR_APP) $(DIR_SRC)/installer && cp -R $(DIR_SRC)/src/progs/ $(DIR_SRC)

@@ -1,18 +1,18 @@
 ###############################################################################
-# This file is part of the IPCop Firewall.                                    #
+# This file is part of the Openfirewall.                                    #
 #                                                                             #
-# IPCop is free software; you can redistribute it and/or modify               #
+# Openfirewall is free software; you can redistribute it and/or modify               #
 # it under the terms of the GNU General Public License as published by        #
 # the Free Software Foundation; either version 2 of the License, or           #
 # (at your option) any later version.                                         #
 #                                                                             #
-# IPCop is distributed in the hope that it will be useful,                    #
+# Openfirewall is distributed in the hope that it will be useful,                    #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of              #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
 # GNU General Public License for more details.                                #
 #                                                                             #
 # You should have received a copy of the GNU General Public License           #
-# along with IPCop; if not, write to the Free Software                        #
+# along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
 # Makefiles are based on LFSMake, which is                                    #
@@ -20,7 +20,7 @@
 #                                                                             #
 # Modifications by:                                                           #
 # ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for IPCop build                                #
+#          - Modified Makefile for Openfirewall build                                #
 #                                                                             #
 # $Id: ipcop-lang 6585 2012-04-27 16:13:48Z gespinasse $
 #                                                                             #
@@ -59,7 +59,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(DIR_SRC)/langs/*/*.po
 	@$(PREBUILD)
 
 	# List of translated languages
-	cp $(DIR_SRC)/langs/list /var/ipcop/main/language.lst
+	cp $(DIR_SRC)/langs/list /var/ofw/main/language.lst
 
 	# Translations should be checked with msgfmt --check, only using --check-format as actually,
 	# some headers are missing : Project-Id-Version, PO-Revision-Date, Last-Translator, Language-Team, MIME-Version, Language
@@ -68,7 +68,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(DIR_SRC)/langs/*/*.po
 	cd $(DIR_SRC)/langs && for i in ??_??; do \
 		echo "Processing $$i for GUI" && \
 		mkdir -p /usr/share/locale/$$i/LC_MESSAGES && \
-		msgfmt --check-format $(DIR_SRC)/langs/$$i/ipcop.po -o /usr/share/locale/$$i/LC_MESSAGES/ipcop.mo && \
+		msgfmt --check-format $(DIR_SRC)/langs/$$i/openfirewall.po -o /usr/share/locale/$$i/LC_MESSAGES/openfirewall.mo && \
 		localedef -i $$i -f UTF-8 $$i.utf8 --no-archive; \
 	done
 

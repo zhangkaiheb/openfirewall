@@ -1,18 +1,18 @@
 ###############################################################################
-# This file is part of the IPCop Firewall.                                    #
+# This file is part of the Openfirewall.                                    #
 #                                                                             #
-# IPCop is free software; you can redistribute it and/or modify               #
+# Openfirewall is free software; you can redistribute it and/or modify               #
 # it under the terms of the GNU General Public License as published by        #
 # the Free Software Foundation; either version 2 of the License, or           #
 # (at your option) any later version.                                         #
 #                                                                             #
-# IPCop is distributed in the hope that it will be useful,                    #
+# Openfirewall is distributed in the hope that it will be useful,                    #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of              #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
 # GNU General Public License for more details.                                #
 #                                                                             #
 # You should have received a copy of the GNU General Public License           #
-# along with IPCop; if not, write to the Free Software                        #
+# along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
 # Makefiles are based on LFSMake, which is                                    #
@@ -20,7 +20,7 @@
 #                                                                             #
 # Modifications by:                                                           #
 # ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for IPCop build                                #
+#          - Modified Makefile for Openfirewall build                                #
 #                                                                             #
 # $Id: openswan 7866 2015-02-05 16:35:16Z owes $
 #                                                                             #
@@ -100,7 +100,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 	cd $(DIR_APP) && sed -i \
 		-e 's%^INC_USRLOCAL.*$$%INC_USRLOCAL=/usr%' \
 		-e 's%^USERCOMPILE.*$$%USERCOMPILE=$(CFLAGS)%' \
-		-e 's%^FINALCONFFILE.*$$%FINALCONFFILE?=/var/ipcop/ipsec/ipsec.conf%' \
+		-e 's%^FINALCONFFILE.*$$%FINALCONFFILE?=/var/ofw/ipsec/ipsec.conf%' \
 		-e 's%^KLIPSCOMPILE.*$$%KLIPSCOMPILE=$(CFLAGS)%' Makefile.inc
 	# Use release date instead of __DATE__ and __TIME__ so everyone that compile has same md5
 ##	cd $(DIR_APP) && sed -i -e 's|__DATE__|$(DATESTAMP)|' \
@@ -147,13 +147,13 @@ endif # IPSEC_KLIPS yes
 	chmod 755 /var/run/pluto
 
 	rm -f /etc/ipsec.conf /etc/ipsec.secrets
-	ln -sf /var/ipcop/ipsec/ipsec.conf    /etc/ipsec.conf
-	ln -sf /var/ipcop/ipsec/ipsec.secrets /etc/ipsec.secrets
+	ln -sf /var/ofw/ipsec/ipsec.conf    /etc/ipsec.conf
+	ln -sf /var/ofw/ipsec/ipsec.secrets /etc/ipsec.secrets
 
 	rm -rf /etc/ipsec.d/{cacerts,certs,crls}
-	ln -sf /var/ipcop/ca      /etc/ipsec.d/cacerts
-	ln -sf /var/ipcop/certs   /etc/ipsec.d/certs
-	ln -sf /var/ipcop/crls    /etc/ipsec.d/crls
+	ln -sf /var/ofw/ca      /etc/ipsec.d/cacerts
+	ln -sf /var/ofw/certs   /etc/ipsec.d/certs
+	ln -sf /var/ofw/crls    /etc/ipsec.d/crls
 
 	# some of the IPsec scripts use rmmod, which we no longer have
 ##	sed -i -e 's%rmmod%modprobe -r%' /usr/lib/ipsec/_realsetup

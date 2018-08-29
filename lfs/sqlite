@@ -1,18 +1,18 @@
 ###############################################################################
-# This file is part of the IPCop Firewall.                                    #
+# This file is part of the Openfirewall.                                    #
 #                                                                             #
-# IPCop is free software; you can redistribute it and/or modify               #
+# Openfirewall is free software; you can redistribute it and/or modify               #
 # it under the terms of the GNU General Public License as published by        #
 # the Free Software Foundation; either version 2 of the License, or           #
 # (at your option) any later version.                                         #
 #                                                                             #
-# IPCop is distributed in the hope that it will be useful,                    #
+# Openfirewall is distributed in the hope that it will be useful,                    #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of              #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
 # GNU General Public License for more details.                                #
 #                                                                             #
 # You should have received a copy of the GNU General Public License           #
-# along with IPCop; if not, write to the Free Software                        #
+# along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
 # Makefiles are based on LFSMake, which is                                    #
@@ -20,7 +20,7 @@
 #                                                                             #
 # Modifications by:                                                           #
 # ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for IPCop build                                #
+#          - Modified Makefile for Openfirewall build                                #
 #                                                                             #
 # $Id: sqlite 8103 2016-03-28 08:16:15Z owes $
 #                                                                             #
@@ -89,7 +89,8 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
 
 	# remove database(s) in case of a partial build
-	rm -f /var/ipcop/traffic/empty-aggregate.db
+	#rm -f /var/ipcop/traffic/empty-aggregate.db
+	rm -f /var/ofw/traffic/empty-aggregate.db
 	rm -f /var/log/traffic/aggregate.db
 
 	# Beware there is 2 differents sqlite packages (-autoconf tar.gz and -src .zip) that support different extensions/features
@@ -108,8 +109,10 @@ endif
 
 	# Create database
 	mkdir -p /var/log/traffic/
-	sqlite3 /var/ipcop/traffic/empty-aggregate.db < $(DIR_SRC)/config/cfgroot/aggregate.table
-	cp /var/ipcop/traffic/empty-aggregate.db /var/log/traffic/aggregate.db
+	#sqlite3 /var/ipcop/traffic/empty-aggregate.db < $(DIR_SRC)/config/cfgroot/aggregate.table
+	#cp /var/ipcop/traffic/empty-aggregate.db /var/log/traffic/aggregate.db
+	sqlite3 /var/ofw/traffic/empty-aggregate.db < $(DIR_SRC)/config/cfgroot/aggregate.table
+	cp /var/ofw/traffic/empty-aggregate.db /var/log/traffic/aggregate.db
 
 	rm -f $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/{DBD-SQLite-*,ulogd-*}
 	@rm -rf $(DIR_APP)

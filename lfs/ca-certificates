@@ -1,18 +1,18 @@
 ###############################################################################
-# This file is part of the IPCop Firewall.                                    #
+# This file is part of the Openfirewall.                                    #
 #                                                                             #
-# IPCop is free software; you can redistribute it and/or modify               #
+# Openfirewall is free software; you can redistribute it and/or modify               #
 # it under the terms of the GNU General Public License as published by        #
 # the Free Software Foundation; either version 2 of the License, or           #
 # (at your option) any later version.                                         #
 #                                                                             #
-# IPCop is distributed in the hope that it will be useful,                    #
+# Openfirewall is distributed in the hope that it will be useful,                    #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of              #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
 # GNU General Public License for more details.                                #
 #                                                                             #
 # You should have received a copy of the GNU General Public License           #
-# along with IPCop; if not, write to the Free Software                        #
+# along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
 # Makefiles are based on LFSMake, which is                                    #
@@ -20,7 +20,7 @@
 #                                                                             #
 # Modifications by:                                                           #
 # ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for IPCop build                                #
+#          - Modified Makefile for Openfirewall build                                #
 #                                                                             #
 # $Id: ca-certificates 7875 2015-02-08 12:36:06Z owes $
 #                                                                             #
@@ -85,14 +85,14 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
 
 	# Modify location for 'local' certificates
-	cd $(DIR_APP) && sed -i -e 's:LOCALCERTSDIR=.*:LOCALCERTSDIR=/var/ipcop/ca-local:g' sbin/update-ca-certificates
+	cd $(DIR_APP) && sed -i -e 's:LOCALCERTSDIR=.*:LOCALCERTSDIR=/var/ofw/ca-local:g' sbin/update-ca-certificates
 	# Remove Debian specific update hooks
 	cd $(DIR_APP) && patch -p1 -i $(DIR_PATCHES)/$(PKG_NAME)_remove-update-hooks.patch
 	# Progress messages from update-ca-certificates to logfile
 	cd $(DIR_APP) && patch -p1 -i $(DIR_PATCHES)/$(PKG_NAME)_add-logger.patch
 
 	install -d -m 755 /usr/share/ca-certificates
-	install -d -m 755 /var/ipcop/ca-local
+	install -d -m 755 /var/ofw/ca-local
 
 	cd $(DIR_APP) && make SUBDIRS=mozilla
 	cd $(DIR_APP) && make install SUBDIRS=mozilla
