@@ -1,4 +1,4 @@
-The traffic on your IPCop __HOSTNAME__ has reached the selected warnlevel!
+The traffic on your Openfirewall __HOSTNAME__ has reached the selected warnlevel!
 
 This period total volume:          __CALC_VOLUME_TOTAL__ MB (__CALC_PERCENT_TOTAL__ %)
 This period in volume:             __CALC_VOLUME_IN__ MB (__CALC_PERCENT_IN__ %)

@@ -53,6 +53,6 @@ usr/lib/ulogd/ulogd_output_XML.so
 usr/lib/ulogd/ulogd_raw2packet_BASE.so
 usr/sbin/ulogd
 #usr/share/man/man8/ulogd.8
-var/ipcop/traffic/empty-ulogd.db
+var/ofw/traffic/empty-ulogd.db
 #var/log/traffic
 var/log/traffic/ulogd.db

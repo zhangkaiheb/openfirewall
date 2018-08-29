@@ -3,7 +3,7 @@
 MacRISC MacRISC3 MacRISC4
 </COMPATIBLE>
 <DESCRIPTION>
-IPCop PPC bootloader
+Openfirewall PPC bootloader
 </DESCRIPTION>
 <BOOT-SCRIPT>
 " screen" output

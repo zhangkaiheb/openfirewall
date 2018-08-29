@@ -1,6 +1,6 @@
 #
-# This is the IPCop list of ISDN adapters for hisax driver
-#   if you want to add your own adapters to IPCop simply add to the list below
+# This is the Openfirewall list of ISDN adapters for hisax driver
+#   if you want to add your own adapters to Openfirewall simply add to the list below
 #
 Teles 16.0, 1
 Teles 8.0, 2

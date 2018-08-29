@@ -10,13 +10,13 @@
 #
 
 use strict;
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 
 my %pppsettings;
 my %modemsettings;
 
-&General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
-&General::readhash('/var/ipcop/modem/settings', \%modemsettings);
+&General::readhash('/var/ofw/ppp/settings', \%pppsettings);
+&General::readhash('/var/ofw/modem/settings', \%modemsettings);
 
 if ($pppsettings{'PROFILEMODEMINIT'} eq '') {
 	$pppsettings{'PROFILEMODEMINIT'} = 'AT'; }

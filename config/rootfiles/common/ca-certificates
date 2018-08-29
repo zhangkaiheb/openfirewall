@@ -174,4 +174,4 @@ usr/share/ca-certificates/mozilla/ePKI_Root_Certification_Authority.crt
 usr/share/ca-certificates/mozilla/thawte_Primary_Root_CA.crt
 usr/share/ca-certificates/mozilla/thawte_Primary_Root_CA_-_G2.crt
 usr/share/ca-certificates/mozilla/thawte_Primary_Root_CA_-_G3.crt
-#var/ipcop/ca-local
+#var/ofw/ca-local

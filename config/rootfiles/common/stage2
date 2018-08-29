@@ -1,6 +1,8 @@
 #boot
 dev/console
 dev/null
+dev/pts
+dev/shm
 #dev/tty
 #dev/tty0
 #dev/tty1
@@ -106,7 +108,7 @@ var/empty
 #var/lib
 #var/lib/misc
 #var/local
-#var/lock
+var/lock
 ##var/lock/subsys
 #var/log
 #var/mail

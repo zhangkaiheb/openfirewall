@@ -1,4 +1,4 @@
-             0fWelcome to IPCop, Licensed under GNU GPL version 2.07      
+             0fWelcome to Openfirewall, Licensed under GNU GPL version 2.07      
 
         PLEASE BEWARE!  This installation process will kill all 
         existing partitions on your PC or server. Please be aware
@@ -14,7 +14,7 @@
         something not-working, broken, etc.: don't panic.
         It is a simple case of S.E.P. and does not need reporting.
 07
-        Press RETURN to boot IPCop default installation.
+        Press RETURN to boot Openfirewall default installation.
 
         Or, if you are having trouble you can try these options....
         Type:   nopcmcia        to disable PCMCIA detection

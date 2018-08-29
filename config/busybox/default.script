@@ -3,7 +3,7 @@
 # udhcpc script 
 # 
 # Based on simple.script by Tim Riker <Tim@Rikers.org>
-# Adapted by the IPCop team for use with IPCop installation
+# Adapted by the Openfirewall team for use with Openfirewall installation
 #
 # $Id: default.script 5583 2011-04-01 06:49:06Z gespinasse $
 #

@@ -16,7 +16,7 @@
 /etc/ssh/ssh_host_rsa_key
 /etc/ssh/ssh_host_rsa_key.pub
 /etc/udev/rules.d/70-persistent-net.rules
-/var/ipcop/
+/var/ofw/
 /var/lib/squidguard/db/custom/allowed/domains
 /var/lib/squidguard/db/custom/allowed/urls
 /var/lib/squidguard/db/custom/blocked/domains

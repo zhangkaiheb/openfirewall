@@ -92,7 +92,7 @@ start_raid()
 	echo -ne "."
 	sleep 1
 	echo -ne ". "
-	mdadm --assemble --scan --run --auto=yes --homehost=ipcop --quiet
+	mdadm --assemble --scan --run --auto=yes --homehost=openfirewall --quiet
 	test_mdadm_ok
 }
 

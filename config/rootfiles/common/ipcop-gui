@@ -1,4 +1,4 @@
-## IPCop GUI
+## Openfirewall GUI
 ##
 home/httpd/cgi-bin/addresses.cgi
 home/httpd/cgi-bin/addressgrps.cgi
@@ -130,10 +130,10 @@ home/httpd/html/images/web-support.png
 home/httpd/html/include
 home/httpd/html/include/domLib.js
 home/httpd/html/include/domMenu.js
-home/httpd/html/include/ipcop.css
+home/httpd/html/include/openfirewall.css
 home/httpd/html/index.cgi
-home/httpd/html/ipcop_big.gif
-home/httpd/html/ipcop_small.gif
+home/httpd/html/openfirewall_big.gif
+home/httpd/html/openfirewall_small.gif
 home/httpd/html/sgraph
 home/httpd/vhost81
 home/httpd/vhost81/cgi-bin

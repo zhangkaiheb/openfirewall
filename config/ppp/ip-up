@@ -1,26 +1,26 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 #
 # $Id: ip-up 4962 2010-09-18 06:51:46Z owes $
 #
 
 use strict;
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 
 &General::log("PPP has gone up on $ARGV[0]");
 umask 022;
@@ -28,7 +28,7 @@ umask 022;
 my %pppsettings;
 
 # read vars back from file.
-&General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+&General::readhash('/var/ofw/ppp/settings', \%pppsettings);
 
 if ( ( $pppsettings{'TYPE'} eq 'isdn') &&
         ( $pppsettings{'COMPORT'} eq 'isdn2')  &&
@@ -41,27 +41,27 @@ my $primarydns = $pppsettings{'DNS1'};
 my $secondarydns = $pppsettings{'DNS2'};
 if ($dns eq 'Automatic') {
     if (!($pppsettings{'TYPE'} =~ /^isdn/)) {
-        if (open(FILE, ">/var/ipcop/red/dns1")) { print FILE $ENV{'DNS1'}; close FILE; }
-        if (open(FILE, ">/var/ipcop/red/dns2")) { print FILE $ENV{'DNS2'}; close FILE; }
+        if (open(FILE, ">/var/ofw/red/dns1")) { print FILE $ENV{'DNS1'}; close FILE; }
+        if (open(FILE, ">/var/ofw/red/dns2")) { print FILE $ENV{'DNS2'}; close FILE; }
     }
     else {
-        if (open(FILE, ">/var/ipcop/red/dns1")) { print FILE $ENV{'MS_DNS1'}; close FILE; }
-        if (open(FILE, ">/var/ipcop/red/dns2")) { print FILE $ENV{'MS_DNS2'}; close FILE; }
+        if (open(FILE, ">/var/ofw/red/dns1")) { print FILE $ENV{'MS_DNS1'}; close FILE; }
+        if (open(FILE, ">/var/ofw/red/dns2")) { print FILE $ENV{'MS_DNS2'}; close FILE; }
     }
 }
 else {
-    if (open(FILE, ">/var/ipcop/red/dns1")) { print FILE $pppsettings{'DNS1'}; close FILE; }
-    if (open(FILE, ">/var/ipcop/red/dns2")) { print FILE $pppsettings{'DNS2'}; close FILE; }
+    if (open(FILE, ">/var/ofw/red/dns1")) { print FILE $pppsettings{'DNS1'}; close FILE; }
+    if (open(FILE, ">/var/ofw/red/dns2")) { print FILE $pppsettings{'DNS2'}; close FILE; }
 }
 
-if (open(FILE, ">/var/ipcop/red/iface")) { print FILE $ARGV[0]; close (FILE); }
-if (open(FILE, ">/var/ipcop/red/local-ipaddress"))  { print FILE $ARGV[3]; close (FILE); }
-if (open(FILE, ">/var/ipcop/red/remote-ipaddress")) { print FILE $ARGV[4]; close (FILE); }
+if (open(FILE, ">/var/ofw/red/iface")) { print FILE $ARGV[0]; close (FILE); }
+if (open(FILE, ">/var/ofw/red/local-ipaddress"))  { print FILE $ARGV[3]; close (FILE); }
+if (open(FILE, ">/var/ofw/red/remote-ipaddress")) { print FILE $ARGV[4]; close (FILE); }
 
 # Remove default route and set default route using remote IP and device (ppp0).
 # If we do not do this IPsec tunnels do not come up.
 system('/sbin/ip route del default');
 system("/sbin/ip route add default dev $ARGV[0] via $ARGV[4]");
 
-system('/usr/bin/touch /var/ipcop/red/active');
+system('/usr/bin/touch /var/ofw/red/active');
 system('/etc/rc.d/rc.updatered ppp up &');

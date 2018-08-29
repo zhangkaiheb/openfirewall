@@ -11,8 +11,8 @@
 ##    (This may become a configurable parameter at some point.)
 ##
 
-#   IPCop Apache path layout (Achim: modified example GNU Layout)
-<Layout IPCop>
+#   Openfirewall Apache path layout (Achim: modified example GNU Layout)
+<Layout Openfirewall>
 	prefix:        /home/httpd
 	exec_prefix:   /usr
 	bindir:        ${exec_prefix}/bin

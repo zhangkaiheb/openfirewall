@@ -11,7 +11,7 @@ HOME=/
 
 # Logwatch
 %daily 10 *	/usr/local/bin/logwatch > /var/log/logwatch/`date -I -d yesterday`; \
-		LOGWATCH_KEEP=$(sed -ne 's/^LOGWATCH_KEEP=\([0-9]\+\)$/\1/p' /var/ipcop/logging/settings); \
+		LOGWATCH_KEEP=$(sed -ne 's/^LOGWATCH_KEEP=\([0-9]\+\)$/\1/p' /var/ofw/logging/settings); \
 		find /var/log/logwatch/ -ctime +${LOGWATCH_KEEP=56} -exec rm -f '{}' ';'
 
 # Backup logs to flashdisk

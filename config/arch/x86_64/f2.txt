@@ -1,4 +1,4 @@
-          0fWelcome to IPCop, Licensed under GNU GPL version 2.07
+          0fWelcome to Openfirewall, Licensed under GNU GPL version 2.07
         PLEASE BEWARE!  This installation process will kill all 
         existing partitions on your PC or server. Please be aware
         of this before continuing this installation.  

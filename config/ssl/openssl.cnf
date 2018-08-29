@@ -5,10 +5,10 @@ oid_section	= new_oids
 [ new_oids ]
 
 [ ca ]
-default_ca	= IPCop
+default_ca	= Openfirewall
 
-[ IPCop ]
-dir		= /var/ipcop
+[ Openfirewall ]
+dir		= /var/ofw
 certs		= $dir/certs
 crl_dir		= $dir/crls
 database	= $dir/certs/index.txt

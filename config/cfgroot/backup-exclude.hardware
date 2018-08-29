@@ -1,2 +1,2 @@
 etc/udev/rules.d/70-persistent-net.rules
-var/ipcop/ethernet/settings
+var/ofw/ethernet/settings

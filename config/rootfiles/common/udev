@@ -2,7 +2,7 @@
 ##
 #etc/udev
 #etc/udev/rules.d
-etc/udev/rules.d/60-ipcop.rules
+etc/udev/rules.d/60-openfirewall.rules
 ####etc/udev/rules.d/70-persistent-net.rules
 etc/udev/rules.d/55-lfs.rules
 etc/udev/rules.d/81-cdrom.rules

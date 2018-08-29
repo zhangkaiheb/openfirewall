@@ -1,4 +1,4 @@
-          0fWelcome to IPCop, Licensed under GNU GPL version 2.07
+          0fWelcome to Openfirewall, Licensed under GNU GPL version 2.07
         PLEASE BEWARE!  This installation process will kill all 
         existing partitions on your PC or server. Please be aware
         of this before continuing this installation.  
@@ -15,7 +15,7 @@
 <09F307>    More advanced installation options.
 <09F407>    memtest.
 
-Press RETURN to boot IPCop default installation.
+Press RETURN to boot Openfirewall default installation.
     Or, if you are having trouble you can try these target options ...
     Type: nodma               to install with DMA disabled for IDE
           verbose             to install with kernel messages enabled

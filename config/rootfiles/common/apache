@@ -187,5 +187,5 @@ usr/sbin/httpd
 #usr/share/man/man8/logresolve.8
 #usr/share/man/man8/rotatelogs.8
 #usr/share/man/man8/suexec.8
-var/ipcop/main/hostname.conf
+var/ofw/main/hostname.conf
 var/log/httpd
