@@ -1,19 +1,19 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop. If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall. If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) The SmoothWall Team
 #
@@ -22,7 +22,7 @@
 #              - ibod now an option
 #              - PCI ADSL support added
 #
-# Copyright (c) 2002-2012 The IPCop Team
+# Copyright (c) 2002-2012 The Openfirewall Team
 #
 # $Id: pppsetup.cgi 6824 2012-11-02 17:52:29Z owes $
 #
@@ -38,9 +38,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 our %pppsettings = ();
 my %temppppsettings = ();
@@ -60,7 +60,7 @@ $profilenames[0] = $Lang::tr{'no profile switch'};
 for ($c = 1; $c <= $maxprofiles; $c++) {
     %temppppsettings = ();
     $temppppsettings{'PROFILENAME'} = $Lang::tr{'empty'};
-    &General::readhash("/var/ipcop/ppp/settings-$c", \%temppppsettings);
+    &General::readhash("/var/ofw/ppp/settings-$c", \%temppppsettings);
     $profilenames[$c] = $temppppsettings{'PROFILENAME'};
 }
 for ($c = 1; $c <= $maxprofiles; $c++) {
@@ -78,13 +78,13 @@ $pppsettings{'ACTION'} = '';
 &initprofile();
 &General::getcgihash(\%pppsettings);
 
-if (($pppsettings{'ACTION'} eq '') && (-e '/var/run/ppp-ipcop.pid' || -e "/var/ipcop/red/active")) {
+if (($pppsettings{'ACTION'} eq '') && (-e '/var/run/ppp-ofw.pid' || -e "/var/ofw/red/active")) {
     $warningmessage = $Lang::tr{'unable to alter profiles while red is active'};
 
-    &General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+    &General::readhash('/var/ofw/ppp/settings', \%pppsettings);
 }
 elsif ($pppsettings{'ACTION'} ne ''
-    && (-e '/var/run/ppp-ipcop.pid' || -e "/var/ipcop/red/active"))
+    && (-e '/var/run/ppp-ofw.pid' || -e "/var/ofw/red/active"))
 {
     $errormessage = $Lang::tr{'unable to alter profiles while red is active'};
 
@@ -93,7 +93,7 @@ elsif ($pppsettings{'ACTION'} ne ''
     # If RED is DHCP/Static we can have a connection without some sensible defaults in ppp/settings.
     # This messes up the screen: no box termination.
     &initprofile();
-    &General::readhash("/var/ipcop/ppp/settings", \%pppsettings);
+    &General::readhash("/var/ofw/ppp/settings", \%pppsettings);
 }
 elsif ($pppsettings{'ACTION'} eq $Lang::tr{'refresh'}) {
     unless ($pppsettings{'TYPE'} =~
@@ -104,7 +104,7 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'refresh'}) {
         goto ERROR;
     }
     my $type = $pppsettings{'TYPE'};
-    &General::readhash("/var/ipcop/ppp/settings", \%pppsettings);
+    &General::readhash("/var/ofw/ppp/settings", \%pppsettings);
     $pppsettings{'TYPE'} = $type;
 }
 elsif ($pppsettings{'ACTION'} eq $Lang::tr{'save'}) {
@@ -227,14 +227,14 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'save'}) {
             $errormessage = "$Lang::tr{'unknown'} Rev $speedtouch";
             goto ERROR;
         }
-        if (!-e "/var/ipcop/alcatelusb/firmware.$modem.bin") {
+        if (!-e "/var/ofw/alcatelusb/firmware.$modem.bin") {
             $errormessage = $Lang::tr{'no alcatelusb firmware'};
             $drivererror  = 1;
             goto ERROR;
         }
     }
 
-    if ($pppsettings{'TYPE'} eq 'eciadsl' && (!(-e "/var/ipcop/eciadsl/synch.bin"))) {
+    if ($pppsettings{'TYPE'} eq 'eciadsl' && (!(-e "/var/ofw/eciadsl/synch.bin"))) {
         $errormessage = $Lang::tr{'no eciadsl synch.bin file'};
         $drivererror  = 1;
         goto ERROR;
@@ -338,7 +338,7 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'save'}) {
         goto ERROR;
     }
 
-    if ($pppsettings{'RECONNECTION'} eq 'dialondemand' && `/bin/cat /var/ipcop/ddns/config` =~ /,on$/m) {
+    if ($pppsettings{'RECONNECTION'} eq 'dialondemand' && `/bin/cat /var/ofw/ddns/config` =~ /,on$/m) {
         $errormessage = $Lang::tr{'dod not compatible with ddns'};
         goto ERROR;
     }
@@ -379,7 +379,7 @@ ERROR:
     }
 
     # write cgi vars to the file.
-    &General::writehash("/var/ipcop/ppp/settings-$pppsettings{'PROFILE'}", \%pppsettings);
+    &General::writehash("/var/ofw/ppp/settings-$pppsettings{'PROFILE'}", \%pppsettings);
 
     # Activate profile
     &General::SelectProfile($pppsettings{'PROFILE'});
@@ -394,10 +394,10 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'select'}) {
     %pppsettings            = ();
     $pppsettings{'PROFILE'} = $profile;       # to be written in file
     &initprofile();
-    &General::readhash("/var/ipcop/ppp/settings-$profile", \%pppsettings);
+    &General::readhash("/var/ofw/ppp/settings-$profile", \%pppsettings);
 
     # need to write default values on disk when profile was empty
-    &General::writehash("/var/ipcop/ppp/settings-$profile", \%pppsettings);
+    &General::writehash("/var/ofw/ppp/settings-$profile", \%pppsettings);
 
     # Activate profile
     &General::SelectProfile($profile);
@@ -408,13 +408,13 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'delete'}) {
     my $profile = $pppsettings{'PROFILE'};
     &General::log("$Lang::tr{'profile deleted'}: $profilenames[$profile]");
 
-    truncate("/var/ipcop/ppp/settings-$profile", 0);
+    truncate("/var/ofw/ppp/settings-$profile", 0);
 
     # save PROFILE, reset hash and recreate default values for empty profil
     %pppsettings = ();
     $pppsettings{'PROFILE'} = $profile;
     &initprofile();
-    &General::writehash("/var/ipcop/ppp/settings-$profile", \%pppsettings);
+    &General::writehash("/var/ofw/ppp/settings-$profile", \%pppsettings);
 
     # Activate profile
     &General::SelectProfile($profile);
@@ -423,7 +423,7 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'delete'}) {
 else {
 
     # no accepted action set, just read in the current vars
-    &General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+    &General::readhash('/var/ofw/ppp/settings', \%pppsettings);
 }
 
 # For dropdown selection, we have profiles 1-5, profile 0 is special case
@@ -1168,7 +1168,7 @@ END
                 $modem = 'v0123';
             }
             print "<tr><td>$Lang::tr{'firmware'}:</td>";
-            if (-e "/var/ipcop/alcatelusb/firmware.$modem.bin") {
+            if (-e "/var/ofw/alcatelusb/firmware.$modem.bin") {
                 print "<td>$Lang::tr{'present'}</td><td colspan='2'>&nbsp;</td></tr>\n";
             }
             else {
@@ -1181,7 +1181,7 @@ END
     }
     elsif ($pppsettings{'TYPE'} eq 'eciadsl') {
         print "<tr><td>$Lang::tr{'driver'}:</td>";
-        if (-e "/var/ipcop/eciadsl/synch.bin") {
+        if (-e "/var/ofw/eciadsl/synch.bin") {
             print "<td>$Lang::tr{'present'}</td><td colspan='2'>&nbsp;</td></tr>\n";
         }
         else {
@@ -1326,7 +1326,7 @@ sub initprofile {
 
     # Get PPPoE settings so we can see if PPPoE is enabled or not.
     $netsettings{'RED_1_TYPE'} = '';
-    &General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
+    &General::readhash("/var/ofw/ethernet/settings", \%netsettings);
 
     # empty profile partial pre-initialization
     if ($netsettings{'RED_COUNT'} >= 1) {

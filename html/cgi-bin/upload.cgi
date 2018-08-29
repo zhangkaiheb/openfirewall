@@ -1,23 +1,23 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop. If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall. If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) The SmoothWall Team
 #
-# Copyright (c) 2004-2014 The IPCop Team
+# Copyright (c) 2004-2014 The Openfirewall Team
 #
 # $Id: upload.cgi 7453 2014-04-11 07:28:44Z owes $
 #
@@ -34,9 +34,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %uploadsettings   = ();
 my $errormessage     = '';
@@ -73,7 +73,7 @@ $kernel = `/bin/uname -r | /usr/bin/tr -d '\012'`;
 
 if ($uploadsettings{'ACTION'} eq $firmwarename) {
     if ($modem eq 'v0123' || $modem eq 'v4_b') {
-        if (copy($uploadsettings{'FH'}, "/var/ipcop/alcatelusb/firmware.$modem.bin") != 1) {
+        if (copy($uploadsettings{'FH'}, "/var/ofw/alcatelusb/firmware.$modem.bin") != 1) {
             $errormessage     = $!;
             $error_speedtouch = 'error';
         }
@@ -92,7 +92,7 @@ elsif ($uploadsettings{'ACTION'} eq "$Lang::tr{'upload'} ipcop-avmdrv.tgz") {
     }
 }
 elsif ($uploadsettings{'ACTION'} eq $Lang::tr{'upload synch.bin'}) {
-    if (copy($uploadsettings{'FH'}, "/var/ipcop/eciadsl/synch.bin") != 1) {
+    if (copy($uploadsettings{'FH'}, "/var/ofw/eciadsl/synch.bin") != 1) {
         $errormessage = $!;
         $error_eci    = 'error';
     }
@@ -128,7 +128,7 @@ print <<END
     <td width='15%'>
 END
     ;
-if (-e "/var/ipcop/alcatelusb/firmware.$modem.bin") {
+if (-e "/var/ofw/alcatelusb/firmware.$modem.bin") {
     if ($extraspeedtouchmessage ne '') {
         print("$extraspeedtouchmessage</td>");
     }
@@ -162,7 +162,7 @@ print <<END
     <td width='15%'>
 END
     ;
-if (-e "/var/ipcop/eciadsl/synch.bin") {
+if (-e "/var/ofw/eciadsl/synch.bin") {
     if ($extraeciadslmessage ne '') {
         print("$extraeciadslmessage</td>");
     }

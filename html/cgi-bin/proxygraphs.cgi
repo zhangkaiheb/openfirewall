@@ -16,9 +16,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %cgiparams=();
 my @cgigraphs=();

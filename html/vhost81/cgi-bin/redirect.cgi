@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2004-2007 marco.s - http://www.urlfilter.net
-# (c) 2011 The IPCop Team
+# (c) 2011 The Openfirewall Team
 #
 # $Id: redirect.cgi 6296 2012-01-30 18:07:51Z dotzball $
 #
@@ -28,14 +28,14 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 
 my $http_port      = '81';
 my %netsettings;
 my %filtersettings;
 
-&General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
-&General::readhash("/var/ipcop/proxy/filtersettings", \%filtersettings);
+&General::readhash("/var/ofw/ethernet/settings", \%netsettings);
+&General::readhash("/var/ofw/proxy/filtersettings", \%filtersettings);
 
 my $category=param("category");
 my $url=param("url");
@@ -142,7 +142,7 @@ print <<END
     </div>
     </div>
     <div style="padding:5px; background-color:#C0C0C0; text-align:right; color:#FFFFFF; font-size:60%; font-family:verdana,arial,'sans serif';">
-        Web Filtering by <a style="color:#FFFFFF;" href="http://www.ipcop.org"><b>IPCop</b></a> and
+        Web Filtering by <a style="color:#FFFFFF;" href="http://www.openfirewall.cn"><b>IPCop</b></a> and
         <a style="color:#FFFFFF;" href="http://www.squidguard.org"><b>SquidGuard</b></a>
     </div>
 </div>

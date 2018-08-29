@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) The SmoothWall Team
-# (c) 2001-2014, the IPCop team
+# (c) 2001-2014, the Openfirewall Team
 #
 # $Id: index.cgi 7455 2014-04-11 08:11:40Z owes $
 #
@@ -32,10 +32,10 @@ use strict;
 use warnings; no warnings 'once';
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
-require '/usr/lib/ipcop/traffic-lib.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/traffic-lib.pl';
 
 my %mainsettings  = ();
 my %cgiparams     = ();
@@ -52,10 +52,10 @@ $cgiparams{'ACTION'} = '';
 &General::getcgihash(\%cgiparams);
 $pppsettings{'VALID'}       = '';
 $pppsettings{'PROFILENAME'} = 'None';
-&General::readhash('/var/ipcop/main/settings',     \%mainsettings);
-&General::readhash('/var/ipcop/ppp/settings',      \%pppsettings);
-&General::readhash('/var/ipcop/modem/settings',    \%modemsettings);
-&General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
+&General::readhash('/var/ofw/main/settings',     \%mainsettings);
+&General::readhash('/var/ofw/ppp/settings',      \%pppsettings);
+&General::readhash('/var/ofw/modem/settings',    \%modemsettings);
+&General::readhash('/var/ofw/ethernet/settings', \%netsettings);
 
 my $connstate = &General::connectionstatus();
 if ($connstate =~ /$Lang::tr{'dod waiting'}/) {
@@ -123,7 +123,7 @@ if (   ($pppsettings{'VALID'} eq 'yes' && $modemsettings{'VALID'} eq 'yes')
 "<br />$Lang::tr{'ip address'} ($Lang::tr{'internet'}): $fetch_ip <br /> $Lang::tr{'ipcops hostname'} ($Lang::tr{'internet'}): $host_name";
 
         # and also the the real red IP if it is different from public IP
-        if (open(IPADDR, "/var/ipcop/red/local-ipaddress")) {
+        if (open(IPADDR, "/var/ofw/red/local-ipaddress")) {
             my $ipaddr = <IPADDR>;
             close IPADDR;
             chomp($ipaddr);
@@ -231,13 +231,13 @@ END
     <tr>
         <td align='left' width='25%' nowrap='nowrap' >&nbsp;</td>
         <td align='center' width='25%' nowrap='nowrap' class='boldbase'>
-            <font class='ipcop_iface_red'><b>$Lang::tr{'trafficin'}</b></font>
+            <font class='ofw_iface_red'><b>$Lang::tr{'trafficin'}</b></font>
         </td>
         <td align='center' width='25%' nowrap='nowrap' class='boldbase'>
-            <font class='ipcop_iface_red'><b>$Lang::tr{'trafficout'}</b></font>
+            <font class='ofw_iface_red'><b>$Lang::tr{'trafficout'}</b></font>
         </td>
         <td align='center' width='25%' nowrap='nowrap' class='boldbase'>
-            <font class='ipcop_iface_red'><b>$Lang::tr{'trafficsum'}</b></font>
+            <font class='ofw_iface_red'><b>$Lang::tr{'trafficsum'}</b></font>
         </td>
     </tr><tr>
         <td align='left' nowrap='nowrap' >$Lang::tr{'this weeks volume'} (MB):</td>

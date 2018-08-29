@@ -1,19 +1,19 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 #
 # $Id: traffic.cgi 5433 2011-02-09 18:56:59Z eoberlander $
@@ -29,17 +29,17 @@ use warnings;
 no warnings 'once';
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require "/usr/lib/ipcop/lang.pl";
-require "/usr/lib/ipcop/header.pl";
-require "/usr/lib/ipcop/traffic-lib.pl";
+require '/usr/lib/ofw/general-functions.pl';
+require "/usr/lib/ofw/lang.pl";
+require "/usr/lib/ofw/header.pl";
+require "/usr/lib/ofw/traffic-lib.pl";
 
 my %cgiparams;
 my %pppsettings;
 my %netsettings;
 my %settings;
 
-&General::readhash("/var/ipcop/ppp/settings", \%pppsettings);
+&General::readhash("/var/ofw/ppp/settings", \%pppsettings);
 
 $cgiparams{'SHOW_PAGE'} = 'overview';
 
@@ -422,7 +422,7 @@ foreach my $device (@sortedDeviceKeys) {
     my $txt_out = '';
 
     if ($interfaces{$devices{$device}}{'COLOR'} eq 'RED_COLOR') {
-        $color = 'ipcop_iface_red';
+        $color = 'ofw_iface_red';
         $redDevice = $device;
 
         if($showAllTraff && $TRAFFIC::settings{'VOLUME_IN_ENABLED'} eq 'on') {
@@ -433,13 +433,13 @@ foreach my $device (@sortedDeviceKeys) {
         }
     }
     elsif ($interfaces{$devices{$device}}{'COLOR'} eq 'ORANGE_COLOR') {
-        $color = 'ipcop_iface_orange';
+        $color = 'ofw_iface_orange';
     }
     elsif ($interfaces{$devices{$device}}{'COLOR'} eq 'BLUE_COLOR') {
-        $color = 'ipcop_iface_blue';
+        $color = 'ofw_iface_blue';
     }
     elsif ($interfaces{$devices{$device}}{'COLOR'} eq 'GREEN_COLOR') {
-        $color = 'ipcop_iface_green';
+        $color = 'ofw_iface_green';
     }
 
     print
@@ -459,7 +459,7 @@ if($showAllTraff==1)
         $vol_txt = "<br />($TRAFFIC::settings{'VOLUME_TOTAL'} MB)";
     }
     print
-"<td width='$inOutWidth' align='center' class='boldbase'><font class='ipcop_iface_red'><b>$Lang::tr{'trafficsum'} $vol_txt </b></font></td>";
+"<td width='$inOutWidth' align='center' class='boldbase'><font class='ofw_iface_red'><b>$Lang::tr{'trafficsum'} $vol_txt </b></font></td>";
 }
 
 print "</tr>\n";

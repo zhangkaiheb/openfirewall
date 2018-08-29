@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# IPCop CGIs - proxy.cgi: web proxy service configuration
+# openfirewall CGIs - proxy.cgi: web proxy service configuration
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2004-2009 marco.s - http://www.advproxy.net
-# (c) 2009-2015 The IPCop Team
+# (c) 2009-2015 The Openfirewall Team
 #
 # $Id: proxy.cgi 7770 2015-01-06 09:08:19Z owes $
 #
@@ -33,9 +33,9 @@ use NetAddr::IP;
 #use warnings;
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 # enable(==1)/disable(==0) HTML Form debugging
 my $debugFormparams = 0;
@@ -131,24 +131,24 @@ my $errormessage='';
 my $error_settings='';
 my $error_options='';
 
-my $acldir   = "/var/ipcop/proxy/acls";
-my $ncsadir  = "/var/ipcop/proxy/ncsa";
-my $ntlmdir  = "/var/ipcop/proxy/ntlm";
-my $raddir   = "/var/ipcop/proxy/radius";
-my $identdir = "/var/ipcop/proxy/ident";
-my $credir   = "/var/ipcop/proxy/cre";
+my $acldir   = "/var/ofw/proxy/acls";
+my $ncsadir  = "/var/ofw/proxy/ncsa";
+my $ntlmdir  = "/var/ofw/proxy/ntlm";
+my $raddir   = "/var/ofw/proxy/radius";
+my $identdir = "/var/ofw/proxy/ident";
+my $credir   = "/var/ofw/proxy/cre";
 
 my $userdb = "$ncsadir/passwd";
 my $stdgrp = "$ncsadir/standard.grp";
 my $extgrp = "$ncsadir/extended.grp";
 my $disgrp = "$ncsadir/disabled.grp";
 
-my $browserdb = "/var/ipcop/proxy/useragents";
-my $mimetypes = "/var/ipcop/proxy/mimetypes";
-my $throttled_urls = "/var/ipcop/proxy/throttle";
+my $browserdb = "/var/ofw/proxy/useragents";
+my $mimetypes = "/var/ofw/proxy/mimetypes";
+my $throttled_urls = "/var/ofw/proxy/throttle";
 
-my $cre_groups  = "/var/ipcop/proxy/cre/classrooms";
-my $cre_svhosts = "/var/ipcop/proxy/cre/supervisors";
+my $cre_groups  = "/var/ofw/proxy/cre/classrooms";
+my $cre_svhosts = "/var/ofw/proxy/cre/supervisors";
 
 my $identhosts = "$identdir/hosts";
 
@@ -227,10 +227,10 @@ open FILE, $browserdb;
 @useragentlist = sort { reverse(substr(reverse(substr($a,index($a,',')+1)),index(reverse(substr($a,index($a,','))),',')+1)) cmp reverse(substr(reverse(substr($b,index($b,',')+1)),index(reverse(substr($b,index($b,','))),',')+1))} grep !/(^$)|(^\s*#)/,<FILE>;
 close(FILE);
 
-&General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
+&General::readhash("/var/ofw/ethernet/settings", \%netsettings);
 
-if (-e "/var/ipcop/openvpn/settings") {
-    &General::readhash("/var/ipcop/openvpn/settings", \%ovpnsettings);
+if (-e "/var/ofw/openvpn/settings") {
+    &General::readhash("/var/ofw/openvpn/settings", \%ovpnsettings);
 
     if ((defined($ovpnsettings{'ENABLED_RED_1'}) && $ovpnsettings{'ENABLED_RED_1'} eq 'on')
         || (defined($ovpnsettings{'ENABLED_BLUE_1'}) && $ovpnsettings{'ENABLED_BLUE_1'} eq 'on')) {
@@ -720,7 +720,7 @@ ERROR:
 
             $proxysettings{'LOGUSERNAME'} = 'off' unless exists $proxysettings{'LOGUSERNAME'};
 
-            &General::writehash("/var/ipcop/proxy/settings", \%proxysettings);
+            &General::writehash("/var/ofw/proxy/settings", \%proxysettings);
 
             system('/usr/local/bin/restartsquid --config');
 
@@ -738,8 +738,8 @@ ERROR:
 
 if (!$errormessage)
 {
-    if (-e "/var/ipcop/proxy/settings") {
-        &General::readhash("/var/ipcop/proxy/settings", \%proxysettings);
+    if (-e "/var/ofw/proxy/settings") {
+        &General::readhash("/var/ofw/proxy/settings", \%proxysettings);
     }
     &read_acls;
 }
@@ -989,23 +989,23 @@ unless (defined($proxysettings{'NCSA_EDIT_MODE'}) && $proxysettings{'NCSA_EDIT_M
     <td colspan='4' class='base'><b>$Lang::tr{'common settings'}</b></td>
 </tr>
 <tr>
-    <td width='25%' class='base'>$Lang::tr{'enabled on'} <span class='ipcop_iface_green' style='font-weight: bold;'>$Lang::tr{'green'}</span>:</td>
+    <td width='25%' class='base'>$Lang::tr{'enabled on'} <span class='ofw_iface_green' style='font-weight: bold;'>$Lang::tr{'green'}</span>:</td>
     <td width='20%'><input type='checkbox' name='ENABLED_GREEN_1' $checked{'ENABLED_GREEN_1'}{'on'} /></td>
-    <td width='30%' class='base'>$Lang::tr{'transparent on'} <span class='ipcop_iface_green' style='font-weight: bold;'>$Lang::tr{'green'}</span>:</td>
+    <td width='30%' class='base'>$Lang::tr{'transparent on'} <span class='ofw_iface_green' style='font-weight: bold;'>$Lang::tr{'green'}</span>:</td>
     <td width='25%'><input type='checkbox' name='TRANSPARENT_GREEN_1' $checked{'TRANSPARENT_GREEN_1'}{'on'} /></td>
 </tr>
 END
 ;
     if ($netsettings{'BLUE_COUNT'} >= 1) {
-        print "<tr><td class='base'>$Lang::tr{'enabled on'} <span class='ipcop_iface_blue' style='font-weight: bold;'>$Lang::tr{'blue'}</span>:</td>";
+        print "<tr><td class='base'>$Lang::tr{'enabled on'} <span class='ofw_iface_blue' style='font-weight: bold;'>$Lang::tr{'blue'}</span>:</td>";
         print "<td><input type='checkbox' name='ENABLED_BLUE_1' $checked{'ENABLED_BLUE_1'}{'on'} /></td>";
-        print "<td class='base'>$Lang::tr{'transparent on'} <span class='ipcop_iface_blue' style='font-weight: bold;'>$Lang::tr{'blue'}</span>:</td>";
+        print "<td class='base'>$Lang::tr{'transparent on'} <span class='ofw_iface_blue' style='font-weight: bold;'>$Lang::tr{'blue'}</span>:</td>";
         print "<td><input type='checkbox' name='TRANSPARENT_BLUE_1' $checked{'TRANSPARENT_BLUE_1'}{'on'} /></td></tr>";
     }
     if ($ovpnactive) {
-        print "<tr><td class='base'>$Lang::tr{'enabled on'} <span class='ipcop_iface_ovpn' style='font-weight: bold;'>OpenVPN</span>:</td>";
+        print "<tr><td class='base'>$Lang::tr{'enabled on'} <span class='ofw_iface_ovpn' style='font-weight: bold;'>OpenVPN</span>:</td>";
         print "<td><input type='checkbox' name='ENABLED_OVPN' $checked{'ENABLED_OVPN'}{'on'} /></td>";
-        print "<td class='base'>$Lang::tr{'transparent on'} <span class='ipcop_iface_ovpn' style='font-weight: bold;'>OpenVPN</span>:</td>";
+        print "<td class='base'>$Lang::tr{'transparent on'} <span class='ofw_iface_ovpn' style='font-weight: bold;'>OpenVPN</span>:</td>";
         print "<td><input type='checkbox' name='TRANSPARENT_OVPN' $checked{'TRANSPARENT_OVPN'}{'on'} /></td></tr>";
     }
     print <<END
@@ -1294,7 +1294,7 @@ END
 ;
 
     $line = $Lang::tr{'no internal proxy on green'};
-    $line =~ s/Green/<span class='ipcop_iface_green' style='font-weight: bold;'>$Lang::tr{'green'}<\/span>/i;
+    $line =~ s/Green/<span class='ofw_iface_green' style='font-weight: bold;'>$Lang::tr{'green'}<\/span>/i;
     print "<tr><td class='base'>$line:</td>\n";
     print <<END
     <td><input type='checkbox' name='NO_PROXY_LOCAL_GREEN' $checked{'NO_PROXY_LOCAL_GREEN'}{'on'} /></td>
@@ -1303,7 +1303,7 @@ END
 ;
     if ($netsettings{'BLUE_COUNT'} >= 1) {
         $line = $Lang::tr{'no internal proxy on blue'};
-        $line =~ s/Blue/<span class='ipcop_iface_blue' style='font-weight: bold;'>$Lang::tr{'blue'}<\/span>/i;
+        $line =~ s/Blue/<span class='ofw_iface_blue' style='font-weight: bold;'>$Lang::tr{'blue'}<\/span>/i;
         print "<tr>\n";
         print "<td class='base'>$line:</td>\n";
         print <<END
@@ -1553,7 +1553,7 @@ END
     <td colspan='4'><b>$Lang::tr{'download throttling'}</b></td>
 </tr>
 <tr>
-    <td width='25%' class='base'>$Lang::tr{'throttling total on'} <span class='ipcop_iface_green' style='font-weight: bold;'>$Lang::tr{'green'}</span>:</td>
+    <td width='25%' class='base'>$Lang::tr{'throttling total on'} <span class='ofw_iface_green' style='font-weight: bold;'>$Lang::tr{'green'}</span>:</td>
     <td width='20%' class='base'>
     <select name='THROTTLING_GREEN_TOTAL'>
 END
@@ -1577,7 +1577,7 @@ END
     <option value='0' $selectedGT>$Lang::tr{'throttling unlimited'}</option>
     </select>
     </td>
-    <td width='25%' class='base'>$Lang::tr{'throttling per host on'} <span class='ipcop_iface_green' style='font-weight: bold;'>$Lang::tr{'green'}</span>:</td>
+    <td width='25%' class='base'>$Lang::tr{'throttling per host on'} <span class='ofw_iface_green' style='font-weight: bold;'>$Lang::tr{'green'}</span>:</td>
     <td width='30%' class='base'>
     <select name='THROTTLING_GREEN_HOST'>
 END
@@ -1608,7 +1608,7 @@ END
     if ($netsettings{'BLUE_COUNT'} >= 1) {
         print <<END
 <tr>
-    <td class='base'>$Lang::tr{'throttling total on'} <span class='ipcop_iface_blue' style='font-weight: bold;'>$Lang::tr{'blue'}</span>:</td>
+    <td class='base'>$Lang::tr{'throttling total on'} <span class='ofw_iface_blue' style='font-weight: bold;'>$Lang::tr{'blue'}</span>:</td>
     <td class='base'>
     <select name='THROTTLING_BLUE_TOTAL'>
 END
@@ -1632,7 +1632,7 @@ END
     <option value='0' $selectedBT>$Lang::tr{'throttling unlimited'}</option>
     </select>
     </td>
-    <td class='base'>$Lang::tr{'throttling per host on'} <span class='ipcop_iface_blue' style='font-weight: bold;'>$Lang::tr{'blue'}</span>:</td>
+    <td class='base'>$Lang::tr{'throttling per host on'} <span class='ofw_iface_blue' style='font-weight: bold;'>$Lang::tr{'blue'}</span>:</td>
     <td class='base'>
     <select name='THROTTLING_BLUE_HOST'>
 END
@@ -1781,7 +1781,7 @@ END
 ;
 
     my %redirectors = ();
-    foreach $redirector (</var/ipcop/proxy/redirector/*>) {
+    foreach $redirector (</var/ofw/proxy/redirector/*>) {
         if (-e $redirector) {
             my %redirectorsettings=();
             &General::readhash($redirector, \%redirectorsettings);

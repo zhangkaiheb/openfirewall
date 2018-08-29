@@ -1,23 +1,23 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 # IPCop CGI's - backup.cgi: manage import/export of configuration files
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # 2005  Franck Bourdonnec, major rewrite
-# (c) 200x-2016 The IPCop Team
+# (c) 200x-2016 The Openfirewall Team
 #
 # $Id: backup.cgi 8074 2016-01-18 21:01:51Z owes $
 #
@@ -42,9 +42,9 @@ use Sys::Hostname;
 use File::Temp qw(tempfile tempdir);
 use Scalar::Util qw(blessed reftype);
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my $errormessage = '';
 my $warnmessage  = '';
@@ -186,7 +186,7 @@ if ($settings{'ACTION'} eq $Lang::tr{'backup export key'}) {
         my $filename = 'backup.' . &hostname() . '.key';
         (my $fh, my $tmpfilename) = tempfile('/tmp/logfile.XXXXXX');
         $errormessage =
-            &get_bk_error(system('/usr/local/bin/ipcopbkcfg', '--keycat', "$settings{'PASSWORD'}", "$tmpfilename") >> 8);
+            &get_bk_error(system('/usr/local/bin/ofwbkcfg', '--keycat', "$settings{'PASSWORD'}", "$tmpfilename") >> 8);
         if (!$errormessage) {
             open FH, "< $tmpfilename" or die "Unable to open tmp key file !";
             my @lines = <FH>;
@@ -211,7 +211,7 @@ if ($settings{'ACTION'} eq $Lang::tr{'backup export key'}) {
     }
 }
 
-my $cryptkeymissing = system('/usr/local/bin/ipcopbkcfg', '--keyexist') >> 8;
+my $cryptkeymissing = system('/usr/local/bin/ofwbkcfg', '--keyexist') >> 8;
 
 # disable 'create key' or other buttons
 if ($cryptkeymissing) {
@@ -229,7 +229,7 @@ if ($settings{'ACTION'} eq $Lang::tr{'create new backup'}) {
         $errormessage = "$Lang::tr{'description'}" . $Lang::tr{'too long 80 char max'};
     }
     else {
-        $errormessage = &get_bk_error(system('/usr/local/bin/ipcopbkcfg', '--write', "$settings{'DESCRIPTION'}") >> 8);
+        $errormessage = &get_bk_error(system('/usr/local/bin/ofwbkcfg', '--write', "$settings{'DESCRIPTION'}") >> 8);
     }
 }
 
@@ -255,7 +255,7 @@ if ($settings{'ACTION'} eq $Lang::tr{'import'}) {
         $errormessage = $Lang::tr{'save error'};
     }
     else {
-        $errormessage = &get_rs_error(system('/usr/local/bin/ipcoprestore', '--import') >> 8);
+        $errormessage = &get_rs_error(system('/usr/local/bin/ofwrestore', '--import') >> 8);
     }
 }
 
@@ -278,10 +278,10 @@ if (defined($settings{$Lang::tr{'restore'} . '.y'})
 
             # can't use ? --hardware : '' because argc is wrong for the helper.
             $errormessage =
-                get_rs_error(system('/usr/local/bin/ipcoprestore', '--restore', "$settings{'KEY'}", '--hardware') >> 8);
+                get_rs_error(system('/usr/local/bin/ofwrestore', '--restore', "$settings{'KEY'}", '--hardware') >> 8);
         }
         else {
-            $errormessage = get_rs_error(system('/usr/local/bin/ipcoprestore', '--restore', "$settings{'KEY'}") >> 8);
+            $errormessage = get_rs_error(system('/usr/local/bin/ofwrestore', '--restore', "$settings{'KEY'}") >> 8);
         }
         if (!$errormessage) {
 
@@ -367,20 +367,20 @@ if ($settings{'ACTION'} eq $Lang::tr{'mount'}) {
     else {
 
         #umount previous, even if same device already mounted.
-        system('/usr/local/bin/ipcopbkcfg', '--umount');
+        system('/usr/local/bin/ofwbkcfg', '--umount');
         if ($settings{'MEDIA'} eq $Lang::tr{'local hard disk'}) {
             # TODO: make this an error ?
             # $errormessage = $Lang::tr{'cannot mount local hard disk'};
         }
         elsif (grep (/$settings{'MEDIA'}/, %partitions)) {
-            $errormessage = `/usr/local/bin/ipcopbkcfg --mount $settings{'MEDIA'}`;
+            $errormessage = `/usr/local/bin/ofwbkcfg --mount $settings{'MEDIA'}`;
         }
     }
 }
 
 # Umount a removable media
 if ($settings{'ACTION'} eq $Lang::tr{'umount'}) {
-    system('/usr/local/bin/ipcopbkcfg', '--umount');
+    system('/usr/local/bin/ofwbkcfg', '--umount');
 }
 
 my $mounted = &findmounted();
@@ -439,7 +439,7 @@ if ($errormessage) {
 # after a restore
 if ($warnmessage) {
     &Header::openbox('100%', 'left', '', 'warning');
-    $warnmessage = "<font class='ipcop_StatusBigRed'>$Lang::tr{'capswarning'}</font>: $warnmessage";
+    $warnmessage = "<font class='ofw_StatusBigRed'>$Lang::tr{'capswarning'}</font>: $warnmessage";
     print "<b>$Lang::tr{'alt information'}</b><br />$warnmessage";
     &Header::closebox();
 }
@@ -572,7 +572,7 @@ print <<END
         </tr>
         <tr>
             <th colspan='3' align='left'>$Lang::tr{'current media'}:
-                <font class='ipcop_StatusBigRed'>$media_des &nbsp;</font>
+                <font class='ofw_StatusBigRed'>$media_des &nbsp;</font>
                 $Lang::tr{'free'}:$freespace M
             </th>
         </tr>
@@ -650,7 +650,7 @@ print "</table>\n</td></tr><tr><td colspan='3'>" . ($i ? "<br />" : "$Lang::tr{'
 
 # after a floppy backup
 if ($settings{'ACTION'} eq $Lang::tr{'backup to floppy'}) {
-    print "<hr /><b>$Lang::tr{'alt information'}</b><pre>" . `/usr/local/bin/ipcopbackup` . '&nbsp;</pre>';
+    print "<hr /><b>$Lang::tr{'alt information'}</b><pre>" . `/usr/local/bin/ofwbackup` . '&nbsp;</pre>';
 }
 print "</td></tr></table>";
 

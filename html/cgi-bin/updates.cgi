@@ -1,25 +1,25 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # updates.cgi is based on Smoothwall updates.cgi which is
 # (c) The SmoothWall Team
 #
 # With many, many changes since 2001,
-# (c) 2001-2015, the IPCop team
+# (c) 2001-2015, the Openfirewall Team
 #
 # $Id: updates.cgi 7832 2015-01-27 20:36:40Z owes $
 #
@@ -36,9 +36,9 @@ use strict;
 #use warnings; no warnings 'once';# 'redefine', 'uninitialized';
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 
 my $errormessage  = '';
@@ -87,7 +87,7 @@ sub get_error() {
 }
 
 &Header::showhttpheaders();
-&General::readhash('/var/ipcop/main/settings', \%mainsettings);
+&General::readhash('/var/ofw/main/settings', \%mainsettings);
 
 my %uploadsettings = ();
 $uploadsettings{'ACTION'} = '';
@@ -143,9 +143,9 @@ elsif (index($uploadsettings{'ACTION'}, "delete-") != -1) {
 }
 elsif ($uploadsettings{'ACTION'} eq $Lang::tr{'refresh update list'}) {
     my $return = 1;
-    if (-e '/var/ipcop/red/active') {
+    if (-e '/var/ofw/red/active') {
         # Start gathering the information from scratch, do not zap the list if offline
-        system('/bin/echo -e "<ipcop>\n</ipcop>" > /var/ipcop/patches/available.xml');
+        system('/bin/echo -e "<ipcop>\n</ipcop>" > /var/ofw/patches/available.xml');
         $return = &General::downloadpatchlist();
     }
     if ($return == 0) {
@@ -167,7 +167,7 @@ elsif ($uploadsettings{'ACTION'} eq "$Lang::tr{'clear cache'} (squid)") {
 elsif ($uploadsettings{'ACTION'} eq "$Lang::tr{'save'}") {
     $mainsettings{'CHECKUPDATES'}   = $uploadsettings{'CHECKUPDATES'};
     $mainsettings{'PRELOADUPDATES'} = $uploadsettings{'PRELOADUPDATES'};
-    &General::writehash('/var/ipcop/main/settings', \%mainsettings);
+    &General::writehash('/var/ofw/main/settings', \%mainsettings);
 }
 
 
@@ -175,8 +175,8 @@ elsif ($uploadsettings{'ACTION'} eq "$Lang::tr{'save'}") {
 if (! system("/bin/ps ax | /bin/grep -q [i]nstallpackage") ) {
     # Temporary test for translated text as it will only become available after extracting the 2.1.3 patch file.
     my $langtxt;
-    if (defined($Lang::tr{'ipcop will now update'})) {
-        $langtxt = $Lang::tr{'ipcop will now update'};
+    if (defined($Lang::tr{'openfirewall will now update'})) {
+        $langtxt = $Lang::tr{'openfirewall will now update'};
     }
     else {
         $langtxt = 'IPCop will now update.';
@@ -193,12 +193,12 @@ if (-e '/var/patches/error') {
 }
 
 # Read-in the XML list files installed/ready to install
-$installed = eval { XMLin('/var/ipcop/patches/installed.xml') };
+$installed = eval { XMLin('/var/ofw/patches/installed.xml') };
 if ($@) {
     $errormessage .= "$Lang::tr{'could not open installed updates file'}<br />";
 }
 
-$available = eval { XMLin('/var/ipcop/patches/available.xml') };
+$available = eval { XMLin('/var/ofw/patches/available.xml') };
 if ($@) {
     $errormessage .= "$Lang::tr{'could not open available updates file'}<br />";
     $available->{"latest"} = ${General::version};
@@ -450,7 +450,7 @@ END
         my $mount   = shift(@all_entries);
 
         my $alertstyle = "";
-        $alertstyle = "class='ipcop_error'" if ($freevalue <= $alert[$count]);
+        $alertstyle = "class='ofw_error'" if ($freevalue <= $alert[$count]);
         print <<END
 <tr $alertstyle>
     <td>$dev</td>

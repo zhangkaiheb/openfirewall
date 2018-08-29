@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2004-2008 marco.s - http://www.urlfilter.net
-# (c) 2011-2016 The IPCop Team
+# (c) 2011-2016 The Openfirewall Team
 #
 # $Id: logurlfilter.cgi 8036 2016-01-04 08:03:32Z owes $
 #
@@ -32,9 +32,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 use POSIX();
 
@@ -67,10 +67,10 @@ $cgiparams{'USERNAME'} = 'ALL';
 &General::getcgihash(\%cgiparams);
 $logsettings{'LOGVIEW_REVERSE'} = 'off';
 $logsettings{'LOGVIEW_VIEWSIZE'} = 150;
-&General::readhash("/var/ipcop/logging/settings", \%logsettings);
+&General::readhash("/var/ofw/logging/settings", \%logsettings);
 
-if (-e "/var/ipcop/proxy/filtersettings") {
-    &General::readhash("/var/ipcop/proxy/filtersettings", \%filtersettings);
+if (-e "/var/ofw/proxy/filtersettings") {
+    &General::readhash("/var/ofw/proxy/filtersettings", \%filtersettings);
 }
 
 my $start = 0;
@@ -133,7 +133,7 @@ my @log   = ();
 
 if ($cgiparams{'ACTION'} eq $Lang::tr{'export'}) {
     print "Content-type: text/plain\n";
-    print "Content-Disposition: attachment; filename=\"ipcop-urlfilter-$date.log\";\n";
+    print "Content-Disposition: attachment; filename=\"ofw-urlfilter-$date.log\";\n";
     print "\n";
     print "IPCop URL filter log\r\n";
     print "$Lang::tr{'date'}: $date\r\n\r\n";

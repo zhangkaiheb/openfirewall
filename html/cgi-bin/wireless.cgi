@@ -1,23 +1,23 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2003 Alan Hourihane <alanh@fairlite.demon.co.uk>
 # (c) 2005 Eric Oberlander, Robert Kerr - Inline editing & DHCP leases
-# (c) 2008-2014, the IPCop team
+# (c) 2008-2014, the Openfirewall Team
 #
 # $Id: wireless.cgi 7240 2014-02-18 22:08:00Z owes $
 #
@@ -34,9 +34,9 @@ use Time::Local;
 use warnings; no warnings 'once';# 'redefine', 'uninitialized';
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my $debug        = 0;
 my %cgiparams    = ();
@@ -63,8 +63,8 @@ $cgiparams{'ID'}         = -1;
 &General::getcgihash(\%cgiparams);
 $id = $cgiparams{'ID'};
 
-&General::readhash('/var/ipcop/dhcp/settings',     \%dhcpsettings);
-&General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
+&General::readhash('/var/ofw/dhcp/settings',     \%dhcpsettings);
+&General::readhash('/var/ofw/ethernet/settings', \%netsettings);
 &readSettings();
 
 &Header::showhttpheaders();
@@ -513,7 +513,7 @@ END
 sub readSettings
 {
     @wireless = ();
-    open(FILE, '/var/ipcop/firewall/wireless');
+    open(FILE, '/var/ofw/firewall/wireless');
     my @tmpfile = <FILE>;
     close(FILE);
 
@@ -536,7 +536,7 @@ sub readSettings
 sub writeSettings {
     my $id;
 
-    open(FILE, ">/var/ipcop/firewall/wireless") or die 'Unable to open Addressfilter file.';
+    open(FILE, ">/var/ofw/firewall/wireless") or die 'Unable to open Addressfilter file.';
     for $id (0 .. $#wireless) {
         next if (($wireless[$id]{'ENABLED'} ne 'on') && ($wireless[$id]{'ENABLED'} ne 'off'));
 
@@ -546,7 +546,7 @@ sub writeSettings {
     close FILE;
 
     # sort wireless device list by IP address
-    system "/usr/bin/sort -n -t '.' -k 2,2 -k 3,3 -k 4,4 /var/ipcop/firewall/wireless -o /var/ipcop/firewall/wireless";
+    system "/usr/bin/sort -n -t '.' -k 2,2 -k 3,3 -k 4,4 /var/ofw/firewall/wireless -o /var/ofw/firewall/wireless";
 
     &readSettings();
 }

@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) The SmoothWall Team
-# (c) 2001-2014, the IPCop team
+# (c) 2001-2014, the Openfirewall Team
 #
 # $Id: changepw.cgi 7558 2014-05-22 13:03:59Z owes $
 #
@@ -33,9 +33,9 @@ use Apache::Htpasswd;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %cgiparams    = ();
 my $errormessage = '';
@@ -58,7 +58,7 @@ if ($cgiparams{'ACTION_ADMIN'} eq $Lang::tr{'save'}) {
             $error_admin  = 'error';
         }
         elsif (length($password1) >= 6) {
-            my $htpasswd = new Apache::Htpasswd({passwdFile => '/var/ipcop/auth/users', UseMD5 => 1});
+            my $htpasswd = new Apache::Htpasswd({passwdFile => '/var/ofw/auth/users', UseMD5 => 1});
             $htpasswd->htDelete('admin');
             if (!$htpasswd->htpasswd('admin', $cgiparams{'ADMIN_PASSWORD1'})) {
                 $errormessage = $Lang::tr{'errmsg change fail'};
@@ -88,7 +88,7 @@ if ($cgiparams{'ACTION_DIAL'} eq $Lang::tr{'save'}) {
             $error_dial   = 'error';
         }
         elsif (length($password1) >= 6) {
-            my $htpasswd = new Apache::Htpasswd({passwdFile => '/var/ipcop/auth/users', UseMD5 => 1});
+            my $htpasswd = new Apache::Htpasswd({passwdFile => '/var/ofw/auth/users', UseMD5 => 1});
             $htpasswd->htDelete('dial');
             if (!$htpasswd->htpasswd('dial', $cgiparams{'DIAL_PASSWORD1'})) {
                 $errormessage = $Lang::tr{'errmsg change fail'};

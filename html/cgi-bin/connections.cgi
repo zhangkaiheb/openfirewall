@@ -1,19 +1,19 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2001 Jack Beglinger <jackb_guppy@yahoo.com>
 #
@@ -21,8 +21,8 @@
 #
 # (c) 2006 Franck - add sorting+filtering capability
 #
-# (c) 2008 Olaf for the IPCop team - use conntrack with XML output from conntrack-tools
-# (c) 2008 - 2011, the IPCop team
+# (c) 2008 Olaf for the Openfirewall Team - use conntrack with XML output from conntrack-tools
+# (c) 2008 - 2011, the Openfirewall Team
 #
 # $Id: connections.cgi 7065 2013-06-08 20:21:14Z dotzball $
 #
@@ -51,19 +51,19 @@ use NetAddr::IP;
 use XML::Simple;
 use XML::Parser::Style::Tree;
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my $icount = 0;
 
 # Read various files
 
 my %netsettings = ();
-&General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
+&General::readhash('/var/ofw/ethernet/settings', \%netsettings);
 my %mainsettings = ();
 $mainsettings{'DISPLAY_CONNECTIONS'} = 'TRAFFIC';
-&General::readhash('/var/ipcop/main/settings', \%mainsettings);
+&General::readhash('/var/ofw/main/settings', \%mainsettings);
 
 my %cgiparams = ();
 $cgiparams{'ACTION'} = '';
@@ -84,27 +84,27 @@ $cgiparams{'SEE_SORT'}  = '';
 
 if ($cgiparams{'ACTION'} eq 'SAVE') {
     $mainsettings{'DISPLAY_CONNECTIONS'} = $cgiparams{'DISPLAY_CONNECTIONS'};
-    &General::writehash('/var/ipcop/main/settings', \%mainsettings);
+    &General::writehash('/var/ofw/main/settings', \%mainsettings);
 }
 if ( $cgiparams{'ACTION'} eq $Lang::tr{'refresh'} ) {
 }
 
 
-my $aliasfile = '/var/ipcop/ethernet/aliases';
+my $aliasfile = '/var/ofw/ethernet/aliases';
 open(ALIASES, $aliasfile) or die 'Unable to open aliases file.';
 my @aliases = <ALIASES>;
 close(ALIASES);
 
 # Add limited broadcast
 push(@network, "255.255.255.255");
-push(@colour,  'ipcop_iface_bg_fw');
+push(@colour,  'ofw_iface_bg_fw');
 push(@ports, '0');
 push(@protocols, '');
 
 # Add IPsec remote networks
-if (-e '/var/ipcop/ipsec/config') {
+if (-e '/var/ofw/ipsec/config') {
     my %confighash=();
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
 
     foreach my $key (keys(%confighash)) {
         # Only enabled and net-net configlines
@@ -112,7 +112,7 @@ if (-e '/var/ipcop/ipsec/config') {
         next unless ($confighash{$key}[3] eq 'net');
 
         push(@network, $confighash{$key}[11]);
-        push(@colour,  'ipcop_iface_bg_ipsec');
+        push(@colour,  'ofw_iface_bg_ipsec');
         push(@ports, '0');
         push(@protocols, '');
     }
@@ -120,56 +120,56 @@ if (-e '/var/ipcop/ipsec/config') {
 
 # Add Firewall Localhost 127.0.0.1
 push(@network, '127.0.0.1');
-push(@colour,  'ipcop_iface_bg_fw');
+push(@colour,  'ofw_iface_bg_fw');
 push(@ports, '0');
 push(@protocols, '');
 
 # Add IGMP Multicast 224.0.0.0/4
 push(@network, '224.0.0.1/4');
-push(@colour,  'ipcop_iface_bg_fw');
+push(@colour,  'ofw_iface_bg_fw');
 push(@ports, '0');
 push(@protocols, '');
 
 
 # Add OpenVPN net and RED/BLUE/ORANGE entry (when appropriate)
-if (-e '/var/ipcop/openvpn/settings') {
+if (-e '/var/ofw/openvpn/settings') {
     my %ovpnsettings = ();
     # defaults for some OpenVPN parameters to avoid "Use of uninit value" warnings
     $ovpnsettings{'DOVPN_SUBNET'} = '';
     $ovpnsettings{'ENABLED_RED_1'} = '';
     $ovpnsettings{'ENABLED_BLUE_1'} = '';
     $ovpnsettings{'ENABLED_ORANGE_1'} = '';
-    &General::readhash('/var/ipcop/openvpn/settings', \%ovpnsettings);
+    &General::readhash('/var/ofw/openvpn/settings', \%ovpnsettings);
 
     if ($ovpnsettings{'DOVPN_SUBNET'} ne '') {
         # add OpenVPN net
         push(@network, $ovpnsettings{'DOVPN_SUBNET'});
-        push(@colour, 'ipcop_iface_bg_ovpn');
+        push(@colour, 'ofw_iface_bg_ovpn');
         push(@ports, '0');
         push(@protocols, '');
     }
     
-    if (open(IP, '/var/ipcop/red/local-ipaddress') && ($ovpnsettings{'ENABLED_RED_1'} eq 'on')) {
+    if (open(IP, '/var/ofw/red/local-ipaddress') && ($ovpnsettings{'ENABLED_RED_1'} eq 'on')) {
         # add RED:port / proto
         my $redip = <IP>;
         close(IP);
         chomp $redip;
         push(@network, $redip);
-        push(@colour, 'ipcop_iface_bg_ovpn');
+        push(@colour, 'ofw_iface_bg_ovpn');
         push(@ports, $ovpnsettings{'DDEST_PORT'});
         push(@protocols, $ovpnsettings{'DPROTOCOL'});
     }
     if ( ($netsettings{'BLUE_COUNT'} > 0) && ($ovpnsettings{'ENABLED_BLUE_1'} eq 'on')) {
         # add BLUE:port / proto
         push(@network, $netsettings{'BLUE_1_ADDRESS'});
-        push(@colour, 'ipcop_iface_bg_ovpn');
+        push(@colour, 'ofw_iface_bg_ovpn');
         push(@ports, $ovpnsettings{'DDEST_PORT'});
         push(@protocols, $ovpnsettings{'DPROTOCOL'});
     }
     if ( ($netsettings{'ORANGE_COUNT'} > 0) && ($ovpnsettings{'ENABLED_ORANGE_1'} eq 'on')) {
       # add ORANGE:port / proto
         push(@network, $netsettings{'ORANGE_1_ADDRESS'});
-        push(@colour, 'ipcop_iface_bg_ovpn');
+        push(@colour, 'ofw_iface_bg_ovpn');
         push(@ports, $ovpnsettings{'DDEST_PORT'});
         push(@protocols, $ovpnsettings{'DPROTOCOL'});
     }
@@ -185,13 +185,13 @@ foreach my $interface ("GREEN","ORANGE","BLUE") {
 
             # Add Firewall Interface
             push(@network, $ip->addr());
-            push(@colour,  'ipcop_iface_bg_fw');
+            push(@colour,  'ofw_iface_bg_fw');
             push(@ports, '0');
             push(@protocols, '');
 
             # Add Broadcast address
             push(@network, $ip->broadcast()->addr());
-            push(@colour,  'ipcop_iface_bg_fw');
+            push(@colour,  'ofw_iface_bg_fw');
             push(@ports, '0');
             push(@protocols, '');
 
@@ -207,7 +207,7 @@ foreach my $interface ("GREEN","ORANGE","BLUE") {
                 chomp($route);
                 my @temp = split(/[\t ]+/, $route);
                 push(@network, $temp[0]);
-                push(@colour,  'ipcop_iface_bg_green');
+                push(@colour,  'ofw_iface_bg_green');
                 push(@ports, '0');
                 push(@protocols, '');
             }
@@ -227,7 +227,7 @@ while ($icount > 0) {
             my @temp = split(/\,/, $line);
             if ($temp[0]) {
                 push(@network, $temp[0]);
-                push(@colour,  'ipcop_iface_bg_fw');
+                push(@colour,  'ofw_iface_bg_fw');
                 push(@ports, '0');
                 push(@protocols, '');
             }
@@ -236,12 +236,12 @@ while ($icount > 0) {
     $icount--;
 }
 
-if (open(IP, '/var/ipcop/red/local-ipaddress')) {
+if (open(IP, '/var/ofw/red/local-ipaddress')) {
     my $redip = <IP>;
     close(IP);
     chomp $redip;
     push(@network, $redip);
-    push(@colour,  'ipcop_iface_bg_fw');
+    push(@colour,  'ofw_iface_bg_fw');
     push(@ports, '0');
     push(@protocols, '');
 }
@@ -493,13 +493,13 @@ print <<END
 <table width='100%'><tr>
     <td class='comment1button'><table width='100%'><tr>
         <td align='center'><b>$Lang::tr{'legend'}: </b></td>
-        <td align='center' class='ipcop_iface_bg_green'><b>$Lang::tr{'lan'}</b></td>
-        <td align='center' class='ipcop_iface_bg_red'><b>$Lang::tr{'internet'}</b></td>
-        <td align='center' class='ipcop_iface_bg_blue'><b>$Lang::tr{'wireless'}</b></td>
-        <td align='center' class='ipcop_iface_bg_orange'><b>$Lang::tr{'dmz'}</b></td>
-        <td align='center' class='ipcop_iface_bg_fw'><b>IPCop</b></td>
-        <td align='center' class='ipcop_iface_bg_ipsec'><b>IPsec</b></td>
-        <td align='center' class='ipcop_iface_bg_ovpn'><b>OpenVPN</b></td>
+        <td align='center' class='ofw_iface_bg_green'><b>$Lang::tr{'lan'}</b></td>
+        <td align='center' class='ofw_iface_bg_red'><b>$Lang::tr{'internet'}</b></td>
+        <td align='center' class='ofw_iface_bg_blue'><b>$Lang::tr{'wireless'}</b></td>
+        <td align='center' class='ofw_iface_bg_orange'><b>$Lang::tr{'dmz'}</b></td>
+        <td align='center' class='ofw_iface_bg_fw'><b>IPCop</b></td>
+        <td align='center' class='ofw_iface_bg_ipsec'><b>IPsec</b></td>
+        <td align='center' class='ofw_iface_bg_ovpn'><b>OpenVPN</b></td>
     </tr></table></td>
     <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'refresh'}' /></td>
     <td class='onlinehelp'>
@@ -517,7 +517,7 @@ END
 sub ipcolour($) {
     my $id = 0;
     my $line;
-    my $colour = 'ipcop_iface_bg_red';
+    my $colour = 'ofw_iface_bg_red';
     my $ip = new NetAddr::IP($_[0]);
     my ($port) = $_[1];
     my ($protocol) = substr $_[2], 0, 3;

@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2007 Olaf (weizen_42) Westrik
-# (c) 2008-2014, the IPCop team
+# (c) 2008-2014, the Openfirewall Team
 #
 # $Id: iptablesgui.cgi 7452 2014-04-11 06:08:12Z owes $
 #
@@ -34,9 +34,9 @@ use CGI::Carp 'fatalsToBrowser';
 
 use LWP::UserAgent;
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my $option_table = '';
 my $errormessage = '';
@@ -158,10 +158,10 @@ sub formattarget
   my $target = shift;
 
     if ($target eq 'ACCEPT') {
-        return "<font class='ipcop_iface_green'>$target</font>";
+        return "<font class='ofw_iface_green'>$target</font>";
     }
     elsif ($target =~ m/^(DROP|REJECT)$/) {
-        return "<font class='ipcop_iface_red'>$target</font>";
+        return "<font class='ofw_iface_red'>$target</font>";
     }
     elsif ($target =~ m/^(DNAT|SNAT|MASQUERADE|LOG|MARK|RETURN)$/) {
         return $target;

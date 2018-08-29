@@ -1,25 +1,25 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # remote.cgi originally (2001) from the Smoothwall project
 # (c) The SmoothWall Team
 #
 # Changes since 2001
-# (c) 2001-2015, the IPCop team
+# (c) 2001-2015, the Openfirewall Team
 #
 # $Id: remote.cgi 7986 2015-07-08 05:43:52Z owes $
 #
@@ -33,9 +33,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %remotesettings = ();
 my %checked        = ();
@@ -55,7 +55,7 @@ if ($remotesettings{'ACTION'} eq $Lang::tr{'save'}) {
     $remotesettings{'ENABLE_SSH_PASSWORDS'} = 'off' unless exists $remotesettings{'ENABLE_SSH_PASSWORDS'};
     $remotesettings{'ENABLE_SSH_KEYS'}      = 'off' unless exists $remotesettings{'ENABLE_SSH_KEYS'};
 
-    &General::writehash('/var/ipcop/remote/settings', \%remotesettings);
+    &General::writehash('/var/ofw/remote/settings', \%remotesettings);
     if ($remotesettings{'ENABLE_SSH'} eq 'on') {
         &General::log($Lang::tr{'ssh is enabled'});
         if (    $remotesettings{'ENABLE_SSH_PASSWORDS'} eq 'off'
@@ -79,7 +79,7 @@ if ($remotesettings{'ACTION'} eq $Lang::tr{'save'}) {
         or $errormessage = "$Lang::tr{'bad return code'} $?";
 }
 
-&General::readhash('/var/ipcop/remote/settings', \%remotesettings);
+&General::readhash('/var/ofw/remote/settings', \%remotesettings);
 
 # not existing here means they're undefined and the default value should be used
 $remotesettings{'ENABLE_SSH_PASSWORDS'} = 'on' unless exists $remotesettings{'ENABLE_SSH_PASSWORDS'};

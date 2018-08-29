@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) Darren Critchley June 2003 - added real time clock setting, etc
-# (c) The IPCop Team January 2008 - redesigned for ntp-4.2.4
+# (c) The Openfirewall Team January 2008 - redesigned for ntp-4.2.4
 #
 # $Id: time.cgi 7762 2014-12-29 08:13:26Z owes $
 #
@@ -32,11 +32,11 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
-our $conffile = '/var/ipcop/time/ntp.conf';
+our $conffile = '/var/ofw/time/ntp.conf';
 
 my %timesettings=();
 my %netsettings=();
@@ -61,7 +61,7 @@ $timesettings{'SETDAY'} = '';
 $timesettings{'SETMONTH'} = '';
 $timesettings{'SETYEAR'} = '';
 
-&General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
+&General::readhash('/var/ofw/ethernet/settings', \%netsettings);
 
 &General::getcgihash(\%timesettings);
 
@@ -155,7 +155,7 @@ ERROR:
         $timesettings{'NTP_VALID'} = 'yes';
     }
 
-    &General::writehash('/var/ipcop/time/settings', \%timesettings);
+    &General::writehash('/var/ofw/time/settings', \%timesettings);
 
     if ($timesettings{'ENABLED_NTP'} eq 'on' && $timesettings{'NTP_VALID'} eq 'yes') {
         &General::log($Lang::tr{'ntp syncro enabled'});
@@ -180,7 +180,7 @@ if ($timesettings{'ACTION'} eq $Lang::tr{'set time now'} && $timesettings{'ENABL
     system ('/usr/local/bin/restartntpd syncnow');
 }
 
-&General::readhash('/var/ipcop/time/settings', \%timesettings);
+&General::readhash('/var/ofw/time/settings', \%timesettings);
 
 if ($timesettings{'NTP_VALID'} eq '') {
     $timesettings{'ENABLED_NTP'} = 'off';

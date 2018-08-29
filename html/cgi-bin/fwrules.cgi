@@ -1,19 +1,19 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # $Id: fwrules.cgi 7066 2013-06-09 12:50:18Z dotzball $
 #
@@ -50,7 +50,7 @@
 #       Implement data layer
 #
 # 6 May 2006 Achim Weber:
-#       Re-worked code to use it in IPCop 1.5, renamed all variables, keys, etc.
+#       Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
 #       from "BOT" to "FW".
 
 # Add entry in menu
@@ -65,10 +65,10 @@ use warnings;
 no warnings 'once';
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
-require '/usr/lib/ipcop/firewall-lib.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/firewall-lib.pl';
 
 my (%cgiparams, %selected, %checked, %radio);
 
@@ -552,11 +552,11 @@ END
         print "<b>$Lang::tr{'outgoing traffic'}:</b>";
     }
     elsif ($type eq 'INPUT') {
-        $colHeaderDestIface = "<div class='ipcop_box'>$colHeaderDestIface</div>";
+        $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
         print "<b>$Lang::tr{'ipcop access'}:</b>";
     }
     elsif ($type eq 'EXTERNAL') {
-        $colHeaderDestIface = "<div class='ipcop_box'>$colHeaderDestIface</div>";
+        $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
         print "<b>$Lang::tr{'external ipcop access'}:</b>";
     }
     elsif ($type eq 'PINHOLES') {
@@ -618,23 +618,23 @@ END
             && defined($FW::interfaces{$rule->{'SRC_NET'}}))
         {
             if ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'GREEN_COLOR') {
-                $srcNetColor = 'ipcop_iface_bg_green';
+                $srcNetColor = 'ofw_iface_bg_green';
             }
             elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'BLUE_COLOR') {
-                $srcNetColor = 'ipcop_iface_bg_blue';
+                $srcNetColor = 'ofw_iface_bg_blue';
             }
             elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR') {
-                $srcNetColor = 'ipcop_iface_bg_orange';
+                $srcNetColor = 'ofw_iface_bg_orange';
             }
             elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'RED_COLOR') {
-                $srcNetColor       = 'ipcop_iface_bg_red';
+                $srcNetColor       = 'ofw_iface_bg_red';
                 $srcNetInvertColor = 'BLACK';
             }
             elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'IPSEC_COLOR') {
-                $srcNetColor = 'ipcop_iface_bg_ipsec';
+                $srcNetColor = 'ofw_iface_bg_ipsec';
             }
             elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'OVPN_COLOR') {
-                $srcNetColor = 'ipcop_iface_bg_ovpn';
+                $srcNetColor = 'ofw_iface_bg_ovpn';
             }
 
         }
@@ -651,23 +651,23 @@ END
                 && defined($FW::interfaces{$rule->{'DST_NET'}}))
             {
                 if ($FW::interfaces{$rule->{'DST_NET'}}{'COLOR'} eq 'GREEN_COLOR') {
-                    $destNetColor = 'ipcop_iface_bg_green';
+                    $destNetColor = 'ofw_iface_bg_green';
                 }
                 elsif ($FW::interfaces{$rule->{'DST_NET'}}{'COLOR'} eq 'BLUE_COLOR') {
-                    $destNetColor = 'ipcop_iface_bg_blue';
+                    $destNetColor = 'ofw_iface_bg_blue';
                 }
                 elsif ($FW::interfaces{$rule->{'DST_NET'}}{'COLOR'} eq 'ORANGE_COLOR') {
-                    $destNetColor = 'ipcop_iface_bg_orange';
+                    $destNetColor = 'ofw_iface_bg_orange';
                 }
                 elsif ($FW::interfaces{$rule->{'DST_NET'}}{'COLOR'} eq 'RED_COLOR') {
-                    $destNetColor       = 'ipcop_iface_bg_red';
+                    $destNetColor       = 'ofw_iface_bg_red';
                     $destNetInvertColor = 'BLACK';
                 }
                 elsif ($FW::interfaces{$rule->{'DST_NET'}}{'COLOR'} eq 'IPSEC_COLOR') {
-                    $destNetColor = 'ipcop_iface_bg_ipsec';
+                    $destNetColor = 'ofw_iface_bg_ipsec';
                 }
                 elsif ($FW::interfaces{$rule->{'DST_NET'}}{'COLOR'} eq 'OVPN_COLOR') {
-                    $destNetColor = 'ipcop_iface_bg_ovpn';
+                    $destNetColor = 'ofw_iface_bg_ovpn';
                 }
             }
 
@@ -675,7 +675,7 @@ END
             $destNet = &General::translateinterface($rule->{'DST_NET'});
         }
         elsif (($type eq 'INPUT') || ($type eq 'EXTERNAL')) {
-            $destNetColor = 'ipcop_iface_bg_fw';
+            $destNetColor = 'ofw_iface_bg_fw';
             $destNet = 'IPCop';
         }
 
@@ -1102,7 +1102,7 @@ sub validateDestParams
     if($cgiparams{'RULETYPE'} eq 'PORTFW') {
 
         ######################
-        ## IPcop external destination
+        ## Openfirewall external destination
         ######################
         if ($cgiparams{'PORTFW_EXT_ADR'} eq '') {
             $errormessage .= "$Lang::tr{'invalid ipcop red address'}<br />";
@@ -1128,7 +1128,7 @@ sub validateDestParams
 
         # Check for reserved ports
         if($errormessage eq '') {
-            # only needed for IPCop 'Red Adress', not necessary for an alias
+            # only needed for Openfirewall 'Red Adress', not necessary for an alias
             if($cgiparams{'PORTFW_EXT_ADR'} eq 'Red Address') {
                 my %extService = ();
                 &DATA::getServiceParams($cgiparams{'PORTFW_SERVICE_TYPE'}, $cgiparams{'PORTFW_CUST_SERVICE'}, $cgiparams{'PORTFW_DEFAULT_SERVICE'}, \%extService);
@@ -1359,7 +1359,7 @@ sub checkBetweenParams
 
         if ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
 
-            # External IPCop access
+            # External Openfirewall access
             $warnOpenFwMessage .= "$Lang::tr{'rule opens your Firewall'}<br />";
         }
         elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
@@ -1369,10 +1369,10 @@ sub checkBetweenParams
         }
         elsif ($cgiparams{'RULETYPE'} eq 'INPUT') {
 
-            # IPCop access
+            # Openfirewall access
             if ($FW::fwSettings{'ADV_MODE_ENABLE'} ne 'on') {
 
-                # only allow IPCop access from Green, Blue or VPN
+                # only allow Openfirewall access from Green, Blue or VPN
                 if (($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') && ($FW::interfaces{$cgiparams{'DEFAULT_SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR')) {
                     $errormessage .= "$Lang::tr{'ipcop access only from green blue and vpn'}<br />";
                 }
@@ -1380,7 +1380,7 @@ sub checkBetweenParams
             else {
                 if ($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') {
 
-                    # only allow IPCop access from Green, Blue or VPN
+                    # only allow Openfirewall access from Green, Blue or VPN
                     if ($FW::interfaces{$cgiparams{'DEFAULT_SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR') {
                         $errormessage .= "$Lang::tr{'ipcop access only from green blue and vpn'}<br />";
                     }
@@ -1870,7 +1870,7 @@ END
 
     if($cgiparams{'RULETYPE'} eq 'PORTFW')
     {
-        # we filter source by IPcop external IP (red IP, Aliases etc.) -> don't restrict by interface
+        # we filter source by Openfirewall external IP (red IP, Aliases etc.) -> don't restrict by interface
         print <<END;
     <td  width='1%' class='base'>
         <input type='hidden' name='SRC_NET_TYPE' value='defaultSrcNet'  />
@@ -2192,7 +2192,7 @@ END
 
 
 ###########################################################################################
-    # IPCop external destination for Port Forwarding
+    # Openfirewall external destination for Port Forwarding
 ############################################################################################
     if ($cgiparams{'RULETYPE'} eq 'PORTFW') {
 
@@ -2215,14 +2215,14 @@ END
         $Lang::tr{'alias ip'}:&nbsp;
         <select name='PORTFW_EXT_ADR'>
 END
-        foreach my $ipcopAdr (sort keys %defaultNetworks) {
-            next unless ($defaultNetworks{$ipcopAdr}{'LOCATION'} eq "IPCOP" && $defaultNetworks{$ipcopAdr}{'COLOR'} eq "RED_COLOR");
+        foreach my $ofwAdr (sort keys %defaultNetworks) {
+            next unless ($defaultNetworks{$ofwAdr}{'LOCATION'} eq "IPCOP" && $defaultNetworks{$ofwAdr}{'COLOR'} eq "RED_COLOR");
 
             my $aliasIp = "";
-            $aliasIp = " ($defaultNetworks{$ipcopAdr}{'ADR'})" if($ipcopAdr ne 'Red Address');
-            print "<option value='$ipcopAdr'";
-            print " selected='selected'" if ($cgiparams{'PORTFW_EXT_ADR'} eq $ipcopAdr);
-            print ">".$ipcopAdr.$aliasIp."</option>";
+            $aliasIp = " ($defaultNetworks{$ofwAdr}{'ADR'})" if($ofwAdr ne 'Red Address');
+            print "<option value='$ofwAdr'";
+            print " selected='selected'" if ($cgiparams{'PORTFW_EXT_ADR'} eq $ofwAdr);
+            print ">".$ofwAdr.$aliasIp."</option>";
         }
 
         print <<END;
@@ -2699,7 +2699,7 @@ END
     }
     else {
 
-        # this is an [External] IPCop Access  rule
+        # this is an [External] Openfirewall Access  rule
         print <<END;
 <tr>
     <td colspan='3'>
@@ -2838,12 +2838,12 @@ END
     print ">-- $Lang::tr{'default services'} --</option>";
 
     if($cgiparams{'RULETYPE'} eq 'EXTERNAL' || $cgiparams{'RULETYPE'} eq 'INPUT'){
-        my %ipcopServices = ();
-        &DATA::readIPCopServices(\%ipcopServices);
-        foreach my $defService (sort keys %ipcopServices) {
+        my %ofwServices = ();
+        &DATA::readOfwServices(\%ofwServices);
+        foreach my $defService (sort keys %ofwServices) {
             print "<option value='$defService'";
             print " selected='selected'" if ($cgiparams{'DEFAULT_SERVICE'} eq $defService);
-            print ">$defService ($ipcopServices{$defService}{'PORT_NR'})</option>";
+            print ">$defService ($ofwServices{$defService}{'PORT_NR'})</option>";
 
         }
         print "<option value='BLANK'> --- </option>";

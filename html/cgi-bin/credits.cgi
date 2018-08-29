@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) The SmoothWall Team
-# Copyright (c) 2001-2011 The IPCop Team
+# Copyright (c) 2001-2011 The Openfirewall Team
 #
 # $Id: credits.cgi 7399 2014-04-04 08:36:48Z eoberlander $
 #
@@ -30,9 +30,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 &Header::showhttpheaders();
 
@@ -46,9 +46,9 @@ print <<END
 
 <table width='100%'>
 <tr>
-    <td align='left' width='20%'><img src='/ipcop_small.gif' alt=''/></td>
-    <td align='center' width='60%'><b><span style='font-size:14px'>IPCop - The Bad Packets Stop Here</span><br />
-    <br />Visit us at <a href='http://www.ipcop.org/' target='_blank'>www.ipcop.org</a></b></td>
+    <td align='left' width='20%'><img src='/openfirewall_small.gif' alt=''/></td>
+    <td align='center' width='60%'><b><span style='font-size:14px'>Openfirewall - The Bad Packets Stop Here</span><br />
+    <br />Visit us at <a href='http://www.openfirewall.cn/' target='_blank'>www.openfirewall.cn</a></b></td>
     <td align='left' width='20%'>&nbsp;</td>
 </tr>
 </table>
@@ -82,7 +82,7 @@ Spanish Documentation Translation - Jes&uacute;s Ezquieta
 (learnet(at)gmail(dot)com)<br />
 </p>
 
-<p><b>IPCop 1.x developers</b><br />
+<p><b>Openfirewall 1.x developers</b><br />
 Project Member - Mark Wormgoor
 (<a href='mailto:mark\@wormgoor.com'>mark\@wormgoor.com</a>)<br />
 Project Member &amp; Configuration backup/restore - Eric S. Johansson
@@ -432,13 +432,13 @@ Vietnamese:<br />
 </p>
 
 <p><b>Linux From Scratch</b><br />
-For building IPCop information from the Linux From Scratch (LFS) books is used.
+For building openfirewall information from the Linux From Scratch (LFS) books is used.
 The <a href='http://www.linuxfromscratch.org/index.html'>LFS books</a> are highly
 recommended to anyone who wants to get some insight into what makes Linux systems tick.
 </p>
 
 <p><b>Smoothwall</b><br />
-IPCop is partially based on the <a href='http://www.smoothwall.org'>Smoothwall</a> GPL
+Openfirewall is partially based on the <a href='http://www.smoothwall.org'>Smoothwall</a> GPL
 version, v0.9.9.  We are grateful to them for both inspiring this product and
 giving us the codebase to work with.
 </p>

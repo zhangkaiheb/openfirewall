@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2005 marco.s - http://www.advproxy.net
-# (c) 2010-2014 The IPCop Team
+# (c) 2010-2014 The Openfirewall Team
 #
 # $Id: chpasswd.cgi 7558 2014-05-22 13:03:59Z owes $
 #
@@ -28,8 +28,8 @@ use Apache::Htpasswd;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
 
 my %cgiparams;
 my %proxysettings;
@@ -37,9 +37,9 @@ my %proxysettings;
 $proxysettings{'NCSA_MIN_PASS_LEN'} = 6;
 
 ### Initialize environment
-&General::readhash("/var/ipcop/proxy/settings", \%proxysettings);
+&General::readhash("/var/ofw/proxy/settings", \%proxysettings);
 
-my $userdb = '/var/ipcop/proxy/ncsa/passwd';
+my $userdb = '/var/ofw/proxy/ncsa/passwd';
 
 my @users = ();
 my @temp = ();
@@ -107,11 +107,11 @@ print <<END
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>IPCop - $Lang::tr{'change web access password'}</title>
+    <title>Openfirewall - $Lang::tr{'change web access password'}</title>
     
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="shortcut icon" href="/favicon.ico" />
-    <style type="text/css">\@import url(/include/ipcop.css);</style>
+    <style type="text/css">\@import url(/include/openfirewall.css);</style>
 </head>
  
 <body>
@@ -211,7 +211,7 @@ else {
 
 
 # manual page reference, not in user page
-# http://www.ipcop.org/2.0.0/en/admin/html/webaccess-passwords.html
+# http://www.openfirewall.org/2.0.0/en/admin/html/webaccess-passwords.html
 
 print <<END
                             </table>

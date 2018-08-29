@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2003-09-22 Darren Critchley <darrenc@telus.net>
-# (c) 2008-2014, the IPCop team
+# (c) 2008-2014, the Openfirewall Team
 #
 # $Id: ifaces.cgi 7240 2014-02-18 22:08:00Z owes $
 #
@@ -31,7 +31,7 @@
 #       Added service grouping
 #
 # 6 May 2006 Achim Weber:
-#       - Re-worked code to use it in IPCop 1.5, renamed all variables, keys, etc.
+#       - Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
 #         from "BOT" to "FW".
 #       - Splited big fwadvconf.cgi to single pages for service, service grouping,
 #         adresses, adress grouping and interfaces
@@ -47,10 +47,10 @@ use strict;
 use warnings;
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
-require '/usr/lib/ipcop/firewall-lib.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/firewall-lib.pl';
 
 &Header::showhttpheaders();
 
@@ -105,7 +105,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'add'}) {
         &General::log("$Lang::tr{'iface added'}: $cgiparams{'IFACE_NAME'}");
         undef %cgiparams;
         $cgiparams{'ACTION'} = '';
-        `/usr/local/bin/setfwrules --ipcop < /dev/null > /dev/null 2>&1 &`;
+        `/usr/local/bin/setfwrules --ofw < /dev/null > /dev/null 2>&1 &`;
     }
 }
 
@@ -154,7 +154,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
     &General::log("$Lang::tr{'iface removed'}: $cgiparams{'IFACE_NAME'}");
     undef %cgiparams;
     $cgiparams{'ACTION'} = '';
-    `/usr/local/bin/setfwrules --ipcop < /dev/null > /dev/null 2>&1 &`;
+    `/usr/local/bin/setfwrules --ofw < /dev/null > /dev/null 2>&1 &`;
 }
 
 if ($cgiparams{'ACTION'} eq $Lang::tr{'reset'}) {
@@ -355,22 +355,22 @@ sub display_default_interfaces {
         print "<tr class='table".int(($id % 2) + 1)."colour'>";
         my $ifaceColor = '';
         if ($FW::interfaces{$iface}{'COLOR'} eq 'GREEN_COLOR') {
-            $ifaceColor = 'ipcop_iface_bg_green';
+            $ifaceColor = 'ofw_iface_bg_green';
         }
         elsif ($FW::interfaces{$iface}{'COLOR'} eq 'BLUE_COLOR') {
-            $ifaceColor = 'ipcop_iface_bg_blue';
+            $ifaceColor = 'ofw_iface_bg_blue';
         }
         elsif ($FW::interfaces{$iface}{'COLOR'} eq 'ORANGE_COLOR') {
-            $ifaceColor = 'ipcop_iface_bg_orange';
+            $ifaceColor = 'ofw_iface_bg_orange';
         }
         elsif ($FW::interfaces{$iface}{'COLOR'} eq 'RED_COLOR') {
-            $ifaceColor = 'ipcop_iface_bg_red';
+            $ifaceColor = 'ofw_iface_bg_red';
         }
         elsif ($FW::interfaces{$iface}{'COLOR'} eq 'IPSEC_COLOR') {
-            $ifaceColor = 'ipcop_iface_bg_ipsec';
+            $ifaceColor = 'ofw_iface_bg_ipsec';
         }
         elsif ($FW::interfaces{$iface}{'COLOR'} eq 'OVPN_COLOR') {
-            $ifaceColor = 'ipcop_iface_bg_ovpn';
+            $ifaceColor = 'ofw_iface_bg_ovpn';
         }
 
         print "<td>".&General::translateinterface($iface)."</td>\n";

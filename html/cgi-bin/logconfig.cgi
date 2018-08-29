@@ -1,21 +1,21 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) -2011 The IPCop Team
+# (c) -2011 The Openfirewall Team
 #
 # Over the years many people have changed and contributed to this file.
 # Check CVS and SVN for specifics.
@@ -34,9 +34,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %logsettings  = ();
 my %checked      = ();
@@ -71,14 +71,14 @@ if ($logsettings{'ACTION'} eq $Lang::tr{'save'}) {
         $errormessage = $Lang::tr{'invalid input'};
     }
     unless ($errormessage) {
-        &General::writehash('/var/ipcop/logging/settings', \%logsettings);
+        &General::writehash('/var/ofw/logging/settings', \%logsettings);
         system('/usr/local/bin/restartsyslogd') == 0
             or $errormessage = "$Lang::tr{'bad return code'} " . $? / 256;
     }
 
 }
 
-&General::readhash('/var/ipcop/logging/settings', \%logsettings);
+&General::readhash('/var/ofw/logging/settings', \%logsettings);
 
 $checked{'ENABLE_REMOTELOG'}{'off'}                            = '';
 $checked{'ENABLE_REMOTELOG'}{'on'}                             = '';

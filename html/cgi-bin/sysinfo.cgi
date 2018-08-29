@@ -2,26 +2,26 @@
 #
 ################################################################################
 #
-# IPCop SysInfo Web-Iface
+# openfirewall SysInfo Web-Iface
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 ################################################################################
 #
-# Based on IPCop http://www.ipcop.org, hddgraph (C) by weizen_42
+# Based on Openfirewall http://www.openfirewall.cn, hddgraph (C) by weizen_42
 # 2007-02-13 modified by wintermute for SysInfo
 # Copyright (C) 2007-2008 Tom 'wintermute' Eichstaedt <wintermute@tom-e.de>
 #
@@ -39,9 +39,9 @@ use strict;
 
 use LWP::UserAgent;
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %cgiparams=();
 my @lines;

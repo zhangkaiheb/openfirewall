@@ -1,21 +1,21 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2011-2014 The IPCop Team
+# (c) 2011-2014 The Openfirewall Team
 #
 # $Id: email.cgi 7240 2014-02-18 22:08:00Z owes $
 #
@@ -30,9 +30,9 @@ use warnings;
 no warnings 'once';
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require "/usr/lib/ipcop/lang.pl";
-require "/usr/lib/ipcop/header.pl";
+require '/usr/lib/ofw/general-functions.pl';
+require "/usr/lib/ofw/lang.pl";
+require "/usr/lib/ofw/header.pl";
 
 my %cgiparams;
 my %settings;
@@ -60,7 +60,7 @@ $cgiparams{'EMAIL_USE_TLS'}     = 'auto';
 
 &General::getcgihash(\%cgiparams);
 
-&General::readhash('/var/ipcop/email/settings', \%settings);
+&General::readhash('/var/ofw/email/settings', \%settings);
 
 if ($cgiparams{'ACTION'} eq $Lang::tr{'save'}) {
     &validSave();
@@ -78,7 +78,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'save'}) {
         $settings{'EMAIL_SERVER_PORT'} = $cgiparams{'EMAIL_SERVER_PORT'};
         $settings{'EMAIL_USE_TLS'}     = $cgiparams{'EMAIL_USE_TLS'};
 
-        &General::writehash('/var/ipcop/email/settings', \%settings);
+        &General::writehash('/var/ofw/email/settings', \%settings);
 
     }
 }    # end if ($cgiparams{'ACTION'} eq $Lang::tr{'save'})
@@ -90,7 +90,7 @@ unless ($saveerror) {
     # Set default EMAIL_FROM if not configured
     if (!exists($settings{'EMAIL_FROM'})) {
         my %mainsettings = ();
-        &General::readhash('/var/ipcop/main/settings', \%mainsettings);
+        &General::readhash('/var/ofw/main/settings', \%mainsettings);
         $settings{'EMAIL_FROM'} = $mainsettings{'HOSTNAME'} . "@" . $mainsettings{'DOMAINNAME'};
     }
 
@@ -120,7 +120,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'send test mail'}) {
         goto ERROR;
     }
 
-    my $template = "/var/ipcop/email/templates/test";
+    my $template = "/var/ofw/email/templates/test";
 
     if (-e "$template.${Lang::language}.tpl") {
         $template .= ".${Lang::language}.tpl";

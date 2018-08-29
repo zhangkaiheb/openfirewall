@@ -1,21 +1,21 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2001-2012 The IPCop Team
+# (c) 2001-2012 The Openfirewall Team
 #
 # Over the years many people have changed and contributed to this file.
 # Check CVS and SVN for specifics.
@@ -33,9 +33,9 @@ use NetAddr::IP;
 use warnings; no warnings 'once';
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 &Header::showhttpheaders();
 
@@ -65,10 +65,10 @@ my $debug   = 0;
 my $disable_main  = 0;          # 1 = only show (non-editable) some vital information in the main box
 my $disable_fixed = 1;          # 1 = only show fixed leases, 0 = fields to add fixed lease become usable
 
-# get IPCop settings
-&General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
-&General::readhash('/var/ipcop/main/settings',     \%mainsettings);
-&General::readhash('/var/ipcop/time/settings',     \%timesettings);
+# get Openfirewall settings
+&General::readhash('/var/ofw/ethernet/settings', \%netsettings);
+&General::readhash('/var/ofw/main/settings',     \%mainsettings);
+&General::readhash('/var/ofw/time/settings',     \%timesettings);
 
 # main settings
 foreach $interface (@INTERFACEs) {
@@ -282,7 +282,7 @@ ERROR_SAVE_MAIN:
     $error_save_main = 'error' if ($errormessage);
 }
 else {
-    &General::readhash('/var/ipcop/dhcp/settings', \%dhcpsettings);
+    &General::readhash('/var/ofw/dhcp/settings', \%dhcpsettings);
 }
 
 if ($dhcpsettings{'ACTION'} eq $Lang::tr{'toggle enable disable'} . '_fixed') {
@@ -896,20 +896,20 @@ sub writeconfig {
         }
     }
     $savesettings{'SORT_FIXEDLEASELIST'} = $dhcpsettings{'SORT_FIXEDLEASELIST'};
-    &General::writehash('/var/ipcop/dhcp/settings', \%savesettings);
+    &General::writehash('/var/ofw/dhcp/settings', \%savesettings);
 
     # only wanted to change (and save) sort order, no need to touch the dnsmasq file
     return if ($_[0] == 0);
 
-    open(FILE, ">/var/ipcop/dhcp/dnsmasq.conf") or die "Unable to write dhcp server conf file";
+    open(FILE, ">/var/ofw/dhcp/dnsmasq.conf") or die "Unable to write dhcp server conf file";
     flock(FILE, 2);
 
     # Global settings
     print FILE <<END
-# Do not modify '/var/ipcop/dhcp/dnsmasq.conf' directly since any changes
+# Do not modify '/var/ofw/dhcp/dnsmasq.conf' directly since any changes
 # you make will be overwritten whenever you resave dhcp settings using the
 # web interface!
-# Instead modify the file '/var/ipcop/dhcp/dnsmasq.local' and then restart
+# Instead modify the file '/var/ofw/dhcp/dnsmasq.local' and then restart
 # the DHCP server using the web interface or restartdhcp.
 # Changes made to the 'local' file will then propagate to the DHCP server.
 
@@ -924,9 +924,9 @@ domain-needed
 dhcp-authoritative
 dhcp-lease-max=$leasemax
 dhcp-leasefile=/var/run/dnsmasq/dnsmasq.leases
-dhcp-hostsfile=/var/ipcop/dhcp/dnsmasq.statichosts
-dhcp-optsfile=/var/ipcop/dhcp/dnsmasq.staticopts
-conf-file=/var/ipcop/dhcp/dnsmasq.local
+dhcp-hostsfile=/var/ofw/dhcp/dnsmasq.statichosts
+dhcp-optsfile=/var/ofw/dhcp/dnsmasq.staticopts
+conf-file=/var/ofw/dhcp/dnsmasq.local
 
 # Enable this if you want to see DNS queries and results
 # log-queries
@@ -1008,7 +1008,7 @@ END
 sub readfixedleases
 {
     @fixedleases = ();
-    open(FILE, '/var/ipcop/dhcp/fixedleases');
+    open(FILE, '/var/ofw/dhcp/fixedleases');
     my @tmpfile = <FILE>;
     close(FILE);
 
@@ -1037,7 +1037,7 @@ sub readfixedleases
 sub writefixedleases {
     my $id;
 
-    open(FILE, ">/var/ipcop/dhcp/fixedleases") or die 'Unable to open fixed leases file.';
+    open(FILE, ">/var/ofw/dhcp/fixedleases") or die 'Unable to open fixed leases file.';
     for $id (0 .. $#fixedleases) {
         next if (($fixedleases[$id]{'ENABLED'} ne 'on') && ($fixedleases[$id]{'ENABLED'} ne 'off'));
 
@@ -1052,17 +1052,17 @@ sub writefixedleases {
 
     # sort
     if ($dhcpsettings{'SORT_FIXEDLEASELIST'} eq 'FIXEDMAC') {
-        system "/usr/bin/sort -t ',' -k 1,1 /var/ipcop/dhcp/fixedleases -o /var/ipcop/dhcp/fixedleases";
+        system "/usr/bin/sort -t ',' -k 1,1 /var/ofw/dhcp/fixedleases -o /var/ofw/dhcp/fixedleases";
     }
     elsif ($dhcpsettings{'SORT_FIXEDLEASELIST'} eq 'FIXEDMACRev') {
-        system "/usr/bin/sort -r -t ',' -k 1,1 /var/ipcop/dhcp/fixedleases -o /var/ipcop/dhcp/fixedleases";
+        system "/usr/bin/sort -r -t ',' -k 1,1 /var/ofw/dhcp/fixedleases -o /var/ofw/dhcp/fixedleases";
     }
     elsif ($dhcpsettings{'SORT_FIXEDLEASELIST'} eq 'FIXEDIPRev') {
-        system "/usr/bin/sort -r -n -t '.' -k 1.18,1 -k 2,2 -k 3,3 -k 4,4 /var/ipcop/dhcp/fixedleases -o /var/ipcop/dhcp/fixedleases";
+        system "/usr/bin/sort -r -n -t '.' -k 1.18,1 -k 2,2 -k 3,3 -k 4,4 /var/ofw/dhcp/fixedleases -o /var/ofw/dhcp/fixedleases";
     }
     else {
         # FIXEDIP is also default when no sorting selected (yet)
-        system "/usr/bin/sort -n -t '.' -k 1.18,1 -k 2,2 -k 3,3 -k 4,4 /var/ipcop/dhcp/fixedleases -o /var/ipcop/dhcp/fixedleases";
+        system "/usr/bin/sort -n -t '.' -k 1.18,1 -k 2,2 -k 3,3 -k 4,4 /var/ofw/dhcp/fixedleases -o /var/ofw/dhcp/fixedleases";
     }
 
     &readfixedleases();
@@ -1071,8 +1071,8 @@ sub writefixedleases {
     return if ($_[0] == 0);
 
     # now write the fixed leases file for dnsmasq
-    open(FILEHOSTS, ">/var/ipcop/dhcp/dnsmasq.statichosts") or die "Unable to write dhcp server hosts file";
-    open(FILEOPTS, ">/var/ipcop/dhcp/dnsmasq.staticopts") or die "Unable to write dhcp server opts file";
+    open(FILEHOSTS, ">/var/ofw/dhcp/dnsmasq.statichosts") or die "Unable to write dhcp server hosts file";
+    open(FILEOPTS, ">/var/ofw/dhcp/dnsmasq.staticopts") or die "Unable to write dhcp server opts file";
     for $id (0 .. $#fixedleases) {
         if ($fixedleases[$id]{'ENABLED'} eq "on") {
             my @fqdn = split(/\./, $fixedleases[$id]{'HOSTNAME'}, 2);

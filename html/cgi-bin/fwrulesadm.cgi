@@ -1,23 +1,23 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) The SmoothWall Team
 # Copyright (c) 2002/04/13 Steve Bootes - Add source IP support
-# (c) 2007-2014, the IPCop team
+# (c) 2007-2014, the Openfirewall Team
 #
 # $Id: fwrulesadm.cgi 7534 2014-05-14 14:34:12Z owes $
 #
@@ -49,14 +49,14 @@
 #       Added option to select position of "native" rules:
 #           Append: behind BOT rules
 #           Insert: before BOT rules
-#       Dropped OrangeAsGreen because you can use Blue in IPCop 1.4 now.
+#       Dropped OrangeAsGreen because you can use Blue in openfirewall 1.4 now.
 #
 # Achim Weber Autumn 2005
 #       Dropped "native" rules. BOT uses its own chains and people can use
 #       the CUSTOM* chains now.
 #
 # 6 May 2006 Achim Weber:
-#       Re-worked code to use it in IPCop 1.5, renamed all variables, keys, etc.
+#       Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
 #       from "BOT" to "FW".
 
 # Add entry in menu
@@ -69,10 +69,10 @@ use warnings;
 no warnings 'once';
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
-require '/usr/lib/ipcop/firewall-lib.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/firewall-lib.pl';
 
 my %cgiparams;
 my $saveerror    = 0;
@@ -497,10 +497,10 @@ foreach my $iface (sort keys %ifacePolicies) {
         $ifaceColor = '';
     }
     elsif ($FW::interfaces{$iface}{'COLOR'} eq 'GREEN_COLOR') {
-        $ifaceColor = 'ipcop_iface_bg_green';
+        $ifaceColor = 'ofw_iface_bg_green';
     }
     elsif ($FW::interfaces{$iface}{'COLOR'} eq 'BLUE_COLOR') {
-        $ifaceColor = 'ipcop_iface_bg_blue';
+        $ifaceColor = 'ofw_iface_bg_blue';
 
         my $imgAddressfilter = 'off.gif';
         my $descLogging = $Lang::tr{'click to enable'};
@@ -518,16 +518,16 @@ foreach my $iface (sort keys %ifacePolicies) {
         $txtAddressfilter .= "</form>";
     }
     elsif ($FW::interfaces{$iface}{'COLOR'} eq 'ORANGE_COLOR') {
-        $ifaceColor = 'ipcop_iface_bg_orange';
+        $ifaceColor = 'ofw_iface_bg_orange';
     }
     elsif ($FW::interfaces{$iface}{'COLOR'} eq 'RED_COLOR') {
-        $ifaceColor = 'ipcop_iface_bg_red';
+        $ifaceColor = 'ofw_iface_bg_red';
     }
     elsif ($FW::interfaces{$iface}{'COLOR'} eq 'IPSEC_COLOR') {
-        $ifaceColor = 'ipcop_iface_bg_ipsec';
+        $ifaceColor = 'ofw_iface_bg_ipsec';
     }
     elsif ($FW::interfaces{$iface}{'COLOR'} eq 'OVPN_COLOR') {
-        $ifaceColor = 'ipcop_iface_bg_ovpn';
+        $ifaceColor = 'ofw_iface_bg_ovpn';
     }
 
     my $imgLogging = 'off.gif';

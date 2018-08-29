@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# IPCop CGIs
+# openfirewall CGIs
 #
 # This code is distributed under the terms of the GPL
 #
@@ -18,9 +18,9 @@ use strict;
 #use warnings; no warnings 'once';# 'redefine', 'uninitialized';
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %cgiparams    = ();
 my %mainsettings = ();
@@ -32,15 +32,15 @@ $cgiparams{'JAVASCRIPT'}         = 'off';
 $cgiparams{'WINDOWWITHHOSTNAME'} = 'off';
 $cgiparams{'REFRESHINDEX'}       = 'off';
 $cgiparams{'PPPUPDOWNBEEP'}      = 'off';
-$cgiparams{'IPCOPUPDOWNBEEP'}    = 'off';
+$cgiparams{'OFWUPDOWNBEEP'}    = 'off';
 $cgiparams{'ACTION'}             = '';
 &General::getcgihash(\%cgiparams);
 
 &Header::showhttpheaders();
-&General::readhash('/var/ipcop/main/settings', \%mainsettings);
+&General::readhash('/var/ofw/main/settings', \%mainsettings);
 
 if ($cgiparams{'ACTION'} eq "$Lang::tr{'save'}") {
-    open(FILE, '/var/ipcop/main/language.lst');
+    open(FILE, '/var/ofw/main/language.lst');
     my $found = 0;
     while (<FILE>) {
         my $lang    = '';
@@ -63,7 +63,7 @@ if ($cgiparams{'ACTION'} eq "$Lang::tr{'save'}") {
         || ($cgiparams{'WINDOWWITHHOSTNAME'} !~ /^(on|off)$/)
         || ($cgiparams{'REFRESHINDEX'} !~ /^(on|off)$/)
         || ($cgiparams{'PPPUPDOWNBEEP'} !~ /^(on|off)$/)
-        || ($cgiparams{'IPCOPUPDOWNBEEP'} !~ /^(on|off)$/))
+        || ($cgiparams{'OFWUPDOWNBEEP'} !~ /^(on|off)$/))
     {
         $errormessage = $Lang::tr{'invalid input'};
         goto SAVE_ERROR;
@@ -78,9 +78,9 @@ if ($cgiparams{'ACTION'} eq "$Lang::tr{'save'}") {
     $mainsettings{'JAVASCRIPT'}         = $cgiparams{'JAVASCRIPT'};
     $mainsettings{'WINDOWWITHHOSTNAME'} = $cgiparams{'WINDOWWITHHOSTNAME'};
     $mainsettings{'PPPUPDOWNBEEP'}      = $cgiparams{'PPPUPDOWNBEEP'};
-    $mainsettings{'IPCOPUPDOWNBEEP'}    = $cgiparams{'IPCOPUPDOWNBEEP'};
+    $mainsettings{'OFWUPDOWNBEEP'}    = $cgiparams{'OFWUPDOWNBEEP'};
     $mainsettings{'REFRESHINDEX'}       = $cgiparams{'REFRESHINDEX'};
-    &General::writehash('/var/ipcop/main/settings', \%mainsettings);
+    &General::writehash('/var/ofw/main/settings', \%mainsettings);
 
     if ($changedlang == 1) {
         &General::log("Changing language to: $mainsettings{'LANGUAGE'} ($mainsettings{'LOCALE'})");
@@ -111,11 +111,11 @@ else {
         $cgiparams{'PPPUPDOWNBEEP'} = 'on';
     }
 
-    if ($mainsettings{'IPCOPUPDOWNBEEP'}) {
-        $cgiparams{'IPCOPUPDOWNBEEP'} = $mainsettings{'IPCOPUPDOWNBEEP'};
+    if ($mainsettings{'OFWUPDOWNBEEP'}) {
+        $cgiparams{'OFWUPDOWNBEEP'} = $mainsettings{'OFWUPDOWNBEEP'};
     }
     else {
-        $cgiparams{'IPCOPUPDOWNBEEP'} = 'on';
+        $cgiparams{'OFWUPDOWNBEEP'} = 'on';
     }
 
     if ($mainsettings{'REFRESHINDEX'}) {
@@ -138,7 +138,7 @@ if ($cgiparams{'ACTION'} eq "$Lang::tr{'restore defaults'}") {
     $cgiparams{'JAVASCRIPT'}         = 'on';
     $cgiparams{'WINDOWWITHHOSTNAME'} = 'off';
     $cgiparams{'PPPUPDOWNBEEP'}      = 'on';
-    $cgiparams{'IPCOPUPDOWNBEEP'}    = 'on';
+    $cgiparams{'OFWUPDOWNBEEP'}    = 'on';
     $cgiparams{'REFRESHINDEX'}       = 'off';
 }
 
@@ -154,15 +154,15 @@ $checked{'PPPUPDOWNBEEP'}{'off'}                       = '';
 $checked{'PPPUPDOWNBEEP'}{'on'}                        = '';
 $checked{'PPPUPDOWNBEEP'}{$cgiparams{'PPPUPDOWNBEEP'}} = "checked='checked'";
 
-$checked{'IPCOPUPDOWNBEEP'}{'off'}                         = '';
-$checked{'IPCOPUPDOWNBEEP'}{'on'}                          = '';
-$checked{'IPCOPUPDOWNBEEP'}{$cgiparams{'IPCOPUPDOWNBEEP'}} = "checked='checked'";
+$checked{'OFWUPDOWNBEEP'}{'off'}                         = '';
+$checked{'OFWUPDOWNBEEP'}{'on'}                          = '';
+$checked{'OFWUPDOWNBEEP'}{$cgiparams{'OFWUPDOWNBEEP'}} = "checked='checked'";
 
 $checked{'REFRESHINDEX'}{'off'}                      = '';
 $checked{'REFRESHINDEX'}{'on'}                       = '';
 $checked{'REFRESHINDEX'}{$cgiparams{'REFRESHINDEX'}} = "checked='checked'";
 
-open(FILE, '/var/ipcop/main/language.lst');
+open(FILE, '/var/ofw/main/language.lst');
 my $optionlist = '';
 while (<FILE>) {
     my $lang      = '';
@@ -216,7 +216,7 @@ print <<END
     <td>$Lang::tr{'beep on ... ppp connects or disconnects'}</td>
 </tr>
 <tr>
-    <td><input type ='checkbox' name='IPCOPUPDOWNBEEP' $checked{'IPCOPUPDOWNBEEP'}{'on'} /></td>
+    <td><input type ='checkbox' name='OFWUPDOWNBEEP' $checked{'OFWUPDOWNBEEP'}{'on'} /></td>
     <td>$Lang::tr{'beep on ... system start or stop'}</td>
 </tr>
 </table>

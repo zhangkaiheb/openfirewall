@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 # 
 # (c) The SmoothWall Team
-# Copyright (c) 2001-2016 The IPCop Team
+# Copyright (c) 2001-2016 The Openfirewall Team
 #
 # $Id: logproxy.cgi 8036 2016-01-04 08:03:32Z owes $
 #
@@ -32,9 +32,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 use POSIX();
 
@@ -65,12 +65,12 @@ $cgiparams{'ACTION'}        = '';
 &General::getcgihash(\%cgiparams);
 $logsettings{'LOGVIEW_REVERSE'}  = 'off';
 $logsettings{'LOGVIEW_VIEWSIZE'} = 150;
-&General::readhash('/var/ipcop/logging/settings', \%logsettings);
+&General::readhash('/var/ofw/logging/settings', \%logsettings);
 
 if ($cgiparams{'ACTION'} eq '') {
     my %save = ();
-    &General::readhash('/var/ipcop/proxy/viewersettings', \%save)
-        if (-e '/var/ipcop/proxy/viewersettings');
+    &General::readhash('/var/ofw/proxy/viewersettings', \%save)
+        if (-e '/var/ofw/proxy/viewersettings');
     $cgiparams{'FILTER'}        = $save{'FILTER'}        if (exists($save{'FILTER'}));
     $cgiparams{'ENABLE_FILTER'} = $save{'ENABLE_FILTER'} if (exists($save{'ENABLE_FILTER'}));
 }
@@ -86,7 +86,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'save'}) {
     my %save = ();
     $save{'FILTER'}        = $cgiparams{'FILTER'};
     $save{'ENABLE_FILTER'} = $cgiparams{'ENABLE_FILTER'};
-    &General::writehash('/var/ipcop/proxy/viewersettings', \%save);
+    &General::writehash('/var/ofw/proxy/viewersettings', \%save);
 }
 
 my $start = ($logsettings{'LOGVIEW_REVERSE'} eq 'on') ? 0x7FFFF000 : 0;    #index of first line number to display
@@ -261,7 +261,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'export'}) {
     print "Content-type: text/plain\n";
     print "Content-Disposition: attachment; filename=\"ipcop-proxy-$date.log\";\n";
     print "\n";
-    print "IPCop proxy log\r\n";
+    print "Openfirewall proxy log\r\n";
     print "$Lang::tr{'date'}: $date\r\n";
     print "$Lang::tr{'source ip'}: $cgiparams{'SOURCE_IP'}\r\n";
     print "$Lang::tr{'username'}: $cgiparams{'USERNAME'}\r\n";

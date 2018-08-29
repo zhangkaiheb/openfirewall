@@ -18,9 +18,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %cgiparams    = ();
 my $death        = 0;
@@ -34,12 +34,12 @@ $cgiparams{'ACTION'} = '';
 if ($cgiparams{'ACTION'} eq $Lang::tr{'shutdown'}) {
     $death = 1;
     # run in background
-    system('/usr/local/bin/ipcopreboot --down GUI shutdown &');
+    system('/usr/local/bin/ofwreboot --down GUI shutdown &');
 }
 elsif ($cgiparams{'ACTION'} eq $Lang::tr{'reboot'}) {
     $rebirth = 1;
     # run in background
-    system('/usr/local/bin/ipcopreboot --boot GUI reboot &');
+    system('/usr/local/bin/ofwreboot --boot GUI reboot &');
 }
 
 if ($death == 0 && $rebirth == 0) {
@@ -84,11 +84,11 @@ else {
     my $refresh = "<meta http-equiv='refresh' content='3; URL=/cgi-bin/index.cgi' />";
     if ($death) {
         $title   = $Lang::tr{'shutting down'};
-        $message = $Lang::tr{'ipcop will now shutdown'};
+        $message = $Lang::tr{'openfirewall will now shutdown'};
     }
     else {
         $title   = $Lang::tr{'rebooting'};
-        $message = $Lang::tr{'ipcop will now reboot'};
+        $message = $Lang::tr{'openfirewall will now reboot'};
     }
     &Header::openpage($title, 0, $refresh);
 
@@ -98,7 +98,7 @@ else {
 <div align='center'>
 <table width='100%'>
 <tr><td align='center'>
-<br /><br /><img src='/ipcop_big.gif' alt='ipcop' /><br /><br /><br />
+<br /><br /><img src='/openfirewall_big.gif' alt='ipcop' /><br /><br /><br />
 </td></tr>
 </table>
 <br />

@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2003-05-25 Mark Wormgoor <mark@wormgoor.com>
-# (c) 2003-2016 The IPCop Team
+# (c) 2003-2016 The Openfirewall Team
 #
 # $Id: ipsec.cgi 8039 2016-01-04 09:06:48Z owes $
 #
@@ -35,12 +35,12 @@ use strict;
 use warnings;
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/vpn-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
-require '/usr/lib/ipcop/countries.pl';
-require '/usr/lib/ipcop/firewall-lib.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/vpn-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/countries.pl';
+require '/usr/lib/ofw/firewall-lib.pl';
 
 #workaround to suppress a warning when a variable is used only once
 my @dummy = ( ${Header::sortup}, @{General::longMonths} );
@@ -72,7 +72,7 @@ my $error_ca = '';
 my $error_connection = '';
 my $error_global = '';
 
-&General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
+&General::readhash("/var/ofw/ethernet/settings", \%netsettings);
 $cgiparams{'ENABLED'} = 'off';
 $cgiparams{'ENABLED_RED_1'} = 'off';
 $cgiparams{'ENABLED_BLUE_1'} = 'off';
@@ -154,7 +154,7 @@ sub makeconnname ($) {
 ### Save main settings
 ###
 if ($cgiparams{'ACTION'} eq $Lang::tr{'save'} && $cgiparams{'TYPE'} eq '' && $cgiparams{'KEY'} eq '') {
-    &General::readhash("/var/ipcop/ipsec/settings", \%vpnsettings);
+    &General::readhash("/var/ofw/ipsec/settings", \%vpnsettings);
     unless (&General::validiporfqdn($cgiparams{'VPN_IP'}) || $cgiparams{'VPN_IP'} eq '%defaultroute') {
         $errormessage .= "$Lang::tr{'invalid input for hostname'}<br />";
         goto SAVE_ERROR;
@@ -189,7 +189,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'save'} && $cgiparams{'TYPE'} eq '' && $cg
         $error_global = 'error';
     }
     else {
-        &General::writehash("/var/ipcop/ipsec/settings", \%vpnsettings);
+        &General::writehash("/var/ofw/ipsec/settings", \%vpnsettings);
         &VPN::writeipsecfiles();
         if (&VPN::ipsecenabled(\%vpnsettings)) {
             &General::log("ipsec", "Start ipsecctrl");
@@ -206,13 +206,13 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'save'} && $cgiparams{'TYPE'} eq '' && $cg
 ### Export ca certificate to browser
 ###
 elsif ($cgiparams{'ACTION'} eq $Lang::tr{'download ca certificate'}) {
-    &General::readhasharray("/var/ipcop/vpn/caconfig", \%cahash);
+    &General::readhasharray("/var/ofw/vpn/caconfig", \%cahash);
 
-    if ( -f "/var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem" ) {
+    if ( -f "/var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem" ) {
         print "Content-Type: application/force-download\n";
         print "Content-Type: application/octet-stream\r\n";
         print "Content-Disposition: attachment; filename=$cahash{$cgiparams{'KEY'}}[0]cert.pem\r\n\r\n";
-        print `/usr/bin/openssl x509 -in /var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem`;
+        print `/usr/bin/openssl x509 -in /var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem`;
         exit(0);
     }
     else {
@@ -223,26 +223,26 @@ elsif ($cgiparams{'ACTION'} eq $Lang::tr{'download ca certificate'}) {
 ### Export PKCS12 file to browser
 ###
 elsif ($cgiparams{'ACTION'} eq $Lang::tr{'download pkcs12 file'}) {
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
     print "Content-Type: application/force-download\n";
     print "Content-Disposition: attachment; filename=" . $confighash{$cgiparams{'KEY'}}[1] . ".p12\r\n";
     print "Content-Type: application/octet-stream\r\n\r\n";
-    print `/bin/cat /var/ipcop/certs/$confighash{$cgiparams{'KEY'}}[1].p12`;
+    print `/bin/cat /var/ofw/certs/$confighash{$cgiparams{'KEY'}}[1].p12`;
     exit (0);
 }
 ###
 ### Display certificate
 ###
 elsif ($cgiparams{'ACTION'} eq $Lang::tr{'show certificate'}) {
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
 
-    if ( -f "/var/ipcop/certs/$confighash{$cgiparams{'KEY'}}[1]cert.pem") {
+    if ( -f "/var/ofw/certs/$confighash{$cgiparams{'KEY'}}[1]cert.pem") {
         &Header::showhttpheaders();
         &Header::openpage($Lang::tr{'ipsec configuration main'}, 1, '');
         &Header::openbigbox('100%', 'left', '', '');
         &Header::openbox('100%', 'left', "$Lang::tr{'certificate'}:");
 
-        my $output = `/usr/bin/openssl x509 -text -in /var/ipcop/certs/$confighash{$cgiparams{'KEY'}}[1]cert.pem`;
+        my $output = `/usr/bin/openssl x509 -text -in /var/ofw/certs/$confighash{$cgiparams{'KEY'}}[1]cert.pem`;
         $output = &Header::cleanhtml($output,"y");
         print <<END
 <table width='100%'><tr>
@@ -268,12 +268,12 @@ END
 ### Export Certificate to browser
 ###
 elsif ($cgiparams{'ACTION'} eq $Lang::tr{'download certificate'}) {
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
 
-    if ( -f "/var/ipcop/certs/$confighash{$cgiparams{'KEY'}}[1]cert.pem") {
+    if ( -f "/var/ofw/certs/$confighash{$cgiparams{'KEY'}}[1]cert.pem") {
         print "Content-Type: application/force-download\n";
         print "Content-Disposition: attachment; filename=" . $confighash{$cgiparams{'KEY'}}[1] . "cert.pem\n\n";
-        print `/bin/cat /var/ipcop/certs/$confighash{$cgiparams{'KEY'}}[1]cert.pem`;
+        print `/bin/cat /var/ofw/certs/$confighash{$cgiparams{'KEY'}}[1]cert.pem`;
         exit (0);
     }
 }
@@ -282,13 +282,13 @@ elsif ($cgiparams{'ACTION'} eq $Lang::tr{'download certificate'}) {
 ###
 elsif ($cgiparams{'ACTION'} eq $Lang::tr{'toggle enable disable'}) {
 
-    &General::readhash("/var/ipcop/ipsec/settings", \%vpnsettings);
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
+    &General::readhash("/var/ofw/ipsec/settings", \%vpnsettings);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
 
     if ($confighash{$cgiparams{'KEY'}}) {
         if ($confighash{$cgiparams{'KEY'}}[0] eq 'off') {
             $confighash{$cgiparams{'KEY'}}[0] = 'on';
-            &General::writehasharray("/var/ipcop/ipsec/config", \%confighash);
+            &General::writehasharray("/var/ofw/ipsec/config", \%confighash);
             &VPN::writeipsecfiles();
             if (&VPN::ipsecenabled(\%vpnsettings)) {
                 &General::log("ipsec", "Activate connection #$cgiparams{'KEY'}");
@@ -301,7 +301,7 @@ elsif ($cgiparams{'ACTION'} eq $Lang::tr{'toggle enable disable'}) {
                 system("/usr/local/bin/ipsecctrl --stop=$cgiparams{'KEY'}")
             }
             $confighash{$cgiparams{'KEY'}}[0] = 'off';
-            &General::writehasharray("/var/ipcop/ipsec/config", \%confighash);
+            &General::writehasharray("/var/ofw/ipsec/config", \%confighash);
             &VPN::writeipsecfiles();
         }
         sleep $sleepDelay;
@@ -314,8 +314,8 @@ elsif ($cgiparams{'ACTION'} eq $Lang::tr{'toggle enable disable'}) {
 ### Restart connection
 ###
 elsif ($cgiparams{'ACTION'} eq $Lang::tr{'restart'}) {
-    &General::readhash("/var/ipcop/ipsec/settings", \%vpnsettings);
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
+    &General::readhash("/var/ofw/ipsec/settings", \%vpnsettings);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
 
     if ($confighash{$cgiparams{'KEY'}}) {
         if (&VPN::ipsecenabled(\%vpnsettings)) {
@@ -332,18 +332,18 @@ elsif ($cgiparams{'ACTION'} eq $Lang::tr{'restart'}) {
 ### Remove connection
 ###
 elsif ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
-    &General::readhash("/var/ipcop/ipsec/settings", \%vpnsettings);
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
+    &General::readhash("/var/ofw/ipsec/settings", \%vpnsettings);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
 
     if ($confighash{$cgiparams{'KEY'}}) {
         if (&VPN::ipsecenabled(\%vpnsettings)) {
             &General::log("ipsec", "Remove connection #$cgiparams{'KEY'}");
             system("/usr/local/bin/ipsecctrl --stop=$cgiparams{'KEY'}")
         }
-        unlink ("/var/ipcop/certs/$confighash{$cgiparams{'KEY'}}[1]cert.pem");
-        unlink ("/var/ipcop/certs/$confighash{$cgiparams{'KEY'}}[1].p12");
+        unlink ("/var/ofw/certs/$confighash{$cgiparams{'KEY'}}[1]cert.pem");
+        unlink ("/var/ofw/certs/$confighash{$cgiparams{'KEY'}}[1].p12");
         delete $confighash{$cgiparams{'KEY'}};
-        &General::writehasharray("/var/ipcop/ipsec/config", \%confighash);
+        &General::writehasharray("/var/ofw/ipsec/config", \%confighash);
         &VPN::writeipsecfiles();
     }
     else {
@@ -392,9 +392,9 @@ elsif (($cgiparams{'ACTION'} eq $Lang::tr{'add'})
         || ($cgiparams{'ACTION'} eq $Lang::tr{'edit'})
         || ($cgiparams{'ACTION'} eq $Lang::tr{'save'} && $cgiparams{'ADVANCED'} eq '')) {
 
-    &General::readhash("/var/ipcop/ipsec/settings", \%vpnsettings);
-    &General::readhasharray("/var/ipcop/vpn/caconfig", \%cahash);
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
+    &General::readhash("/var/ofw/ipsec/settings", \%vpnsettings);
+    &General::readhasharray("/var/ofw/vpn/caconfig", \%cahash);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
 
     if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
         if (! $confighash{$cgiparams{'KEY'}}[0]) {
@@ -569,7 +569,7 @@ elsif (($cgiparams{'ACTION'} eq $Lang::tr{'add'})
             my  $opt  = " ca -days 999999";
             $opt .= " -batch -notext";
             $opt .= " -in $filename";
-            $opt .= " -out /var/ipcop/certs/$cgiparams{'NAME'}cert.pem";
+            $opt .= " -out /var/ofw/certs/$cgiparams{'NAME'}cert.pem";
 
             my $return = &VPN::callssl ($opt);
             unlink ($filename);
@@ -577,11 +577,11 @@ elsif (($cgiparams{'ACTION'} eq $Lang::tr{'add'})
             if ($return) {
                 $errormessage .= "$return<br />";
                 $error_auth = 'error';
-                unlink ("/var/ipcop/certs/$cgiparams{'NAME'}cert.pem");
+                unlink ("/var/ofw/certs/$cgiparams{'NAME'}cert.pem");
                 goto VPNCONF_ERROR;
             }
 
-            $cgiparams{'CERT_NAME'} = &VPN::getCNfromcert ("/var/ipcop/certs/$cgiparams{'NAME'}cert.pem");
+            $cgiparams{'CERT_NAME'} = &VPN::getCNfromcert ("/var/ofw/certs/$cgiparams{'NAME'}cert.pem");
             if ($cgiparams{'CERT_NAME'} eq '') {
                 $errormessage .= "$Lang::tr{'could not retrieve common name from certificate'}<br />";
                 $error_auth = 'error';
@@ -661,13 +661,13 @@ elsif (($cgiparams{'ACTION'} eq $Lang::tr{'add'})
                         };
                         $cgiparams{'CA_NAME'} = "Imported-$idx";
                         $cgiparams{'CERT_NAME'} = &Header::cleanhtml(&VPN::getCNfromcert ('/tmp/newhostcert'));
-                        my $return = move("/tmp/newcacert", "/var/ipcop/ca/$cgiparams{'CA_NAME'}cert.pem");
+                        my $return = move("/tmp/newcacert", "/var/ofw/ca/$cgiparams{'CA_NAME'}cert.pem");
                         $errormessage .= "$Lang::tr{'certificate file move failed'}: $!<br />" if ($return ne 1);
                         if (!$errormessage) {
                             my $key = &General::findhasharraykey (\%cahash);
                             $cahash{$key}[0] = $cgiparams{'CA_NAME'};
                             $cahash{$key}[1] = $casubject;
-                            &General::writehasharray("/var/ipcop/vpn/caconfig", \%cahash);
+                            &General::writehasharray("/var/ofw/vpn/caconfig", \%cahash);
                             &General::log("ipsec", "Reload certificates and secrets");
                             system("/usr/local/bin/ipsecctrl --reload");
                         }
@@ -676,7 +676,7 @@ elsif (($cgiparams{'ACTION'} eq $Lang::tr{'add'})
             }
             if (!$errormessage) {
                 &General::log("ipsec", "Moving host cert...");
-                my $return = move("/tmp/newhostcert", "/var/ipcop/certs/$cgiparams{'NAME'}cert.pem");
+                my $return = move("/tmp/newhostcert", "/var/ofw/certs/$cgiparams{'NAME'}cert.pem");
                 $errormessage .= "$Lang::tr{'certificate file move failed'}: $!<br />" if ($return ne 1);
             }
 
@@ -685,8 +685,8 @@ elsif (($cgiparams{'ACTION'} eq $Lang::tr{'add'})
             unlink ('/tmp/newcacert');
             unlink ('/tmp/newhostcert');
             if ($errormessage) {
-                unlink ("/var/ipcop/ca/$cgiparams{'CA_NAME'}cert.pem");
-                unlink ("/var/ipcop/certs/$cgiparams{'NAME'}cert.pem");
+                unlink ("/var/ofw/ca/$cgiparams{'CA_NAME'}cert.pem");
+                unlink ("/var/ofw/certs/$cgiparams{'NAME'}cert.pem");
                 goto VPNCONF_ERROR;
             }
             &General::log("ipsec", "p12 import completed!");
@@ -713,12 +713,12 @@ elsif (($cgiparams{'ACTION'} eq $Lang::tr{'add'})
             # Verify the certificate has a valid CA and move it
             &General::log("ipsec", "Validating imported cert against our known CA...");
             my $validca = 1;  #assume ok
-            my $test = `/usr/bin/openssl verify -CAfile /var/ipcop/ca/cacert.pem $filename`;
+            my $test = `/usr/bin/openssl verify -CAfile /var/ofw/ca/cacert.pem $filename`;
 
             if ($test !~ /: OK/) {
                 my $validca = 0;
                 foreach my $key (keys %cahash) {
-                    $test = `/usr/bin/openssl verify -CAfile /var/ipcop/ca/$cahash{$key}[0]cert.pem $filename`;
+                    $test = `/usr/bin/openssl verify -CAfile /var/ofw/ca/$cahash{$key}[0]cert.pem $filename`;
                     if ($test =~ /: OK/) {
                         $validca = 1;
                         last;
@@ -733,7 +733,7 @@ elsif (($cgiparams{'ACTION'} eq $Lang::tr{'add'})
                 goto VPNCONF_ERROR;
             }
             else {
-                my $return = move($filename, "/var/ipcop/certs/$cgiparams{'NAME'}cert.pem");
+                my $return = move($filename, "/var/ofw/certs/$cgiparams{'NAME'}cert.pem");
                 if ($return ne 1) {
                     $errormessage .= "$Lang::tr{'certificate file move failed'}: $!<br />";
                     $error_auth = 'error';
@@ -742,9 +742,9 @@ elsif (($cgiparams{'ACTION'} eq $Lang::tr{'add'})
                 }
             }
 
-            $cgiparams{'CERT_NAME'} = &VPN::getCNfromcert ("/var/ipcop/certs/$cgiparams{'NAME'}cert.pem");
+            $cgiparams{'CERT_NAME'} = &VPN::getCNfromcert ("/var/ofw/certs/$cgiparams{'NAME'}cert.pem");
             if ($cgiparams{'CERT_NAME'} eq '') {
-                unlink ("/var/ipcop/certs/$cgiparams{'NAME'}cert.pem");
+                unlink ("/var/ofw/certs/$cgiparams{'NAME'}cert.pem");
                 $errormessage .= "$Lang::tr{'could not retrieve common name from certificate'}<br />";
                 $error_auth = 'error';
                 goto VPNCONF_ERROR;
@@ -856,15 +856,15 @@ elsif (($cgiparams{'ACTION'} eq $Lang::tr{'add'})
             if (open(STDIN, "-|")) {
                 my $opt  = " req -nodes -rand /proc/interrupts:/proc/net/rt_cache";
                 $opt .= " -newkey rsa:1024";
-                $opt .= " -keyout /var/ipcop/certs/$cgiparams{'NAME'}key.pem";
-                $opt .= " -out /var/ipcop/certs/$cgiparams{'NAME'}req.pem";
+                $opt .= " -keyout /var/ofw/certs/$cgiparams{'NAME'}key.pem";
+                $opt .= " -out /var/ofw/certs/$cgiparams{'NAME'}req.pem";
 
                 my $return = &VPN::callssl ($opt);
                 if ($return) {
                     $errormessage .= "$return<br />";
                     $error_auth = 'error';
-                    unlink ("/var/ipcop/certs/$cgiparams{'NAME'}key.pem");
-                    unlink ("/var/ipcop/certs/$cgiparams{'NAME'}req.pem");
+                    unlink ("/var/ofw/certs/$cgiparams{'NAME'}key.pem");
+                    unlink ("/var/ofw/certs/$cgiparams{'NAME'}req.pem");
                     goto VPNCONF_ERROR;
                 }
             }
@@ -897,40 +897,40 @@ END
             close ($fh);
 
             my $opt  = " ca -days $certdays -batch -notext";
-            $opt .= " -in /var/ipcop/certs/$cgiparams{'NAME'}req.pem";
-            $opt .= " -out /var/ipcop/certs/$cgiparams{'NAME'}cert.pem";
+            $opt .= " -in /var/ofw/certs/$cgiparams{'NAME'}req.pem";
+            $opt .= " -out /var/ofw/certs/$cgiparams{'NAME'}cert.pem";
             $opt .= " -extfile $v3extname";
 
             my $return = &VPN::callssl ($opt);
             unlink ($v3extname);
-            unlink ("/var/ipcop/certs/$cgiparams{'NAME'}req.pem");
+            unlink ("/var/ofw/certs/$cgiparams{'NAME'}req.pem");
             &VPN::cleanssldatabase();
             if ($return) {
                 $errormessage .= "$return<br />";
                 $error_auth = 'error';
-                unlink ("/var/ipcop/certs/$cgiparams{'NAME'}key.pem");
-                unlink ("/var/ipcop/certs/$cgiparams{'NAME'}cert.pem");
+                unlink ("/var/ofw/certs/$cgiparams{'NAME'}key.pem");
+                unlink ("/var/ofw/certs/$cgiparams{'NAME'}cert.pem");
                 goto VPNCONF_ERROR;
             }
 
             # Create the pkcs12 file
             &General::log("ipsec", "Packing a pkcs12 file...");
             $opt  = " pkcs12 -export";
-            $opt .= " -inkey /var/ipcop/certs/$cgiparams{'NAME'}key.pem";
-            $opt .= " -in /var/ipcop/certs/$cgiparams{'NAME'}cert.pem";
+            $opt .= " -inkey /var/ofw/certs/$cgiparams{'NAME'}key.pem";
+            $opt .= " -in /var/ofw/certs/$cgiparams{'NAME'}cert.pem";
             $opt .= " -name \"$cgiparams{'NAME'}\"";
             $opt .= " -passout pass:" . &General::escape_shell($cgiparams{'CERT_PASS1'});
-            $opt .= " -certfile /var/ipcop/ca/cacert.pem";
+            $opt .= " -certfile /var/ofw/ca/cacert.pem";
             $opt .= " -caname \"$vpnsettings{'ROOTCERT_ORGANIZATION'} CA\"";
-            $opt .= " -out /var/ipcop/certs/$cgiparams{'NAME'}.p12";
+            $opt .= " -out /var/ofw/certs/$cgiparams{'NAME'}.p12";
 
             $return = &VPN::callssl ($opt);
-            unlink ("/var/ipcop/certs/$cgiparams{'NAME'}key.pem");
+            unlink ("/var/ofw/certs/$cgiparams{'NAME'}key.pem");
             if ($return) {
                 $errormessage .= "$return<br />";
                 $error_auth = 'error';
-                unlink ("/var/ipcop/certs/$cgiparams{'NAME'}cert.pem");
-                unlink ("/var/ipcop/certs/$cgiparams{'NAME'}.p12");
+                unlink ("/var/ofw/certs/$cgiparams{'NAME'}cert.pem");
+                unlink ("/var/ofw/certs/$cgiparams{'NAME'}.p12");
                 goto VPNCONF_ERROR;
             }
         }
@@ -1008,7 +1008,7 @@ END
         # free unused fields!
         $confighash{$key}[15] = 'off';
 
-        &General::writehasharray("/var/ipcop/ipsec/config", \%confighash);
+        &General::writehasharray("/var/ofw/ipsec/config", \%confighash);
         &VPN::writeipsecfiles();
         if (&VPN::ipsecenabled(\%vpnsettings)) {
             &General::log("ipsec", "Add connection #$key");
@@ -1023,16 +1023,16 @@ END
     }
     else { # add new connection
         $cgiparams{'ENABLED'} = 'on';
-        if ( ! -f "/var/ipcop/private/cakey.pem" ) {
+        if ( ! -f "/var/ofw/private/cakey.pem" ) {
             $cgiparams{'AUTH'} = 'psk';
         }
-        elsif ( ! -f "/var/ipcop/ca/cacert.pem") {
+        elsif ( ! -f "/var/ofw/ca/cacert.pem") {
             $cgiparams{'AUTH'} = 'certfile';
         }
         else {
             $cgiparams{'AUTH'} = 'certgen';
         }
-        &General::readhash('/var/ipcop/vpn/rootcertsettings', \%rootcertsettings) if (-f '/var/ipcop/vpn/rootcertsettings');
+        &General::readhash('/var/ofw/vpn/rootcertsettings', \%rootcertsettings) if (-f '/var/ofw/vpn/rootcertsettings');
         $cgiparams{'LOCAL_SUBNET'}      = "$netsettings{'GREEN_1_NETADDRESS'}/$netsettings{'GREEN_1_NETMASK'}";
         $cgiparams{'CERT_EMAIL'}        = $rootcertsettings{'ROOTCERT_EMAIL'};
         $cgiparams{'CERT_OU'}           = $rootcertsettings{'ROOTCERT_OU'};
@@ -1262,9 +1262,9 @@ END
         # my $pskdisabled = ($vpnsettings{'VPN_IP'} eq '%defaultroute') ? "disabled='disabled'" : '' ;
         my $pskdisabled = '' ;
         $cgiparams{'PSK'} =  $Lang::tr{'vpn incompatible use of defaultroute'} if ($pskdisabled);
-        my $cakeydisabled = ( ! -f "/var/ipcop/private/cakey.pem" ) ? "disabled='disabled'" : '';
+        my $cakeydisabled = ( ! -f "/var/ofw/private/cakey.pem" ) ? "disabled='disabled'" : '';
         $cgiparams{'CERT_NAME'} = $Lang::tr{'vpn no full pki'} if ($cakeydisabled);
-        my $cacrtdisabled = ( ! -f "/var/ipcop/ca/cacert.pem" ) ? "disabled='disabled'" : '';
+        my $cacrtdisabled = ( ! -f "/var/ofw/ca/cacert.pem" ) ? "disabled='disabled'" : '';
 
         $commentblob = "<img src='/blob.gif' alt='*' />&nbsp;$Lang::tr{'this field may be blank'}" if ($cakeydisabled eq '');
 
@@ -1404,8 +1404,8 @@ END
 if(($cgiparams{'ACTION'} eq $Lang::tr{'advanced'})
     || ($cgiparams{'ACTION'} eq $Lang::tr{'save'} && $cgiparams{'ADVANCED'} eq 'yes')) {
 
-    &General::readhash("/var/ipcop/ipsec/settings", \%vpnsettings);
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
+    &General::readhash("/var/ofw/ipsec/settings", \%vpnsettings);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
 
     if (! $confighash{$cgiparams{'KEY'}}) {
         $errormessage .= "$Lang::tr{'invalid key'}<br />";
@@ -1528,7 +1528,7 @@ if(($cgiparams{'ACTION'} eq $Lang::tr{'advanced'})
         $confighash{$cgiparams{'KEY'}}[28] = $cgiparams{'PFS'};
         $confighash{$cgiparams{'KEY'}}[14] = $cgiparams{'VHOST'};
 
-        &General::writehasharray("/var/ipcop/ipsec/config", \%confighash);
+        &General::writehasharray("/var/ofw/ipsec/config", \%confighash);
         &VPN::writeipsecfiles();
 
         if (&VPN::ipsecenabled(\%vpnsettings)) {
@@ -1783,17 +1783,17 @@ END
 %cgiparams = ();
 %cahash = ();
 %confighash = ();
-&General::readhash("/var/ipcop/ipsec/settings", \%cgiparams);
-&General::readhasharray("/var/ipcop/vpn/caconfig", \%cahash);
-&General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
+&General::readhash("/var/ofw/ipsec/settings", \%cgiparams);
+&General::readhasharray("/var/ofw/vpn/caconfig", \%cahash);
+&General::readhasharray("/var/ofw/ipsec/config", \%confighash);
 $cgiparams{'CA_NAME'} = '';
 
 my @status = `/usr/local/bin/ipsecctrl --status`;
 my $sactive = &General::isrunning('pluto/pluto', 'nosize');
 
 # suggest a default name for this side
-if ($cgiparams{'VPN_IP'} eq '' && -e "/var/ipcop/red/active") {
-    if (open(IPADDR, "/var/ipcop/red/local-ipaddress")) {
+if ($cgiparams{'VPN_IP'} eq '' && -e "/var/ofw/red/active") {
+    if (open(IPADDR, "/var/ofw/red/local-ipaddress")) {
         my $ipaddr = <IPADDR>;
         close IPADDR;
         chomp ($ipaddr);
@@ -1951,7 +1951,7 @@ foreach my $key (sort SortConfigHashByTunnelName (keys(%confighash))) {
         print "</td>";
     }
 
-    my $cavalid = `/usr/bin/openssl x509 -text -in /var/ipcop/certs/$confighash{$key}[1]cert.pem`;
+    my $cavalid = `/usr/bin/openssl x509 -text -in /var/ofw/certs/$confighash{$key}[1]cert.pem`;
     $cavalid    =~ /Not After : (.*)[\n]/;
     $cavalid    = $1;
     print "<td align='center'>$cavalid</td>";
@@ -1960,22 +1960,22 @@ foreach my $key (sort SortConfigHashByTunnelName (keys(%confighash))) {
     #
     my $active = "";
     if ($confighash{$key}[0] eq 'off') {
-        $active = "<table class='ipcop_closed' cellpadding='2' cellspacing='0' width='100%'><tr><td align='center'>$Lang::tr{'capsclosed'}</td></tr></table>";
+        $active = "<table class='ofw_closed' cellpadding='2' cellspacing='0' width='100%'><tr><td align='center'>$Lang::tr{'capsclosed'}</td></tr></table>";
     }
     else {
-        $active = "<table class='ipcop_stopped' cellpadding='2' cellspacing='0' width='100%'><tr><td align='center'>$Lang::tr{'capserror'}</td></tr></table>";
+        $active = "<table class='ofw_stopped' cellpadding='2' cellspacing='0' width='100%'><tr><td align='center'>$Lang::tr{'capserror'}</td></tr></table>";
     }
     foreach my $line (@status) {
         if ($line =~ /Pluto is not running/) {
-            $active = "<table class='ipcop_closed' cellpadding='2' cellspacing='0' width='100%'><tr><td align='center'>$Lang::tr{'capsclosed'}</td></tr></table>";
+            $active = "<table class='ofw_closed' cellpadding='2' cellspacing='0' width='100%'><tr><td align='center'>$Lang::tr{'capsclosed'}</td></tr></table>";
             last;
         }
         if ($line =~ /\"$confighash{$key}[1]\".*IPsec SA established/) {
-            $active = "<table class='ipcop_running' cellpadding='2' cellspacing='0' width='100%'><tr><td align='center'>$Lang::tr{'capsopen'}</td></tr></table>";
+            $active = "<table class='ofw_running' cellpadding='2' cellspacing='0' width='100%'><tr><td align='center'>$Lang::tr{'capsopen'}</td></tr></table>";
             last;
         }
         if ($line =~ /\"$confighash{$key}[1]\".*policy/) {
-            $active = "<table class='ipcop_stopped' cellpadding='2' cellspacing='0' width='100%'><tr><td align='center'>$Lang::tr{'capsclosed'}</td></tr></table>";
+            $active = "<table class='ofw_stopped' cellpadding='2' cellspacing='0' width='100%'><tr><td align='center'>$Lang::tr{'capsclosed'}</td></tr></table>";
         }
     }
     print <<END
@@ -2005,7 +2005,7 @@ END
         print "<td width='2%'>&nbsp;</td>";
     }
 
-    if ($confighash{$key}[4] eq 'cert' && -f "/var/ipcop/certs/$confighash{$key}[1].p12") {
+    if ($confighash{$key}[4] eq 'cert' && -f "/var/ofw/certs/$confighash{$key}[1].p12") {
         print <<END
     <td align='center'>
         <form method='post' action='$ENV{'SCRIPT_NAME'}'>

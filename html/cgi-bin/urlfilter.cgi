@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2004-2008 marco.s - http://www.urlfilter.net
-# (c) 2011-2014 The IPCop Team
+# (c) 2011-2014 The Openfirewall Team
 #
 # $Id: urlfilter.cgi 7748 2014-12-15 07:04:32Z owes $
 #
@@ -35,9 +35,9 @@ use CGI::Carp 'fatalsToBrowser';
 use File::Copy;
 use IO::Socket;
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 # enable(==1)/disable(==0) HTML Form debugging
 my $debugFormparams = 0;
@@ -65,13 +65,13 @@ my $blacklist   = '';
 my $blistbackup = '';
 
 my $changed    = 'no';
-my $tcfile     = "/var/ipcop/proxy/timeconst";
-my $uqfile     = "/var/ipcop/proxy/userquota";
+my $tcfile     = "/var/ofw/proxy/timeconst";
+my $uqfile     = "/var/ofw/proxy/userquota";
 my $dbdir      = "/var/lib/squidguard/db";
-my $editdir    = "/var/ipcop/proxy/editor";
+my $editdir    = "/var/ofw/proxy/editor";
 
-my $sourceurlfile = "/var/ipcop/proxy/blacklistupdate/blacklistupdate.urls";
-my $updconffile   = "/var/ipcop/proxy/blacklistupdate/blacklistupdate.conf";
+my $sourceurlfile = "/var/ofw/proxy/blacklistupdate/blacklistupdate.urls";
+my $updconffile   = "/var/ofw/proxy/blacklistupdate/blacklistupdate.conf";
 
 my $errormessage   = '';
 my $updatemessage  = '';
@@ -101,9 +101,9 @@ if (!-e $tcfile)        { system("touch $tcfile"); }
 if (!-e $uqfile)        { system("touch $uqfile"); }
 if (!-e $sourceurlfile) { system("touch $sourceurlfile"); }
 
-&General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
-&General::readhash("/var/ipcop/main/settings",     \%mainsettings);
-&General::readhash("/var/ipcop/proxy/settings",    \%proxysettings);
+&General::readhash("/var/ofw/ethernet/settings", \%netsettings);
+&General::readhash("/var/ofw/main/settings",     \%mainsettings);
+&General::readhash("/var/ofw/proxy/settings",    \%proxysettings);
 
 &readblockcategories;
 
@@ -228,37 +228,37 @@ if (   (($filtersettings{'ACTION'} eq $Lang::tr{'save'}) && ($filtersettings{'MO
             goto ERROR;
         }
 
-        if (copy($filtersettings{'UPDATEFILE'}, "/var/ipcop/proxy/blacklists.tar.gz") != 1) {
+        if (copy($filtersettings{'UPDATEFILE'}, "/var/ofw/proxy/blacklists.tar.gz") != 1) {
             $errormessage .= "$!<br />";
             goto ERROR;
         }
 
-        if (!(-d "/var/ipcop/proxy/update")) { mkdir("/var/ipcop/proxy/update"); }
+        if (!(-d "/var/ofw/proxy/update")) { mkdir("/var/ofw/proxy/update"); }
 
         my $exitcode =
-            system("/bin/tar --no-same-owner -xzf /var/ipcop/proxy/blacklists.tar.gz -C /var/ipcop/proxy/update");
+            system("/bin/tar --no-same-owner -xzf /var/ofw/proxy/blacklists.tar.gz -C /var/ofw/proxy/update");
 
         if ($exitcode > 0) {
             $errormessage .= "$Lang::tr{'errmsg extract tar'}<br />"
         }
         else {
 
-            if (-d "/var/ipcop/proxy/update/BL") {
-                system("mv /var/ipcop/proxy/update/BL /var/ipcop/proxy/update/blacklists");
+            if (-d "/var/ofw/proxy/update/BL") {
+                system("mv /var/ofw/proxy/update/BL /var/ofw/proxy/update/blacklists");
             }
 
-            if (-d "/var/ipcop/proxy/update/category") {
-                system("mv /var/ipcop/proxy/update/category /var/ipcop/proxy/update/blacklists");
+            if (-d "/var/ofw/proxy/update/category") {
+                system("mv /var/ofw/proxy/update/category /var/ofw/proxy/update/blacklists");
             }
 
-            if (!(-d "/var/ipcop/proxy/update/blacklists")) {
+            if (!(-d "/var/ofw/proxy/update/blacklists")) {
                 $errormessage .= "$Lang::tr{'errmsg invalid blacklist content'}<br />";
             }
             else {
                 # remove old blacklists (except custom lists)
                 system("rm -rf `find $dbdir/* -maxdepth 0 | grep -v $dbdir/custom` ");
 
-                system("cp -r /var/ipcop/proxy/update/blacklists/* $dbdir");
+                system("cp -r /var/ofw/proxy/update/blacklists/* $dbdir");
 
                 &readblockcategories;
                 &readcustomlists;
@@ -272,8 +272,8 @@ if (   (($filtersettings{'ACTION'} eq $Lang::tr{'save'}) && ($filtersettings{'MO
                 );
             }
         }
-        if (-d "/var/ipcop/proxy/update")            { system("rm -rf /var/ipcop/proxy/update"); }
-        if (-e "/var/ipcop/proxy/blacklists.tar.gz") { unlink("/var/ipcop/proxy/blacklists.tar.gz"); }
+        if (-d "/var/ofw/proxy/update")            { system("rm -rf /var/ofw/proxy/update"); }
+        if (-e "/var/ofw/proxy/blacklists.tar.gz") { unlink("/var/ofw/proxy/blacklists.tar.gz"); }
         if ($errormessage)                           { goto ERROR; }
     }
 
@@ -281,7 +281,7 @@ if (   (($filtersettings{'ACTION'} eq $Lang::tr{'save'}) && ($filtersettings{'MO
         $blistbackup = ($filtersettings{'ENABLE_FULLBACKUP'} eq 'on') ? "blacklists" : "blacklists/custom";
         if (
             system(
-"/bin/tar -C /var/ipcop/proxy -czf /var/ipcop/proxy/backup.tar.gz settings timeconst userquota blacklistupdate $blistbackup"
+"/bin/tar -C /var/ofw/proxy -czf /var/ofw/proxy/backup.tar.gz settings timeconst userquota blacklistupdate $blistbackup"
             )
             )
         {
@@ -291,15 +291,15 @@ if (   (($filtersettings{'ACTION'} eq $Lang::tr{'save'}) && ($filtersettings{'MO
         else {
             print "Content-type: application/gzip\n";
             print "Content-length: ";
-            print(-s "/var/ipcop/proxy/backup.tar.gz");
+            print(-s "/var/ofw/proxy/backup.tar.gz");
             print "\n";
             print "Content-disposition: attachment; filename=urlfilter-backup.tar.gz\n\n";
 
-            open(FILE, "/var/ipcop/proxy/backup.tar.gz");
+            open(FILE, "/var/ofw/proxy/backup.tar.gz");
             while (<FILE>) { print; }
             close(FILE);
 
-            if (-e "/var/ipcop/proxy/backup.tar.gz") { unlink("/var/ipcop/proxy/backup.tar.gz"); }
+            if (-e "/var/ofw/proxy/backup.tar.gz") { unlink("/var/ofw/proxy/backup.tar.gz"); }
             exit;
         }
     }
@@ -312,24 +312,24 @@ if (   (($filtersettings{'ACTION'} eq $Lang::tr{'save'}) && ($filtersettings{'MO
             goto ERROR;
         }
 
-        if (!(-d "/var/ipcop/proxy/restore")) { mkdir("/var/ipcop/proxy/restore"); }
+        if (!(-d "/var/ofw/proxy/restore")) { mkdir("/var/ofw/proxy/restore"); }
 
-        if (copy($filtersettings{'UPDATEFILE'}, "/var/ipcop/proxy/backup.tar.gz") != 1) {
+        if (copy($filtersettings{'UPDATEFILE'}, "/var/ofw/proxy/backup.tar.gz") != 1) {
             $errormessage .= "$!<br />";
         }
 
         my $exitcode = system(
-"/bin/tar --no-same-owner --preserve-permissions -xzf /var/ipcop/proxy/backup.tar.gz -C /var/ipcop/proxy/restore"
+"/bin/tar --no-same-owner --preserve-permissions -xzf /var/ofw/proxy/backup.tar.gz -C /var/ofw/proxy/restore"
         );
         if ($exitcode > 0) {
             $errormessage .= "$Lang::tr{'errmsg extract tar'}<br />";
         }
         else {
-            if (!(-e "/var/ipcop/proxy/restore/settings")) {
+            if (!(-e "/var/ofw/proxy/restore/settings")) {
                 $errormessage .= "$Lang::tr{'errmsg invalid restore file'}<br />";
             }
             else {
-                system("cp -rp /var/ipcop/proxy/restore/* /var/ipcop/proxy/");
+                system("cp -rp /var/ofw/proxy/restore/* /var/ofw/proxy/");
                 &readblockcategories;
                 &readcustomlists;
                 &writeconfigfile;
@@ -338,8 +338,8 @@ if (   (($filtersettings{'ACTION'} eq $Lang::tr{'save'}) && ($filtersettings{'MO
             }
         }
 
-        if (-e "/var/ipcop/proxy/backup.tar.gz") { unlink("/var/ipcop/proxy/backup.tar.gz"); }
-        if (-d "/var/ipcop/proxy/restore")       { system("rm -rf /var/ipcop/proxy/restore"); }
+        if (-e "/var/ofw/proxy/backup.tar.gz") { unlink("/var/ofw/proxy/backup.tar.gz"); }
+        if (-d "/var/ofw/proxy/restore")       { system("rm -rf /var/ofw/proxy/restore"); }
         if ($errormessage)                       { goto ERROR; }
     }
 
@@ -1035,8 +1035,8 @@ if ($filtersettings{'ACTION'} eq $Lang::tr{'instant update'}) {
     }
 }
 
-if (-e "/var/ipcop/proxy/filtersettings") {
-    &General::readhash("/var/ipcop/proxy/filtersettings", \%filtersettings);
+if (-e "/var/ofw/proxy/filtersettings") {
+    &General::readhash("/var/ofw/proxy/filtersettings", \%filtersettings);
 }
 
 &readcustomlists;
@@ -2676,7 +2676,7 @@ sub savesettings
     delete $filtersettings{'CUSTOM_EXPRESSIONS'};
     delete $filtersettings{'UPDATEFILE'};
 
-    &General::writehash("/var/ipcop/proxy/filtersettings", \%filtersettings);
+    &General::writehash("/var/ofw/proxy/filtersettings", \%filtersettings);
 
     # write redirector config
     my %redirectorconf=();
@@ -2686,7 +2686,7 @@ sub savesettings
     $redirectorconf{'OPTION_CHAIN'} = '-f';
     $redirectorconf{'ENABLED'} = $filtersettings{'ENABLED'};
 
-    &General::writehash("/var/ipcop/proxy/redirector/urlfilter", \%redirectorconf);
+    &General::writehash("/var/ofw/proxy/redirector/urlfilter", \%redirectorconf);
 
     system('/usr/local/bin/restartsquid --config');
 }
@@ -3001,11 +3001,11 @@ sub writeconfigfile
 
     $defaultrule =~ s/\//_/g;
 
-    open(FILE, ">/var/ipcop/proxy/squidGuard.conf") or die "Unable to write squidGuard.conf file";
+    open(FILE, ">/var/ofw/proxy/squidGuard.conf") or die "Unable to write squidGuard.conf file";
     flock(FILE, 2);
 
     print FILE <<END
-# Do not modify '/var/ipcop/proxy/squidGuard.conf' directly since any changes
+# Do not modify '/var/ofw/proxy/squidGuard.conf' directly since any changes
 # you make will be overwritten whenever you resave URL filter settings using the
 # web interface!
 

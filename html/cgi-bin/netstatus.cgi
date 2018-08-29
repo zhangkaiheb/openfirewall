@@ -20,9 +20,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %dhcpsettings=();
 my %netsettings=();
@@ -32,9 +32,9 @@ my $output='';
 $dhcpinfo{'DOMAIN'}=''; # because it may not be defined in the answer
 my $dhcpserver = 0;
 
-&General::readhash('/var/ipcop/dhcp/settings', \%dhcpsettings);
-&General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
-&General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+&General::readhash('/var/ofw/dhcp/settings', \%dhcpsettings);
+&General::readhash('/var/ofw/ethernet/settings', \%netsettings);
+&General::readhash('/var/ofw/ppp/settings', \%pppsettings);
 &Header::showhttpheaders();
 &Header::openpage($Lang::tr{'network status information'}, 1, '');
 
@@ -107,10 +107,10 @@ print "</table></td></tr></table>\n";
 
 print "<a name='reddns'/>\n";
 &Header::openbox('100%', 'left', "$Lang::tr{'red'} $Lang::tr{'dns configuration'}:");
-if (-e "/var/ipcop/red/active") {
-    my $dns1 = `/bin/cat /var/ipcop/red/dns1`;
+if (-e "/var/ofw/red/active") {
+    my $dns1 = `/bin/cat /var/ofw/red/dns1`;
     chomp($dns1);
-    my $dns2 = `/bin/cat /var/ipcop/red/dns2`;
+    my $dns2 = `/bin/cat /var/ofw/red/dns2`;
     chomp($dns2);
 
     print <<END

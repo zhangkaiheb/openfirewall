@@ -20,9 +20,9 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %modemsettings = ();
 my $errormessage  = '';
@@ -49,14 +49,14 @@ ERROR:
         $modemsettings{'VALID'} = 'yes';
     }
 
-    &General::writehash('/var/ipcop/modem/settings', \%modemsettings);
+    &General::writehash('/var/ofw/modem/settings', \%modemsettings);
 }
 
 if ($modemsettings{'ACTION'} eq $Lang::tr{'restore defaults'}) {
-    system('/bin/cp', '/var/ipcop/modem/defaults', '/var/ipcop/modem/settings', '-f');
+    system('/bin/cp', '/var/ofw/modem/defaults', '/var/ofw/modem/settings', '-f');
 }
 
-&General::readhash('/var/ipcop/modem/settings', \%modemsettings);
+&General::readhash('/var/ofw/modem/settings', \%modemsettings);
 
 &Header::openpage($Lang::tr{'modem configuration'}, 1, '');
 

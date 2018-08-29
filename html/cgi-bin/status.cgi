@@ -1,25 +1,25 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 # 
 # status.cgi originally (2001) from the Smoothwall project
 # (c) The SmoothWall Team
 #
 # Many changes since 2001
-# (c) 2001-2014, the IPCop team
+# (c) 2001-2014, the Openfirewall Team
 #
 # $Id: status.cgi 7203 2014-01-08 06:04:23Z owes $
 #
@@ -35,12 +35,12 @@ use strict;
 use warnings; no warnings 'once';# 'redefine', 'uninitialized';
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my %netsettings=();
-&General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
+&General::readhash('/var/ofw/ethernet/settings', \%netsettings);
 
 # Maps a nice printable name to the changing part of the pid file, which
 # is also the name of the program
@@ -338,7 +338,7 @@ END
             if ($_ =~ m/^\s+State\s+:\s+(.*?)\s*$/) {
                 my $field = &Header::cleanhtml($1,"y");
                 $rowtext .= "<td>$field</td>";
-                $state = "class='ipcop_error'" if (($field ne 'clean') && ($field ne 'active'));
+                $state = "class='ofw_error'" if (($field ne 'clean') && ($field ne 'active'));
             }
             elsif ($_ =~ m/^\s*Active Devices\s+:\s+(\d+).*$/) {
                 $rowtext .= "<td align='center'>$1</td>";

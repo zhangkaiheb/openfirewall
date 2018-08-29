@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2004-2008 marco.s - http://www.advproxy.net
-# (c) 2010-2011 The IPCop Team
+# (c) 2010-2011 The Openfirewall Team
 #
 # $Id: webaccess.cgi 6013 2011-10-31 08:19:13Z owes $
 #
@@ -27,11 +27,11 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
-my $apdir = "/var/ipcop/proxy";
+my $apdir = "/var/ofw/proxy";
 my $group_def_file = "$apdir/cre/classrooms";
 my $svhosts_file = "$apdir/cre/supervisors";
 my $acl_src_noaccess_ips = "$apdir/acls/src_noaccess_ip.acl";
@@ -45,7 +45,7 @@ my @group_defs=();
 my @groups=();
 
 ### Initialize environment
-&General::readhash("/var/ipcop/proxy/settings", \%proxysettings);
+&General::readhash("/var/ofw/proxy/settings", \%proxysettings);
 
 &General::getcgihash(\%cgiparams);
 
@@ -92,11 +92,11 @@ print <<END
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>IPCop - Web Access Manager</title>
+    <title>Openfirewall - Web Access Manager</title>
     
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="shortcut icon" href="/favicon.ico" />
-    <style type="text/css">\@import url(/include/ipcop.css);</style>
+    <style type="text/css">\@import url(/include/openfirewall.css);</style>
 </head>
  
 <body>
@@ -126,7 +126,7 @@ print <<END
                   <tr>
                     <td colspan='2'><img src='/images/boxtop1.png' width='30' height='53' alt='' /></td>
 
-                    <td style='background: url(/images/boxtop2.png);'><b>IPCop Web Access Manager</b></td>
+                    <td style='background: url(/images/boxtop2.png);'><b>Openfirewall Web Access Manager</b></td>
 
                     <td colspan='2'><img src='/images/boxtop3.png' width='163' height='53' alt='' /></td>
                   </tr>

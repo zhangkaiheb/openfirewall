@@ -1,21 +1,21 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2001-2016 The IPCop Team
+# (c) 2001-2016 The Openfirewall Team
 #
 # $Id: vpnca.cgi 8074 2016-01-18 21:01:51Z owes $
 #
@@ -34,11 +34,11 @@ use strict;
 #use warnings;
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/vpn-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
-require '/usr/lib/ipcop/countries.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/vpn-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/countries.pl';
 
 my $sleepDelay = 4;     # small delay after call to ipsecctrl before reading status
 
@@ -85,28 +85,28 @@ $cgiparams{'YEAR'}  = $now[5] + 1900 + 15;
 ###
 if ($cgiparams{'ACTION'} eq $Lang::tr{'remove x509'} && $cgiparams{'AREUSURE'} eq 'yes') {
     %confighash = ();
-    &General::readhasharray('/var/ipcop/ipsec/config', \%confighash);
+    &General::readhasharray('/var/ofw/ipsec/config', \%confighash);
     foreach my $key (keys %confighash) {
         if ($confighash{$key}[4] eq 'cert') {
             delete $confighash{$key};
         }
     }
-    &General::writehasharray('/var/ipcop/ipsec/config', \%confighash);
+    &General::writehasharray('/var/ofw/ipsec/config', \%confighash);
 
     %confighash = ();
-    &General::readhasharray('/var/ipcop/openvpn/config', \%confighash);
+    &General::readhasharray('/var/ofw/openvpn/config', \%confighash);
     foreach my $key (keys %confighash) {
         if ($confighash{$key}[4] eq 'cert') {
             delete $confighash{$key};
         }
     }
-    &General::writehasharray('/var/ipcop/openvpn/config', \%confighash);
+    &General::writehasharray('/var/ofw/openvpn/config', \%confighash);
 
-    while (my $file = glob('/var/ipcop/{ca,certs,crls,private}/*')) {
+    while (my $file = glob('/var/ofw/{ca,certs,crls,private}/*')) {
         unlink $file
     }
     &VPN::cleanssldatabase();
-    if (open(FILE, '>/var/ipcop/vpn/caconfig')) {
+    if (open(FILE, '>/var/ofw/vpn/caconfig')) {
         print FILE '';
         close FILE;
     }
@@ -132,7 +132,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'remove x509'} && $cgiparams{'AREUSURE'} e
         <tr>
         <td align='center'>
         <input type='hidden' name='AREUSURE' value='yes' />
-        <font class='ipcop_StatusBigRed'>$Lang::tr{'capswarning'}</font>:
+        <font class='ofw_StatusBigRed'>$Lang::tr{'capswarning'}</font>:
         $Lang::tr{'resetting the vpn configuration will remove the root ca, the host certificate and all certificate based connections'}</td>
         </tr><tr>
         <td align='center'>
@@ -152,7 +152,7 @@ END
 ### Upload CA Certificate
 ###
 } elsif ($cgiparams{'ACTION'} eq $Lang::tr{'upload ca certificate'}) {
-    &General::readhasharray("/var/ipcop/vpn/caconfig", \%cahash);
+    &General::readhasharray("/var/ofw/vpn/caconfig", \%cahash);
 
     if ($cgiparams{'CA_NAME'} !~ /^[a-zA-Z0-9]+$/) {
         $errormessage = $Lang::tr{'name must only contain characters'};
@@ -194,7 +194,7 @@ END
         goto UPLOADCA_ERROR;
     } 
     else {
-        move($filename, "/var/ipcop/ca/$cgiparams{'CA_NAME'}cert.pem");
+        move($filename, "/var/ofw/ca/$cgiparams{'CA_NAME'}cert.pem");
         if ($? ne 0) {
             $errormessage = "$Lang::tr{'certificate file move failed'}: $!";
             unlink ($filename);
@@ -204,8 +204,8 @@ END
 
     my $key = &General::findhasharraykey (\%cahash);
     $cahash{$key}[0] = $cgiparams{'CA_NAME'};
-    $cahash{$key}[1] = &Header::cleanhtml(&VPN::getsubjectfromcert("/var/ipcop/ca/$cgiparams{'CA_NAME'}cert.pem"));
-    &General::writehasharray("/var/ipcop/vpn/caconfig", \%cahash);
+    $cahash{$key}[1] = &Header::cleanhtml(&VPN::getsubjectfromcert("/var/ofw/ca/$cgiparams{'CA_NAME'}cert.pem"));
+    &General::writehasharray("/var/ofw/vpn/caconfig", \%cahash);
 
     &General::log("ipsec", "Reload certificates and secrets");
     system('/usr/local/bin/ipsecctrl', '--reload');
@@ -219,14 +219,14 @@ END
 ### Display CA Certificate
 ###
 } elsif ($cgiparams{'ACTION'} eq $Lang::tr{'show ca certificate'}) {
-    &General::readhasharray("/var/ipcop/vpn/caconfig", \%cahash);
+    &General::readhasharray("/var/ofw/vpn/caconfig", \%cahash);
 
-    if ( -f "/var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem") {
+    if ( -f "/var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem") {
         &Header::showhttpheaders();
         &Header::openpage($Lang::tr{'certificate authorities'}, 1, '');
         &Header::openbigbox('100%', 'left', '', '');
         &Header::openbox('100%', 'left', "$Lang::tr{'ca certificate'}:");
-        my $output = `/usr/bin/openssl x509 -text -in /var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem`;
+        my $output = `/usr/bin/openssl x509 -text -in /var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem`;
         $output = &Header::cleanhtml($output,"y");
         print <<END
 <table width='100%'><tr>
@@ -255,13 +255,13 @@ END
 ### Export CA Certificate to browser
 ###
 } elsif ($cgiparams{'ACTION'} eq $Lang::tr{'download ca certificate'}) {
-    &General::readhasharray("/var/ipcop/vpn/caconfig", \%cahash);
+    &General::readhasharray("/var/ofw/vpn/caconfig", \%cahash);
 
-    if ( -f "/var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem" ) {
+    if ( -f "/var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem" ) {
         print "Content-Type: application/force-download\n";
         print "Content-Type: application/octet-stream\r\n";
         print "Content-Disposition: attachment; filename=$cahash{$cgiparams{'KEY'}}[0]cert.pem\r\n\r\n";
-        print `/usr/bin/openssl x509 -in /var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem`;
+        print `/usr/bin/openssl x509 -in /var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem`;
         exit(0);
     }
     else {
@@ -272,29 +272,29 @@ END
 ### Remove CA Certificate (step 2)
 ###
 } elsif ($cgiparams{'ACTION'} eq $Lang::tr{'remove ca certificate'} && $cgiparams{'AREUSURE'} eq 'yes') {
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
-    &General::readhasharray("/var/ipcop/vpn/caconfig", \%cahash);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
+    &General::readhasharray("/var/ofw/vpn/caconfig", \%cahash);
 
-    if ( -f "/var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem" ) {
+    if ( -f "/var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem" ) {
         foreach my $key (keys %confighash) {
-            my $test = `/usr/bin/openssl verify -CAfile /var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem /var/ipcop/certs/$confighash{$key}[1]cert.pem`;
+            my $test = `/usr/bin/openssl verify -CAfile /var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem /var/ofw/certs/$confighash{$key}[1]cert.pem`;
             if ($test =~ /: OK/) {
                 # Delete connection
                 if (&VPN::ipsecenabled()) {
                     &General::log("ipsec", "Delete connection #$key");
                     system("/usr/local/bin/ipsecctrl --stop=$key");
                 }
-                unlink ("/var/ipcop/certs/$confighash{$key}[1]cert.pem");
-                unlink ("/var/ipcop/certs/$confighash{$key}[1].p12");
+                unlink ("/var/ofw/certs/$confighash{$key}[1]cert.pem");
+                unlink ("/var/ofw/certs/$confighash{$key}[1].p12");
                 delete $confighash{$key};
-                &General::writehasharray("/var/ipcop/ipsec/config", \%confighash);
+                &General::writehasharray("/var/ofw/ipsec/config", \%confighash);
 
                 &VPN::writeipsecfiles();
             }
         }
-        unlink ("/var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem");
+        unlink ("/var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem");
         delete $cahash{$cgiparams{'KEY'}};
-        &General::writehasharray("/var/ipcop/vpn/caconfig", \%cahash);
+        &General::writehasharray("/var/ofw/vpn/caconfig", \%cahash);
 
         &General::log("ipsec", "Reload certificates and secrets");
         system('/usr/local/bin/ipsecctrl', '--reload');
@@ -309,13 +309,13 @@ END
 ### Remove CA Certificate (step 1)
 ###
 } elsif ($cgiparams{'ACTION'} eq $Lang::tr{'remove ca certificate'}) {
-    &General::readhasharray("/var/ipcop/ipsec/config", \%confighash);
-    &General::readhasharray("/var/ipcop/vpn/caconfig", \%cahash);
+    &General::readhasharray("/var/ofw/ipsec/config", \%confighash);
+    &General::readhasharray("/var/ofw/vpn/caconfig", \%cahash);
 
     my $assignedcerts = 0;
-    if ( -f "/var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem" ) {
+    if ( -f "/var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem" ) {
         foreach my $key (keys %confighash) {
-            my $test = `/usr/bin/openssl verify -CAfile /var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem /var/ipcop/certs/$confighash{$key}[1]cert.pem`;
+            my $test = `/usr/bin/openssl verify -CAfile /var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem /var/ofw/certs/$confighash{$key}[1]cert.pem`;
             if ($test =~ /: OK/) {
                 $assignedcerts++;
             }
@@ -335,7 +335,7 @@ END
     <input type='hidden' name='AREUSURE' value='yes' /></td>
 </tr><tr>
     <td align='center'>
-    <font class='ipcop_StatusBigRed'>$Lang::tr{'capswarning'}</font>
+    <font class='ofw_StatusBigRed'>$Lang::tr{'capswarning'}</font>
     $Lang::tr{'connections are associated with this ca.  deleting the ca will delete these connections as well.'}</td>
 </tr><tr>
     <td align='center'>
@@ -352,9 +352,9 @@ END
             exit (0);
         }
         else {
-            unlink ("/var/ipcop/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem");
+            unlink ("/var/ofw/ca/$cahash{$cgiparams{'KEY'}}[0]cert.pem");
             delete $cahash{$cgiparams{'KEY'}};
-            &General::writehasharray("/var/ipcop/vpn/caconfig", \%cahash);
+            &General::writehasharray("/var/ofw/vpn/caconfig", \%cahash);
 
             &General::log("ipsec", "Reload certificates and secrets");
             system('/usr/local/bin/ipsecctrl', '--reload');
@@ -378,11 +378,11 @@ END
     &Header::openbigbox('100%', 'left', '', '');
     if ($cgiparams{'ACTION'} eq $Lang::tr{'show root certificate'}) {
         &Header::openbox('100%', 'left', "$Lang::tr{'root certificate'}:");
-        $output = `/usr/bin/openssl x509 -text -in /var/ipcop/ca/cacert.pem`;
+        $output = `/usr/bin/openssl x509 -text -in /var/ofw/ca/cacert.pem`;
     } 
     else {
         &Header::openbox('100%', 'left', "$Lang::tr{'host certificate'}:");
-        $output = `/usr/bin/openssl x509 -text -in /var/ipcop/certs/hostcert.pem`;
+        $output = `/usr/bin/openssl x509 -text -in /var/ofw/certs/hostcert.pem`;
     }
     $output = &Header::cleanhtml($output,"y");
     print <<END
@@ -408,10 +408,10 @@ END
 ### Export root certificate to browser
 ###
 } elsif ($cgiparams{'ACTION'} eq $Lang::tr{'download root certificate'}) {
-    if ( -f '/var/ipcop/ca/cacert.pem' ) {
+    if ( -f '/var/ofw/ca/cacert.pem' ) {
         print "Content-Type: application/force-download\n";
         print "Content-Disposition: attachment; filename=cacert.pem\r\n\r\n";
-        print `/usr/bin/openssl x509 -in /var/ipcop/ca/cacert.pem`;
+        print `/usr/bin/openssl x509 -in /var/ofw/ca/cacert.pem`;
         exit(0);
     }
 
@@ -419,10 +419,10 @@ END
 ### Export host certificate to browser
 ###
 } elsif ($cgiparams{'ACTION'} eq $Lang::tr{'download host certificate'}) {
-    if ( -f '/var/ipcop/certs/hostcert.pem' ) {
+    if ( -f '/var/ofw/certs/hostcert.pem' ) {
         print "Content-Type: application/force-download\n";
         print "Content-Disposition: attachment; filename=hostcert.pem\r\n\r\n";
-        print `/usr/bin/openssl x509 -in /var/ipcop/certs/hostcert.pem`;
+        print `/usr/bin/openssl x509 -in /var/ofw/certs/hostcert.pem`;
         exit(0);
     }
 
@@ -432,16 +432,16 @@ END
 } elsif ($cgiparams{'ACTION'} eq $Lang::tr{'generate root/host certificates'} ||
      $cgiparams{'ACTION'} eq $Lang::tr{'upload p12 file'}) {
 
-    if (-f '/var/ipcop/ca/cacert.pem') {
+    if (-f '/var/ofw/ca/cacert.pem') {
         $errormessage = $Lang::tr{'valid root certificate already exists'};
         goto ROOTCERT_SKIP;
     }
 
-    &General::readhash('/var/ipcop/vpn/rootcertsettings', \%rootcertsettings) if (-f '/var/ipcop/vpn/rootcertsettings');
+    &General::readhash('/var/ofw/vpn/rootcertsettings', \%rootcertsettings) if (-f '/var/ofw/vpn/rootcertsettings');
 
     if (($cgiparams{'GENERATE_ROOT'} eq 'first') && ($cgiparams{'ACTION'} eq $Lang::tr{'generate root/host certificates'})) {
         # fill in initial values
-        if (-e "/var/ipcop/red/active" && open(IPADDR, "/var/ipcop/red/local-ipaddress")) {
+        if (-e "/var/ofw/red/active" && open(IPADDR, "/var/ofw/red/local-ipaddress")) {
             my $ipaddr = <IPADDR>;
             close IPADDR;
             chomp ($ipaddr);
@@ -547,7 +547,7 @@ END
         $rootcertsettings{'ROOTCERT_DIGEST'}        = $cgiparams{'ROOTCERT_DIGEST'};
         $rootcertsettings{'ROOTCERT_ROOTBITS'}      = $cgiparams{'ROOTCERT_ROOTBITS'};
         $rootcertsettings{'ROOTCERT_HOSTBITS'}      = $cgiparams{'ROOTCERT_HOSTBITS'};
-        &General::writehash("/var/ipcop/vpn/rootcertsettings", \%rootcertsettings);
+        &General::writehash("/var/ofw/vpn/rootcertsettings", \%rootcertsettings);
 
         # Replace empty strings with a .
         (my $ou = $cgiparams{'ROOTCERT_OU'}) =~ s/^\s*$/\./;
@@ -561,8 +561,8 @@ END
                 my $opt  = " req -x509 -nodes -rand /proc/interrupts:/proc/net/rt_cache";
                 $opt .= " -days $certdays";
                 $opt .= " -newkey rsa:$rootcertsettings{'ROOTCERT_ROOTBITS'} -$rootcertsettings{'ROOTCERT_DIGEST'}";
-                $opt .= " -keyout /var/ipcop/private/cakey.pem";
-                $opt .= " -out /var/ipcop/ca/cacert.pem";
+                $opt .= " -keyout /var/ofw/private/cakey.pem";
+                $opt .= " -out /var/ofw/ca/cacert.pem";
 
                 $errormessage = &VPN::callssl ($opt);
             }
@@ -584,8 +584,8 @@ END
             if (open(STDIN, "-|")) {
                 my $opt  = " req -nodes -rand /proc/interrupts:/proc/net/rt_cache";
                 $opt .= " -newkey rsa:$rootcertsettings{'ROOTCERT_HOSTBITS'} -$rootcertsettings{'ROOTCERT_DIGEST'}";
-                $opt .= " -keyout /var/ipcop/certs/hostkeytmp.pem";
-                $opt .= " -out /var/ipcop/certs/hostreq.pem";
+                $opt .= " -keyout /var/ofw/certs/hostkeytmp.pem";
+                $opt .= " -out /var/ofw/certs/hostreq.pem";
                 $opt .= " -extensions server";
                 $errormessage = &VPN::callssl ($opt);
             } 
@@ -622,28 +622,28 @@ END
 
             my  $opt  = " ca -days $certdays";
             $opt .= " -md $rootcertsettings{'ROOTCERT_DIGEST'} -batch -notext";
-            $opt .= " -in /var/ipcop/certs/hostreq.pem";
-            $opt .= " -out /var/ipcop/certs/hostcert.pem";
+            $opt .= " -in /var/ofw/certs/hostreq.pem";
+            $opt .= " -out /var/ofw/certs/hostcert.pem";
             $opt .= " -extfile $v3extname";
             $errormessage = &VPN::callssl ($opt);
-            unlink ("/var/ipcop/certs/hostreq.pem"); #no more needed
+            unlink ("/var/ofw/certs/hostreq.pem"); #no more needed
             unlink ($v3extname);
         }
 
         # Manipulate hostkey to make openswan happy
         if (!$errormessage) {
             &General::log("vpn", "decrypt hostkey");
-            my $opt  = " rsa -in /var/ipcop/certs/hostkeytmp.pem";
-            $opt .= " -out /var/ipcop/certs/hostkey.pem";
+            my $opt  = " rsa -in /var/ofw/certs/hostkeytmp.pem";
+            $opt .= " -out /var/ofw/certs/hostkey.pem";
             $errormessage = &VPN::callssl ($opt);
-            unlink ("/var/ipcop/certs/hostkeytmp.pem");
+            unlink ("/var/ofw/certs/hostkeytmp.pem");
         }
 
         # Create an empty CRL
         if (!$errormessage) {
             &General::log("vpn", "Creating emptycrl...");
             my  $opt  = " ca -gencrl";
-            $opt .= " -out /var/ipcop/crls/cacrl.pem";
+            $opt .= " -out /var/ofw/crls/cacrl.pem";
             $errormessage = &VPN::callssl ($opt);
         }
 
@@ -651,7 +651,7 @@ END
         if (!$errormessage) {
             &General::log("vpn", "Creating DH parameter...");
             my $opt  = " dhparam -rand /proc/interrupts:/proc/net/rt_cache";
-            $opt .= " -out /var/ipcop/private/dh1024.pem 1024";
+            $opt .= " -out /var/ofw/private/dh1024.pem 1024";
             $errormessage = &VPN::callssl ($opt);
         }
 
@@ -663,10 +663,10 @@ END
         }
 
         #Cleanup
-        unlink ("/var/ipcop/ca/cacert.pem");
-        unlink ("/var/ipcop/certs/hostkey.pem");
-        unlink ("/var/ipcop/certs/hostcert.pem");
-        unlink ("/var/ipcop/crls/cacrl.pem");
+        unlink ("/var/ofw/ca/cacert.pem");
+        unlink ("/var/ofw/certs/hostkey.pem");
+        unlink ("/var/ofw/certs/hostcert.pem");
+        unlink ("/var/ofw/crls/cacrl.pem");
         &VPN::cleanssldatabase();
     }
     elsif ($cgiparams{'ACTION'} eq $Lang::tr{'upload p12 file'}) {
@@ -729,19 +729,19 @@ END
 
         if (!$errormessage) {
             &General::log("vpn", "Moving cacert...");
-            move("/tmp/newcacert", "/var/ipcop/ca/cacert.pem");
+            move("/tmp/newcacert", "/var/ofw/ca/cacert.pem");
             $errormessage = "$Lang::tr{'certificate file move failed'}: $!" if ($? ne 0);
         }
 
         if (!$errormessage) {
             &General::log("vpn", "Moving host cert...");
-            move("/tmp/newhostcert", "/var/ipcop/certs/hostcert.pem");
+            move("/tmp/newhostcert", "/var/ofw/certs/hostcert.pem");
             $errormessage = "$Lang::tr{'certificate file move failed'}: $!" if ($? ne 0);
         }
 
         if (!$errormessage) {
             &General::log("vpn", "Moving private key...");
-            move("/tmp/newhostkey", "/var/ipcop/certs/hostkey.pem");
+            move("/tmp/newhostkey", "/var/ofw/certs/hostkey.pem");
             $errormessage = "$Lang::tr{'certificate file move failed'}: $!" if ($? ne 0);
         }
 
@@ -751,15 +751,15 @@ END
         unlink ('/tmp/newhostcert');
         unlink ('/tmp/newhostkey');
         if ($errormessage) {
-            unlink ("/var/ipcop/ca/cacert.pem");
-            unlink ("/var/ipcop/certs/hostcert.pem");
-            unlink ("/var/ipcop/certs/hostkey.pem");
+            unlink ("/var/ofw/ca/cacert.pem");
+            unlink ("/var/ofw/certs/hostcert.pem");
+            unlink ("/var/ofw/certs/hostkey.pem");
             goto ROOTCERT_ERROR;
         }
 
         # Create empty CRL cannot be done because we don't have
         # the private key for this CAROOT
-        # Ipcop can only import certificates
+        # Openfirewall can only import certificates
 
         &General::log("vpn", "p12 import completed!");
         &VPN::cleanssldatabase();
@@ -889,7 +889,7 @@ END
         <input type='hidden' name='GENERATE_ROOT' value='second' /><br /><br /></td>
 </tr><tr>
     <td class='base' colspan='2' align='left'>
-    <font class='ipcop_StatusBigRed'>$Lang::tr{'capswarning'}</font>:
+    <font class='ofw_StatusBigRed'>$Lang::tr{'capswarning'}</font>:
         $Lang::tr{'generating the root and host certificates may take a long time. it can take up to several minutes on older hardware. please be patient'}</td>
 </tr><tr>
     <td colspan='2'><hr /></td>
@@ -950,7 +950,7 @@ if ($warnmessage) {
 }
 
 
-&General::readhasharray('/var/ipcop/vpn/caconfig', \%cahash);
+&General::readhasharray('/var/ofw/vpn/caconfig', \%cahash);
 
 &Header::openbox('100%', 'left', "$Lang::tr{'certificate authorities'}:", $error_ca);
 print <<END
@@ -963,8 +963,8 @@ print <<END
 END
 ;
 
-if (-f '/var/ipcop/ca/cacert.pem') {
-    my $casubject = &Header::cleanhtml(&VPN::getsubjectfromcert('/var/ipcop/ca/cacert.pem'));
+if (-f '/var/ofw/ca/cacert.pem') {
+    my $casubject = &Header::cleanhtml(&VPN::getsubjectfromcert('/var/ofw/ca/cacert.pem'));
 
     print <<END
 <tr class='table1colour'>
@@ -993,8 +993,8 @@ END
     ;
 }
 
-if (-f "/var/ipcop/certs/hostcert.pem") {
-    my $hostsubject = &Header::cleanhtml(&VPN::getsubjectfromcert ("/var/ipcop/certs/hostcert.pem"));
+if (-f "/var/ofw/certs/hostcert.pem") {
+    my $hostsubject = &Header::cleanhtml(&VPN::getsubjectfromcert ("/var/ofw/certs/hostcert.pem"));
 
     print <<END
 <tr class='table2colour'>
@@ -1056,7 +1056,7 @@ END
 print '</table>';
 
 # If the file contains entries, print Key to action icons
-if ( -f '/var/ipcop/ca/cacert.pem') {
+if ( -f '/var/ofw/ca/cacert.pem') {
     print <<END
 <table><tr>
     <td class='boldbase'>&nbsp; $Lang::tr{'legend'}:</td>
@@ -1076,7 +1076,7 @@ print <<END
 END
 ;
 
-if (! -f '/var/ipcop/ca/cacert.pem') {
+if (! -f '/var/ofw/ca/cacert.pem') {
     print <<END
 <tr>
     <td colspan='3'></td>

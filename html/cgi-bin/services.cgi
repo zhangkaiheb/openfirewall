@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2003-09-22 Darren Critchley <darrenc@telus.net>
-# (c) 2008-2014, the IPCop team
+# (c) 2008-2014, the Openfirewall Team
 #
 # $Id: services.cgi 7240 2014-02-18 22:08:00Z owes $
 #
@@ -31,7 +31,7 @@
 #       Added service grouping
 #
 # 6 May 2006 Achim Weber:
-#       - Re-worked code to use it in IPCop 1.5, renamed all variables, keys, etc.
+#       - Re-worked code to use it in openfirewall 1.5, renamed all variables, keys, etc.
 #         from "BOT" to "FW".
 #       - Splited big fwadvconf.cgi to single pages for service, service grouping,
 #         adresses, adress grouping and interfaces
@@ -48,10 +48,10 @@ use warnings;
 no warnings 'once';
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
-require '/usr/lib/ipcop/firewall-lib.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/firewall-lib.pl';
 
 &Header::showhttpheaders();
 
@@ -197,7 +197,7 @@ if ($cgiparams{'ACTION'} eq '') {
 }
 
 # Darren Critchley - Bring in the protocols file built from /etc/protocols into hash %protocol
-require '/usr/lib/ipcop/protocols.pl';
+require '/usr/lib/ofw/protocols.pl';
 
 # Darren Critchley - figure out which protocol is selected
 $selected{'PROTOCOL'}{'tcp'}    = '';
@@ -572,15 +572,15 @@ sub display_default_services {
     my %defaultServices = ();
     &DATA::readDefaultServices(\%defaultServices);
 
-    my %ipcopServices = ();
-    &DATA::readIPCopServices(\%ipcopServices);
+    my %ofwServices = ();
+    &DATA::readOfwServices(\%ofwServices);
 
     my $id = 0;
-    foreach my $defService (sort keys %ipcopServices) {
+    foreach my $defService (sort keys %ofwServices) {
         print "<tr class='table".int(($id % 2) + 1)."colour'>";
         print "<td>$defService</td>\n";
-        print "<td align='center'>$ipcopServices{$defService}{'PORT_NR'}</td>\n";
-        print "<td align='center'>" . &cleanprotocol($ipcopServices{$defService}{'PROTOCOL'}) . "</td>\n";
+        print "<td align='center'>$ofwServices{$defService}{'PORT_NR'}</td>\n";
+        print "<td align='center'>" . &cleanprotocol($ofwServices{$defService}{'PROTOCOL'}) . "</td>\n";
         print "</tr>\n";
         $id++;
     }
