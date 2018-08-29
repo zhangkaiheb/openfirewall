@@ -70,7 +70,8 @@ OTHERSRC=${SNAME}-${VERSION}-othersrc.tar.bz2
 SLOGAN="The Bad Packets Stop Here"
 
 # Where the ipcop specific config files will be installed (this is the path on a running ipcop system)
-CONFIG_ROOT=/var/ipcop
+#CONFIG_ROOT=/var/ipcop
+CONFIG_ROOT=/var/ofw
 
 # What's the kernel version we're building (this is not the host kernel)
 KVER=`grep --max-count=1 VER lfs/linux | awk '{ print $3 }' | tr -d '\n'; grep --max-count=1 IPCOPKRELEASE lfs/linux | awk '{ print $3 }'`
@@ -396,7 +397,8 @@ TOOLS_DIR=tools_${MACHINE}
 ##fi
 
 # This is the directory that holds the newly built ipcop system
-LFS=${BASEDIR}/build_${MACHINE}/ipcop
+#LFS=${BASEDIR}/build_${MACHINE}/ipcop
+LFS=${BASEDIR}/build_${MACHINE}/ofw
 
 # For toolchain LFS chap5
 # /${TOOLS_DIR}/usr/bin is for ccache symlink
@@ -941,7 +943,7 @@ check_build_env()
 			echo -ne "Cmnd_Alias MKNOD = ${MKNOD} ${LFS}/dev/*\n"
 			echo -ne "Cmnd_Alias MV = ${MV} ${LFS}/tmp/* \\ \n"
 			echo -ne "\t\t\t\t${LFS}/tmp/*, \\ \n"
-			echo -ne "\t\t${MV} ${BASEDIR}/build_${MACHINE}/${INSTALLER_DIR}/images/ipcop-* \\ \n"
+			echo -ne "\t\t${MV} ${BASEDIR}/build_${MACHINE}/${INSTALLER_DIR}/images/openfirewall-* \\ \n"
 			echo -ne "\t\t\t\t${BASEDIR}/\n"
 			echo -ne "Cmnd_Alias NICECMD = ${NICECMD} * ${CHROOT} ${LFS} *\n"
 			echo -ne "Cmnd_Alias RM = ${RM} ${BASEDIR}/*, \\ \n"
@@ -1450,7 +1452,8 @@ entershell()
 	STAGE_ORDER=02; STAGE=base
 
 	# Set CCACHE_COMPILERCHECK
-	for GCC_AVAILABLE in ${BASEDIR}/build_${MACHINE}/ipcop/usr/bin/gcc /${TOOLS_DIR}/bin/${TARGET_2}-gcc; do
+	###for GCC_AVAILABLE in ${BASEDIR}/build_${MACHINE}/ipcop/usr/bin/gcc /${TOOLS_DIR}/bin/${TARGET_2}-gcc; do
+	for GCC_AVAILABLE in ${BASEDIR}/build_${MACHINE}/ofw/usr/bin/gcc /${TOOLS_DIR}/bin/${TARGET_2}-gcc; do
 		[ -f ${GCC_AVAILABLE} ] && update-gcc-hash "$GCC_AVAILABLE" && break
 	done
 
