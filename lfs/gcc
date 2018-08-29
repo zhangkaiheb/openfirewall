@@ -342,27 +342,26 @@ endif
 	# we don't use openmp and mudflap, so disable that
 	# newer versions of texinfo break gcc makeinfo, disable using MAKEINFO=missing
 
-		cd $(DIR_SRC)/gcc-build &&				\
+	cd $(DIR_SRC)/gcc-build &&				\
 		SED=sed                               \
 		../$(THISAPP)/configure --prefix=/usr            \
-			--enable-languages=c,c++ \
-			--disable-multilib       \
-			--disable-bootstrap      \
-			--with-system-zlib    \
-			--libexecdir=/usr/lib           \
-			--enable-shared             \
-			--disable-nls               \
-			--enable-checking=release       \
-			--enable-threads=posix          \
-			--enable-__cxa_atexit           \
-			--enable-clocale=gnu            \
-			--enable-languages=c,c++        \
-			--disable-libmudflap            \
-			--disable-libgomp           \
-			$(SETTINGS)             \
-			$(TUNEOPTIONS)              \
-			MAKEINFO=missing \
-
+		--enable-languages=c,c++ \
+		--disable-multilib       \
+		--disable-bootstrap      \
+		--with-system-zlib    \
+		--libexecdir=/usr/lib           \
+		--enable-shared             \
+		--disable-nls               \
+		--enable-checking=release       \
+		--enable-threads=posix          \
+		--enable-__cxa_atexit           \
+		--enable-clocale=gnu            \
+		--enable-languages=c,c++        \
+		--disable-libmudflap            \
+		--disable-libgomp           \
+		$(SETTINGS)             \
+		$(TUNEOPTIONS)              \
+		MAKEINFO=missing
 
 
 	cd $(DIR_SRC)/gcc-build && make -j $(PARALLELISM)
