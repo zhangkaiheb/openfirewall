@@ -12,6 +12,10 @@ usr/lib/liblogging-stdlog.so.0
 usr/lib/liblogging-stdlog.so.0.0.0
 #usr/lib/pkgconfig/libestr.pc
 #usr/lib/pkgconfig/liblogging-stdlog.pc
+usr/lib/libfastjson.so
+usr/lib/libfastjson.so.4
+usr/lib/libfastjson.so.4.2.0
+#usr/lib/pkgconfig/libfastjson.pc
 #usr/lib/rsyslog
 #usr/lib/rsyslog/imklog.la
 usr/lib/rsyslog/imklog.so
