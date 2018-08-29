@@ -1,23 +1,23 @@
 /*
  * language.c: Language selection used in installer only
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2010, the IPCop team
+ * (c) 2007-2010, the Openfirewall Team
  *
  * $Id: language.c 4410 2010-03-26 07:58:35Z owes $
  *
@@ -63,11 +63,11 @@ void write_lang_configs(void)
     NODEKV *kv = NULL;
 
     /* default stuff for main/settings. */
-    read_kv_from_file(&kv, "/harddisk/var/ipcop/main/settings");
+    read_kv_from_file(&kv, "/harddisk/var/ofw/main/settings");
     update_kv(&kv, "LANGUAGE", selected_lang);
     update_kv(&kv, "LOCALE", selected_locale);
     update_kv(&kv, "HOSTNAME", SNAME);
-    write_kv_to_file(&kv, "/harddisk/var/ipcop/main/settings");
+    write_kv_to_file(&kv, "/harddisk/var/ofw/main/settings");
     free_kv(&kv);
 
     /* initial language for VPN certs */
@@ -78,9 +78,9 @@ void write_lang_configs(void)
     }
     temp[i] = '\0';
     kv = NULL;
-    read_kv_from_file(&kv, "/harddisk/var/ipcop/ipsec/settings");
+    read_kv_from_file(&kv, "/harddisk/var/ofw/ipsec/settings");
     update_kv(&kv, "ROOTCERT_COUNTRY", temp);
-    write_kv_to_file(&kv, "/harddisk/var/ipcop/ipsec/settings");
+    write_kv_to_file(&kv, "/harddisk/var/ofw/ipsec/settings");
     free_kv(&kv);
 }
 
@@ -101,7 +101,7 @@ static void set_language(char *shortname, char *locale, char *font)
 
     strcpy(selected_lang, shortname);
 
-    ipcop_locale(selected_locale);
+    ofw_locale(selected_locale);
 }
 
 
@@ -325,7 +325,7 @@ static inline nls_uint32 SWAP(i)
     Set locale and read .mo file.
     Parameter should something like en_GB, de_DE
 */
-void ipcop_locale(char *locale)
+void ofw_locale(char *locale)
 {
     FILE *f;
     char filename[STRING_SIZE];
@@ -440,7 +440,7 @@ ERROR_EXIT:
     fclose(f);
 
     if (!b_locale) {
-        fprintf(flog, "ERROR: ipcop_locale()\n");
+        fprintf(flog, "ERROR: ofw_locale()\n");
     }
 }
 
@@ -449,7 +449,7 @@ ERROR_EXIT:
     Look for a translated text.
     If non found simply return the original text.
 */
-char *ipcop_gettext(char *txt)
+char *ofw_gettext(char *txt)
 {
     int i;
 

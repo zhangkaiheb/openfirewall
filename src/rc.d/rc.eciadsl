@@ -1,27 +1,27 @@
 #!/bin/bash
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (c) 2003-2011 The IPCop Team
+# Copyright (c) 2003-2011 The Openfirewall Team
 #
 # $Id: rc.eciadsl 5948 2011-10-15 20:41:04Z owes $
 #
 
 DEBUG="off"
-eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
+eval $(/usr/local/bin/readhash /var/ofw/ppp/settings)
 
 # Debugging. Comment it out to use DEBUG from ppp settings
 DEBUG="on"
@@ -59,7 +59,7 @@ function wait_for_iface()
 # See how we were called.
 case "$1" in
 start)
-    if [ ! -f "/var/ipcop/eciadsl/synch.bin" ]; then
+    if [ ! -f "/var/ofw/eciadsl/synch.bin" ]; then
         msg "Synch.bin not uploaded"
         exit 1
     fi
@@ -85,7 +85,7 @@ start)
     # Firmware
     if [ "$CHIP" = 'GS7070' ]; then
         if ( /bin/grep -q "^P:  Vendor=$VID1 ProdID=$PID1" /proc/bus/usb/devices ); then
-            /bin/rm -f /var/ipcop/red/eciadsl-synch-done
+            /bin/rm -f /var/ofw/red/eciadsl-synch-done
             /bin/sleep 2
             msg "Loading Firmware for $MODEM"
             /usr/sbin/eciadsl-firmware 0x$VID1 0x$PID1 0x$VID2 0x$PID2 /etc/eciadsl/firmware00.bin
@@ -104,14 +104,14 @@ start)
     fi
 
     # Modem synch
-    if [ ! -e "/var/ipcop/red/eciadsl-synch-done" ]; then
-        /usr/sbin/eciadsl-synch -alt $ALTS -mc $CHIP 0x$VID2 0x$PID2 /var/ipcop/eciadsl/synch.bin
+    if [ ! -e "/var/ofw/red/eciadsl-synch-done" ]; then
+        /usr/sbin/eciadsl-synch -alt $ALTS -mc $CHIP 0x$VID2 0x$PID2 /var/ofw/eciadsl/synch.bin
         RET=$?
         if [ "$RET" -ne "0" ]; then
             msg "$MODEM failed to get synchronization, reason:$RET"
             exit 1
         else
-            /usr/bin/touch /var/ipcop/red/eciadsl-synch-done
+            /usr/bin/touch /var/ofw/red/eciadsl-synch-done
         fi
     fi
 
@@ -159,7 +159,7 @@ stop)
 cleanup)
     msg "driver cleanup"
 
-    /bin/rm -f /var/ipcop/red/eciadsl-synch-done
+    /bin/rm -f /var/ofw/red/eciadsl-synch-done
     ;;
 *)
     /bin/echo "Usage: $0 {start|stop|cleanup}"

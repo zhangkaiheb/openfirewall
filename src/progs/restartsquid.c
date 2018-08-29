@@ -1,19 +1,19 @@
-/* IPCop helper program - restartsquid
+/* openfirewall helper program - restartsquid
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
  * restartsquid originally from the Smoothwall project
  * (c) Lawrence Manning, 2001
@@ -22,7 +22,7 @@
  * Exclude red network from transparent proxy to allow browsing to alias IPs
  * Read in VPN settings and exclude each VPN network from transparent proxy
  *
- * (c) 2004-2012 The IPCop Team
+ * (c) 2004-2012 The Openfirewall Team
  *
  * $Id: restartsquid.c 7262 2014-02-28 21:50:59Z owes $
  *
@@ -94,7 +94,7 @@ void setdirectipsec(int setdirectipsec_green, int setdirectipsec_blue)
     if (!setdirectipsec_green && !setdirectipsec_blue)
         return;                 /* nothing to do */
 
-    if (!(file = fopen("/var/ipcop/ipsec/config", "r"))) {
+    if (!(file = fopen("/var/ofw/ipsec/config", "r"))) {
         fprintf(stderr, "Couldn't open IPsec config file");
         return;                 /* error! exit or return? */
     }
@@ -180,7 +180,7 @@ void setdirectipsec(int setdirectipsec_green, int setdirectipsec_blue)
         if (setdirectipsec_green) {
             if (snprintf(buffer, STRING_SIZE - 1,
                          "/sbin/iptables -t nat -A SQUID -i %s -p tcp -d %s/%s --dport 80 -j RETURN",
-                         ipcop_ethernet.device[GREEN][1], ipsec_netaddress, ipsec_netmask) >= STRING_SIZE) {
+                         ofw_ethernet.device[GREEN][1], ipsec_netaddress, ipsec_netmask) >= STRING_SIZE) {
                 fprintf(stderr, "Command too long\n");
                 fclose(file);
                 exit(1);
@@ -192,7 +192,7 @@ void setdirectipsec(int setdirectipsec_green, int setdirectipsec_blue)
             if (snprintf(buffer,
                          STRING_SIZE - 1,
                          "/sbin/iptables -t nat -A SQUID -i %s -p tcp -d %s/%s --dport 80 -j RETURN",
-                         ipcop_ethernet.device[BLUE][1], ipsec_netaddress, ipsec_netmask) >= STRING_SIZE) {
+                         ofw_ethernet.device[BLUE][1], ipsec_netaddress, ipsec_netmask) >= STRING_SIZE) {
                 fprintf(stderr, "Command too long\n");
                 fclose(file);
                 exit(1);
@@ -332,7 +332,7 @@ int main(int argc, char **argv)
     }
 
     verbose_printf(1, "Reading Proxy settings ... \n");
-    if (read_kv_from_file(&squid_kv, "/var/ipcop/proxy/settings") != SUCCESS) {
+    if (read_kv_from_file(&squid_kv, "/var/ofw/proxy/settings") != SUCCESS) {
         fprintf(stderr, "Cannot read proxy settings\n");
         exit(1);
     }
@@ -377,7 +377,7 @@ int main(int argc, char **argv)
     }
 
     /* We can't start squid if .conf is missing */
-    if (access("/var/ipcop/proxy/squid.conf", F_OK) == -1) {
+    if (access("/var/ofw/proxy/squid.conf", F_OK) == -1) {
         fprintf(stderr, "Configuration file squid.conf not found\n");
         exit(1);
     }
@@ -390,7 +390,7 @@ int main(int argc, char **argv)
         enabled = 1;
         /* rebuild firewall rules, proxy port may be different now */
         verbose_printf(1, "Rebuild firewall rules ... \n");
-        safe_system("/usr/local/bin/setfwrules --ipcop");
+        safe_system("/usr/local/bin/setfwrules --ofw");
 
         verbose_printf(1, "Create swap directories ... \n");
         if (safe_system("/usr/sbin/squid -s -z 2>/dev/null")) {
@@ -404,12 +404,12 @@ int main(int argc, char **argv)
     }
 
     /* static (green/blue) interfaces must exist if transparence is requested */
-    if (transparent_green && enabled_green && !ipcop_ethernet.count[GREEN]) {
+    if (transparent_green && enabled_green && !ofw_ethernet.count[GREEN]) {
         fprintf(stderr, "No GREEN device, not running transparent\n");
         exit(1);
     }
 
-    if (transparent_blue && enabled_blue && !ipcop_ethernet.count[BLUE]) {
+    if (transparent_blue && enabled_blue && !ofw_ethernet.count[BLUE]) {
         fprintf(stderr, "No BLUE device, not running transparent\n");
         exit(1);
     }
@@ -419,7 +419,7 @@ int main(int argc, char **argv)
 
     /* disable transparence for known IPsec networks */
     verbose_printf(1, "Reading IPsec settings ... \n");
-    if (read_kv_from_file(&ipsec_kv, "/var/ipcop/ipsec/settings") != SUCCESS) {
+    if (read_kv_from_file(&ipsec_kv, "/var/ofw/ipsec/settings") != SUCCESS) {
         fprintf(stderr, "Cannot read IPsec settings\n");
         exit(1);
     }
@@ -439,12 +439,12 @@ int main(int argc, char **argv)
 
     /* choose RED destination: 'localip' or 'red_netaddress/red_netmask' */
     char destination[STRING_SIZE] = "";
-    if (strcmp(ipcop_ethernet.red_type[1], "STATIC") == 0) {
-        snprintf(destination, STRING_SIZE, "%s/%s", ipcop_ethernet.address[RED][1], ipcop_ethernet.netmask[RED][1]);
+    if (strcmp(ofw_ethernet.red_type[1], "STATIC") == 0) {
+        snprintf(destination, STRING_SIZE, "%s/%s", ofw_ethernet.address[RED][1], ofw_ethernet.netmask[RED][1]);
     }
     else {
-        if (ipcop_ethernet.red_address[1][0] && VALID_IP(ipcop_ethernet.red_address[1])) {
-            snprintf(destination, STRING_SIZE, "%s", ipcop_ethernet.red_address[1]);
+        if (ofw_ethernet.red_address[1][0] && VALID_IP(ofw_ethernet.red_address[1])) {
+            snprintf(destination, STRING_SIZE, "%s", ofw_ethernet.red_address[1]);
         }
     }
 
@@ -463,7 +463,7 @@ int main(int argc, char **argv)
         verbose_printf(1, "Setting transparent iptables rule for GREEN ... \n");
         if (snprintf(buffer, STRING_SIZE - 1,
                      "/sbin/iptables -t nat -A SQUID -i %s -p tcp -d %s --dport 80 -j RETURN",
-                     ipcop_ethernet.device[GREEN][1], destination) >= STRING_SIZE) {
+                     ofw_ethernet.device[GREEN][1], destination) >= STRING_SIZE) {
             fprintf(stderr, "Command too long\n");
             exit(1);
         }
@@ -473,7 +473,7 @@ int main(int argc, char **argv)
         /* install the redirect for other port http destinations from green */
         if (snprintf(buffer, STRING_SIZE - 1,
                      "/sbin/iptables -t nat -A SQUID -i %s -p tcp --dport 80 -j REDIRECT --to-port %d",
-                     ipcop_ethernet.device[GREEN][1], PORT_PROXY_INTERCEPT) >= STRING_SIZE) {
+                     ofw_ethernet.device[GREEN][1], PORT_PROXY_INTERCEPT) >= STRING_SIZE) {
             fprintf(stderr, "Command too long\n");
             exit(1);
         }
@@ -485,7 +485,7 @@ int main(int argc, char **argv)
         verbose_printf(1, "Setting transparent iptables rule for BLUE ... \n");
         if (snprintf(buffer, STRING_SIZE - 1,
                      "/sbin/iptables -t nat -A SQUID -i %s -p tcp -d %s --dport 80 -j RETURN",
-                     ipcop_ethernet.device[BLUE][1], destination) >= STRING_SIZE) {
+                     ofw_ethernet.device[BLUE][1], destination) >= STRING_SIZE) {
             fprintf(stderr, "Command too long\n");
             exit(1);
         }
@@ -495,7 +495,7 @@ int main(int argc, char **argv)
         /* install the redirect for other port http destinations from blue */
         if (snprintf(buffer, STRING_SIZE - 1,
                      "/sbin/iptables -t nat -A SQUID -i %s -p tcp --dport 80 -j REDIRECT --to-port %d",
-                     ipcop_ethernet.device[BLUE][1], PORT_PROXY_INTERCEPT) >= STRING_SIZE) {
+                     ofw_ethernet.device[BLUE][1], PORT_PROXY_INTERCEPT) >= STRING_SIZE) {
             fprintf(stderr, "Command too long\n");
             exit(1);
         }

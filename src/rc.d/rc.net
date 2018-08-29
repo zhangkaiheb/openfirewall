@@ -1,27 +1,27 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2008-2014, the IPCop team
+# (c) 2008-2014, the Openfirewall Team
 #
 # $Id: rc.net 7628 2014-07-17 06:47:30Z owes $
 #
 
 use strict;
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 
 
 my %netsettings;
@@ -33,14 +33,14 @@ my $interface;
 my $columns = 0;        # For pretty output
 my $init = 0;
 
-&General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
-if (-e '/var/ipcop/ethernet/settings.old') {
+&General::readhash('/var/ofw/ethernet/settings', \%netsettings);
+if (-e '/var/ofw/ethernet/settings.old') {
     # Special case when reconfiguring
-    &General::readhash('/var/ipcop/ethernet/settings.old', \%oldnetsettings);
-    unlink('/var/ipcop/ethernet/settings.old');
+    &General::readhash('/var/ofw/ethernet/settings.old', \%oldnetsettings);
+    unlink('/var/ofw/ethernet/settings.old');
 }
 # We need pppsettings for AUTOCONNECT
-&General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+&General::readhash('/var/ofw/ppp/settings', \%pppsettings);
 
 
 if (($ARGV[0] eq 'init') || ($ARGV[0] eq '--init')) {
@@ -49,7 +49,7 @@ if (($ARGV[0] eq 'init') || ($ARGV[0] eq '--init')) {
     &net_init();
 }
 elsif (($ARGV[0] eq 'reconfigure') || ($ARGV[0] eq '--reconfigure')) {
-    my $redactive = (-e '/var/ipcop/red/active') ? 1 : 0;
+    my $redactive = (-e '/var/ofw/red/active') ? 1 : 0;
     # reconfigure is used by setup, first stop and unload everything, then pull everything back up
     if (defined($oldnetsettings{'GREEN_COUNT'})) {
         &net_stop(\%oldnetsettings);
@@ -129,7 +129,7 @@ sub net_init
     system("/etc/rc.d/rc.red clear");
 
     # Create an empty resolv.conf for dnsmasq, will be filled with proper data later by rc.updatered
-    system ('echo > /var/ipcop/red/resolv.conf');
+    system ('echo > /var/ofw/red/resolv.conf');
 
     # TODO: Launch PCMCIA ?
     # TODO: Relaunch PCMCIA USB ?
@@ -147,7 +147,7 @@ sub net_start
 {
     my $settings = shift;
 
-    print "Setting up IPCop firewall rules ... ";
+    print "Setting up Openfirewall firewall rules ... ";
     system("/etc/rc.d/rc.firewall start");
     &General::testok($columns);
 
@@ -224,7 +224,7 @@ sub net_stop
     sleep 3;
     system("/etc/rc.d/rc.red clear");
 
-    print "Stopping IPCop firewall\n";
+    print "Stopping Openfirewall firewall\n";
     system('/etc/rc.d/rc.firewall stop');
 
     system("/etc/rc.d/rc.event network down");

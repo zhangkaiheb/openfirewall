@@ -1,22 +1,22 @@
 /*
  * accountingctrl.c: Simple program to setup iptables rules for traffic accounting.
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2008-2011, the IPCop team
+ * (c) 2008-2011, the Openfirewall Team
  *
  * $Id: accountingctrl.c 7108 2013-09-29 10:43:06Z dotzball $
  *
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
     }
 
     verbose_printf(1, "Reading traffic accounting settings ... \n");
-    if (read_kv_from_file(&kv, "/var/ipcop/traffic/settings") != SUCCESS) {
+    if (read_kv_from_file(&kv, "/var/ofw/traffic/settings") != SUCCESS) {
         fprintf(stderr, "Cannot read traffic accounting settings\n");
         return 1;
     }
@@ -169,7 +169,7 @@ int main(int argc, char **argv)
 
         if (flag_empty_all) {
             verbose_printf(1, "Empty traffic accounting DB ... \n");
-            safe_system("cp /var/ipcop/traffic/empty-aggregate.db /var/log/traffic/aggregate.db");
+            safe_system("cp /var/ofw/traffic/empty-aggregate.db /var/log/traffic/aggregate.db");
             syslog(LOG_NOTICE, "Traffic accounting DB emptied");
         }
 
@@ -177,7 +177,7 @@ int main(int argc, char **argv)
             verbose_printf(1, "Stop ulogd ... \n");
             safe_system("/usr/bin/killall ulogd");
             verbose_printf(1, "Empty ulogd DB ... \n");
-            safe_system("cp /var/ipcop/traffic/empty-ulogd.db /var/log/traffic/ulogd.db");
+            safe_system("cp /var/ofw/traffic/empty-ulogd.db /var/log/traffic/ulogd.db");
             if (enabled && detail_high) {
                 verbose_printf(1, "Start ulogd ... \n");
                 safe_system("/usr/sbin/ulogd -d");
@@ -202,19 +202,19 @@ int main(int argc, char **argv)
         /* for all colours */
         for (i = 0; i < NONE; i++) {
 
-            for (j = 1; j <= ipcop_ethernet.count[i]; j++) {
+            for (j = 1; j <= ofw_ethernet.count[i]; j++) {
                 if (i == RED) {
-                    if (! ipcop_ethernet.red_active[j]) {
+                    if (! ofw_ethernet.red_active[j]) {
                         continue;
                     }
 
-                    iface = ipcop_ethernet.red_device[j];
+                    iface = ofw_ethernet.red_device[j];
                 }
                 else {
-                    iface = ipcop_ethernet.device[i][j];
+                    iface = ofw_ethernet.device[i][j];
                 }
                 
-                snprintf(dev_id, STRING_SIZE, "%s_%d", ipcop_colours_text[i], j);
+                snprintf(dev_id, STRING_SIZE, "%s_%d", ofw_colours_text[i], j);
                 if (detail_high) {
                     add_device_rules(dev_id, iface);
                 }
@@ -224,13 +224,13 @@ int main(int argc, char **argv)
             }
         }
         
-        if ((ipcop_ethernet.count[RED] == 0) && (strlen(ipcop_ethernet.red_device[1]))) {
+        if ((ofw_ethernet.count[RED] == 0) && (strlen(ofw_ethernet.red_device[1]))) {
             // Special case for Modem/ISDN
             if (detail_high) {
-                add_device_rules("RED_1", ipcop_ethernet.red_device[1]);
+                add_device_rules("RED_1", ofw_ethernet.red_device[1]);
             }
             else {
-                add_vnstat_db("RED_1", ipcop_ethernet.red_device[1]);
+                add_vnstat_db("RED_1", ofw_ethernet.red_device[1]);
             }
         }
         

@@ -1,19 +1,19 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
 # puzzleFwRules.pl from the BlockOutTraffic Addon
@@ -24,10 +24,10 @@
 #		there is a timeframe change
 #
 # 6 May 2006 Achim Weber:
-#		Re-worked code to use it in IPCop 1.5, renamed all variables, keys, etc.
+#		Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
 #		from "BOT" to "FW".
 #
-# (c) 2008-2014, the IPCop team
+# (c) 2008-2014, the Openfirewall Team
 #
 # $Id: puzzleFwRules.pl 7534 2014-05-14 14:34:12Z owes $
 #
@@ -39,11 +39,11 @@ use warnings;
 no warnings 'once';
 
 use Fcntl qw(:flock);
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
-require '/usr/lib/ipcop/firewall-lib.pl';
-require '/usr/lib/ipcop/protocols.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/firewall-lib.pl';
+require '/usr/lib/ofw/protocols.pl';
 
 # Debug level:
 #	0 - create rules, no print
@@ -72,7 +72,7 @@ my ($second, $minute, $hour, $day, $month, $year, $wday) = localtime(time);
 my @allRuleTypes = ("INPUT", "OUTGOING", "EXTERNAL", "PINHOLES", "PORTFW");
 
 my @runRuleTypes          = ();
-my $doUpdateIpcopRules    = 0;
+my $doUpdateOfwRules    = 0;
 my $doUpdateWirelessRules = 0;
 
 # init timeframe settings
@@ -147,9 +147,9 @@ elsif (($argument eq '-f') && ($#ARGV >= 0)) {
 }
 elsif ($argument eq '-a') {
 
-    # force update of all (user & IPCop services) rules
+    # force update of all (user & Openfirewall services) rules
     @runRuleTypes          = @allRuleTypes;
-    $doUpdateIpcopRules    = 1;
+    $doUpdateOfwRules    = 1;
     $doUpdateWirelessRules = 1;
 
     if ($debugLevel > 0) {
@@ -169,7 +169,7 @@ elsif ($argument eq '-u') {
 }
 elsif ($argument eq '-i') {
 
-    $doUpdateIpcopRules = 1;
+    $doUpdateOfwRules = 1;
 
     if ($debugLevel > 0) {
         print "Force update of services rules\n";
@@ -200,10 +200,10 @@ else {
 
 
 print "\n--> count: $#runRuleTypes \n\n" if ($debugLevel > 0);
-if ($#runRuleTypes < 0 && $doUpdateIpcopRules == 0 && $doUpdateWirelessRules == 0) {
+if ($#runRuleTypes < 0 && $doUpdateOfwRules == 0 && $doUpdateWirelessRules == 0) {
     if ($debugLevel > 0) {
         print
-"Exit from $0 because there is nothing to do. No IPCop rules and no timeframe rules to update\nHour: $hour\nMinute: $minute\n";
+"Exit from $0 because there is nothing to do. No Openfirewall rules and no timeframe rules to update\nHour: $hour\nMinute: $minute\n";
     }
     exit 0;
 }
@@ -253,20 +253,20 @@ my %ruleConfig = ();
 
 # my %defaultServices;
 &DATA::readDefaultServices(\%defaultServices);
-&DATA::readIPCopServices(\%defaultServices);
+&DATA::readOfwServices(\%defaultServices);
 
 my %groupServices;
 &DATA::readServiceGroupConf(\%groupServices);
 
 # Retrieve IPsec settings
 my %ipsecSettings = ();
-if (-e "/var/ipcop/ipsec/settings") {
-    &General::readhash("/var/ipcop/ipsec/settings", \%ipsecSettings);
+if (-e "/var/ofw/ipsec/settings") {
+    &General::readhash("/var/ofw/ipsec/settings", \%ipsecSettings);
 }
 # Retrieve OpenVPN settings
 my %ovpnSettings = ();
-if (-e "/var/ipcop/openvpn/settings") {
-    &General::readhash("/var/ipcop/openvpn/settings", \%ovpnSettings);
+if (-e "/var/ofw/openvpn/settings") {
+    &General::readhash("/var/ofw/openvpn/settings", \%ovpnSettings);
 }
 # Avoid some "Use of initialized value in string eq at line xxx" messages
 $ipsecSettings{'ENABLED_RED_1'} = 'off' if (!exists($ipsecSettings{'ENABLED_RED_1'}));
@@ -808,7 +808,7 @@ foreach my $type (@runRuleTypes) {
 
 #~
 #~         src IP:                 2.2.2.2
-#~         IPCop ext IP:     192.168.11.190 (DEFAULT/Red Address)
+#~         Openfirewall ext IP:     192.168.11.190 (DEFAULT/Red Address)
 #~         ext Port:             123 (tcp)
 #~         internal IP:        1.1.1.1
 #~         internal port:     456 (tcp)
@@ -819,7 +819,7 @@ foreach my $type (@runRuleTypes) {
 #~ /sbin/iptables -t mangle -A PORTFWMANGLE -p tcp -s 192.168.4.190/255.255.255.0 -d 192.168.11.190 --dport 123 -j MARK --set-mark 31
 #~ /sbin/iptables -A PORTFWACCESS -i eth1 -p tcp -s 2.2.2.2 -d 1.1.1.1 --dport 456 -j ACCEPT
 
-#~         IPCop ext IP:     192.168.11.190 (DEFAULT/Red Address)
+#~         Openfirewall ext IP:     192.168.11.190 (DEFAULT/Red Address)
 #~         ext Port:             123 (tcp)
 #~         internal IP:        1.1.1.1
 #~         internal port:     456 (tcp)
@@ -832,7 +832,7 @@ foreach my $type (@runRuleTypes) {
 
 
 #~         src IP:                 2.2.2.2 + 3.3.3.3
-#~         IPCop ext IP:     192.168.11.190 (DEFAULT/Red Address)
+#~         Openfirewall ext IP:     192.168.11.190 (DEFAULT/Red Address)
 #~         ext Port:             123 (tcp)
 #~         internal IP:        1.1.1.1
 #~         internal port:     456 (tcp)
@@ -845,7 +845,7 @@ foreach my $type (@runRuleTypes) {
 #~ /sbin/iptables -A PORTFWACCESS -i eth1 -p tcp -s 3.3.3.3 -d 1.1.1.1 --dport 456 -j ACCEPT
 
 
-#~         IPCop ext IP:     192.168.11.190 (DEFAULT/Red Address)
+#~         Openfirewall ext IP:     192.168.11.190 (DEFAULT/Red Address)
 #~         proto:                   GRE
 #~         internal IP:        1.1.1.1
 #~
@@ -951,18 +951,18 @@ my $defaultRule   = '';
 my %ifacePolicies = ();
 &DATA::readReadPolicies(\%FW::interfaces, \%ifacePolicies);
 
-if ($doUpdateIpcopRules) {
+if ($doUpdateOfwRules) {
     ## DEBUG
-    print "Setup IPCop service rules\n" if ($debugLevel > 0);
+    print "Setup Openfirewall service rules\n" if ($debugLevel > 0);
     ## DEBUG END
     &prepareRuleDirect("-F FW_ADMIN");
-    &prepareRuleDirect("-F FW_IPCOP");
+    &prepareRuleDirect("-F FW_OFW");
     &prepareRuleDirect("-F FW_MARK_IPSEC");
-    &prepareRuleDirect("-F FW_IPCOP_FORWARD");
+    &prepareRuleDirect("-F FW_OFW_FORWARD");
     &prepareRuleDirect("-F FW_LOG");
 
-    # Deny only those traffic which is open in vanila IPCop.
-    # Other traffic blocked by IPCop rules. So it is possible by using related, established connections
+    # Deny only those traffic which is open in vanila Openfirewall.
+    # Other traffic blocked by Openfirewall rules. So it is possible by using related, established connections
     foreach my $inIface (keys %FW::interfaces) {
         ## DEBUG
         print " In: $inIface" if ($debugLevel > 0);
@@ -986,9 +986,9 @@ if ($doUpdateIpcopRules) {
             # but only if we have policy half-open/open
             if ($ipsecSettings{'ENABLED_BLUE_1'} eq 'on') {
                 if ($ifacePolicies{$inIface}{'POLICY'} =~ /^half-open|open$/) {
-                    @serviceXYZ = &buildServiceParamsDefault('IPCop IPsec', "");
+                    @serviceXYZ = &buildServiceParamsDefault('Ofw IPsec', "");
                     foreach $protoPort (@serviceXYZ) {
-                        &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
+                        &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
                     }
                 }
                 # Mark outgoing ipsec-blue traffic with 3, outgoing blue traffic with 4
@@ -999,47 +999,47 @@ if ($doUpdateIpcopRules) {
             # Allow OpenVPN if enabled on blue, OpenVPN access does not need an Addressfilter entry so it much come first
             # but only if we have policy half-open/open
             if (($ovpnSettings{'ENABLED_BLUE_1'} eq 'on') && ($ifacePolicies{$inIface}{'POLICY'} =~ /^half-open|open$/)) {
-                @serviceXYZ = &buildServiceParamsDefault('IPCop OpenVPN', "");
+                @serviceXYZ = &buildServiceParamsDefault('Ofw OpenVPN', "");
                 foreach $protoPort (@serviceXYZ) {
-                    &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
+                    &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
                 }
             }
 
             # Open DHCP, even for those not in Addressfilter
-            @serviceXYZ = &buildServiceParamsDefault('IPCop dhcp', "");
+            @serviceXYZ = &buildServiceParamsDefault('Ofw dhcp', "");
             foreach $protoPort (@serviceXYZ) {
-                &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
+                &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
             }
             # Add a firewall log filter for DHCP broadcast responses
-            &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} -p udp --sport 67 --dport 68 -j DROP");
+            &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} -p udp --sport 67 --dport 68 -j DROP");
 
             if ($ifacePolicies{$inIface}{'ADDRESSFILTER'} eq 'on') {
                 $doUpdateWirelessRules = 1;
-                &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} -m conntrack --ctstate NEW -j ADRFILTERINPUT");
-                &prepareRule("-A FW_IPCOP_FORWARD -i $FW::interfaces{$inIface}{'IFACE'} -m conntrack --ctstate NEW -j ADRFILTERFORWARD");
+                &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} -m conntrack --ctstate NEW -j ADRFILTERINPUT");
+                &prepareRule("-A FW_OFW_FORWARD -i $FW::interfaces{$inIface}{'IFACE'} -m conntrack --ctstate NEW -j ADRFILTERFORWARD");
             }
         }
 
         if ($FW::interfaces{$inIface}{'COLOR'} ne "RED_COLOR") {
             # add 'Pinholes' for all policies and all 'our' interfaces except for RED.
             # Policy 'open' also needs Pinholes to be able to define a block or log rule.
-            &prepareRule("-A FW_IPCOP_FORWARD -i $FW::interfaces{$inIface}{'IFACE'} -j FW_PINHOLES");
+            &prepareRule("-A FW_OFW_FORWARD -i $FW::interfaces{$inIface}{'IFACE'} -j FW_PINHOLES");
         }
         else {
 
             # always allow ping on red, with limited rate
             my @serviceXYZ = &buildServiceParamsDefault('Ping', "");
             foreach my $protoPort (@serviceXYZ) {
-                &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT -m limit --limit 1/second");
+                &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT -m limit --limit 1/second");
                 # If we do not drop here, burst pings will be accepted through related established
-                &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j DROP");
+                &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j DROP");
             }
 
             # allow IPsec if enabled
             if ($ipsecSettings{'ENABLED_RED_1'} eq 'on') {
-                my @serviceXYZ = &buildServiceParamsDefault('IPCop IPsec', "");
+                my @serviceXYZ = &buildServiceParamsDefault('Ofw IPsec', "");
                 foreach my $protoPort (@serviceXYZ) {
-                    &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
+                    &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
                 }
                 # Mark outgoing ipsec-red traffic with 1, outgoing red traffic with 2
                 &prepareRuleDirect("-A FW_MARK_IPSEC -o $FW::interfaces{$inIface}{'IFACE'} -m policy --dir out --pol ipsec --proto esp -j MARK --set-mark 1");
@@ -1048,37 +1048,37 @@ if ($doUpdateIpcopRules) {
 
             # allow OpenVPN if enabled on red
             if ($ovpnSettings{'ENABLED_RED_1'} eq 'on') {
-                my @serviceXYZ = &buildServiceParamsDefault('IPCop OpenVPN', "");
+                my @serviceXYZ = &buildServiceParamsDefault('Ofw OpenVPN', "");
                 foreach my $protoPort (@serviceXYZ) {
-                    &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
+                    &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
                 }
             }
         }
 
 
-        # open some default ipcop services for policy 'half-open' and 'open'
+        # open some default openfirewall services for policy 'half-open' and 'open'
         if ($ifacePolicies{$inIface}{'POLICY'} =~ /^half-open|open$/) {
 
-            my @ipcopServices = ();
-            # Some IPCop services for Green
+            my @ofwServices = ();
+            # Some Openfirewall services for Green
             if ($FW::interfaces{$inIface}{'COLOR'} =~ /^GREEN_COLOR$/) {
-                @ipcopServices = ('IPCop dhcp', 'IPCop dns', 'IPCop ntp', 'IPCop proxy', 'IPCop http', 'IPCop proxy-int-1', 'Ping');
+                @ofwServices = ('Ofw dhcp', 'Ofw dns', 'Ofw ntp', 'Ofw proxy', 'Ofw http', 'Ofw proxy-int-1', 'Ping');
                 # Add a firewall log filter for DHCP broadcast responses
-                &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} -p udp --sport 67 --dport 68 -j DROP");
+                &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} -p udp --sport 67 --dport 68 -j DROP");
             }
-            # Some IPCop services for Blue (DHCP, IPsec, OpenVPN are already opened above)
+            # Some Openfirewall services for Blue (DHCP, IPsec, OpenVPN are already opened above)
             if ($FW::interfaces{$inIface}{'COLOR'} =~ /^BLUE_COLOR$/) {
-                @ipcopServices = ('IPCop dns', 'IPCop ntp', 'IPCop proxy', 'IPCop http', 'IPCop proxy-int-1', 'Ping');
+                @ofwServices = ('Ofw dns', 'Ofw ntp', 'Ofw proxy', 'Ofw http', 'Ofw proxy-int-1', 'Ping');
             }
-            # Some IPCop services for IPsec and OpenVPN (no DHCP needed for VPN)
+            # Some Openfirewall services for IPsec and OpenVPN (no DHCP needed for VPN)
             if ($FW::interfaces{$inIface}{'COLOR'} =~ /^IPSEC_COLOR|OVPN_COLOR$/) {
-                @ipcopServices = ('IPCop dns', 'IPCop ntp', 'IPCop proxy', 'IPCop http', 'IPCop proxy-int-1', 'Ping');
+                @ofwServices = ('Ofw dns', 'Ofw ntp', 'Ofw proxy', 'Ofw http', 'Ofw proxy-int-1', 'Ping');
             }
 
-            foreach my $service (@ipcopServices) {
+            foreach my $service (@ofwServices) {
                 my @serviceXYZ = &buildServiceParamsDefault($service, "");
                 foreach my $protoPort (@serviceXYZ) {
-                    &prepareRule("-A FW_IPCOP -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
+                    &prepareRule("-A FW_OFW -i $FW::interfaces{$inIface}{'IFACE'} $protoPort -j ACCEPT");
                 }
             }
         }   # if ($ifacePolicies{$inIface}{'POLICY'} =~ /^half-open|open$/)
@@ -1092,7 +1092,7 @@ if ($doUpdateIpcopRules) {
 
             # forward
             foreach my $outIface (@outDevs) {
-                &prepareRule("-A FW_IPCOP_FORWARD -i $FW::interfaces{$inIface}{'IFACE'} -o $outIface -j ACCEPT");
+                &prepareRule("-A FW_OFW_FORWARD -i $FW::interfaces{$inIface}{'IFACE'} -o $outIface -j ACCEPT");
             }    # forward END
 
         }    #  if ($ifacePolicies{$inIface}{'POLICY'} eq 'open') {
@@ -1125,15 +1125,15 @@ if ($doUpdateIpcopRules) {
                 $defaultRule .= "-m mac --mac-source $FW::fwSettings{'ADMIN_MAC'} ";
             }
 
-            # IPCop https
-            my @ipcopHTTPS = &buildServiceParamsDefault('IPCop https', "");
-            foreach my $httpsProtoPort (@ipcopHTTPS) {
+            # Openfirewall https
+            my @ofwHTTPS = &buildServiceParamsDefault('Ofw https', "");
+            foreach my $httpsProtoPort (@ofwHTTPS) {
                 &prepareRule("$defaultRule $httpsProtoPort -j ACCEPT");
             }
 
-            # IPCop ssh
-            my @ipcopSSH = &buildServiceParamsDefault('IPCop ssh', "");
-            foreach my $sshProtoPort (@ipcopSSH) {
+            # Openfirewall ssh
+            my @ofwSSH = &buildServiceParamsDefault('Ofw ssh', "");
+            foreach my $sshProtoPort (@ofwSSH) {
                 &prepareRule("$defaultRule $sshProtoPort -j ACCEPT");
             }
 
@@ -1147,7 +1147,7 @@ if ($doUpdateIpcopRules) {
             print " Custom: $iface\n" if ($debugLevel > 0);
             ## DEBUG END
 
-            &prepareRule("-A FW_IPCOP_FORWARD -i $custIfaces{$iface}{'IFACE'} -j FW_PINHOLES");
+            &prepareRule("-A FW_OFW_FORWARD -i $custIfaces{$iface}{'IFACE'} -j FW_PINHOLES");
 
             my $defaultRule = "-A FW_LOG -i $custIfaces{$iface}{'IFACE'} -j";
             my $defaultAction = 'DROP';
@@ -1427,7 +1427,7 @@ sub buildServiceParamsDefault
     my $service_3     = '';
     my $service_4     = '';
 
-    if ($p_serviceName eq 'IPCop IPsec') {
+    if ($p_serviceName eq 'Ofw IPsec') {
         # TODO: do we need GRE ?
         $service_1 = "-p esp";
         $service_2 = "-p ah";

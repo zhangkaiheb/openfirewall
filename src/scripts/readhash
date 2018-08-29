@@ -4,7 +4,7 @@
 # commands to run to set these as shell environment variables, it is
 # intended to be used as follows:
 #
-#   eval $(readhash /var/ipcop/main/settings)
+#   eval $(readhash /var/ofw/main/settings)
 #
 # $Id: readhash 3163 2009-07-02 07:19:29Z owes $
 # 

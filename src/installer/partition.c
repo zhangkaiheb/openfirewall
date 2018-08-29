@@ -1,22 +1,22 @@
 /*
  * partition.c: Create partitions
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2014, the IPCop team
+ * (c) 2007-2014, the Openfirewall Team
  *
  *
  *
@@ -63,7 +63,7 @@
 
 
 // tweak for errorbox
-#define  gettext  ipcop_gettext
+#define  gettext  ofw_gettext
 
 #define BLKGETSIZE64 _IOR(0x12,114,size_t)
 
@@ -243,13 +243,13 @@ int make_partitions(char *dev, char *dev2, long int disk_size, int part_options,
     if (part_options & PART_OPTIONS_MANUAL) {
         /* OK, user thinks he's smart enough to do by himself */
 
-        newtWinMessage(ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_OK"), "Do your thing with parted now!");
+        newtWinMessage(ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_OK"), "Do your thing with parted now!");
 
         /* TODO: some verification? */
         return SUCCESS;
     }
 
-    statuswindow(72, 5, ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_MAKING_PARTITIONS"));
+    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MAKING_PARTITIONS"));
         /* disk-partition parameters
          #1 arch (alpha, powerpc, sparc, x86)
          #2 dev name (without /dev)
@@ -292,8 +292,8 @@ PARTITION_EXIT:
 
     /* Create RAID and wait for the drives to be synchronised */
 
-    f = (newtComponent *) statuswindow_progress(72, 5, ipcop_gettext("TR_TITLE_DISK"),
-                                                ipcop_gettext("TR_CREATING_RAID"));
+    f = (newtComponent *) statuswindow_progress(72, 5, ofw_gettext("TR_TITLE_DISK"),
+                                                ofw_gettext("TR_CREATING_RAID"));
     scale = newtScale(1, 3, 70, 100);
     newtFormAddComponent(*f, scale);
     newtDrawForm(*f);
@@ -310,7 +310,7 @@ PARTITION_EXIT:
         return FAILURE;
     }
 
-    for (i = 0; i < IPCOP_PARTITIONS; i++) {
+    for (i = 0; i < OFW_PARTITIONS; i++) {
         FILE *pipe;
         char string[STRING_SIZE];
         char *ptr;
@@ -325,7 +325,7 @@ PARTITION_EXIT:
             return FAILURE;
         }
 
-        newtScaleSet(scale, (i * 100) / IPCOP_PARTITIONS);
+        newtScaleSet(scale, (i * 100) / OFW_PARTITIONS);
         newtRefresh();
         sleep(1);
 
@@ -347,7 +347,7 @@ PARTITION_EXIT:
 
                 ptr += strlen("resync = ");
                 percentage = atoi(ptr);
-                newtScaleSet(scale, percentage/IPCOP_PARTITIONS + (i*100)/IPCOP_PARTITIONS);
+                newtScaleSet(scale, percentage/OFW_PARTITIONS + (i*100)/OFW_PARTITIONS);
                 newtRefresh();
 
                 pclose(pipe);
@@ -381,12 +381,12 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
     newtComponent *f;
 
     if ((handlelocal = fopen("/etc/fstab", "w")) == NULL) {
-        errorbox(ipcop_gettext("TR_UNABLE_TO_WRITE_ETC_FSTAB"));
+        errorbox(ofw_gettext("TR_UNABLE_TO_WRITE_ETC_FSTAB"));
         return FAILURE;
     }
     /* Need to create a temp. first, since /harddisk is not yet populated */
     if ((handletarget = fopen("/tmp/tmpfstab", "w")) == NULL) {
-        errorbox(ipcop_gettext("TR_UNABLE_TO_WRITE_ETC_FSTAB"));
+        errorbox(ofw_gettext("TR_UNABLE_TO_WRITE_ETC_FSTAB"));
         return FAILURE;
     }
 #define FORMAT_FSTAB  "%-14s %-14s %-10s %-20s %-5s %-5s\n"
@@ -398,9 +398,9 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
         If a partition is missing, mke2fs will throw an error and we can abort.
     */
 
-    statuswindow(72, 5, ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_MAKING_FILESYSTEMS"));
+    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MAKING_FILESYSTEMS"));
 
-    for (i = 0; i < IPCOP_PARTITIONS; i++) {
+    for (i = 0; i < OFW_PARTITIONS; i++) {
         int pindex = partition_index[i];
 #ifdef USE_UUID
         int fd;
@@ -409,22 +409,21 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
         const char *uuid;
 #endif
 
-        if (raid) {
+        if (raid)
             snprintf(devname, STRING_SIZE, "/dev/md%d", i);
-        }
-        else {
+        else
             snprintf(devname, STRING_SIZE, "/dev/%s%d", dev, pindex+1);
-        }
+
         partition_uuidenc[pindex][0] = 0;
         snprintf(command, STRING_SIZE, "/usr/bin/mke2fs -F -F -L %s -q -j %s", partition_label[pindex], devname);
         if (mysystem(command)) {
             newtPopWindow();
             switch (i) {
             case PART_INDEX_ROOT:
-                errorbox(ipcop_gettext("TR_UNABLE_TO_MAKE_ROOT_FILESYSTEM"));
+                errorbox(ofw_gettext("TR_UNABLE_TO_MAKE_ROOT_FILESYSTEM"));
                 break;
             case PART_INDEX_VARLOG:
-                errorbox(ipcop_gettext("TR_UNABLE_TO_MAKE_LOG_FILESYSTEM"));
+                errorbox(ofw_gettext("TR_UNABLE_TO_MAKE_LOG_FILESYSTEM"));
                 break;
             default:
                 /* FIXME: cannot be, can it? */
@@ -483,23 +482,23 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
     fclose(handletarget);
     newtPopWindow();
 
-    statuswindow(72, 5, ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_MOUNTING_ROOT_FILESYSTEM"));
+    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MOUNTING_ROOT_FILESYSTEM"));
     /* load ext3 now */
     if (mysystem("/sbin/modprobe ext4") || mysystem("/bin/mount /harddisk/")) {
         newtPopWindow();
-        errorbox(ipcop_gettext("TR_UNABLE_TO_MOUNT_ROOT_FILESYSTEM"));
+        errorbox(ofw_gettext("TR_UNABLE_TO_MOUNT_ROOT_FILESYSTEM"));
         return FAILURE;
     }
     newtPopWindow();
 
     /* create mountpoint for /var/log and mount */
-    statuswindow(72, 5, ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_MOUNTING_LOG_FILESYSTEM"));
+    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MOUNTING_LOG_FILESYSTEM"));
     snprintf(command, STRING_SIZE, "/bin/mkdir -p /harddisk%s", partition_mount[partition_index[PART_INDEX_VARLOG]]);
     mysystem(command);
     snprintf(command, STRING_SIZE, "/bin/mount /harddisk%s", partition_mount[partition_index[PART_INDEX_VARLOG]]);
     if (mysystem(command)) {
         newtPopWindow();
-        errorbox(ipcop_gettext("TR_UNABLE_TO_MOUNT_LOG_FILESYSTEM"));
+        errorbox(ofw_gettext("TR_UNABLE_TO_MOUNT_LOG_FILESYSTEM"));
         return FAILURE;
     }
     newtPopWindow();
@@ -511,10 +510,10 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
         break;
     case network:
         /* download needed files */
-        statuswindow(72, 5, ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_DOWNLOADING_IMAGE"));
+        statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_DOWNLOADING_IMAGE"));
         mysystem("mkdir -p /harddisk/tmp");
 
-        strcpy(string, TARBALL_IPCOP);
+        strcpy(string, TARBALL_OFW);
         snprintf(command, STRING_SIZE, "wget -O /harddisk/tmp/%s %s/%s", string, network_source, string);
         if ((retcode = mysystem(command)) == 0) {
             strcpy(tarball_location, "/harddisk/tmp");
@@ -523,7 +522,7 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
 
         if (retcode) {
             /* Houston we have a problem, wget failed */
-            snprintf(command, STRING_SIZE, ipcop_gettext("TR_TAR_GZ_NOT_FOUND"), string, network_source);
+            snprintf(command, STRING_SIZE, ofw_gettext("TR_TAR_GZ_NOT_FOUND"), string, network_source);
             errorbox(command);
             return FAILURE;
         }
@@ -534,12 +533,12 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
         return FAILURE;
     }
 
-    f = (newtComponent *) statuswindow_progress(72, 5, ipcop_gettext("TR_TITLE_DISK"),
-                                                ipcop_gettext("TR_INSTALLING_FILES"));
-    snprintf(command, STRING_SIZE, "/bin/tar -C /harddisk -vxpzf %s/" TARBALL_IPCOP, tarball_location);
+    f = (newtComponent *) statuswindow_progress(72, 5, ofw_gettext("TR_TITLE_DISK"),
+                                                ofw_gettext("TR_INSTALLING_FILES"));
+    snprintf(command, STRING_SIZE, "/bin/tar -C /harddisk -vxpzf %s/" TARBALL_OFW, tarball_location);
     retcode = mysystem_progress(command, f, 1, 3, 70, 5250, 0);
     if (medium_sources == network) {
-        mysystem("rm -f /harddisk/tmp/" TARBALL_IPCOP);
+        mysystem("rm -f /harddisk/tmp/" TARBALL_OFW);
     }
 
     newtFormDestroy(*f);
@@ -547,34 +546,34 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
 
     /* abort if tar failed (source missing or archive broken) */
     if (retcode) {
-        newtWinMessage(get_title(), ipcop_gettext("TR_OK"), "tar error");
+        newtWinMessage(get_title(), ofw_gettext("TR_OK"), "tar error");
         return FAILURE;
     }
 
     /* Create swapfile (if any) */
     if (swap_file != 0) {
-        statuswindow(72, 5, ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_MAKING_SWAPSPACE"));
+        statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MAKING_SWAPSPACE"));
         snprintf(command, STRING_SIZE, "/bin/dd if=/dev/zero of=/harddisk/swapfile bs=1024k count=%ld", swap_file);
         if (mysystem(command)) {
             newtPopWindow();
-            errorbox(ipcop_gettext("TR_UNABLE_TO_MAKE_SWAPSPACE"));
+            errorbox(ofw_gettext("TR_UNABLE_TO_MAKE_SWAPSPACE"));
             return FAILURE;
         }
 
         retcode = mysystem("mkswap /harddisk/swapfile");
         newtPopWindow();
         if (retcode) {
-            errorbox(ipcop_gettext("TR_UNABLE_TO_MAKE_SWAPSPACE"));
+            errorbox(ofw_gettext("TR_UNABLE_TO_MAKE_SWAPSPACE"));
             return FAILURE;
         }
 
         /*  We need to activate swap here
          *  depmod requires a lot of memory (~50-60 MB) which will fail on a 64 MB machine without swap */
-        statuswindow(72, 5, ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_MOUNTING_SWAP_PARTITION"));
+        statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MOUNTING_SWAP_PARTITION"));
         retcode = mysystem("swapon /harddisk/swapfile");
         newtPopWindow();
         if (retcode) {
-            errorbox(ipcop_gettext("TR_UNABLE_TO_MOUNT_SWAP_PARTITION"));
+            errorbox(ofw_gettext("TR_UNABLE_TO_MOUNT_SWAP_PARTITION"));
             return FAILURE;
         }
     }
@@ -586,11 +585,11 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
         /* Create mdadm.conf, also for inclusion in initramfs */
         mysystem("mkdir -p /harddisk/etc/mdadm");
         if (system("echo DEVICE partitions > /harddisk/etc/mdadm/mdadm.conf")) {
-            errorbox(ipcop_gettext("TR_UNABLE_TO_INSTALL_FILES"));
+            errorbox(ofw_gettext("TR_UNABLE_TO_INSTALL_FILES"));
             return FAILURE;
         }
         if (system("/sbin/mdadm --examine --scan >> /harddisk/etc/mdadm/mdadm.conf")) {
-            errorbox(ipcop_gettext("TR_UNABLE_TO_INSTALL_FILES"));
+            errorbox(ofw_gettext("TR_UNABLE_TO_INSTALL_FILES"));
             return FAILURE;
         }
     }
@@ -606,12 +605,12 @@ static int create_initramfs(void)
     int retcode;
     FILE *handle;
 
-    statuswindow(72, 5, ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_BUILDING_INITRD"));
+    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_BUILDING_INITRD"));
 
     // run depmod to have complete modules.* files on target system
     snprintf(bigstring, STRING_SIZE, "chroot /harddisk /sbin/depmod -a %s", helper_kernel_release());
     if (mysystem(bigstring)) {
-        errorbox(ipcop_gettext("TR_UNABLE_TO_BUILD_INITRD"));
+        errorbox(ofw_gettext("TR_UNABLE_TO_BUILD_INITRD"));
         newtPopWindow();
         return FAILURE;
     }
@@ -623,7 +622,7 @@ static int create_initramfs(void)
            "chroot /harddisk /sbin/mkinitramfs --with-firmware --many-modules --with-list=/etc/modules.initramfs");
 
     if ((handle = fopen("/harddisk/etc/modules.initramfs", "w")) == NULL) {
-        errorbox(ipcop_gettext("TR_UNABLE_TO_BUILD_INITRD"));
+        errorbox(ofw_gettext("TR_UNABLE_TO_BUILD_INITRD"));
         newtPopWindow();
         return FAILURE;
     }
@@ -656,7 +655,7 @@ static int create_initramfs(void)
     retcode = mysystem(bigstring);
     newtPopWindow();
     if (retcode) {
-        errorbox(ipcop_gettext("TR_UNABLE_TO_BUILD_INITRD"));
+        errorbox(ofw_gettext("TR_UNABLE_TO_BUILD_INITRD"));
         return FAILURE;
     }
 
@@ -674,7 +673,7 @@ static int make_bootable(char *dev, char *dev2, int part_options)
     char device[STRING_SIZE];
     char device2[STRING_SIZE];
 
-    statuswindow(72, 5, ipcop_gettext("TR_TITLE_DISK"), ipcop_gettext("TR_MAKING_BOOTABLE"));
+    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MAKING_BOOTABLE"));
 
     snprintf(device, STRING_SIZE, "/dev/%s", dev);
     snprintf(device2, STRING_SIZE, "/dev/%s", dev2);
@@ -881,19 +880,21 @@ static int make_bootable(char *dev, char *dev2, int part_options)
 
 #endif
 
+        fprintf(flog, "Writing MBR 2\n");
     newtPopWindow();
+        fprintf(flog, "Writing MBR 3\n");
     return SUCCESS;
 }
 
 
 /*  The big one. Cleaning, cooking, laundring, the whole enchilada.
 */
-int make_ipcop_disk(char *dev, char *dev2, long int disk_size, long int swap_file, int part_options)
+int make_ofw_disk(char *dev, char *dev2, long int disk_size, long int swap_file, int part_options)
 {
     raid = (*dev2 != 0);
     /* Make partition table and partitions */
     if (make_partitions(dev, dev2, disk_size, part_options, &swap_file) != SUCCESS) {
-        errorbox(ipcop_gettext("TR_UNABLE_TO_PARTITION"));
+        errorbox(ofw_gettext("TR_UNABLE_TO_PARTITION"));
         return FAILURE;
     }
 
@@ -915,9 +916,10 @@ int make_ipcop_disk(char *dev, char *dev2, long int disk_size, long int swap_fil
 
     /* Make the new installation bootable */
     if (make_bootable(dev, dev2, part_options)) {
-         errorbox(ipcop_gettext("TR_BOOTLOADER_INSTALLATION_ERROR"));
+         errorbox(ofw_gettext("TR_BOOTLOADER_INSTALLATION_ERROR"));
          return FAILURE;
     }
 
+        fprintf(flog, "Writing MBR 20\n");
     return SUCCESS;
 }

@@ -1,33 +1,33 @@
 #
 # header.pl: various helper functions for the web GUI
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2002 Alex Hudson - getcgihash() rewrite
 # Copyright (C) 2002 Bob Grant <bob@cache.ucr.edu> - validmac()
 # Copyright (c) 2002/04/13 Steve Bootes - add alias section, helper functions
 # Copyright (c) 2002/08/23 Mark Wormgoor <mark@wormgoor.com> validfqdn()
 # Copyright (c) 2003/09/11 Darren Critchley <darrenc@telus.net> srtarray()
-# Copyright (c) 2004-2016 The IPCop Team - way to many changes to specify here
+# Copyright (c) 2004-2016 The Openfirewall Team - way to many changes to specify here
 #
 # $Id: header.pl 8063 2016-01-10 09:17:41Z owes $
 #
 
 package Header;
-require '/usr/lib/ipcop/menu.pl';
+require '/usr/lib/ofw/menu.pl';
 
 use strict;
 use Time::Local;
@@ -72,9 +72,9 @@ sub genmenu
     ### Initialize environment
     my %menuconfig = ();
     my %ethsettings = ();
-    &General::readhash('/var/ipcop/ethernet/settings', \%ethsettings);
+    &General::readhash('/var/ofw/ethernet/settings', \%ethsettings);
     my %proxysettings = ();
-    &General::readhash('/var/ipcop/proxy/settings', \%proxysettings);
+    &General::readhash('/var/ofw/proxy/settings', \%proxysettings);
 
     $menuconfig{'haveBlue'} = $ethsettings{'BLUE_COUNT'};
     $menuconfig{'haveProxy'} = 0;
@@ -101,7 +101,7 @@ sub showhttpheaders
         # TODO: remove this. Need this for some limited time only: doing a restore may leave us without GUIPORT
         $mainsettings{'GUIPORT'} = 8443;
 
-        &General::readhash('/var/ipcop/main/settings', \%mainsettings);
+        &General::readhash('/var/ofw/main/settings', \%mainsettings);
         print "Status: 302 Moved\r\n";
         print "Location: https://$ENV{'SERVER_ADDR'}:$mainsettings{'GUIPORT'}/$ENV{'PATH_INFO'}\r\n\r\n";
         exit 0;
@@ -154,14 +154,14 @@ sub showjsmenu
     print <<EOF
     domMenu_settings.set('domMenu_main', new Hash(
     'menuBarWidth', '0%',
-    'menuBarClass', 'ipcop_menuBar',
-    'menuElementClass', 'ipcop_menuElement',
-    'menuElementHoverClass', 'ipcop_menuElementHover',
-    'menuElementActiveClass', 'ipcop_menuElementHover',
-    'subMenuBarClass', 'ipcop_subMenuBar',
-    'subMenuElementClass', 'ipcop_subMenuElement',
-    'subMenuElementHoverClass', 'ipcop_subMenuElementHover',
-    'subMenuElementActiveClass', 'ipcop_subMenuElementHover',
+    'menuBarClass', 'ofw_menuBar',
+    'menuElementClass', 'ofw_menuElement',
+    'menuElementHoverClass', 'ofw_menuElementHover',
+    'menuElementActiveClass', 'ofw_menuElementHover',
+    'subMenuBarClass', 'ofw_subMenuBar',
+    'subMenuElementClass', 'ofw_subMenuElement',
+    'subMenuElementHoverClass', 'ofw_subMenuElementHover',
+    'subMenuElementActiveClass', 'ofw_subMenuElementHover',
     'subMenuMinWidth', 'auto',
     'distributeSpace', false,
     'openMouseoverMenuDelay', 0,
@@ -181,9 +181,9 @@ sub showmenu
     print "<tr>\n";
 
     foreach my $k1 (sort keys %menu) {
-        print "<td class='ipcop_menuElementTD'><a href='"
+        print "<td class='ofw_menuElementTD'><a href='"
             . @{@{$menu{$k1}{'subMenu'}}[0]}[1]
-            . "' class='ipcop_menuElementNoJS'>";
+            . "' class='ofw_menuElementNoJS'>";
         print $menu{$k1}{'contents'} . "</a></td>\n";
     }
     print "</tr></table>\n";
@@ -235,7 +235,7 @@ sub openpage
     my $onload_menu = '';
     ### Initialize environment
     my %settings = ();
-    &General::readhash('/var/ipcop/main/settings', \%settings);
+    &General::readhash('/var/ofw/main/settings', \%settings);
 
     if ($settings{'JAVASCRIPT'} eq 'off') {
         $javascript = 0;
@@ -261,7 +261,7 @@ sub openpage
     $extrahead
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="shortcut icon" href="/favicon.ico" />
-    <style type="text/css">\@import url(/include/ipcop.css);</style>
+    <style type="text/css">\@import url(/include/openfirewall.css);</style>
 END
     ;
     if ($javascript) {
@@ -329,7 +329,7 @@ END
     <table width='100%' border='0' cellpadding='0' cellspacing='0' style='table-layout:fixed;'>
     <col width='75' /><col width='182' /><col />
     <tr valign='bottom'><td></td>
-        <td class='ipcop_menuLocationMain' colspan='2' height='25'><img src='/images/null.gif' width='8' height='1' alt='' />$location
+        <td class='ofw_menuLocationMain' colspan='2' height='25'><img src='/images/null.gif' width='8' height='1' alt='' />$location
         <img src='/images/null.gif' width='16' height='1' alt='' /><img src='/images/header_arrow.gif' width='20' height='12' alt='' /><img src='/images/null.gif' width='24' height='1' alt='' /><font style='font-size: 12px;'>$sublocation</font></td>
     </tr>
     <tr valign='bottom'><td colspan='3' height='3'></td></tr>
@@ -364,14 +364,14 @@ sub closepage
     my $connected = shift;
     my $extraversion = '';
     $extraversion = '| ' . `cat /etc/svn-install` . ' ' if (! -e '/var/log/updates/update.check');
-    my $status = "<small>IPCop v${General::version} $extraversion &copy; 2001-2016 The IPCop Team</small>";
+    my $status = "<small>IPCop v${General::version} $extraversion &copy; 2001-2016 The Openfirewall Team</small>";
 
     $status = &General::connectionstatus() . "<br />" . `/bin/date "+%Y-%m-%d %H:%M:%S"`. "<br /><br />$status" if ($connected ne 'skip_connected');
 
     print <<END
 <!-- IPCOP FOOTER -->
     <table width='100%' border='0'><tr>
-    <td width='175' align='left'><img src='/images/null.gif' width='15' height='12' alt='' /><a href='http://sourceforge.net/projects/ipcop' target='_blank'><img src='/images/sflogo.gif' width='153' height='30' alt='Get IPCop Firewall at SourceForge.net. Fast, secure and Free Open Source software downloads' /></a></td>
+    <td width='175' align='left'><img src='/images/null.gif' width='15' height='12' alt='' /><a href='http://sourceforge.net/projects/ipcop' target='_blank'><img src='/images/sflogo.gif' width='153' height='30' alt='Get Openfirewall at SourceForge.net. Fast, secure and Free Open Source software downloads' /></a></td>
     <td align='center' valign='middle'>$status</td>
     <td width='175' align='right' valign='bottom'><a href='http://www.ipcop.org/' target='_blank'><img src='/images/shieldedtux.png' width='113' height='82' alt='IPCop Tux' /></a><img src='/images/null.gif' width='15' height='12' alt='' /></td>
     </tr></table>
@@ -527,7 +527,7 @@ END
     }
 }
 
-# Show page with IPCop logo and a single text. Optional refresh.
+# Show page with Openfirewall logo and a single text. Optional refresh.
 #   Parameters:
 #   - page title
 #   - boxtype: error = red boxframe, warning = yellow boxframe
@@ -548,7 +548,7 @@ sub page_show
 <div align='center'>
 <table width='100%'>
 <tr><td align='center'>
-<br /><br /><img src='/ipcop_big.gif' alt='ipcop' /><br /><br /><br />
+<br /><br /><img src='/openfirewall_big.gif' alt='openfirewall' /><br /><br /><br />
 </td></tr>
 </table>
 <br />

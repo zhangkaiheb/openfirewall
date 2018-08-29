@@ -7,12 +7,12 @@ OBJLIBS=setuid.o ../installer/helper.o
 
 PROGS = iowrap logwatch
 SUID_PROGS = accountingctrl setfwrules emailhelper  \
-	restartdhcp restartsquid restartssh ipcopreboot \
-	ipcopbkcfg installpackage installfcdsl ipsecctrl \
-	red setaliases ipcopbackup restartshaping restartntpd \
+	restartdhcp restartsquid restartssh ofwreboot \
+	ofwbkcfg installpackage installfcdsl ipsecctrl \
+	red setaliases ofwbackup restartshaping restartntpd \
 	setdate rebuildhosts rebuildlangtexts conntrack_helper \
 	restartsyslogd sysinfo restartopenvpn iptableswrapper
-BACKUP_PROGS = ipcoprestore
+BACKUP_PROGS = ofwrestore
 
 all : helper.o helper_backup.o $(PROGS) $(SUID_PROGS) $(BACKUP_PROGS)
 
@@ -39,9 +39,9 @@ $(BACKUP_PROGS): setuid.o ../installer/helper.o ../installer/helper_backup.o
 
 $(PROGS): ../installer/helper.o
 
-ipcopbkcfg: ipcopbkcfg.c setuid.o
-	$(COMPILE) -lcrypt ipcopbkcfg.c setuid.o -o $@
+ofwbkcfg: ofwbkcfg.c setuid.o
+	$(COMPILE) -lcrypt ofwbkcfg.c setuid.o -o $@
 
-ipcoprestore: setuid.o ../installer/helper.o ../installer/helper_backup.o
-	$(COMPILE) ipcoprestore.c $(OBJLIBS) ../installer/helper_backup.o -o $@
+ofwrestore: setuid.o ../installer/helper.o ../installer/helper_backup.o
+	$(COMPILE) ofwrestore.c $(OBJLIBS) ../installer/helper_backup.o -o $@
 

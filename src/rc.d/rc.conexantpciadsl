@@ -42,11 +42,11 @@ start)
         fi
         if ( /bin/grep -q '14f11611' /proc/bus/pci/devices ); then
             # Tigris model
-            /bin/ln -f -s /etc/Conexant/CnxTgF.hex /var/ipcop/cnx_pci/firmware.hex
+            /bin/ln -f -s /etc/Conexant/CnxTgF.hex /var/ofw/cnx_pci/firmware.hex
         else
             if ( /bin/grep -q '14f11622' /proc/bus/pci/devices ); then
                 # Yukon model
-                /bin/ln -f -s /etc/Conexant/CnxYkF.hex /var/ipcop/cnx_pci/firmware.hex
+                /bin/ln -f -s /etc/Conexant/CnxYkF.hex /var/ofw/cnx_pci/firmware.hex
             else
                 msg "don't know this model"
                 exit 1
@@ -54,8 +54,8 @@ start)
         fi
 
         # Initialize the firmware and start training
-        /bin/ln -f -s /etc/Conexant/cnxadsl.conf /var/ipcop/cnx_pci/cnxadsl.conf
-        /etc/Conexant/cnxadslload /var/ipcop/cnx_pci
+        /bin/ln -f -s /etc/Conexant/cnxadsl.conf /var/ofw/cnx_pci/cnxadsl.conf
+        /etc/Conexant/cnxadslload /var/ofw/cnx_pci
     fi
     wait_for_showtime
     exit $?

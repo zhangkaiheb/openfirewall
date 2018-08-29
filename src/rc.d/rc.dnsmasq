@@ -8,18 +8,18 @@
 #
 
 # read variables 
-eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
-eval $(/usr/local/bin/readhash /var/ipcop/ethernet/settings)
-eval $(/usr/local/bin/readhash /var/ipcop/main/settings)
+eval $(/usr/local/bin/readhash /var/ofw/ppp/settings)
+eval $(/usr/local/bin/readhash /var/ofw/ethernet/settings)
+eval $(/usr/local/bin/readhash /var/ofw/main/settings)
 [ "$DOMAINNAME" ] && LOCALDOMAIN="-s $DOMAINNAME --local=/$DOMAINNAME/"
 
 # See how we were called.
 case "$1" in
 start|--start)
-    if [ -e "/var/ipcop/red/dial-on-demand" -a "$DIALONDEMANDDNS" == "on" -a ! -e "/var/ipcop/red/active" ]; then
-        /usr/sbin/dnsmasq -r /var/ipcop/ppp/fake-resolv.conf $LOCALDOMAIN
+    if [ -e "/var/ofw/red/dial-on-demand" -a "$DIALONDEMANDDNS" == "on" -a ! -e "/var/ofw/red/active" ]; then
+        /usr/sbin/dnsmasq -r /var/ofw/ppp/fake-resolv.conf $LOCALDOMAIN
     else
-        /usr/sbin/dnsmasq -r /var/ipcop/red/resolv.conf $LOCALDOMAIN
+        /usr/sbin/dnsmasq -r /var/ofw/red/resolv.conf $LOCALDOMAIN
     fi
     ;;
 stop|--stop)

@@ -2,22 +2,22 @@
 #
 # lang.pl: retrieve the translated texts for GUI
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2007-2013, the IPCop team
+# (c) 2007-2013, the Openfirewall Team
 #
 # Copyright (c) 2007-11-13 owes  This is almost a full cleanup, texts are now fetched from .MO files.
 #
@@ -25,11 +25,11 @@
 #
 
 
-# When you want to add your own language strings/entries to IPCop,
-# you create a file with <PREFIX>.<LANG>.pl in the /var/ipcop/addons/lang directory
+# When you want to add your own language strings/entries to Openfirewall,
+# you create a file with <PREFIX>.<LANG>.pl in the /var/ofw/addons/lang directory
 #   <PREFIX> can be freely chosen but must be unique. An example could be "myAddonName"
 #   <LANG> is a mnemonic of the used language like en, de, it, nl etc.
-#       You can find a detailed list of possible mnemonics in the file /var/ipcop/main/language.lst
+#       You can find a detailed list of possible mnemonics in the file /var/ofw/main/language.lst
 # A file could for example be named "myAddonName.en.pl".
 #
 # Note that you should always add 'en' (English) file, as this will be taken as the default for all
@@ -43,13 +43,13 @@
 #);
 # --------- CODE END---------
 #
-# After you have copied all your files to /var/ipcop/addons/lang you use the SUID 
+# After you have copied all your files to /var/ofw/addons/lang you use the SUID 
 # helper rebuildlangtexts which will call &Lang::BuildAddonLang
 # to assemble all texts for a language in one file.
 
 
 package Lang;
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 use Locale::Maketext::Gettext::Functions;
 use strict;
 
@@ -60,11 +60,11 @@ my $locale;
 langsettings();
 
 # Setup for __('text')
-bindtextdomain("ipcop", "/usr/share/locale");
-textdomain("ipcop");
+bindtextdomain("openfirewall", "/usr/share/locale");
+textdomain("openfirewall");
 
 # Used in both functions
-$Lang::CacheDir = "/var/ipcop/addons/lang";
+$Lang::CacheDir = "/var/ofw/addons/lang";
 $Lang::CacheLang = "$Lang::CacheDir/texts.pl";
 
 
@@ -74,7 +74,7 @@ reload(0);
 
 sub langsettings
 {
-    &General::readhash('/var/ipcop/main/settings', \%settings);
+    &General::readhash('/var/ofw/main/settings', \%settings);
     $language = $settings{'LANGUAGE'};
     $locale = $settings{'LOCALE'};
 }
@@ -99,7 +99,7 @@ sub reload
 
     # Get lexicon for $Lang :: tr{'text'}
     #   (note: 2 spaces intentionally added around :: so 'text' is not added to .po file)
-    %Lang::tr = read_mo("/usr/share/locale/${locale}/LC_MESSAGES/ipcop.mo");
+    %Lang::tr = read_mo("/usr/share/locale/${locale}/LC_MESSAGES/openfirewall.mo");
 
     # Now fetch additional addon texts (if any)
     if (-s "$Lang::CacheLang.${language}" ) {
@@ -156,8 +156,8 @@ sub BuildAddonLang {
     close (FILE);
 
     # Force our permissions (Addon installer may set wrong properties)
-    system('/bin/chown root:root /var/ipcop/addons/lang/*');
-    system('/bin/chmod 444 /var/ipcop/addons/lang/*');
+    system('/bin/chown root:root /var/ofw/addons/lang/*');
+    system('/bin/chmod 444 /var/ofw/addons/lang/*');
 }
 
 1;

@@ -3,7 +3,7 @@
 # $Id: rc.conexantusbadsl 1895 2008-09-16 19:53:39Z owes $
 #
 
-eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
+eval $(/usr/local/bin/readhash /var/ofw/ppp/settings)
 
 # Debugging. Comment it out to stop logging
 DEBUG="yes"

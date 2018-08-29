@@ -1,19 +1,19 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 #
 # $Id: monitorTraffic.pl 5834 2011-08-28 19:30:53Z dotzball $
@@ -24,9 +24,9 @@ use strict;
 # enable only the following on debugging purpose
 #use warnings;
 
-require '/usr/lib/ipcop/general-functions.pl';
-require "/usr/lib/ipcop/lang.pl";
-require '/usr/lib/ipcop/traffic-lib.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require "/usr/lib/ofw/lang.pl";
+require '/usr/lib/ofw/traffic-lib.pl';
 
 # Debug level:
 #    0 - send email (if enabled), no print
@@ -173,7 +173,7 @@ exit 0;
 
 sub sendWarnEmail
 {
-    my $template = "/var/ipcop/email/templates/warn-traffic";
+    my $template = "/var/ofw/email/templates/warn-traffic";
 
     if(-e "$template.${Lang::language}.tpl") {
         $template .= ".${Lang::language}.tpl";

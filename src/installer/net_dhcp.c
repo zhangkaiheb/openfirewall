@@ -1,23 +1,23 @@
 /*
  * net_dhcp.c: DHCP server configuration
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2010, the IPCop team
+ * (c) 2007-2010, the Openfirewall Team
  *
  * $Id: net_dhcp.c 5182 2010-11-28 15:56:41Z owes $
  * 
@@ -77,27 +77,27 @@ int changedhcpserver(void)
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
-    if (inet_aton(ipcop_ethernet.address[GREEN][1], &green_address) == 0) {
+    if (inet_aton(ofw_ethernet.address[GREEN][1], &green_address) == 0) {
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
-    if (inet_aton(ipcop_ethernet.netmask[GREEN][1], &green_netmask) == 0) {
+    if (inet_aton(ofw_ethernet.netmask[GREEN][1], &green_netmask) == 0) {
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
-    if (inet_aton(ipcop_ethernet.netaddress[GREEN][1], &green_netaddress) == 0) {
+    if (inet_aton(ofw_ethernet.netaddress[GREEN][1], &green_netaddress) == 0) {
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
 
-    if (read_kv_from_file(&dhcpkv, "/var/ipcop/dhcp/settings") != SUCCESS) {
+    if (read_kv_from_file(&dhcpkv, "/var/ofw/dhcp/settings") != SUCCESS) {
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
 
     /* Fetch domainname */
     domainname[0] = 0;
-    if (read_kv_from_file(&mainkv, "/var/ipcop/main/settings") == SUCCESS) {
+    if (read_kv_from_file(&mainkv, "/var/ofw/main/settings") == SUCCESS) {
         find_kv_default(mainkv, "DOMAINNAME", domainname);
         free_kv(&mainkv);
     }
@@ -145,7 +145,7 @@ int changedhcpserver(void)
         changed = TRUE;
     }
     if (find_kv(dhcpkv, "DNS1_GREEN_1") == NULL) {
-        update_kv(&dhcpkv, "DNS1_GREEN_1", ipcop_ethernet.address[GREEN][1]);
+        update_kv(&dhcpkv, "DNS1_GREEN_1", ofw_ethernet.address[GREEN][1]);
         changed = TRUE;
     }
     if (find_kv(dhcpkv, "DEFAULT_LEASE_TIME_GREEN_1") == NULL) {
@@ -244,15 +244,15 @@ int changedhcpserver(void)
             FILE *f;
             int leasetime;
 
-            if ((f = fopen("/var/ipcop/dhcp/dnsmasq.conf", "w")) == NULL) {
+            if ((f = fopen("/var/ofw/dhcp/dnsmasq.conf", "w")) == NULL) {
                 errorbox(gettext("TR_ERROR_WRITING_CONFIG"));
                 return FAILURE;
             }
 
-            fprintf(f, "# Do not modify '/var/ipcop/dhcp/dnsmasq.conf' directly since any changes\n");
+            fprintf(f, "# Do not modify '/var/ofw/dhcp/dnsmasq.conf' directly since any changes\n");
             fprintf(f, "# you make will be overwritten whenever you resave dhcp settings using the\n");
             fprintf(f, "# web interface! \n");
-            fprintf(f, "# Instead modify the file '/var/ipcop/dhcp/dnsmasq.local' and then restart \n");
+            fprintf(f, "# Instead modify the file '/var/ofw/dhcp/dnsmasq.local' and then restart \n");
             fprintf(f, "# the DHCP server using the web interface or restartdhcp.\n");
             fprintf(f, "# Changes made to the 'local' file will then propagate to the DHCP server.\n");
             fprintf(f, "\n");
@@ -266,9 +266,9 @@ int changedhcpserver(void)
             fprintf(f, "domain-needed\n");
             fprintf(f, "dhcp-authoritative\n");
             fprintf(f, "dhcp-leasefile=/var/run/dnsmasq/dnsmasq.leases\n");
-            fprintf(f, "dhcp-hostsfile=/var/ipcop/dhcp/dnsmasq.statichosts\n");
-            fprintf(f, "dhcp-optsfile=/var/ipcop/dhcp/dnsmasq.staticopts\n");
-            fprintf(f, "conf-file=/var/ipcop/dhcp/dnsmasq.local\n");
+            fprintf(f, "dhcp-hostsfile=/var/ofw/dhcp/dnsmasq.statichosts\n");
+            fprintf(f, "dhcp-optsfile=/var/ofw/dhcp/dnsmasq.staticopts\n");
+            fprintf(f, "conf-file=/var/ofw/dhcp/dnsmasq.local\n");
             fprintf(f, "\n");
 
             leasetime = atol(find_kv(dhcpkv, "DEFAULT_LEASE_TIME_GREEN_1")) * 60;
@@ -285,7 +285,7 @@ int changedhcpserver(void)
             fclose(f);
         }
 
-        write_kv_to_file(&dhcpkv, "/var/ipcop/dhcp/settings");
+        write_kv_to_file(&dhcpkv, "/var/ofw/dhcp/settings");
 
         if (flag_is_state == setup) {
             mysystem("/usr/local/bin/restartdhcp");

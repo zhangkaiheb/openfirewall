@@ -1,28 +1,28 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # firewall-lib.pl was created for the BlockOutTraffic Addon.
 # Copyright (C) 2004 Achim Weber <dotzball@users.sourceforge.net>
 #
 # 6 May 2006 Achim Weber:
-#       Re-worked code to use it in IPCop 1.5, renamed all variables, keys, etc.
+#       Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
 #       from "BOT" to "FW".
 #
-# (c) 2007-2014, the IPCop team
+# (c) 2007-2014, the Openfirewall Team
 #
 # $Id: firewall-lib.pl 7340 2014-03-17 06:57:10Z owes $
 #
@@ -31,10 +31,10 @@ package FW;
 
 use strict;
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
-require '/usr/lib/ipcop/DataAccess.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/DataAccess.pl';
 
 $| = 1;    # line buffering
 
@@ -50,7 +50,7 @@ $ifaceCounts{'RED'}    = 0;
 
 &DATA::setup_default_interfaces(\%FW::interfaces, \%ifaceCounts);
 
-$FW::settingsfile     = '/var/ipcop/firewall/settings';
+$FW::settingsfile     = '/var/ofw/firewall/settings';
 $FW::settingsCGI      = '/cgi-bin/fwrulesadm.cgi';
 $FW::configCGI        = '/cgi-bin/fwrules.cgi';
 $FW::advConfCGI       = '/cgi-bin/fwadvconf.cgi';
@@ -76,7 +76,7 @@ sub readValidSettings
 
         # hardcode GREEN_1 in case there was nothing selected yet
         # FIXME:
-        # As soon as it is possible to install IPCop without GREEN
+        # As soon as it is possible to install Openfirewall without GREEN
         # this needs to be fixed.
         $FW::fwSettings{'ADMIN_GREEN_1'} = 'on';
     }
@@ -406,11 +406,11 @@ sub hideAdvRule
         return 1;
     }
     if($ruleType =~ /^(EXTERNAL|PORTFW|PINHOLES)$/) {
-        # Always create 'External IPcop Access', 'Port forwarding' and 'Internal Traffic' ('Pinholes' like Orange -> Green)
+        # Always create 'External Openfirewall Access', 'Port forwarding' and 'Internal Traffic' ('Pinholes' like Orange -> Green)
         return 0;
     }
 
-    # If we are here the rule is an IPCop Access rule with Orange -> IPCop. Those rules are only created in adv. mode
+    # If we are here the rule is an Openfirewall Access rule with Orange -> Openfirewall. Those rules are only created in adv. mode
     return 1;
 }
 # EOF

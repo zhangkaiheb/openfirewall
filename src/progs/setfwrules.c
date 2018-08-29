@@ -1,4 +1,4 @@
-/* IPCop helper program - setfwrules
+/* Openfirewall helper program - setfwrules
  *
  * This program is distributed under the terms of the GNU General Public
  * Licence.  See the file COPYING for details.
@@ -33,10 +33,10 @@ void usage(char *prg, int exit_code)
 {
     printf("Usage: %s [OPTION]\n\n", prg);
     printf("Options:\n");
-    printf("  -a, --all             force update for all user and IPCop services rules\n");
+    printf("  -a, --all             force update for all user and Openfirewall services rules\n");
     printf("  -c, --cron            check for timeframe rule changes\n");
     printf("  -f, --force=CHAIN     force update for CHAIN\n");
-    printf("  -i, --ipcop           force update for IPCop services rules\n");
+    printf("  -o, --ofw             force update for Openfirewall services rules\n");
     printf("  -u, --user            force update for user rules\n");
     printf("  -w, --wireless        force update of Addressfilter rules\n");
     printf("      --emergency       enable admin access for GREEN\n");
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     int flag_all = 0;
     int flag_cron = 0;
     int flag_force = 0;
-    int flag_ipcop = 0;
+    int flag_ofw = 0;
     int flag_user = 0;
     int flag_wireless = 0;
     char *opt_chain = NULL;
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
         { "emergency", no_argument, &flag_emergency, 1 },
         { "cron", no_argument, 0, 'c' },
         { "force", required_argument, 0, 'f' },
-        { "ipcop", no_argument, 0, 'i' },
+        { "ofw", no_argument, 0, 'o' },
         { "user", no_argument, 0, 'u' },
         { "wireless", no_argument, 0, 'w' },
         { "verbose", no_argument, 0, 'v' },
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     if (!(initsetuid()))
         exit(1);
 
-    while ((c = getopt_long(argc, argv, "acf:hiuvw", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "acf:houvw", long_options, &option_index)) != -1) {
         switch (c) {
         case 0:
             break;
@@ -98,8 +98,8 @@ int main(int argc, char *argv[])
             }
             opt_chain = strdup(optarg);
             break;
-        case 'i':
-            flag_ipcop = 1;
+        case 'o':
+            flag_ofw = 1;
             break;
         case 'u':
             flag_user = 1;
@@ -134,8 +134,8 @@ int main(int argc, char *argv[])
     // Enable access from GREEN network and disable MAC filter, in case admin has locked himself out
     // FW_ADMIN chain comes before user firewall rules, so this is sufficient
     if (flag_emergency) {
-        safe_system("/bin/sed -i -e s+ADMIN_GREEN_1.*+ADMIN_GREEN_1=on+ -e s+USE_ADMIN_MAC.*+USE_ADMIN_MAC=off+ /var/ipcop/firewall/settings");
-        flag_ipcop = 1;
+        safe_system("/bin/sed -i -e s+ADMIN_GREEN_1.*+ADMIN_GREEN_1=on+ -e s+USE_ADMIN_MAC.*+USE_ADMIN_MAC=off+ /var/ofw/firewall/settings");
+        flag_ofw = 1;
     }
 
     // should we check for (timeframe) rule changes only?
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
         safe_system(command);
     }
 
-    if (flag_ipcop) {
+    if (flag_ofw) {
         snprintf(command, STRING_SIZE, "/usr/local/bin/puzzleFwRules.pl %s -i", opt_debug);
         safe_system(command);
     }

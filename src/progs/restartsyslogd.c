@@ -1,24 +1,24 @@
 /*
  * restartsyslogd: restart system log daemon and rewrite logrotate rotate parameter
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) 2003-07-12 Robert Kerr <rkerr@go.to>
  *
- * (c) 2004-2014 The IPCop Team
+ * (c) 2004-2014 The Openfirewall Team
  *
  * $Id: restartsyslogd.c 7576 2014-05-24 08:45:28Z owes $
  *
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
     }
 
     verbose_printf(1, "Reading log settings ... \n");
-    if (read_kv_from_file(&log_kv, "/var/ipcop/logging/settings") != SUCCESS) {
+    if (read_kv_from_file(&log_kv, "/var/ofw/logging/settings") != SUCCESS) {
         fprintf(stderr, "Cannot read syslog settings\n");
         exit(ERR_SETTINGS);
     }

@@ -1,20 +1,20 @@
 /*
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2009-2015 The IPCop Team
+ * (c) 2009-2015 The Openfirewall Team
  *
  * $Id: restartopenvpn.c 7890 2015-02-15 17:01:39Z owes $
  *
@@ -59,7 +59,7 @@ void config()
     char command[STRING_SIZE];
 
     snprintf(command, STRING_SIZE,
-        "/usr/bin/perl -e \"use NetAddr::IP; require '/usr/lib/ipcop/vpn-functions.pl'; &VPN::writeovpnserverconf();\"");
+        "/usr/bin/perl -e \"use NetAddr::IP; require '/usr/lib/ofw/vpn-functions.pl'; &VPN::writeovpnserverconf();\"");
     safe_system(command);
 
     exit(0);
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 
     /* Fetch openvpn/settings */
     verbose_printf(1, "Reading OpenVPN settings ... \n");
-    if (read_kv_from_file(&openvpn_kv, "/var/ipcop/openvpn/settings") != SUCCESS) {
+    if (read_kv_from_file(&openvpn_kv, "/var/ofw/openvpn/settings") != SUCCESS) {
         fprintf(stderr, "Cannot read OpenVPN settings\n");
         exit(1);
     }
@@ -163,18 +163,18 @@ int main(int argc, char *argv[])
         }
 
         for (j = 1; j <= MAX_NETWORK_COLOUR; j++) {
-            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", ipcop_colours_text[i], j);
+            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", ofw_colours_text[i], j);
 
             if (test_kv(openvpn_kv, buffer, "on") == SUCCESS) {
                 /* this card is enabled in openvpn/settings */
-                if (j > ipcop_ethernet.count[i]) {
+                if (j > ofw_ethernet.count[i]) {
                     /* card is missing in ethernet/settings */
                     if (i == RED) {
                         /* RED could be Modem/ISDN */
                         verbose_printf(2, "RED is enabled and is not in ethernet/settings ... \n");
                     }
                     else {
-                        fprintf(stderr, "%s_%d enabled but no device defined\n", ipcop_colours_text[i], j);
+                        fprintf(stderr, "%s_%d enabled but no device defined\n", ofw_colours_text[i], j);
                         exit(1);
                     }
                 }
@@ -192,12 +192,12 @@ int main(int argc, char *argv[])
     if (enabled_count && (flag_start || flag_restart)) {
         safe_system("/sbin/modprobe tun");
         verbose_printf(1, "Starting OpenVPN server ... \n");
-        safe_system("/usr/sbin/openvpn --config /var/ipcop/openvpn/server.conf");
+        safe_system("/usr/sbin/openvpn --config /var/ofw/openvpn/server.conf");
     }
 
     /* rebuild rules, maybe server is now disabled, or some other change */
     verbose_printf(1, "Rebuild firewall rules ... \n");
-    safe_system("/usr/local/bin/setfwrules --ipcop");
+    safe_system("/usr/local/bin/setfwrules --ofw");
 
     return(0);
 }

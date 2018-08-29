@@ -2,22 +2,22 @@
 #
 # mkinitramfs, creates initramfs from installer/kernel update
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2007-2012, the IPCop team.
+# Copyright (C) 2007-2012, the Openfirewall Team.
 #
 # $Id: mkinitramfs 6634 2012-06-01 21:26:40Z owes $
 #
@@ -89,7 +89,7 @@ exiterror()
     # 3 -- kernel directory not found
     # 4 -- module(s) (file) (directory) not found
     # 5 -- firmware not found
-    # 6 -- insufficient space on /boot for the requested ipcoprd.img
+    # 6 -- insufficient space on /boot for the requested ofwrd.img
     # 7 -- error during modules.dep creation
     # 128 -- various cp errors
     # 129 -- missing errorcode
@@ -216,7 +216,7 @@ find_module_deps()
 create_initramfs()
 {
     local i
-    local TMPDIR=`mktemp -d -t ipcoprd.XXXXXX`
+    local TMPDIR=`mktemp -d -t ofwrd.XXXXXX`
 
     # Copy the pre-packaged initramfs directory structure
     if ! tar zxf /usr/lib/mkinitramfs.tar.gz -C ${TMPDIR}; then
@@ -307,9 +307,9 @@ create_initramfs()
         exiterror 7 "Error during initramfs depmod"
     fi
 
-    # Now create the initramfs ipcoprd.img
-    echo -ne "Creating ipcoprd.img.  This may take some time ... "
-    cd ${TMPDIR} && find . | cpio -o -H newc --quiet | gzip -9 > /tmp/temp_ipcoprd.img
+    # Now create the initramfs ofwrd.img
+    echo -ne "Creating ofwrd.img.  This may take some time ... "
+    cd ${TMPDIR} && find . | cpio -o -H newc --quiet | gzip -9 > /tmp/temp_ofwrd.img
     echo -ne "Done\n"
 
     # Clean up
@@ -323,18 +323,18 @@ create_initramfs()
 ############################################################################
 install_initramfs()
 {
-    local INITRAMFS_SIZE=`du -ks /tmp/temp_ipcoprd.img | cut -f1`
+    local INITRAMFS_SIZE=`du -ks /tmp/temp_ofwrd.img | cut -f1`
     local FREE_BOOT_SPACE=`df -P -k /boot | tail -n 1 | awk '{ print $4 }'`
 
     if [ 0${FREE_BOOT_SPACE} -gt 0${INITRAMFS_SIZE} ]; then
         echo_me "Installing initramfs in /boot ... "
-        if mv -f /tmp/temp_ipcoprd.img /boot/ipcoprd-${KVER}.img; then
+        if mv -f /tmp/temp_ofwrd.img /boot/ofwrd-${KVER}.img; then
             echo_me "Done\n"
             if [ x"${VERBOSE}" == x"yes" ]; then
-                du -h /boot/ipcoprd-${KVER}.img
+                du -h /boot/ofwrd-${KVER}.img
             fi
         else
-            exiterror 128 "Couldn't install ipcoprd.img in /boot"
+            exiterror 128 "Couldn't install ofwrd.img in /boot"
         fi
     else
         exiterror 6 "Not enough space on /boot."
@@ -398,7 +398,7 @@ do
     esac
 done
 
-echo_me "Creating IPCop bootstrap/rescue initramfs for kernel ${KVER}\n"
+echo_me "Creating Openfirewall bootstrap/rescue initramfs for kernel ${KVER}\n"
 
 # Check if the kernel modules directory exists
 if [ ! -d /lib/modules/${KVER} ]; then

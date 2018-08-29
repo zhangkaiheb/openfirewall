@@ -1,22 +1,22 @@
 /*
  * hardware.c: Probing, Scanning, everything to find out what's there
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2015, the IPCop team
+ * (c) 2007-2015, the Openfirewall Team
  *
  * $Id: hardware.c 7909 2015-03-01 11:25:39Z owes $
  * 
@@ -410,10 +410,10 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
         numBusses--;
     }
 
-    snprintf(line, STRING_SIZE, ipcop_gettext("TR_SCANNING_HARDWARE"), "");
+    snprintf(line, STRING_SIZE, ofw_gettext("TR_SCANNING_HARDWARE"), "");
     text = newtLabel(1, 1, line);
     scale = newtScale(1, 3, 70, numBusses * 10);
-    newtCenteredWindow(72, 5, ipcop_gettext("TR_TITLE_HARDWARE"));
+    newtCenteredWindow(72, 5, ofw_gettext("TR_TITLE_HARDWARE"));
     form = newtForm(NULL, NULL, 0);
     newtFormAddComponents(form, text, scale, NULL);
 
@@ -427,7 +427,7 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
      *
      */
 
-    snprintf(line, STRING_SIZE, ipcop_gettext("TR_SCANNING_HARDWARE"), "PCI");
+    snprintf(line, STRING_SIZE, ofw_gettext("TR_SCANNING_HARDWARE"), "PCI");
     strcat(line, "           ");
     newtLabelSetText(text, line);
     newtRefresh();
@@ -586,7 +586,7 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
 
     fprintf(flog, "Scan USB\n");
 
-    snprintf(line, STRING_SIZE, ipcop_gettext("TR_SCANNING_HARDWARE"), "USB");
+    snprintf(line, STRING_SIZE, ofw_gettext("TR_SCANNING_HARDWARE"), "USB");
     strcat(line, "           ");
     newtLabelSetText(text, line);
     newtRefresh();
@@ -686,7 +686,7 @@ skipusb:
 
     fprintf(flog, "Scan PCMCIA\n");
 
-    snprintf(line, STRING_SIZE, ipcop_gettext("TR_SCANNING_HARDWARE"), "PCMCIA");
+    snprintf(line, STRING_SIZE, ofw_gettext("TR_SCANNING_HARDWARE"), "PCMCIA");
     strcat(line, "           ");
     newtLabelSetText(text, line);
     newtRefresh();
@@ -717,7 +717,7 @@ skippcmcia:
 
         text = newtTextboxReflowed(1, 1, "Load and add a specific kernel module.", 68, 0, 0, 0);
         numLines = newtTextboxGetNumLines(text);
-        newtCenteredWindow(72, numLines + 10, ipcop_gettext("TR_TITLE_HARDWARE"));
+        newtCenteredWindow(72, numLines + 10, ofw_gettext("TR_TITLE_HARDWARE"));
         form = newtForm(NULL, NULL, 0);
         newtFormAddComponent(form, text);
 
@@ -727,8 +727,8 @@ skippcmcia:
         moduleentry = newtEntry(12, numLines + 3, "", 20, &modulename, 0);
         newtFormAddComponent(form, moduleentry);
 
-        button_add = newtButton(6, numLines + 5, ipcop_gettext("TR_OK"));
-        button_done = newtButton(26, numLines + 5, ipcop_gettext("TR_DONE"));
+        button_add = newtButton(6, numLines + 5, ofw_gettext("TR_OK"));
+        button_done = newtButton(26, numLines + 5, ofw_gettext("TR_DONE"));
         newtFormAddComponents(form, button_add, button_done, NULL);
 
         newtRefresh();
@@ -756,7 +756,7 @@ skippcmcia:
     firstscan = TRUE;
     while (install_setup && (numharddisk == 0)) {
         fflush(fhwdetect);
-        statuswindow(72, 5, ipcop_gettext("TR_TITLE_HARDWARE"), ipcop_gettext("TR_SCANNING_HARDWARE"), "drives");
+        statuswindow(72, 5, ofw_gettext("TR_TITLE_HARDWARE"), ofw_gettext("TR_SCANNING_HARDWARE"), "drives");
 
         if (!firstscan) {
             /* since we've not yet waited since last modprobe, sleep now */
@@ -778,9 +778,9 @@ skippcmcia:
             const char *modulename;
             int numLines;
 
-            text = newtTextboxReflowed(1, 1, ipcop_gettext("TR_NO_HARDDISK_MODPROBE"), 68, 0, 0, 0);
+            text = newtTextboxReflowed(1, 1, ofw_gettext("TR_NO_HARDDISK_MODPROBE"), 68, 0, 0, 0);
             numLines = newtTextboxGetNumLines(text);
-            newtCenteredWindow(72, numLines + 9, ipcop_gettext("TR_TITLE_HARDWARE"));
+            newtCenteredWindow(72, numLines + 9, ofw_gettext("TR_TITLE_HARDWARE"));
             form = newtForm(NULL, NULL, 0);
             newtFormAddComponent(form, text);
 
@@ -790,9 +790,9 @@ skippcmcia:
             moduleentry = newtEntry(12, numLines + 2, "", 20, &modulename, 0);
             newtFormAddComponent(form, moduleentry);
 
-            button_rescan = newtButton(6, numLines + 4, ipcop_gettext("TR_RESCAN"));
+            button_rescan = newtButton(6, numLines + 4, ofw_gettext("TR_RESCAN"));
             button_modprobe = newtButton(26, numLines + 4, "Modprobe");
-            button_cancel = newtButton(46, numLines + 4, ipcop_gettext("TR_CANCEL"));
+            button_cancel = newtButton(46, numLines + 4, ofw_gettext("TR_CANCEL"));
             newtFormAddComponents(form, button_rescan, button_modprobe, button_cancel, NULL);
 
             newtRefresh();

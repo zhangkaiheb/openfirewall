@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
 # Called from rc.sysinit during initialisation for flash installed system.
 # Creates ramdisk with symlinks etc.
@@ -10,10 +10,10 @@
 
 # Max amount of RAM used by the tmpfs mount can be set through flashsettings file
 # as a fixed size (eg 32M) or percentage (eg 50%). Default is 64M.
-if [ -f /var/ipcop/main/flashsettings ] ; then
+if [ -f /var/ofw/main/flashsettings ] ; then
     # Since we also allow the size to be set as a percentage (i.e. 50%)
     # we can not use readhash here.
-    TMPFS_MAX_SIZE=`grep "^TMPFS_MAX_SIZE" /var/ipcop/main/flashsettings | cut -f 2 -d '='`
+    TMPFS_MAX_SIZE=`grep "^TMPFS_MAX_SIZE" /var/ofw/main/flashsettings | cut -f 2 -d '='`
 fi
 if [ ! $TMPFS_MAX_SIZE ] ; then
     TMPFS_MAX_SIZE=64M
@@ -84,8 +84,8 @@ fi
 
 if [ ! -e /var/log/traffic ]; then
     mkdir -p /var/log/traffic/vnstat
-    cp /var/ipcop/traffic/empty-aggregate.db /var/log/traffic/aggregate.db
-    cp /var/ipcop/traffic/empty-ulogd.db /var/log/traffic/ulogd.db
+    cp /var/ofw/traffic/empty-aggregate.db /var/log/traffic/aggregate.db
+    cp /var/ofw/traffic/empty-ulogd.db /var/log/traffic/ulogd.db
 fi
 
 if [ ! -e /var/log/updates ]; then
@@ -130,7 +130,7 @@ fi
 
 tar -xzf /var/log_compressed/spool.tgz -C /var/spool
 
-if [ ! -L /var/ipcop/red ]; then
-    rm -rf /var/ipcop/red
-    ln -fs /ram/red /var/ipcop/red
+if [ ! -L /var/ofw/red ]; then
+    rm -rf /var/ofw/red
+    ln -fs /ram/red /var/ofw/red
 fi

@@ -2,22 +2,22 @@
  * arch_defs.h: Global defines, function definitions etc. concerning portabilty
  *              Probably only necessary for installer. 
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2014, the IPCop team
+ * (c) 2007-2014, the Openfirewall Team
  *
  * $Id: arch_defs.h 7846 2015-02-01 18:35:46Z owes $
  * 
@@ -47,7 +47,7 @@
 /*
     Number of partitions
 */
-#define IPCOP_PARTITIONS    2
+#define OFW_PARTITIONS    2
 #if defined (__i386__)
 #define NR_PARTITIONS       2
 #elif defined (__x86_64__)
@@ -71,7 +71,7 @@
 #define LOGCOMPRESSED    64
 
 
-#define TARBALL_IPCOP    "ipcop-" VERSION ".tar.gz"
+#define TARBALL_OFW    "ipcop-" VERSION ".tar.gz"
 
 
 typedef enum
@@ -122,7 +122,7 @@ extern char *serial_commandline;                /* ttyS0,38400n81 */
     Functions implemented in hardware.c and partition.c    
 */
 void scan_hardware(int installer_setup, int nopcmcia, int nousb, int manualmodule);
-int make_ipcop_disk(char *device, char *device2, long int disk_size, long int swapfilesize, int part_options);
+int make_ofw_disk(char *device, char *device2, long int disk_size, long int swapfilesize, int part_options);
 
 #define PART_OPTIONS_MANUAL     0x0001
 #define PART_OPTIONS_NO_MBR     0x0002

@@ -1,23 +1,23 @@
 /*
  * common.h: Global defines, function definitions etc.
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2011, the IPCop team
+ * (c) 2007-2011, the Openfirewall Team
  *
  * $Id: common.h 7846 2015-02-01 18:35:46Z owes $
  *
@@ -64,13 +64,13 @@ int mysystemhidden(char *command);
 /* Retrieves PID from PIDfile and send signal */
 int mysignalpidfile(char *pidfile, int signal);
 
-/* Gets IPCop version number, platform and 'slogan'. */
+/* Gets Openfirewall version number, platform and 'slogan'. */
 char *get_title(void);
 
-/* Get IPCop version.
+/* Get Openfirewall version.
     0 if version file missing or version invalid.
     (a << 16) + (b << 8) + c for version a.b.c          */
-unsigned int getipcopversion(void);
+unsigned int getofwversion(void);
 
 /* stripnl().  Replaces \n with \0 */
 void stripnl(char *s);
@@ -109,7 +109,7 @@ int write_kv_to_file(NODEKV ** p, char *filename);
 
 
 /*  Many helper programs need ethernet/settings config file (read only).
-    Make life easier, first do read_ethernet_settings then use ipcop_ethernet structure.
+    Make life easier, first do read_ethernet_settings then use ofw_ethernet structure.
 */
 
 /* How many colours do we have */
@@ -132,11 +132,11 @@ typedef enum
     BLUE,
     ORANGE,
     NONE,
-} ipcop_colours;
+} ofw_colours;
 
-extern char *ipcop_colours_text[CFG_COLOURS_COUNT];     /* GREEN, RED etc. as strings */
-extern char *ipcop_aliases_text[CFG_COLOURS_COUNT];     /* lan, wan etc. as network aliases */
-extern char *ipcop_red_text[CFG_RED_COUNT];     /* ANALOG, ISDN, etc. */
+extern char *ofw_colours_text[CFG_COLOURS_COUNT];     /* GREEN, RED etc. as strings */
+extern char *ofw_aliases_text[CFG_COLOURS_COUNT];     /* lan, wan etc. as network aliases */
+extern char *ofw_red_text[CFG_RED_COUNT];     /* ANALOG, ISDN, etc. */
 
 struct network_s
 {
@@ -144,7 +144,7 @@ struct network_s
     char *options;              /* modprobe parameters */
     char *device;               /* eth0, eth1 etc. */
     char *description;
-    ipcop_colours colour;       /* GREEN, RED, BLUE, ORANGE, ---- */
+    ofw_colours colour;       /* GREEN, RED, BLUE, ORANGE, ---- */
     char *address;              /* MAC address */
     char *vendorid;             /* vendor and device ID for better NIC matching */
     char *modelid;
@@ -167,7 +167,7 @@ struct ethernet_s
     /* this one is very special */
     char *default_gateway;
 };
-extern struct ethernet_s ipcop_ethernet;
+extern struct ethernet_s ofw_ethernet;
 
 /* Return SUCCESS if device exist */
 int exist_ethernet_device(char *device);

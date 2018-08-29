@@ -1,21 +1,21 @@
 #!/bin/sh
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# (c) 2001-2015, the IPCop team
+# (c) 2001-2015, the Openfirewall Team
 #
 # $Id: rc.sysinit 7884 2015-02-09 16:54:04Z owes $
 #
@@ -94,7 +94,7 @@ COLUMNS=$((${COLUMNS##* } - 10 )) # left 10 to right border
 DONE="\\033[${COLUMNS}G\\033[0;32mDone${NORMAL}" # 'Done' in green
 FAIL="\\033[${COLUMNS}G\\033[0;31mFail${NORMAL}" # 'Fail' in red
 
-eval $(/usr/local/bin/readhash /var/ipcop/main/settings)
+eval $(/usr/local/bin/readhash /var/ofw/main/settings)
 
 umask 022
 
@@ -118,6 +118,9 @@ if ! /bin/mountpoint -q /proc; then
     echo > /proc/sys/kernel/hotplug
     test_ok
 fi
+
+# 
+/bin/mkdir -pv /run/lock
 
 # Start udev
 echo -ne "Starting udev ... "
@@ -190,8 +193,8 @@ if [ ! -e /etc/FLASH ]; then
     fi
 fi
 
-IPCOPVERSION=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::version;"`
-IPCOPKERNEL=`/bin/uname -r`
+OFWVERSION=`/usr/bin/perl -e "require '/usr/lib/ofw/general-functions.pl';print \\$General::version;"`
+OFWKERNEL=`/bin/uname -r`
 
 echo -ne "Setting hostname ... "
 if [ -z "$DOMAINNAME" ]; then
@@ -218,15 +221,15 @@ if [ -e /swapfile ]; then
     test_ok
 fi
 
-if [ -L /boot/System.map -a -r /boot/System.map-${IPCOPKERNEL} -a \
-    ! /boot/System.map -ef /boot/System.map-${IPCOPKERNEL} ]; then
+if [ -L /boot/System.map -a -r /boot/System.map-${OFWKERNEL} -a \
+    ! /boot/System.map -ef /boot/System.map-${OFWKERNEL} ]; then
     echo -ne "Updating System.map file location ... "
-    /bin/ln -s -f System.map-${IPCOPKERNEL} /boot/System.map
+    /bin/ln -s -f System.map-${OFWKERNEL} /boot/System.map
     test_ok
 fi
-if [ ! -e /boot/System.map -a -r /boot/System.map-${IPCOPKERNEL} ]; then
+if [ ! -e /boot/System.map -a -r /boot/System.map-${OFWKERNEL} ]; then
     echo -ne "Updating System.map file location ... "
-    /bin/ln -s -f System.map-${IPCOPKERNEL} /boot/System.map
+    /bin/ln -s -f System.map-${OFWKERNEL} /boot/System.map
     test_ok
 fi
 
@@ -248,7 +251,7 @@ export LANG
 test_ok
 
 echo -ne "Setting consolefonts ... "
-eval $(/usr/local/bin/readhash /var/ipcop/main/settings)
+eval $(/usr/local/bin/readhash /var/ofw/main/settings)
 for i in 2 3 4 5 6; do
     > /dev/tty$i
 done
@@ -329,10 +332,10 @@ if [ ! -e /etc/ssh/ssh_host_ed25519_key ]; then
     test_ok
 fi
 
-if [ ! -e /var/ipcop/backup/backup.key ]; then
+if [ ! -e /var/ofw/backup/backup.key ]; then
     echo -ne "Generating backup key.  This may take several minutes ... "
-    /usr/sbin/ipsec ranbits --quick 256 > /var/ipcop/backup/backup.key
-    /bin/chmod 400 /var/ipcop/backup/backup.key
+    /usr/sbin/ipsec ranbits --quick 256 > /var/ofw/backup/backup.key
+    /bin/chmod 400 /var/ofw/backup/backup.key
     test_ok
 fi
 # https certificate
@@ -343,7 +346,7 @@ else
     /usr/local/bin/httpscert new > /dev/null 2>&1
     test_ok
 fi
-if [ ! -e /usr/lib/ipcop/menu.pl ]; then
+if [ ! -e /usr/lib/ofw/menu.pl ]; then
     echo -ne "Generating GUI menu ... "
     /usr/local/bin/updatemenu.pl
     test_ok
@@ -428,7 +431,7 @@ test_ok
 echo "Running rc.event"
 /etc/rc.d/rc.event system up
 
-/usr/bin/logger -t ipcop "IPCop ${IPCOPVERSION} started with kernel ${IPCOPKERNEL}."
+/usr/bin/logger -t ipcop "openfirewall ${OFWVERSION} started with kernel ${OFWKERNEL}."
 
-# Start RED if 'Connect on IPCop restart' enabled
+# Start RED if 'Connect on Openfirewall restart' enabled
 /etc/rc.d/rc.net --startred

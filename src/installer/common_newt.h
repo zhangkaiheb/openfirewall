@@ -1,23 +1,23 @@
 /*
  * common_newt.h: Global defines, function definitions for installer and setup
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2008, the IPCop team
+ * (c) 2008, the Openfirewall Team
  *
  * $Id: common_newt.h 3360 2009-07-30 10:16:12Z owes $
  *
@@ -65,8 +65,8 @@ int changedhcpserver(void);
 int password(char *user);
 
 /* Translation functions used in installer */
-void ipcop_locale(char *locale);
-char *ipcop_gettext(char *txt);
+void ofw_locale(char *locale);
+char *ofw_gettext(char *txt);
 
 /* Small window to change IP and Netmask of some colour */
 int changed_config;      /* something has changed      */

@@ -1,28 +1,28 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2009-2011, the IPCop team
+# (c) 2009-2011, the Openfirewall Team
 #
 # $Id: rc.connectioncheck 5784 2011-08-13 10:51:11Z owes $
 #
 
 
 use strict;
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 
 
 my $attempts = 0;
@@ -31,13 +31,13 @@ $pppsettings{'HOLDOFF'} = 30;
 $pppsettings{'DEBUG'} = 'off';
 $pppsettings{'MAXCONFIGURE'} = 160;
 
-&General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+&General::readhash('/var/ofw/ppp/settings', \%pppsettings);
 
-if (-s "/var/ipcop/red/keepconnected") {
-    $attempts = `/bin/cat /var/ipcop/red/keepconnected`; 
+if (-s "/var/ofw/red/keepconnected") {
+    $attempts = `/bin/cat /var/ofw/red/keepconnected`; 
 }
 else {
-    system('echo "0" > /var/ipcop/red/keepconnected');    
+    system('echo "0" > /var/ofw/red/keepconnected');    
 }
 
 if ($ARGV[0] eq 'start') {
@@ -51,7 +51,7 @@ if ($ARGV[0] eq 'start') {
 
     while (system("/bin/ps ax | /bin/grep -q [p]ppd")) {
 
-        if (! -e "/var/ipcop/red/keepconnected") {
+        if (! -e "/var/ofw/red/keepconnected") {
             # user pressed disconnect in gui
             &msg('Disconnect via GUI');
             exit 0
@@ -75,15 +75,15 @@ if ($ARGV[0] eq 'start') {
     #watching if an IP is received in MAXCONFIGURE time to avoid some pppoa waiting forever even after LCP timeout
     my $count = 0;
     while ($count < $pppsettings{'MAXCONFIGURE'}) {
-        if (! -e "/var/ipcop/red/keepconnected") {
+        if (! -e "/var/ofw/red/keepconnected") {
             # user pressed disconnect in gui
             &msg('Disconnect via GUI');
             exit 0;
         }
 
-        if (-e "/var/ipcop/red/active") {
+        if (-e "/var/ofw/red/active") {
             # connected in time so exit
-            system('echo "0" > /var/ipcop/red/keepconnected');    
+            system('echo "0" > /var/ofw/red/keepconnected');    
             &msg('Connected');
             exit 0;
         }
@@ -91,7 +91,7 @@ if ($ARGV[0] eq 'start') {
         # pppd uses 10.64.64.64 as a temporary IP when dial-on-demand is used
         # but the connection has not yet been dialed - ie no demand (see
         # ppp-2.4.3/pppd/ipcp.c:1651). Don't count in this case
-        $count+=5 unless ( (-e "/var/ipcop/red/dial-on-demand") && system("/sbin/ip addr list label 'ppp*' | /bin/grep -q 'inet 10.64.64.64'"));
+        $count+=5 unless ( (-e "/var/ofw/red/dial-on-demand") && system("/sbin/ip addr list label 'ppp*' | /bin/grep -q 'inet 10.64.64.64'"));
 
         if (system("/bin/ps ax | /bin/grep -q [p]ppd")) {
             #pppd exit, so don't need to wait MAXCONFIGURE
@@ -112,21 +112,21 @@ if ($ARGV[0] eq 'start') {
     # this attempt to connect fail, so retry
 
     #Don't erase keepconnected because it is used to watch user actions
-    system("/usr/bin/touch /var/ipcop/red/redial");
+    system("/usr/bin/touch /var/ofw/red/redial");
     system("/etc/rc.d/rc.red stop");
     while (! system("/bin/ps ax | /bin/grep -q [p]ppd") ) {
         &msg('Waiting pppd exit');
         sleep 2;
     }
 
-    if (! -e "/var/ipcop/red/keepconnected") {
+    if (! -e "/var/ofw/red/keepconnected") {
         # user pressed disconnect in gui
         &msg('Disconnect via GUI');
         exit 0;
     }
     $attempts++;
     if ($attempts >= $pppsettings{'MAXRETRIES'}) {
-        system('echo "0" > /var/ipcop/red/keepconnected');
+        system('echo "0" > /var/ofw/red/keepconnected');
         &msg('Clearing RED interface');
         system("/etc/rc.d/rc.red clear");
         if (defined($pppsettings{'BACKUPPROFILE'}) && ($pppsettings{'BACKUPPROFILE'} != 0)) {
@@ -134,7 +134,7 @@ if ($ARGV[0] eq 'start') {
             &General::SelectProfile($backup);
 
             # read the new profile
-            &General::readhash('/var/ipcop/ppp/settings', \%pppsettings);
+            &General::readhash('/var/ofw/ppp/settings', \%pppsettings);
             &msg("Changed to backup profile $backup $pppsettings{'PROFILENAME'}");
         }
         else {
@@ -143,7 +143,7 @@ if ($ARGV[0] eq 'start') {
         }
     }
     else {
-        system("echo $attempts > /var/ipcop/red/keepconnected");
+        system("echo $attempts > /var/ofw/red/keepconnected");
         # Increment attempts counter for logfile
         $attempts++;
         &msg("Restarting $attempts/$pppsettings{'MAXRETRIES'}");
@@ -151,12 +151,12 @@ if ($ARGV[0] eq 'start') {
 
     my $holdoff = $pppsettings{'HOLDOFF'};
     &msg("Holdoff $holdoff seconds");
-    while (($holdoff > 0) && (-e "/var/ipcop/red/keepconnected")) {
+    while (($holdoff > 0) && (-e "/var/ofw/red/keepconnected")) {
         sleep 1;
         $holdoff--;
     }
 
-    if (! -e "/var/ipcop/red/keepconnected") {
+    if (! -e "/var/ofw/red/keepconnected") {
         # user pressed disconnect in gui
         &msg('Disconnect via GUI');
         exit 0;

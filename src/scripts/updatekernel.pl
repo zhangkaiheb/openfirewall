@@ -1,27 +1,27 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2009-2012, the IPCop team
+# (c) 2009-2012, the Openfirewall Team
 #
 # $Id: updatekernel.pl 6815 2012-10-31 10:50:55Z owes $
 #
 
 use strict;
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 
 my %bootconfig = (
     'i486'  => '/boot/extlinux.conf',
@@ -53,8 +53,8 @@ while (@ARGV) {
 # old version is optional and does not need to exist
 #
 # Usages:
-#   IPCop installed with kernel .9. Update adds kernel .10, current is .9 and old (to be deleted) is .8
-#   IPCop installed with kernel .9. Update adds kernel .11, current is .10 and old (to be deleted) is .9
+#   Openfirewall installed with kernel .9. Update adds kernel .10, current is .9 and old (to be deleted) is .8
+#   Openfirewall installed with kernel .9. Update adds kernel .11, current is .10 and old (to be deleted) is .9
 #
 
 
@@ -109,7 +109,7 @@ if (($oldversion ne '') && (-e "/lib/modules/$oldversion")) {
     # Remove kernel modules
     system("rm -rf /lib/modules/$oldversion");
     # Remove files from /boot
-    system("rm -rf /boot/ipcoprd-$oldversion.img");
+    system("rm -rf /boot/ofwrd-$oldversion.img");
     system("rm -rf /boot/System.map-$oldversion");
     system("rm -rf /boot/vmlinuz-$oldversion");
 }
@@ -129,20 +129,20 @@ open(BOOTCONFIG, ">>", $bootconfig{$General::machine}) or die "Cannot open $boot
 if ($General::machine eq 'i486') {
     print BOOTCONFIG <<END
 
-LABEL old-ipcop
-  MENU LABEL IPCop old kernel ($keepversion)
+LABEL old-Openfirewall
+  MENU LABEL Openfirewall old kernel ($keepversion)
   MENU SAVE
   KERNEL vmlinuz-$keepversion
 $lines{'default'}
 
 LABEL old-noacpi
-  MENU LABEL IPCop old kernel ($keepversion ACPI disabled)
+  MENU LABEL openfirewall old kernel ($keepversion ACPI disabled)
   MENU SAVE
   KERNEL vmlinuz-$keepversion
 $lines{'noacpi'}
 
 LABEL old-verbose
-  MENU LABEL IPCop old kernel ($keepversion verbose booting)
+  MENU LABEL openfirewall old kernel ($keepversion verbose booting)
   MENU SAVE
   KERNEL vmlinuz-$keepversion
 $lines{'verbose'}
@@ -152,9 +152,9 @@ elsif ($General::machine eq 'ppc') {
     print BOOTCONFIG <<END
 
 image=/vmlinuz
-	label=IPCop old kernel 
+	label=openfirewall old kernel 
 $lines{'root'}
-	initrd=/ipcoprd-$keepversion.img
+	initrd=/ofwrd-$keepversion.img
 	read-only
 	append="mode=normal video=ofonly"
 END
@@ -163,9 +163,9 @@ elsif ($General::machine eq 'sparc') {
     print BOOTCONFIG <<END
 
 image[sun4u] = /boot/vmlinuz
-	label=IPCop old kernel 
+	label=Openfirewall old kernel 
 $lines{'root'}
-	initrd=/boot/ipcoprd-$keepversion.img
+	initrd=/boot/ofwrd-$keepversion.img
 	append="mode=normal"
 	#append="mode=normal console=tty0 console=ttyS0,9600n8 video=atyfb:off"
 END

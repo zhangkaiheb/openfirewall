@@ -1,22 +1,22 @@
 /*
  * networking.c: 
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2014, the IPCop team
+ * (c) 2007-2014, the Openfirewall Team
  *
  * $Id: networking.c 7593 2014-06-09 07:49:51Z owes $
  * 
@@ -310,14 +310,14 @@ static void scancards(void)
         char key[STRING_SIZE];
 
         for (i = 0; i < CFG_COLOURS_COUNT - 1; i++) {
-            snprintf(key, STRING_SIZE, "%s_COUNT", ipcop_colours_text[i]);
+            snprintf(key, STRING_SIZE, "%s_COUNT", ofw_colours_text[i]);
             c = atoi(find_kv(eth_kv, key));
 
             for (j = 1; j <= c; j++) {
                 int found = 0;
                 char *device;
 
-                snprintf(key, STRING_SIZE, "%s_%d_DEV", ipcop_colours_text[i], j);
+                snprintf(key, STRING_SIZE, "%s_%d_DEV", ofw_colours_text[i], j);
                 device = strdup(find_kv(eth_kv, key));
 
                 /* Test if the configured device is still present */
@@ -346,7 +346,7 @@ static void scancards(void)
                     }
                 }
 
-                snprintf(key, STRING_SIZE, "%s_%d_DRIVER", ipcop_colours_text[i], j);
+                snprintf(key, STRING_SIZE, "%s_%d_DRIVER", ofw_colours_text[i], j);
                 for (n = 0; !found && (n < numnetwork); n++) {
                     if (!networks[n].device[0] && (find_kv(eth_kv, key) != NULL)
                         && !strcmp(networks[n].module, find_kv(eth_kv, key))) {
@@ -378,11 +378,11 @@ static void scancards(void)
 
                     numnetwork++;
                     found = 1;
-                    fprintf(flog, "  HW undetected %s_%d %s\n", ipcop_colours_text[i], j, device);
+                    fprintf(flog, "  HW undetected %s_%d %s\n", ofw_colours_text[i], j, device);
                 }
 
                 if (!found) {
-                    fprintf(flog, "  setup problem with %s_%d %s\n", ipcop_colours_text[i], j, device);
+                    fprintf(flog, "  setup problem with %s_%d %s\n", ofw_colours_text[i], j, device);
                     free(device);
                 }
             }
@@ -440,7 +440,7 @@ static void redconfigtype(void)
     /* build radio buttons and add to window */
     for (i = 0; i < CFG_RED_COUNT; i++) {
         radio[i] =
-            newtRadiobutton(2, i + numLines + 2, radio_text[i], (strcmp(keyvalue, ipcop_red_text[i]) == 0),
+            newtRadiobutton(2, i + numLines + 2, radio_text[i], (strcmp(keyvalue, ofw_red_text[i]) == 0),
                             i == 0 ? NULL : radio[i - 1]);
         newtFormAddComponents(networkform, radio[i], NULL);
     }
@@ -463,12 +463,12 @@ static void redconfigtype(void)
     if (exitstruct.u.co == ok) {
         newtComponent selected = newtRadioGetCurrent(radio[1]);
         for (i = 0; i < CFG_RED_COUNT; i++) {
-            if ((selected == radio[i]) && strcmp(keyvalue, ipcop_red_text[i])) {
+            if ((selected == radio[i]) && strcmp(keyvalue, ofw_red_text[i])) {
                 /* config type has changed, update cfg file and set flag  */
-                update_kv(&eth_kv, "RED_1_TYPE", ipcop_red_text[i]);
-                strcpy(kv_red_type, ipcop_red_text[i]);
+                update_kv(&eth_kv, "RED_1_TYPE", ofw_red_text[i]);
+                strcpy(kv_red_type, ofw_red_text[i]);
 
-                if (!strcmp(ipcop_red_text[i], "ANALOG") || !strcmp(ipcop_red_text[i], "GSM3G") || !strcmp(ipcop_red_text[i], "ISDN")) {
+                if (!strcmp(ofw_red_text[i], "ANALOG") || !strcmp(ofw_red_text[i], "GSM3G") || !strcmp(ofw_red_text[i], "ISDN")) {
                     update_kv(&eth_kv, "RED_1_DEV", "");
                     update_kv(&eth_kv, "RED_COUNT", "0");
                 }
@@ -534,7 +534,7 @@ static void cardconfig(int n)
 
     /* owes: ToDo could do with some fancy text here */
     snprintf(info, STRING_SIZE_LARGE, "%s\nMAC Address: %s Device: %s\nCurrently assigned to: %s",
-             networks[n].description, networks[n].address, networks[n].device, ipcop_colours_text[networks[n].colour]);
+             networks[n].description, networks[n].address, networks[n].device, ofw_colours_text[networks[n].colour]);
 
     for (choice = 0, i = 0; i < CFG_COLOURS_COUNT - 1; i++) {
         int used = 0;
@@ -553,7 +553,7 @@ static void cardconfig(int n)
         }
 
         if (!used) {
-            colourchoices[choice++] = ipcop_colours_text[i];
+            colourchoices[choice++] = ofw_colours_text[i];
         }
     }
     colourchoices[choice++] = gettext("TR_NOT_USED");
@@ -571,20 +571,20 @@ static void cardconfig(int n)
             changed_config = 1;
             if (!strcmp(colourchoices[choice], gettext("TR_NOT_USED"))) {
                 if (networks[n].colour != NONE) {
-                    updatesettings(ipcop_colours_text[networks[n].colour], -1);
+                    updatesettings(ofw_colours_text[networks[n].colour], -1);
                 }
                 networks[n].colour = NONE;
             }
             else {
                 if (networks[n].colour != NONE) {
-                    updatesettings(ipcop_colours_text[networks[n].colour], -1);
+                    updatesettings(ofw_colours_text[networks[n].colour], -1);
                 }
 
                 /* since choices is a selected list of colours, we cannot directly correlate numeric choice to a colour */
                 for (i = 0; i < CFG_COLOURS_COUNT - 1; i++) {
-                    if (!strcmp(ipcop_colours_text[i], colourchoices[choice])) {
+                    if (!strcmp(ofw_colours_text[i], colourchoices[choice])) {
                         networks[n].colour = i;
-                        updatesettings(ipcop_colours_text[networks[n].colour], n);
+                        updatesettings(ofw_colours_text[networks[n].colour], n);
                     }
                 }
             }
@@ -637,18 +637,18 @@ static void udevconfig(void)
         return;
     }
 
-    fprintf(fnet, "# This file was generated by IPCop setup.\n");
+    fprintf(fnet, "# This file was generated by Openfirewall setup.\n");
     fprintf(fnet, "# Do not make any modifications, rerun setup instead.\n\n");
 
     /* set the device names with the help of udev */
     for (i = 0; i < numnetwork; i++) {
         if (networks[i].address[0]) {
             if (networks[i].colour == NONE) {
-                snprintf(device, STRING_SIZE, "%s-%d", ipcop_aliases_text[NONE], counter++);
+                snprintf(device, STRING_SIZE, "%s-%d", ofw_aliases_text[NONE], counter++);
             }
             else {
-                snprintf(device, STRING_SIZE, "%s-%d", ipcop_aliases_text[networks[i].colour], 1);
-                snprintf(key, STRING_SIZE, "%s_%d_DEV", ipcop_colours_text[networks[i].colour], 1);
+                snprintf(device, STRING_SIZE, "%s-%d", ofw_aliases_text[networks[i].colour], 1);
+                snprintf(key, STRING_SIZE, "%s_%d_DEV", ofw_colours_text[networks[i].colour], 1);
                 update_kv(&eth_kv, key, device);
             }
 
@@ -761,7 +761,7 @@ static void cardlist(void)
             if ((choice == -1) && (networks[i].colour == NONE)) {
                 choice = count;
             }
-            snprintf(line, STRING_SIZE, "%-60.60s (%s)", networks[i].description, ipcop_colours_text[networks[i].colour]);
+            snprintf(line, STRING_SIZE, "%-60.60s (%s)", networks[i].description, ofw_colours_text[networks[i].colour]);
             cardchoices[count++] = strdup(line);
         }
         cardchoices[count] = NULL;
@@ -812,9 +812,9 @@ static void cardlist(void)
                     break;
                 }
                 if (!count) {
-                    rc = newtWinChoice(ipcop_gettext("TR_TITLE_DISK"),
-                           ipcop_gettext("TR_GO_BACK"), ipcop_gettext("TR_OK"),
-                           ipcop_gettext("TR_NO_RED_INTERFACE_RESET_TYPE"));
+                    rc = newtWinChoice(ofw_gettext("TR_TITLE_DISK"),
+                           ofw_gettext("TR_GO_BACK"), ofw_gettext("TR_OK"),
+                           ofw_gettext("TR_NO_RED_INTERFACE_RESET_TYPE"));
 
                     if (rc == 2) {
                         /* Bail out by resetting RED type to analog */
@@ -875,7 +875,7 @@ static void changehostname(void)
     strcpy(keyvalue, "");
     if (find_kv_default(eth_kv, "RED_DHCP_HOSTNAME", keyvalue) == FAILURE) {
         NODEKV *main_kv = NULL;
-        if (read_kv_from_file(&main_kv, "/var/ipcop/main/settings") == SUCCESS) {
+        if (read_kv_from_file(&main_kv, "/var/ofw/main/settings") == SUCCESS) {
             find_kv_default(main_kv, "HOSTNAME", keyvalue);
             free_kv(&main_kv);
         }
@@ -930,11 +930,11 @@ static void selectchangeaddress(void)
             /* Skip RED if it is not set to STATIC, PPPoE or PPTP */
             continue;
         }
-        snprintf(key, STRING_SIZE, "%s_1_DEV", ipcop_colours_text[i]);
+        snprintf(key, STRING_SIZE, "%s_1_DEV", ofw_colours_text[i]);
         strcpy(keyvalue, "");
         find_kv_default(eth_kv, key, keyvalue);
         if (keyvalue[0]) {
-            menuchoices[choice++] = ipcop_colours_text[i];
+            menuchoices[choice++] = ofw_colours_text[i];
         }
     }
 
@@ -1095,7 +1095,7 @@ int handlenetworking(void)
     changed_red = 0;
     changed_dnsgateway = 0;
 
-    if (read_kv_from_file(&eth_kv, "/var/ipcop/ethernet/settings") != SUCCESS) {
+    if (read_kv_from_file(&eth_kv, "/var/ofw/ethernet/settings") != SUCCESS) {
         free_kv(&eth_kv);
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
@@ -1105,7 +1105,7 @@ int handlenetworking(void)
 
     /* make sure these are always present */
     for (rc = 0; rc < CFG_COLOURS_COUNT - 1; rc++) {
-        snprintf(keyvalue, STRING_SIZE, "%s_COUNT", ipcop_colours_text[rc]);
+        snprintf(keyvalue, STRING_SIZE, "%s_COUNT", ofw_colours_text[rc]);
         if ((find_kv(eth_kv, keyvalue)) == NULL) {
             update_kv(&eth_kv, keyvalue, "0");
         }
@@ -1160,7 +1160,7 @@ int handlenetworking(void)
             changeaddress("ORANGE", &changed_orange);
         }
 
-        write_kv_to_file(&eth_kv, "/var/ipcop/ethernet/settings");
+        write_kv_to_file(&eth_kv, "/var/ofw/ethernet/settings");
         free_kv(&eth_kv);
         mysystem("/usr/local/bin/rebuildhosts");
 
@@ -1177,7 +1177,7 @@ int handlenetworking(void)
      */
 
     choice = 0;
-    mysystem("cp -f /var/ipcop/ethernet/settings /var/ipcop/ethernet/settings.old");
+    mysystem("cp -f /var/ofw/ethernet/settings /var/ofw/ethernet/settings.old");
 
     for (;;) {
 
@@ -1208,7 +1208,7 @@ int handlenetworking(void)
             cardlist();
             break;
         case 2:
-            if (access("/var/ipcop/red/active", 0) != -1) {
+            if (access("/var/ofw/red/active", 0) != -1) {
                 errorbox(gettext("TR_RED_IN_USE"));
             }
             else {
@@ -1230,8 +1230,8 @@ int handlenetworking(void)
     }
 
     if (changed_config) {
-        write_kv_to_file(&eth_kv, "/var/ipcop/ethernet/settings");
-        statuswindow(72, 5, gettext("TR_NETWORKING"), ipcop_gettext("TR_RECONFIGURE_NETWORK"));
+        write_kv_to_file(&eth_kv, "/var/ofw/ethernet/settings");
+        statuswindow(72, 5, gettext("TR_NETWORKING"), ofw_gettext("TR_RECONFIGURE_NETWORK"));
         mysystem("/etc/rc.d/rc.net --reconfigure");
         newtPopWindow();
     }

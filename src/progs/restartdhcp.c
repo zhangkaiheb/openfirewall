@@ -1,23 +1,23 @@
 /*
  * restartdhcp.c: suid helper to restart DHCP service
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2001-2008, the IPCop team
+ * (c) 2001-2008, the Openfirewall Team
  *
  * $Id: restartdhcp.c 3215 2009-07-11 14:47:26Z owes $
  *
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 
     /* Read DHCP settings */
     verbose_printf(1, "Reading DHCP settings ... \n");
-    if (read_kv_from_file(&dhcp_kv, "/var/ipcop/dhcp/settings") != SUCCESS) {
+    if (read_kv_from_file(&dhcp_kv, "/var/ofw/dhcp/settings") != SUCCESS) {
         fprintf(stderr, "Cannot read DHCP settings\n");
         exit(1);
     }
@@ -112,13 +112,13 @@ int main(int argc, char **argv)
         }
 
         for (j = 1; j <= MAX_NETWORK_COLOUR; j++) {
-            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", ipcop_colours_text[i], j);
+            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", ofw_colours_text[i], j);
 
             if (test_kv(dhcp_kv, buffer, "on") == SUCCESS) {
                 /* this card is enabled in dhcp/settings */
-                if (j > ipcop_ethernet.count[i]) {
+                if (j > ofw_ethernet.count[i]) {
                     /* card is missing in ethernet/settings */
-                    fprintf(stderr, "%s_%d enabled but no device defined\n", ipcop_colours_text[i], j);
+                    fprintf(stderr, "%s_%d enabled but no device defined\n", ofw_colours_text[i], j);
                     exit(1);
                 }
 

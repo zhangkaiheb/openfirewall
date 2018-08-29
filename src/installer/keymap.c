@@ -1,23 +1,23 @@
 /* 
  * keymap.c: set the keyboard
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2009, the IPCop team
+ * (c) 2007-2009, the Openfirewall Team
  * 
  * $Id: keymap.c 3436 2009-08-14 09:14:53Z owes $
  * 
@@ -59,14 +59,14 @@ int write_keymap(void)
         return SUCCESS;
     }
 
-    if (read_kv_from_file(&kv, "/harddisk/var/ipcop/main/settings") != SUCCESS) {
+    if (read_kv_from_file(&kv, "/harddisk/var/ofw/main/settings") != SUCCESS) {
         free_kv(&kv);
-        errorbox(ipcop_gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
+        errorbox(ofw_gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
 
     update_kv(&kv, "KEYMAP", keymap_setting);
-    write_kv_to_file(&kv, "/harddisk/var/ipcop/main/settings");
+    write_kv_to_file(&kv, "/harddisk/var/ofw/main/settings");
     free_kv(&kv);
 
     return SUCCESS;
@@ -122,9 +122,9 @@ int handlekeymap(void)
 
     strcpy(keymap_setting, KEYMAPROOT "qwerty/us.map.gz");
     if (flag_is_state != installer) {
-        if (read_kv_from_file(&kv, "/var/ipcop/main/settings") != SUCCESS) {
+        if (read_kv_from_file(&kv, "/var/ofw/main/settings") != SUCCESS) {
             free_kv(&kv);
-            errorbox(ipcop_gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
+            errorbox(ofw_gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
             return FAILURE;
         }
 
@@ -147,15 +147,15 @@ int handlekeymap(void)
 
     /* In case of serial console we can skip this question, and simply use our default */
     if (! ((flag_is_state != setup) && (medium_console == serial))) {
-        rc = newtWinMenu(ipcop_gettext("TR_KEYBOARD_MAPPING"), ipcop_gettext("TR_KEYBOARD_MAPPING_LONG"), 50, 5, 5, 6, displaynames,
-                     &choice, ipcop_gettext("TR_OK"), (flag_is_state != setup) ? ipcop_gettext("TR_SKIP") : ipcop_gettext("TR_GO_BACK"), NULL);
+        rc = newtWinMenu(ofw_gettext("TR_KEYBOARD_MAPPING"), ofw_gettext("TR_KEYBOARD_MAPPING_LONG"), 50, 5, 5, 6, displaynames,
+                     &choice, ofw_gettext("TR_OK"), (flag_is_state != setup) ? ofw_gettext("TR_SKIP") : ofw_gettext("TR_GO_BACK"), NULL);
     }
     strcpy(keymap_setting, filenames[choice]);
 
     if (rc != 2) {
         if (flag_is_state != installer) {
             update_kv(&kv, "KEYMAP", keymap_setting);
-            write_kv_to_file(&kv, "/var/ipcop/main/settings");
+            write_kv_to_file(&kv, "/var/ofw/main/settings");
         }
         snprintf(commandstring, STRING_SIZE, "/usr/bin/loadkeys %s", keymap_setting);
         mysystem(commandstring);

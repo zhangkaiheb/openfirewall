@@ -1,23 +1,23 @@
 /*
  * net_isdn.c: ISDN configuration
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2009-2010, the IPCop team
+ * (c) 2009-2010, the Openfirewall Team
  *
  * $Id $
  * 
@@ -228,7 +228,7 @@ int handleisdn(void)
 
     menuchoices[4] = NULL;
 
-    if (read_kv_from_file(&isdn_kv, "/var/ipcop/ethernet/isdn") != SUCCESS) {
+    if (read_kv_from_file(&isdn_kv, "/var/ofw/ethernet/isdn") != SUCCESS) {
         free_kv(&isdn_kv);
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
@@ -281,7 +281,7 @@ int handleisdn(void)
 
         if (rc == 2) {
             /* Exit, with modifications */
-            write_kv_to_file(&isdn_kv, "/var/ipcop/ethernet/isdn");
+            write_kv_to_file(&isdn_kv, "/var/ofw/ethernet/isdn");
             break;
         }
         if (rc == 3) {

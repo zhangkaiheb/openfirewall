@@ -1,25 +1,25 @@
 /*
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) 2004-05-31 Robert Kerr <rkerr@go.to>
  *
  * Loosely based on the smoothwall helper program by the same name,
  * portions are (c) Lawrence Manning, 2001
  *
- * (c) 2008-2014, the IPCop team
+ * (c) 2008-2014, the Openfirewall Team
  *
  * $Id: installpackage.c 7362 2014-03-23 15:08:38Z owes $
  * 
@@ -294,7 +294,7 @@ void main(int argc, char *argv[])
     if (flag_test) {
         /* update list of available patches */
         snprintf(command, STRING_SIZE,
-            "/usr/bin/perl -e \"require '/usr/lib/ipcop/general-functions.pl'; &General::updateavailablepatches('/var/patches/information.xml');\"");
+            "/usr/bin/perl -e \"require '/usr/lib/ofw/general-functions.pl'; &General::updateavailablepatches('/var/patches/information.xml');\"");
         safe_system(command);
 
         /* exithandler will do the cleaning */
@@ -336,7 +336,7 @@ void main(int argc, char *argv[])
 
     /* update list of installed patches */
     snprintf(command, STRING_SIZE,
-        "/usr/bin/perl -e \"require '/usr/lib/ipcop/general-functions.pl'; &General::updateinstalledpatches('%s/information.xml');\"", 
+        "/usr/bin/perl -e \"require '/usr/lib/ofw/general-functions.pl'; &General::updateinstalledpatches('%s/information.xml');\"", 
         tmpdir);
     safe_system(command);
 

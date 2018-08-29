@@ -1,23 +1,23 @@
 /* 
  * helper_backup.c: helper functions for backup/restore
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2010, the IPCop team
+ * (c) 2010, the Openfirewall Team
  *
  * $Id: helper_backup.c 5049 2010-10-21 07:39:19Z owes $
  * 
@@ -35,16 +35,16 @@
 int testbackupversion(char *path)
 {
     unsigned int backupversion;
-    unsigned int ipcopversion;
+    unsigned int ofwversion;
 
     backupversion = getbackupversion(path);
     if (backupversion == 0) {
         fprintf(flog, "Backup version missing\n");
         return FAILURE;
     }
-    ipcopversion = getipcopversion();
-    if (ipcopversion == 0) {
-        fprintf(flog, "IPCop version missing\n");
+    ofwversion = getofwversion();
+    if (ofwversion == 0) {
+        fprintf(flog, "Openfirewall version missing\n");
         return FAILURE;
     }
 
@@ -54,16 +54,16 @@ int testbackupversion(char *path)
         return FAILURE;
     }
     /* We know how to deal with old backups */
-    if (ipcopversion >= backupversion) {
+    if (ofwversion >= backupversion) {
         return SUCCESS;
     }
     /*  'Newer' backups are not a problem if version difference is only minor 
-        i.e. backup is 2.0.x and IPCop version is 2.0.y         */
-    if ((ipcopversion & 0xFFFF00) == (backupversion & 0xFFFF00)) {
+        i.e. backup is 2.0.x and Openfirewall version is 2.0.y         */
+    if ((ofwversion & 0xFFFF00) == (backupversion & 0xFFFF00)) {
         return SUCCESS;
     }
 
-    fprintf(flog, "Backup: 0x%08X  >>  IPCop: 0x%08X\n", backupversion, ipcopversion);
+    fprintf(flog, "Backup: 0x%08X  >>  Openfirewall: 0x%08X\n", backupversion, ofwversion);
     return FAILURE;
 }
 
@@ -75,7 +75,7 @@ unsigned int getbackupversion(char *path)
     unsigned int version = 0;
     unsigned int v_major, v_minor, v_revision;
 
-    snprintf(filename, STRING_SIZE, "%s/var/ipcop/backup/version", path);
+    snprintf(filename, STRING_SIZE, "%s/var/ofw/backup/version", path);
     if ((f = fopen(filename, "r")) == NULL) {
         return 0;
     }

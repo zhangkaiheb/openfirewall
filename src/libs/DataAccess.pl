@@ -1,46 +1,46 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2005 Achim Weber <dotzball@users.sourceforge.net>
-# (c) 2007-2014, the IPCop team
+# (c) 2007-2014, the Openfirewall Team
 #
 # $Id: DataAccess.pl 7534 2014-05-14 14:34:12Z owes $
 #
 # 6 May 2006 Achim Weber:
-#       Re-worked code to use it in IPCop 1.5, renamed all variables, keys, etc.
+#       Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
 #       from "BOT" to "FW".
 
 package DATA;
 
 use strict;
 
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 
 $| = 1;    # line buffering
 
-$DATA::customServicesFile  = "/var/ipcop/firewall/customservices";
-$DATA::defaultServicesFile = "/var/ipcop/firewall/defaultservices";
-$DATA::customNetworkFile   = "/var/ipcop/firewall/customnetworks";
-$DATA::customIFaceFile     = "/var/ipcop/firewall/custominterfaces";
-$DATA::serviceGroupFile    = "/var/ipcop/firewall/serviceGroups";
-$DATA::addressGroupFile    = "/var/ipcop/firewall/addressGroups";
-$DATA::blueAdressesFile    = "/var/ipcop/firewall/wireless";
-$DATA::configfile          = "/var/ipcop/firewall/config";
-$DATA::policyFile          = "/var/ipcop/firewall/policy";
+$DATA::customServicesFile  = "/var/ofw/firewall/customservices";
+$DATA::defaultServicesFile = "/var/ofw/firewall/defaultservices";
+$DATA::customNetworkFile   = "/var/ofw/firewall/customnetworks";
+$DATA::customIFaceFile     = "/var/ofw/firewall/custominterfaces";
+$DATA::serviceGroupFile    = "/var/ofw/firewall/serviceGroups";
+$DATA::addressGroupFile    = "/var/ofw/firewall/addressGroups";
+$DATA::blueAdressesFile    = "/var/ofw/firewall/wireless";
+$DATA::configfile          = "/var/ofw/firewall/config";
+$DATA::policyFile          = "/var/ofw/firewall/policy";
 
 @DATA::ruleKeys_unique = (
     'SRC_NET_TYPE', 'SRC_NET',      'SRC_ADR_TYPE', 'SRC_ADR',      'INV_SRC_ADR',  'SRC_PORT',     'INV_SRC_PORT', 
@@ -60,7 +60,7 @@ $DATA::policyFile          = "/var/ipcop/firewall/policy";
 );
 
 my %netsettings = ();
-&General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
+&General::readhash("/var/ofw/ethernet/settings", \%netsettings);
 
 #######################################################
 # Default Services
@@ -93,55 +93,55 @@ sub readDefaultServices
 }
 
 #######################################################
-# IPCop Services
+# Openfirewall Services
 #######################################################
-# my %ipcopServices;
-sub readIPCopServices
+# my %ofwServices;
+sub readOfwServices
 {
     my $dServices = shift;
 
-    $dServices->{'IPCop dhcp'}{'PORT_IPT'} = "--sport 68 --dport 67";
-    $dServices->{'IPCop dhcp'}{'PORT_NR'}  = '67';
-    $dServices->{'IPCop dhcp'}{'PROTOCOL'} = 'udp';
+    $dServices->{'Ofw dhcp'}{'PORT_IPT'} = "--sport 68 --dport 67";
+    $dServices->{'Ofw dhcp'}{'PORT_NR'}  = '67';
+    $dServices->{'Ofw dhcp'}{'PROTOCOL'} = 'udp';
 
-    $dServices->{'IPCop dns'}{'PORT_IPT'} = "--dport 53";
-    $dServices->{'IPCop dns'}{'PORT_NR'}  = '53';
-    $dServices->{'IPCop dns'}{'PROTOCOL'} = 'tcpudp';
+    $dServices->{'Ofw dns'}{'PORT_IPT'} = "--dport 53";
+    $dServices->{'Ofw dns'}{'PORT_NR'}  = '53';
+    $dServices->{'Ofw dns'}{'PROTOCOL'} = 'tcpudp';
 
     my $https = '8443';
     my %mainsettings = ();
-    &General::readhash("/var/ipcop/main/settings", \%mainsettings);
+    &General::readhash("/var/ofw/main/settings", \%mainsettings);
     $https = $mainsettings{'GUIPORT'} if (defined($mainsettings{'GUIPORT'}));
 
-    $dServices->{'IPCop https'}{'PORT_IPT'} = "--dport $https";
-    $dServices->{'IPCop https'}{'PORT_NR'}  = $https;
-    $dServices->{'IPCop https'}{'PROTOCOL'} = 'tcp';
+    $dServices->{'Ofw https'}{'PORT_IPT'} = "--dport $https";
+    $dServices->{'Ofw https'}{'PORT_NR'}  = $https;
+    $dServices->{'Ofw https'}{'PROTOCOL'} = 'tcp';
 
-    $dServices->{'IPCop ntp'}{'PORT_IPT'} = "--dport 123";
-    $dServices->{'IPCop ntp'}{'PORT_NR'}  = '123';
-    $dServices->{'IPCop ntp'}{'PROTOCOL'} = 'udp';
+    $dServices->{'Ofw ntp'}{'PORT_IPT'} = "--dport 123";
+    $dServices->{'Ofw ntp'}{'PORT_NR'}  = '123';
+    $dServices->{'Ofw ntp'}{'PROTOCOL'} = 'udp';
 
     my %proxysettings = ();
-    &General::readhash("/var/ipcop/proxy/settings", \%proxysettings);
+    &General::readhash("/var/ofw/proxy/settings", \%proxysettings);
     my $proxy = '8080';
     if ($proxysettings{'PROXY_PORT'} =~ /^(\d+)$/) {
         $proxy = $1;
     }
-    $dServices->{'IPCop proxy'}{'PORT_IPT'} = "--dport $proxy";
-    $dServices->{'IPCop proxy'}{'PORT_NR'}  = $proxy;
-    $dServices->{'IPCop proxy'}{'PROTOCOL'} = 'tcp';
+    $dServices->{'Ofw proxy'}{'PORT_IPT'} = "--dport $proxy";
+    $dServices->{'Ofw proxy'}{'PORT_NR'}  = $proxy;
+    $dServices->{'Ofw proxy'}{'PROTOCOL'} = 'tcp';
     # (our) Squid error messages use tcp/81 for images
-    $dServices->{'IPCop http'}{'PORT_IPT'} = "--dport 81";
-    $dServices->{'IPCop http'}{'PORT_NR'}  = '81';
-    $dServices->{'IPCop http'}{'PROTOCOL'} = 'tcp';
+    $dServices->{'Ofw http'}{'PORT_IPT'} = "--dport 81";
+    $dServices->{'Ofw http'}{'PORT_NR'}  = '81';
+    $dServices->{'Ofw http'}{'PROTOCOL'} = 'tcp';
     # use tcp/82 as intercept proxy port
-    $dServices->{'IPCop proxy-int-1'}{'PORT_IPT'} = "--dport 82";
-    $dServices->{'IPCop proxy-int-1'}{'PORT_NR'}  = '82';
-    $dServices->{'IPCop proxy-int-1'}{'PROTOCOL'} = 'tcp';
+    $dServices->{'Ofw proxy-int-1'}{'PORT_IPT'} = "--dport 82";
+    $dServices->{'Ofw proxy-int-1'}{'PORT_NR'}  = '82';
+    $dServices->{'Ofw proxy-int-1'}{'PROTOCOL'} = 'tcp';
     # reserve tcp/83 for proxy future use
-    $dServices->{'IPCop proxy-int-2'}{'PORT_IPT'} = "--dport 83";
-    $dServices->{'IPCop proxy-int-2'}{'PORT_NR'}  = '83';
-    $dServices->{'IPCop proxy-int-2'}{'PROTOCOL'} = 'tcp';
+    $dServices->{'Ofw proxy-int-2'}{'PORT_IPT'} = "--dport 83";
+    $dServices->{'Ofw proxy-int-2'}{'PORT_NR'}  = '83';
+    $dServices->{'Ofw proxy-int-2'}{'PROTOCOL'} = 'tcp';
 
     my $ssh = '8022';
     if (defined($mainsettings{'SSHPORT'})) {
@@ -163,17 +163,17 @@ sub readIPCopServices
             }
         }
     }
-    $dServices->{'IPCop ssh'}{'PORT_IPT'} = "--dport $ssh";
-    $dServices->{'IPCop ssh'}{'PORT_NR'}  = $ssh;
-    $dServices->{'IPCop ssh'}{'PROTOCOL'} = 'tcp';
+    $dServices->{'Ofw ssh'}{'PORT_IPT'} = "--dport $ssh";
+    $dServices->{'Ofw ssh'}{'PORT_NR'}  = $ssh;
+    $dServices->{'Ofw ssh'}{'PROTOCOL'} = 'tcp';
 
-    $dServices->{'IPCop IPsec'}{'PORT_IPT'} = "";
-    $dServices->{'IPCop IPsec'}{'PORT_NR'}  = '-';
-    $dServices->{'IPCop IPsec'}{'PROTOCOL'} = 'AH,ESP,IKE';
+    $dServices->{'Ofw IPsec'}{'PORT_IPT'} = "";
+    $dServices->{'Ofw IPsec'}{'PORT_NR'}  = '-';
+    $dServices->{'Ofw IPsec'}{'PROTOCOL'} = 'AH,ESP,IKE';
 
-    if (-e "/var/ipcop/openvpn/settings") {
+    if (-e "/var/ofw/openvpn/settings") {
         my %ovpnSettings = ();
-        &General::readhash("/var/ipcop/openvpn/settings", \%ovpnSettings);
+        &General::readhash("/var/ofw/openvpn/settings", \%ovpnSettings);
 
         my $ovpnport = '1194';
         my $ovpnproto = 'udp';
@@ -183,9 +183,9 @@ sub readIPCopServices
         if ($ovpnSettings{'DPROTOCOL'} =~ /^(tcp|udp)$/) {
           $ovpnproto = $1;
         }
-        $dServices->{'IPCop OpenVPN'}{'PORT_IPT'} = "--dport $ovpnport";
-        $dServices->{'IPCop OpenVPN'}{'PORT_NR'}  = $ovpnport;
-        $dServices->{'IPCop OpenVPN'}{'PROTOCOL'} = $ovpnproto;
+        $dServices->{'Ofw OpenVPN'}{'PORT_IPT'} = "--dport $ovpnport";
+        $dServices->{'Ofw OpenVPN'}{'PORT_NR'}  = $ovpnport;
+        $dServices->{'Ofw OpenVPN'}{'PROTOCOL'} = $ovpnproto;
 
         # TODO: find the ports for OpenVPN net-2-net
     }
@@ -200,7 +200,7 @@ sub read_icmptypes
 {
     my $hashRef = shift;
 
-    my $fname   = "/var/ipcop/firewall/icmptypes";
+    my $fname   = "/var/ofw/firewall/icmptypes";
     my $newline = "";
     my @newarray;
 
@@ -448,7 +448,7 @@ sub setup_default_interfaces
     $ifaceCounts->{'OPENVPN'} = 0;
 
     my %netsettings = ();
-    &General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
+    &General::readhash("/var/ofw/ethernet/settings", \%netsettings);
 
     # Get current defined networks (Red, Green, Blue, Orange)
     $ifaces->{'Green'}{'IFACE'} = $netsettings{'GREEN_1_DEV'};
@@ -477,7 +477,7 @@ sub setup_default_interfaces
     $ifaces->{'Red'}{'IFACE'} = $red_iface;
     $ifaces->{'Red'}{'ID'}    = 'RED_1';
     $ifaces->{'Red'}{'COLOR'} = 'RED_COLOR';
-    if (-e "/var/ipcop/red/active" && $red_iface ne '') {
+    if (-e "/var/ofw/red/active" && $red_iface ne '') {
         $ifaces->{'Red'}{'ACTIV'} = 'yes';
     }
     else {
@@ -489,17 +489,17 @@ sub setup_default_interfaces
     ## setup VPN interfaces
     ####
     # IPsec
-    if (-e "/var/ipcop/ipsec/ipsec.conf") {
-        open(FILE, "/var/ipcop/ipsec/ipsec.conf") or die 'Unable to open ipsec.conf file.';
+    if (-e "/var/ofw/ipsec/ipsec.conf") {
+        open(FILE, "/var/ofw/ipsec/ipsec.conf") or die 'Unable to open ipsec.conf file.';
         my @current = <FILE>;
         close(FILE);
         foreach my $line (@current) {
 
             if ($line =~ /^\s*protostack=netkey/) {
                 # using NETKEY
-                if (-e "/var/ipcop/ipsec/settings") {
+                if (-e "/var/ofw/ipsec/settings") {
                     my %ipsecSettings = ();
-                    &General::readhash("/var/ipcop/ipsec/settings", \%ipsecSettings);
+                    &General::readhash("/var/ofw/ipsec/settings", \%ipsecSettings);
 
                     if (($red_iface ne '') && (defined($ipsecSettings{'ENABLED_RED_1'}) && $ipsecSettings{'ENABLED_RED_1'} eq 'on')) {
                         # ipsec-red is a temporary interface
@@ -557,9 +557,9 @@ sub setup_default_interfaces
     }    # end IPsec
 
     # OpenVPN
-    if (-e "/var/ipcop/openvpn/settings") {
+    if (-e "/var/ofw/openvpn/settings") {
         my %ovpnSettings = ();
-        &General::readhash("/var/ipcop/openvpn/settings", \%ovpnSettings);
+        &General::readhash("/var/ofw/openvpn/settings", \%ovpnSettings);
 
         # We add only 1 interface here, since the OpenVPN server only creates 1 tunnel interface
         # This will probably change as soon as we add OpenVPN net-2-net
@@ -578,10 +578,10 @@ sub setup_default_interfaces
 
 }
 
-#######################################################
+############################################################
 # Default Networks
-#######################################################
-# Achim Weber: borrowed and modified from IPCop code:
+############################################################
+# Achim Weber: borrowed and modified from Openfirewall code:
 sub setup_default_networks
 {
     my $defaultNetworks = shift;
@@ -630,8 +630,8 @@ sub setup_default_networks
 
     # init with a dummy value
     my $red_address = 'N/A';
-    if (-e "/var/ipcop/red/local-ipaddress") {
-        $red_address = `cat /var/ipcop/red/local-ipaddress`;
+    if (-e "/var/ofw/red/local-ipaddress") {
+        $red_address = `cat /var/ofw/red/local-ipaddress`;
         chomp($red_address);
     }
     $defaultNetworks->{'Red Address'}{'IPT'}      = "$red_address";
@@ -688,9 +688,9 @@ sub setup_default_networks
     }
 
     # OpenVPN
-    if (-e "/var/ipcop/openvpn/settings") {
+    if (-e "/var/ofw/openvpn/settings") {
         my %ovpnSettings = ();
-        &General::readhash("/var/ipcop/openvpn/settings", \%ovpnSettings);
+        &General::readhash("/var/ofw/openvpn/settings", \%ovpnSettings);
 
         # OpenVPN on Red?
         if (defined($ovpnSettings{'DOVPN_SUBNET'})) {
@@ -709,7 +709,7 @@ sub setup_default_networks
         }
     }    # end OpenVPN
 
-    open(FILE, "/var/ipcop/ethernet/aliases") or die 'Unable to open aliases file.';
+    open(FILE, "/var/ofw/ethernet/aliases") or die 'Unable to open aliases file.';
     my @current = <FILE>;
     close(FILE);
     my $ctr = 0;
@@ -892,7 +892,7 @@ sub readReadPolicies
         elsif ($ifaces->{$iface}{'COLOR'} =~ /^ORANGE_COLOR$/) {
 
             # orange is allowed to connect to the internet but no
-            # access to IPCop
+            # access to Openfirewall
             $policy = 'open';
         }
         elsif ($ifaces->{$iface}{'COLOR'} =~ /^RED_COLOR$/) {
@@ -996,16 +996,16 @@ sub readBlueAddresses
 
 
 
-#######################################################
-# Check if a protocol+port combination is reserved for IPCop itself
-#######################################################
+##########################################################################
+# Check if a protocol+port combination is reserved for Openfirewall itself
+##########################################################################
 sub isReservedPort
 {
     my $proto = shift;
     my $port = shift;
 
-    my %ipcopServices = ();
-    &DATA::readIPCopServices(\%ipcopServices);
+    my %ofwServices = ();
+    &DATA::readOfwServices(\%ofwServices);
 
     my $isRange = 0;
     my @range = ();
@@ -1014,19 +1014,19 @@ sub isReservedPort
         $isRange = 1;
     }
 
-    foreach my $key (keys %ipcopServices)
+    foreach my $key (keys %ofwServices)
     {
-        my $proto_ipcop = $ipcopServices{$key}{'PROTOCOL'};
-        my $port_ipcop =  $ipcopServices{$key}{'PORT_NR'};
+        my $proto_ofw = $ofwServices{$key}{'PROTOCOL'};
+        my $port_ofw =  $ofwServices{$key}{'PORT_NR'};
 
-        if((index($proto_ipcop, $proto) != -1) || (index($proto, $proto_ipcop) != -1)) {
+        if((index($proto_ofw, $proto) != -1) || (index($proto, $proto_ofw) != -1)) {
             if($isRange) {
-                if($range[0] <= $port_ipcop && $port_ipcop <= $range[1]){
+                if($range[0] <= $port_ofw && $port_ofw <= $range[1]){
                    return 1;
                 }
             }
             else {
-                if($port_ipcop eq $port){
+                if($port_ofw eq $port){
                    return 1;
                 }
             }

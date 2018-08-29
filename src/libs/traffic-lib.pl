@@ -1,19 +1,19 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 #
 # $Id: traffic-lib.pl 5565 2011-03-26 07:00:12Z owes $
@@ -27,10 +27,10 @@ use strict;
 #use warnings; no warnings 'once';
 #use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
-require '/usr/lib/ipcop/DataAccess.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/DataAccess.pl';
 
 $|=1; # line buffering
 
@@ -41,7 +41,7 @@ $|=1; # line buffering
 $TRAFFIC::debugFormparams = 0;
 
 
-$TRAFFIC::settingsfile = "/var/ipcop/traffic/settings";
+$TRAFFIC::settingsfile = "/var/ofw/traffic/settings";
 $TRAFFIC::logfile = "/var/log/traffic.log";
 $TRAFFIC::colorOk 	 = '#00FF00';
 $TRAFFIC::colorWarn = '#FF9900';

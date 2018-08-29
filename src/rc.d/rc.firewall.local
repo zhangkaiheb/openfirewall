@@ -5,9 +5,9 @@
 #
 
 # read variables 
-eval $(/usr/local/bin/readhash /var/ipcop/ethernet/settings) 
-if [ -f /var/ipcop/red/iface ]; then
-	REAL_RED=`cat /var/ipcop/red/iface`
+eval $(/usr/local/bin/readhash /var/ofw/ethernet/settings) 
+if [ -f /var/ofw/red/iface ]; then
+	REAL_RED=`cat /var/ofw/red/iface`
 fi
 
 # See how we were called.

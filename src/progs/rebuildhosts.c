@@ -1,19 +1,19 @@
-/* IPCop helper program - rebuildhosts
+/* Openfirewall helper program - rebuildhosts
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
  * (c) Alan Hourihane, 2003
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     /* Fetch ethernet/settings, exit on error */
     read_ethernet_settings(1);
 
-    if (read_kv_from_file(&main_kv, "/var/ipcop/main/settings") != SUCCESS) {
+    if (read_kv_from_file(&main_kv, "/var/ofw/main/settings") != SUCCESS) {
         fprintf(stderr, "Couldn't read main settings\n");
         exit(1);
     }
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     free_kv(&main_kv);
     main_kv = NULL;
 
-    if (!(fd = fopen("/var/ipcop/main/hosts", "r"))) {
+    if (!(fd = fopen("/var/ofw/main/hosts", "r"))) {
         fprintf(stderr, "Couldn't open main hosts file\n");
         exit(1);
     }
@@ -125,9 +125,9 @@ int main(int argc, char *argv[])
     fprintf(hosts, "127.0.0.1\tlocalhost\n");
 
     if (strlen(domainname))
-        fprintf(hosts, "%s\t%s.%s\t%s\n", ipcop_ethernet.address[GREEN][1], hostname, domainname, hostname);
+        fprintf(hosts, "%s\t%s.%s\t%s\n", ofw_ethernet.address[GREEN][1], hostname, domainname, hostname);
     else
-        fprintf(hosts, "%s\t%s\n", ipcop_ethernet.address[GREEN][1], hostname);
+        fprintf(hosts, "%s\t%s\n", ofw_ethernet.address[GREEN][1], hostname);
 
     while (fgets(buffer, STRING_SIZE, fd)) {
         buffer[strlen(buffer) - 1] = 0;

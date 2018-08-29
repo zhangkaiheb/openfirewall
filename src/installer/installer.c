@@ -6,7 +6,7 @@
  *
  * Written by Alan Hourihane <alanh@fairlite.demon.co.uk>
  *
- * (c) 2007-2015, the IPCop team
+ * (c) 2007-2015, the Openfirewall Team
  *
  * This is the first stage installer.
  * - select language.
@@ -47,7 +47,7 @@
 #include "arch_defs.h"
 
 // tweak for errorbox
-#define  gettext  ipcop_gettext
+#define  gettext  ofw_gettext
 
 
 /* global variables */
@@ -260,7 +260,7 @@ static void read_codepath(void)
     char string[STRING_SIZE];
     char strboot[STRING_SIZE] = "none";
 
-    find_kv_default(kv, "ipcopboot", strboot);
+    find_kv_default(kv, "ofwboot", strboot);
 
     if (find_kv_default(kv, "codepath", string) == SUCCESS) {
         if (!strcmp(string, "1") || !strcmp(string, "2")) {
@@ -298,7 +298,7 @@ static int source_network(void)
     }
 
     /* Put up status screen here, modprobing can take some time */
-    statuswindow(72, 5, ipcop_gettext("TR_TITLE_SOURCE"), ipcop_gettext("TR_SEARCH_NETWORKS"));
+    statuswindow(72, 5, ofw_gettext("TR_TITLE_SOURCE"), ofw_gettext("TR_SEARCH_NETWORKS"));
 
     /* load net drivers from discovered hardware */
     for (i = 0; i < numhardwares; i++) {
@@ -321,8 +321,8 @@ static int source_network(void)
     if (strlen(local_IP) == 0 || codepath == 1) {
         newtComponent *f;
         newtComponent scale;
-        f = (newtComponent *) statuswindow_progress(72, 5, ipcop_gettext("TR_TITLE_SOURCE"),
-                                                    ipcop_gettext("TR_SEARCH_NETWORKS"));
+        f = (newtComponent *) statuswindow_progress(72, 5, ofw_gettext("TR_TITLE_SOURCE"),
+                                                    ofw_gettext("TR_SEARCH_NETWORKS"));
         scale = newtScale(1, 3, 70, 100);
         newtFormAddComponent(*f, scale);
         newtDrawForm(*f);
@@ -370,7 +370,7 @@ static int source_network(void)
     }
 
     /* check local_IP is not already used by another machine */
-    statuswindow(72, 5, ipcop_gettext("TR_TITLE_SOURCE"), ipcop_gettext("TR_VERIFYING_IP"));
+    statuswindow(72, 5, ofw_gettext("TR_TITLE_SOURCE"), ofw_gettext("TR_VERIFYING_IP"));
     snprintf(command, STRING_SIZE, "ping %s", local_IP);
     rc = mysystem(command);
     newtPopWindow();
@@ -391,9 +391,9 @@ static int source_network(void)
     char filename[STRING_SIZE];
     while (1) {
         struct newtWinEntry entries[] = { {"", &values[0], 0,}, {NULL, NULL, 0} };
-        snprintf(message, STRING_SIZE_LARGE, ipcop_gettext("TR_ENTER_URL_FILE"), TARBALL_IPCOP);
-        rc = newtWinEntries(ipcop_gettext("TR_TITLE_SOURCE"), message,
-                            65, 5, 5, 50, entries, ipcop_gettext("TR_OK"), ipcop_gettext("TR_GO_BACK"), NULL);
+        snprintf(message, STRING_SIZE_LARGE, ofw_gettext("TR_ENTER_URL_FILE"), TARBALL_OFW);
+        rc = newtWinEntries(ofw_gettext("TR_TITLE_SOURCE"), message,
+                            65, 5, 5, 50, entries, ofw_gettext("TR_OK"), ofw_gettext("TR_GO_BACK"), NULL);
         strncpy(message, values[0], STRING_SIZE);
         fprintf(flog, "URL is %s\n", message);
 
@@ -409,10 +409,10 @@ static int source_network(void)
             message[strlen(message) - 1] = '\0';
 
         strcpy(network_source, message);
-        statuswindow(72, 5, ipcop_gettext("TR_TITLE_SOURCE"), ipcop_gettext("TR_CHECKING"));
+        statuswindow(72, 5, ofw_gettext("TR_TITLE_SOURCE"), ofw_gettext("TR_CHECKING"));
 
         /* just verify if files exist, download later */
-        strcpy(filename, TARBALL_IPCOP);
+        strcpy(filename, TARBALL_OFW);
         snprintf(command, STRING_SIZE, "wget --spider -O /tmp/%s %s/%s", filename, network_source, filename);
         rc = mysystem(command);
         newtPopWindow();
@@ -422,7 +422,7 @@ static int source_network(void)
         }
 
         /* spider failed, inform user */
-        snprintf(message, STRING_SIZE, ipcop_gettext("TR_TAR_GZ_NOT_FOUND"), filename, network_source);
+        snprintf(message, STRING_SIZE, ofw_gettext("TR_TAR_GZ_NOT_FOUND"), filename, network_source);
         errorbox(message);
     }
 }
@@ -437,7 +437,7 @@ static int source_cdrom(void)
     char filename[STRING_SIZE];
     char filepath[STRING_SIZE];
 
-    statuswindow(72, 5, ipcop_gettext("TR_TITLE_SOURCE"), ipcop_gettext("TR_MOUNTING_CDROM"));
+    statuswindow(72, 5, ofw_gettext("TR_TITLE_SOURCE"), ofw_gettext("TR_MOUNTING_CDROM"));
 
     for (i = 0; i < numhardwares; i++) {
         if ((hardwares[i].type == cdrom) || 
@@ -471,7 +471,7 @@ static int source_cdrom(void)
                 }
 
                 /* Let us see if this is an IPCop CD or USB key */
-                strcpy(filename, TARBALL_IPCOP);
+                strcpy(filename, TARBALL_OFW);
                 snprintf(filepath, STRING_SIZE, "/cdrom/%s", filename);
                 if (!access(filepath, 0)) {
                     /* TODO: some fancy test (md5 ?) to verify CD */
@@ -497,7 +497,7 @@ static int source_cdrom(void)
 
     newtPopWindow();
     fprintf(flog, "no cdroms\n");
-    errorbox(ipcop_gettext("TR_NO_CDROM"));
+    errorbox(ofw_gettext("TR_NO_CDROM"));
 
     return FAILURE;
 }
@@ -538,10 +538,10 @@ static int findsource(void)
 
     /* Choose source for tarball. Very basic. */
     while (1) {
-        snprintf(line, STRING_SIZE_LARGE, ipcop_gettext("TR_SELECT_INSTALLATION_MEDIA_LONG"), NAME);
-        rc = newtWinMenu(ipcop_gettext("TR_TITLE_SOURCE"),
+        snprintf(line, STRING_SIZE_LARGE, ofw_gettext("TR_SELECT_INSTALLATION_MEDIA_LONG"), NAME);
+        rc = newtWinMenu(ofw_gettext("TR_TITLE_SOURCE"),
                          line, 65, 5, 5, 8,
-                         installtypes, &installtype, ipcop_gettext("TR_OK"), ipcop_gettext("TR_CANCEL"), NULL);
+                         installtypes, &installtype, ofw_gettext("TR_OK"), ofw_gettext("TR_CANCEL"), NULL);
         if (rc == 2) {
             return FAILURE;     // give up
         }
@@ -620,7 +620,7 @@ NEXTDISK:
         // Choose the disk to use
         switch (raid) {
         case 0:
-            strcpy(string, ipcop_gettext("TR_TITLE_DISK"));
+            strcpy(string, ofw_gettext("TR_TITLE_DISK"));
             break;
         case 1:
             strcpy(string, "RAID disk 1");
@@ -629,9 +629,9 @@ NEXTDISK:
             strcpy(string, "RAID disk 2");
             break;
         }
-        rc = newtWinMenu(string, ipcop_gettext("TR_SELECT_DEVICE_FOR_INSTALLATION"),
+        rc = newtWinMenu(string, ofw_gettext("TR_SELECT_DEVICE_FOR_INSTALLATION"),
                          65, 5, 5, 8, harddisklist, &c, 
-                         ipcop_gettext("TR_OK"), (raid != 0) ? ipcop_gettext("TR_GO_BACK") : ipcop_gettext("TR_CANCEL"), NULL);
+                         ofw_gettext("TR_OK"), (raid != 0) ? ofw_gettext("TR_GO_BACK") : ofw_gettext("TR_CANCEL"), NULL);
 
         if ((rc == 2) && (raid == 0))   // cancel choosed!
             return FAILURE;
@@ -670,7 +670,7 @@ NEXTDISK:
 
         if (disksize[raid] < DISK_MINIMUM) {
             fprintf(flog, "HARDDISK %s: really too small.\n", hardwares[disklist[raid]].device);
-            errorbox(ipcop_gettext("TR_DISK_TOO_SMALL"));
+            errorbox(ofw_gettext("TR_DISK_TOO_SMALL"));
             continue;           // give option to choose another disk
         }
         fprintf(flog, "Hard disk selected %s. Size:%ld MiB\n", hardwares[disklist[raid]].device, disksize[raid]);
@@ -687,9 +687,9 @@ NEXTDISK:
         }
 
         /* warn about disk destroying and ask for (additional) confirmation */
-        rc = newtWinChoice(ipcop_gettext("TR_TITLE_DISK"),
-                           ipcop_gettext("TR_GO_BACK"), ipcop_gettext("TR_OK"),
-                           ipcop_gettext("TR_CONFIRM_DEVICE_INSTALLATION"));
+        rc = newtWinChoice(ofw_gettext("TR_TITLE_DISK"),
+                           ofw_gettext("TR_GO_BACK"), ofw_gettext("TR_OK"),
+                           ofw_gettext("TR_CONFIRM_DEVICE_INSTALLATION"));
 
         if (rc != 2) {
             fprintf(flog, "Installation cancelled by user.\n");
@@ -712,9 +712,9 @@ NEXTDISK:
             /* Should this be a harddisk or flash installation? */
             medium_target = harddisk;
 
-            rc = newtWinTernary(ipcop_gettext("TR_TITLE_DISK"),
-                                ipcop_gettext("TR_HARDDISK"), ipcop_gettext("TR_FLASH"), ipcop_gettext("TR_GO_BACK"),
-                                ipcop_gettext("TR_HARDDISK_FLASH_LONG"));
+            rc = newtWinTernary(ofw_gettext("TR_TITLE_DISK"),
+                                ofw_gettext("TR_HARDDISK"), ofw_gettext("TR_FLASH"), ofw_gettext("TR_GO_BACK"),
+                                ofw_gettext("TR_HARDDISK_FLASH_LONG"));
 
             if (rc == 3) {
                 /* Cancel */
@@ -732,7 +732,7 @@ NEXTDISK:
                 /*  First check for enough RAM available, set a minimum of 96 MiB 
                  *  check for value slightly below 96, since kernel reported memory is not 96 */
                 if (memtotal < 90) {
-                    snprintf(message, STRING_SIZE, ipcop_gettext("TR_FLASH_NOT_ENOUGH_MEMORY"), 96);
+                    snprintf(message, STRING_SIZE, ofw_gettext("TR_FLASH_NOT_ENOUGH_MEMORY"), 96);
                     errorbox(message);
                     continue;
                 }
@@ -844,8 +844,8 @@ int main(int argc, char **argv)
             /* CDROM, NET, USB key, boot floppy + CDROM detected */
             char strboot[STRING_SIZE] = "none";
 
-            find_kv_default(kv, "ipcopboot", strboot);
-            fprintf(flog, "ipcopboot=%s\n", strboot);
+            find_kv_default(kv, "ofwboot", strboot);
+            fprintf(flog, "ofwboot=%s\n", strboot);
             if (!strcmp(strboot, "usb")) {
                 mysystem("/sbin/modprobe vfat");    /* necessary for usb-key */
                 medium_boot = usb;
@@ -952,18 +952,18 @@ int main(int argc, char **argv)
 
     /* first things first, installer language */
     handlelanguage(kv);
-    /* Starting here we have a language selected, use ipcop_gettext to get translated texts */
+    /* Starting here we have a language selected, use ofw_gettext to get translated texts */
 
     free_kv(&kv);
 
-    char *install_status = ipcop_gettext("TR_INSTALLATION_CANCELED");
+    char *install_status = ofw_gettext("TR_INSTALLATION_CANCELED");
 
     /* Screen setup and welcome window */
     newtDrawRootText(18, 0, get_title());
-    newtPushHelpLine(ipcop_gettext("TR_HELPLINE"));
-    snprintf(line, STRING_SIZE_LARGE, ipcop_gettext("TR_WELCOME"), NAME);
+    newtPushHelpLine(ofw_gettext("TR_HELPLINE"));
+    snprintf(line, STRING_SIZE_LARGE, ofw_gettext("TR_WELCOME"), NAME);
     rc = newtWinChoice(get_title(),
-                       ipcop_gettext("TR_OK"), ipcop_gettext("TR_CANCEL"),
+                       ofw_gettext("TR_OK"), ofw_gettext("TR_CANCEL"),
                        line);
     if (rc == 2) {
         goto EXIT;
@@ -981,7 +981,7 @@ int main(int argc, char **argv)
 
     /* any possible target drives found */
     if (numharddisk == 0) {
-        errorbox(ipcop_gettext("TR_NO_HARDDISK"));
+        errorbox(ofw_gettext("TR_NO_HARDDISK"));
         fprintf(flog, "NO HARDDRIVES\n");
         goto EXIT;
     }
@@ -1011,16 +1011,19 @@ int main(int argc, char **argv)
 
     /*  Partition, format, mount, initramfs and make bootable
        manual partitioning if PART_OPTIONS_PARTED set */
-    if (make_ipcop_disk(hardwares[selected_hd].device, hardwares[selected_hd2].device, disk_size, swapfilesize, part_options) != SUCCESS)
+    if (make_ofw_disk(hardwares[selected_hd].device, hardwares[selected_hd2].device, disk_size, swapfilesize, part_options) != SUCCESS)
         goto EXIT;
 
 
     // Now, /harddisk           is mounted
     //      /harddisk/var/log   is mounted
 
+        fprintf(flog, "Writing MBR 30\n");
     /* Target is up&running so we can store some previously made settings */
     write_lang_configs();
+        fprintf(flog, "Writing MBR 31\n");
     write_keymap();
+        fprintf(flog, "Writing MBR 32\n");
     write_timezone();
     /* Copy the info about detected HW for later reference */
     mysystem("/bin/cp /tmp/hwdetect /harddisk/var/log/hwdetect");
@@ -1030,10 +1033,10 @@ int main(int argc, char **argv)
         NODEKV *kv_flash = NULL;
         char value[STRING_SIZE];
 
-        read_kv_from_file(&kv_flash, "/harddisk/var/ipcop/main/flashsettings");
+        read_kv_from_file(&kv_flash, "/harddisk/var/ofw/main/flashsettings");
         snprintf(value, STRING_SIZE, "%ldM", ramdisk_size);
         update_kv(&kv_flash, "TMPFS_MAX_SIZE", value);
-        write_kv_to_file(&kv_flash, "/harddisk/var/ipcop/main/flashsettings");
+        write_kv_to_file(&kv_flash, "/harddisk/var/ofw/main/flashsettings");
 
         mysystem("chroot /harddisk /usr/local/sbin/flashfinal.sh");
     }
@@ -1055,12 +1058,13 @@ int main(int argc, char **argv)
         }
     }
 
+        fprintf(flog, "Writing MBR 40\n");
     /* Offer restore here, if no restore -> launch setup later */
     restore_success = handlerestore();
 
     /* Installation is done, time to congratulate and then turn to configuration */
-    snprintf(message, STRING_SIZE_LARGE, ipcop_gettext("TR_CONGRATULATIONS_LONG"), NAME, SNAME, SNAME, NAME, NAME, NAME);
-    newtWinMessage(get_title(), ipcop_gettext("TR_CONGRATULATIONS"), message);
+    snprintf(message, STRING_SIZE_LARGE, ofw_gettext("TR_CONGRATULATIONS_LONG"), NAME, SNAME, SNAME, NAME, NAME, NAME);
+    newtWinMessage(get_title(), ofw_gettext("TR_CONGRATULATIONS"), message);
 
     if ((medium_sources == network) && (restore_success == FAILURE)) {
         /* running udhcp may have given us some acceptable defaults */
@@ -1083,7 +1087,7 @@ int main(int argc, char **argv)
         }
 
         if (mysystem(line)) {
-            errorbox(ipcop_gettext("TR_UNABLE_TO_EJECT_CDROM"));
+            errorbox(ofw_gettext("TR_UNABLE_TO_EJECT_CDROM"));
         }
     }
 
@@ -1099,7 +1103,7 @@ int main(int argc, char **argv)
     }
 
     // All done, just have to unmount everything...
-    statuswindow(72, 5, get_title(), ipcop_gettext("TR_UNMOUNTING"));
+    statuswindow(72, 5, get_title(), ofw_gettext("TR_UNMOUNTING"));
 
     mysystem("swapoff -a");
     mysystem("/bin/umount -n /harddisk/tmp");
@@ -1120,13 +1124,13 @@ int main(int argc, char **argv)
     mysystem("/bin/mount  -n -o remount,ro /harddisk/");
 */
     newtPopWindow();
-    install_status = ipcop_gettext("TR_CONGRATULATIONS");
+    install_status = ofw_gettext("TR_CONGRATULATIONS");
 
   EXIT:
 
     if (restore_success == FAILURE) {
         /* install_status can be TR_CONGRATULATIONS or TR_INSTALLATION_CANCELED */
-        newtWinMessage(get_title(), ipcop_gettext("TR_OK"), install_status);
+        newtWinMessage(get_title(), ofw_gettext("TR_OK"), install_status);
     }
 
     newtFinished();

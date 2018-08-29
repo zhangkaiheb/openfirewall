@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2004-2007 marco.s - http://www.urlfilter.net
-# (c) 2012-2014 The IPCop Team
+# (c) 2012-2014 The Openfirewall Team
 #
 # $Id: blacklistupdate.pl 7506 2014-04-29 13:56:19Z owes $
 #
@@ -24,7 +24,7 @@
 use strict;
 use warnings;
 
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 use Fcntl qw(:flock);   # import LOCK_* constants
 
 # Debug level:
@@ -34,11 +34,11 @@ my $debugLevel = 0;
 
 my $make_clean = 1;
 
-my $target = '/var/ipcop/proxy/download';
+my $target = '/var/ofw/proxy/download';
 my $dbdir  = '/var/lib/squidguard/db';
 
-my $sourceurlfile = '/var/ipcop/proxy/blacklistupdate/blacklistupdate.urls';
-my $updconffile = '/var/ipcop/proxy/blacklistupdate/blacklistupdate.conf';
+my $sourceurlfile = '/var/ofw/proxy/blacklistupdate/blacklistupdate.urls';
+my $updconffile = '/var/ofw/proxy/blacklistupdate/blacklistupdate.conf';
 
 my %updatesettings;
 $updatesettings{'ENABLED'} = 'off';
@@ -60,8 +60,8 @@ my $doSetPermissions = 0;
 if (-e "$updconffile") {
     &General::readhash("$updconffile", \%updatesettings);
 }
-if (-e '/var/ipcop/proxy/settings') {
-    &General::readhash('/var/ipcop/proxy/settings', \%proxysettings);
+if (-e '/var/ofw/proxy/settings') {
+    &General::readhash('/var/ofw/proxy/settings', \%proxysettings);
 }
 
 while (@ARGV) {
@@ -99,7 +99,7 @@ while (@ARGV) {
 
 if ($doUpdate || $doUpdateForce) {
 
-    if (-e '/var/ipcop/red/active') {
+    if (-e '/var/ofw/red/active') {
         if ($debugLevel > 0) {
             print "Updating...\n";
             system("logger -t installpackage[urlfilter] \"URL filter blacklist - Updating...\"");

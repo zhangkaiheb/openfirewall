@@ -1,21 +1,21 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (c) 2002-2016 The IPCop Team
+# Copyright (c) 2002-2016 The Openfirewall Team
 #
 # $Id: setddns.pl 8065 2016-01-10 09:26:44Z owes $
 #
@@ -26,8 +26,8 @@ use IO::Socket;
 use Net::SSLeay;
 use Fcntl qw(:flock);
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/ddns-lib.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/ddns-lib.pl';
 
 # Settings and hosts are automatically pulled in through ddns-lib.pl
 
@@ -55,7 +55,7 @@ if ($ARGV[0] eq '--force') {
     }
 }
 
-if (! -e '/var/ipcop/red/active') {
+if (! -e '/var/ofw/red/active') {
     if (($ARGV[0] eq '--cron') || ($ARGV[0] eq '--force')) {
         # silently exit
         myexit(0);
@@ -66,7 +66,7 @@ if (! -e '/var/ipcop/red/active') {
 }
 
 my $ip;
-if (open(IP, '/var/ipcop/red/local-ipaddress')) {
+if (open(IP, '/var/ofw/red/local-ipaddress')) {
     $ip = <IP>;
     close(IP);
     chomp $ip;
@@ -123,14 +123,14 @@ if (   &General::IpInSubnet($ip, '10.0.0.0', '255.0.0.0')
         &General::log("Dynamic DNS public router IP is: $ip");
 
         myexit(0) if ($ip eq 'unavailable');
-        system("echo $ip  > /var/ipcop/red/internet-ipaddress");
+        system("echo $ip  > /var/ofw/red/internet-ipaddress");
     }
 }
 
 
 # use proxy ?
 my %proxysettings;
-&General::readhash('/var/ipcop/proxy/settings', \%proxysettings);
+&General::readhash('/var/ofw/proxy/settings', \%proxysettings);
 if ($_ = $proxysettings{'UPSTREAM_PROXY'}) {
     my ($peer, $peerport) = (
 /^(?:[a-zA-Z ]+\:\/\/)?(?:[A-Za-z0-9\_\.\-]*?(?:\:[A-Za-z0-9\_\.\-]*?)?\@)?([a-zA-Z0-9\.\_\-]*?)(?:\:([0-9]{1,5}))?(?:\/.*?)?$/

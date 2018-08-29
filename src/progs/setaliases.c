@@ -1,27 +1,27 @@
 /*
  * setaliases - configure red aliased interfaces
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
  * (c) Steve Bootes, 2002/04/15
  *
  * 21/04/03 Robert Kerr Changed to link directly to libsmooth rather than
  *                      using a copy & paste
  *
- * (c) -2011, the IPCop team
+ * (c) -2011, the Openfirewall Team
  *
  * $Id: setaliases.c 7371 2014-03-24 19:11:42Z owes $
  *
@@ -101,25 +101,25 @@ int main(int argc, char *argv[])
     /* delete all aliases, readd the active ones below */
     memset(command, 0, STRING_SIZE);
     verbose_printf(1, "Flushing aliases\n");
-    snprintf(command, STRING_SIZE - 1, "/sbin/ip addr flush label %s:alias", ipcop_ethernet.device[RED][1]);
+    snprintf(command, STRING_SIZE - 1, "/sbin/ip addr flush label %s:alias", ofw_ethernet.device[RED][1]);
     safe_system(command);
 
     /* Check for RED_COUNT=1 (or higher) i.e. RED ethernet present. If not,
      * exit gracefully.  This is not an error... */
-    if ((ipcop_ethernet.count[RED] == 0) || (ipcop_ethernet.red_active[1] == 0)) {
+    if ((ofw_ethernet.count[RED] == 0) || (ofw_ethernet.red_active[1] == 0)) {
         verbose_printf(1, "No RED ethernet present. Exit.\n");
         exit(0);
     }
 #if 0
     /* Now check the RED_TYPE - aliases currently only set when RED is STATIC. */
-    if (strcmp(ipcop_ethernet.red_type[1], "STATIC")) {
+    if (strcmp(ofw_ethernet.red_type[1], "STATIC")) {
         verbose_printf(1, "RED is not STATIC. Exit.\n");
         exit(0);
     }
 #endif
 
     /* Now set up the new aliases from the config file */
-    if (!(file = fopen("/var/ipcop/ethernet/aliases", "r"))) {
+    if (!(file = fopen("/var/ofw/ethernet/aliases", "r"))) {
         fprintf(stderr, "Unable to open aliases configuration file\n");
         exit(1);
     }
@@ -150,14 +150,14 @@ int main(int argc, char *argv[])
         }
 
         if ((aliasip == NULL) || (enabled == NULL) || (count < 4)) {
-            fprintf(stderr, "Incomplete data line: in %s(%d)\n", "/var/ipcop/ethernet/aliases", linecounter);
+            fprintf(stderr, "Incomplete data line: in %s(%d)\n", "/var/ofw/ethernet/aliases", linecounter);
             exit(1);
         }
         if (!strcmp(enabled, "on") == 0)        /* disabled rule? */
             continue;
 
         if (!VALID_IP(aliasip)) {
-            fprintf(stderr, "Bad alias : %s in %s(%d)\n", aliasip, "/var/ipcop/ethernet/aliases", linecounter);
+            fprintf(stderr, "Bad alias : %s in %s(%d)\n", aliasip, "/var/ofw/ethernet/aliases", linecounter);
             exit(1);
         }
 
@@ -166,13 +166,13 @@ int main(int argc, char *argv[])
             /* ip addr will set proper mask. /32 if alias outside RED ip address range */
             snprintf(command, STRING_SIZE - 1,
                      "/sbin/ip addr add %s dev %s label %s:alias",
-                     aliasip, ipcop_ethernet.red_device[1], ipcop_ethernet.red_device[1]);
+                     aliasip, ofw_ethernet.red_device[1], ofw_ethernet.red_device[1]);
             verbose_printf(1, "Add alias %s\n", aliasip);
         }
         else {
             snprintf(command, STRING_SIZE - 1,
                      "/sbin/ip addr add %s/%s dev %s label %s:alias",
-                     aliasip, netmask, ipcop_ethernet.red_device[1], ipcop_ethernet.red_device[1]);
+                     aliasip, netmask, ofw_ethernet.red_device[1], ofw_ethernet.red_device[1]);
             verbose_printf(1, "Add alias %s/%s\n", aliasip, netmask);
         }
         safe_system(command);
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
         memset(command, 0, STRING_SIZE);
         snprintf(command, STRING_SIZE - 1,
                 "/usr/bin/arping -q -c 1 -U -I %s -s %s %s",
-                ipcop_ethernet.device[RED][1], aliasip, aliasip);
+                ofw_ethernet.device[RED][1], aliasip, aliasip);
         safe_system(command);
     }
     return 0;

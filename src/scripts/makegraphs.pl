@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2004-01-19 Mark Wormgoor <mark@wormgoor.com>.
-# (c) 2007-2014, the IPCop team
+# (c) 2007-2014, the Openfirewall Team
 #
 # $Id: makegraphs.pl 7496 2014-04-22 16:41:58Z owes $
 #
@@ -27,12 +27,12 @@ use strict;
 
 use IO::Socket;
 use RRDs;
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
+require '/usr/lib/ofw/header.pl';
 
 my (%settings, $iface, $ERROR);
-&General::readhash('/var/ipcop/ethernet/settings', \%settings);
+&General::readhash('/var/ofw/ethernet/settings', \%settings);
 
 # Added for conversion of utf-8 characters
 ### TODO: check conversion still required

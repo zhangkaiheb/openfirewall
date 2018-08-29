@@ -1,28 +1,28 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2009-2015, the IPCop team
+# (c) 2009-2015, the Openfirewall Team
 #
 # $Id: scheduler.pl 7884 2015-02-09 16:54:04Z owes $
 #
 
 
 use strict;
-require '/usr/lib/ipcop/scheduler-lib.pl';
+require '/usr/lib/ofw/scheduler-lib.pl';
 
 
 my ($second, $minute, $hour, $day, $month ,$year, $weekday) = localtime(time);
@@ -65,7 +65,7 @@ sub reconnect
 {
     &General::log('Scheduler reconnect');
 
-    if (-e '/var/ipcop/red/active') {
+    if (-e '/var/ofw/red/active') {
         &hangup();
         # Some providers/connections exist that reconnect better after a small delay
         sleep 15;
@@ -78,7 +78,7 @@ sub dial
     &General::log("Scheduler dial");
     &General::log('red', 'Scheduler dial');
 
-    return if (-e '/var/ipcop/red/active');
+    return if (-e '/var/ofw/red/active');
 
     unless (system('/etc/rc.d/rc.red', 'start') == 0) {
         &General::log("Scheduler dial failed: $?");
@@ -87,7 +87,7 @@ sub dial
 
     # wait maximum 60 seconds for red/active triggerfile
     my $counter = 60;
-    until (-e '/var/ipcop/red/active' || $counter == 0) {
+    until (-e '/var/ofw/red/active' || $counter == 0) {
         sleep 1;
         $counter--;
     }
@@ -98,12 +98,12 @@ sub hangup
     &General::log("Scheduler hangup");
     &General::log('red', 'Scheduler hangup');
 
-    my $existPPP = -e '/var/run/ppp-ipcop.pid';
-    return unless (-e '/var/ipcop/red/active' || $existPPP);
+    my $existPPP = -e '/var/run/ppp-ofw.pid';
+    return unless (-e '/var/ofw/red/active' || $existPPP);
     
     my $ppppid = '-';
     if($existPPP) {
-        $ppppid = `cat /var/run/ppp-ipcop.pid | grep -v ppp`;
+        $ppppid = `cat /var/run/ppp-ofw.pid | grep -v ppp`;
         chomp($ppppid);
     }
 
@@ -114,7 +114,7 @@ sub hangup
 
     # now wait for red/active triggerfile and ppp daemon to disappear
     sleep 1;
-    while (-e '/var/ipcop/red/active' || ($existPPP && -d "/proc/$ppppid")) {
+    while (-e '/var/ofw/red/active' || ($existPPP && -d "/proc/$ppppid")) {
         sleep 1;
     }
 
@@ -129,14 +129,14 @@ sub profile
     my $profilenr = shift;
     my $red_active = 0;         # are we connected?
 
-    unless (-e "/var/ipcop/ppp/settings-${profilenr}")
+    unless (-e "/var/ofw/ppp/settings-${profilenr}")
     {
         &General::log("Secheduler invalid profile: $profilenr");
         return;
     }
     &General::log("Scheduler select profile $profilenr");
 
-    if (-e '/var/ipcop/red/active') {
+    if (-e '/var/ofw/red/active') {
         # remember to restart red after changing profile
         $red_active = 1;
         &hangup();
@@ -171,12 +171,12 @@ sub update
 
 sub reboot
 {
-    system("/usr/local/bin/ipcopreboot --boot Scheduled reboot");
+    system("/usr/local/bin/ofwreboot --boot Scheduled reboot");
 }
 
 sub shutdown
 {
-    system("/usr/local/bin/ipcopreboot --down Scheduled shutdown");
+    system("/usr/local/bin/ofwreboot --down Scheduled shutdown");
 }
 
 sub ipsec

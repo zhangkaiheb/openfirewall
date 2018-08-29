@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) The SmoothWall Team
-# Copyright (c) 2001-2015 The IPCop Team
+# Copyright (c) 2001-2015 The Openfirewall Team
 #
 # $Id: rc.red 7871 2015-02-06 14:23:18Z owes $
 
@@ -27,7 +27,7 @@ $< = $>;
 use strict;
 
 #use warnings;
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 
 my %pppsettings;
 my %isdnsettings;
@@ -36,17 +36,17 @@ my %dhcpsettings;
 my $iface;
 
 # read vars back from file.
-&General::readhash("/var/ipcop/ppp/settings",      \%pppsettings);
-&General::readhash("/var/ipcop/ethernet/isdn",     \%isdnsettings);
-&General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
-&General::readhash("/var/ipcop/dhcp/settings",     \%dhcpsettings);
+&General::readhash("/var/ofw/ppp/settings",      \%pppsettings);
+&General::readhash("/var/ofw/ethernet/isdn",     \%isdnsettings);
+&General::readhash("/var/ofw/ethernet/settings", \%netsettings);
+&General::readhash("/var/ofw/dhcp/settings",     \%dhcpsettings);
 
 sub myexit
 {
     my $retcode = shift;
 
-    unlink('/var/ipcop/red/connecting');
-    unlink('/var/ipcop/red/disconnecting');
+    unlink('/var/ofw/red/connecting');
+    unlink('/var/ofw/red/disconnecting');
 
     &General::log("ERROR ($retcode) in rc.red") if ($retcode);
 
@@ -101,7 +101,7 @@ sub doupdatesettings {
     system('/sbin/ip route del default 2>/dev/null');
 
     # erase in case it was created once with 'persistent' selected but rc.red stop never used : SF1171610
-    unlink("/var/ipcop/red/iface");
+    unlink("/var/ofw/red/iface");
 }
 
 # No output should be sent to the webclient
@@ -109,8 +109,8 @@ open STDIN,  '</dev/zero' or die "Can't read from /dev/zero";
 open STDOUT, '>/dev/null' or die "Can't write to /dev/null";
 
 if ($ARGV[0] eq 'start') {
-    if (   -e "/var/ipcop/red/active"
-        || -e '/var/run/ppp-ipcop.pid')
+    if (   -e "/var/ofw/red/active"
+        || -e '/var/run/ppp-ofw.pid')
     {
         &General::log("ERROR: Can't start RED when it's still active");
         exit 1;
@@ -120,8 +120,8 @@ if ($ARGV[0] eq 'start') {
         exit 1;
     }
 
-    system('/usr/bin/touch /var/ipcop/red/connecting');
-    unlink '/var/ipcop/red/disconnecting';
+    system('/usr/bin/touch /var/ofw/red/connecting');
+    unlink '/var/ofw/red/disconnecting';
     if (
         (
             (($netsettings{'RED_1_TYPE'} =~ /^(PPPOE|PPTP)$/) && ($netsettings{'RED_COUNT'} > 0))
@@ -142,13 +142,13 @@ if ($ARGV[0] eq 'start') {
             &General::log("red", "Starting RED device $netsettings{'RED_1_DEV'} type $netsettings{'RED_1_TYPE'}.");
 
             if ($netsettings{'RED_1_TYPE'} eq 'DHCP') {
-                if (open(FILE, ">/var/ipcop/red/iface")) { print FILE $netsettings{'RED_1_DEV'}; close FILE; }
+                if (open(FILE, ">/var/ofw/red/iface")) { print FILE $netsettings{'RED_1_DEV'}; close FILE; }
                 dodhcpdial($netsettings{'RED_1_DEV'}, $netsettings{'RED_DHCP_HOSTNAME'});
                 exit 0;
             }
             elsif (($netsettings{'RED_1_TYPE'} eq 'PPTP') && ($pppsettings{'METHOD'} eq 'DHCP')) {
-                if (open(FILE, ">/var/ipcop/red/device")) { print FILE $netsettings{'RED_1_DEV'}; close FILE; }
-                unlink("/var/ipcop/red/iface");
+                if (open(FILE, ">/var/ofw/red/device")) { print FILE $netsettings{'RED_1_DEV'}; close FILE; }
+                unlink("/var/ofw/red/iface");
                 dodhcpdial($netsettings{'RED_1_DEV'}, $netsettings{'RED_DHCP_HOSTNAME'});
             }
             elsif (($netsettings{'RED_1_TYPE'} eq 'STATIC')
@@ -158,14 +158,14 @@ if ($ARGV[0] eq 'start') {
                 system("/sbin/ip", "addr", "add", "$netsettings{'RED_1_ADDRESS'}/$netsettings{'RED_1_NETMASK'}", "dev", $netsettings{'RED_1_DEV'});
                 system("/sbin/ip", "link", "set", $netsettings{'RED_1_DEV'}, "up" );
                 if ($netsettings{'RED_1_TYPE'} eq 'STATIC') {
-                    system("echo $netsettings{'DNS1'}    > /var/ipcop/red/dns1");
-                    system("echo $netsettings{'DNS2'}    > /var/ipcop/red/dns2");
-                    system("echo $netsettings{'RED_1_ADDRESS'} > /var/ipcop/red/local-ipaddress");
-                    system("echo $netsettings{'DEFAULT_GATEWAY'} > /var/ipcop/red/remote-ipaddress");
+                    system("echo $netsettings{'DNS1'}    > /var/ofw/red/dns1");
+                    system("echo $netsettings{'DNS2'}    > /var/ofw/red/dns2");
+                    system("echo $netsettings{'RED_1_ADDRESS'} > /var/ofw/red/local-ipaddress");
+                    system("echo $netsettings{'DEFAULT_GATEWAY'} > /var/ofw/red/remote-ipaddress");
                 }
                 elsif ($netsettings{'RED_1_TYPE'} eq 'PPTP') {
-                    if (open(FILE, ">/var/ipcop/red/device")) { print FILE $netsettings{'RED_1_DEV'}; close FILE; }
-                    unlink("/var/ipcop/red/iface");
+                    if (open(FILE, ">/var/ofw/red/device")) { print FILE $netsettings{'RED_1_DEV'}; close FILE; }
+                    unlink("/var/ofw/red/iface");
                 }
                 if ($netsettings{'DEFAULT_GATEWAY'} ne '') {
                     system("/sbin/ip", "route", "add", "default", "via", $netsettings{'DEFAULT_GATEWAY'});
@@ -189,8 +189,8 @@ if ($ARGV[0] eq 'start') {
             }
 
             if ($netsettings{'RED_1_TYPE'} eq 'STATIC') {
-                if (open(FILE, ">/var/ipcop/red/iface")) { print FILE $netsettings{'RED_1_DEV'}; close FILE; }
-                system("/usr/bin/touch", "/var/ipcop/red/active");
+                if (open(FILE, ">/var/ofw/red/iface")) { print FILE $netsettings{'RED_1_DEV'}; close FILE; }
+                system("/usr/bin/touch", "/var/ofw/red/active");
                 system("/etc/rc.d/rc.updatered red up");
                 exit 0;
             }
@@ -202,7 +202,7 @@ if ($ARGV[0] eq 'start') {
     }
 
     if ($pppsettings{'RECONNECTION'} eq 'dialondemand') {
-        system('/usr/bin/touch', "/var/ipcop/red/dial-on-demand");
+        system('/usr/bin/touch', "/var/ofw/red/dial-on-demand");
     }
 
     if ($pppsettings{'VALID'} ne 'yes') {
@@ -210,15 +210,15 @@ if ($ARGV[0] eq 'start') {
         myexit(1);
     }
 
-    if (-e "/var/ipcop/ppp/updatesettings") {
+    if (-e "/var/ofw/ppp/updatesettings") {
         &doupdatesettings;
     }
 
     if (($pppsettings{'METHOD'} eq 'STATIC') && ($pppsettings{'DNS'} eq 'Manual')) {
-        if (open(FILE, ">/var/ipcop/red/dns1"))             { print FILE $pppsettings{'DNS1'};    close FILE; }
-        if (open(FILE, ">/var/ipcop/red/dns2"))             { print FILE $pppsettings{'DNS2'};    close FILE; }
-        if (open(FILE, ">/var/ipcop/red/local-ipaddress"))  { print FILE $pppsettings{'IP'};      close FILE; }
-        if (open(FILE, ">/var/ipcop/red/remote-ipaddress")) { print FILE $pppsettings{'GATEWAY'}; close FILE; }
+        if (open(FILE, ">/var/ofw/red/dns1"))             { print FILE $pppsettings{'DNS1'};    close FILE; }
+        if (open(FILE, ">/var/ofw/red/dns2"))             { print FILE $pppsettings{'DNS2'};    close FILE; }
+        if (open(FILE, ">/var/ofw/red/local-ipaddress"))  { print FILE $pppsettings{'IP'};      close FILE; }
+        if (open(FILE, ">/var/ofw/red/remote-ipaddress")) { print FILE $pppsettings{'GATEWAY'}; close FILE; }
     }
     if ($pppsettings{'RECONNECTION'} eq 'dialondemand') {
         &General::log("red", "Dial-on-Demand waiting to dial $pppsettings{'PROFILENAME'}.");
@@ -248,10 +248,10 @@ if ($ARGV[0] eq 'start') {
     elsif ($pppsettings{'TYPE'} eq 'wanpipe-adsl')    { &doatmprepare($pppsettings{'TYPE'}); }
     elsif ($pppsettings{'TYPE'} eq 'wanpipe-serial')  { &dowanpipeserialdial(); }
 
-    if (-e "/var/ipcop/ppp/updatesettings") {
+    if (-e "/var/ofw/ppp/updatesettings") {
 
         # erase update mark only after specific script had run, allowing specific script to treat the update
-        unlink("/var/ipcop/ppp/updatesettings");
+        unlink("/var/ofw/ppp/updatesettings");
     }
     if (($pppsettings{'RECONNECTION'} eq 'dialondemand') || ($pppsettings{'METHOD'} eq 'STATIC')) {
         system("/etc/rc.d/rc.updatered red up");
@@ -259,29 +259,29 @@ if ($ARGV[0] eq 'start') {
 }
 elsif ($ARGV[0] eq 'stop') {
     $iface = &General::getredinterface();
-    my $device = &General::getinterfacefromfile("/var/ipcop/red/device");
+    my $device = &General::getinterfacefromfile("/var/ofw/red/device");
 
-    if (-e "/var/ipcop/red/active") {
-        system('/usr/bin/touch /var/ipcop/red/disconnecting');
+    if (-e "/var/ofw/red/active") {
+        system('/usr/bin/touch /var/ofw/red/disconnecting');
     }
-    unlink "/var/ipcop/red/dial-on-demand";
-    unlink "/var/ipcop/red/active";
-    unlink "/var/ipcop/red/connecting";
-    unlink "/var/ipcop/red/local-ipaddress";
-    unlink "/var/ipcop/red/remote-ipaddress";
-    unlink "/var/ipcop/red/dns1";
-    unlink "/var/ipcop/red/dns2";
-    unlink "/var/ipcop/red/resolv.conf";
-    unlink "/var/ipcop/red/device";
+    unlink "/var/ofw/red/dial-on-demand";
+    unlink "/var/ofw/red/active";
+    unlink "/var/ofw/red/connecting";
+    unlink "/var/ofw/red/local-ipaddress";
+    unlink "/var/ofw/red/remote-ipaddress";
+    unlink "/var/ofw/red/dns1";
+    unlink "/var/ofw/red/dns2";
+    unlink "/var/ofw/red/resolv.conf";
+    unlink "/var/ofw/red/device";
 
     # stay with keepconnected during transitional rc.red stop ordered by rc.connectioncheck
-    if (!-e "/var/ipcop/red/redial") {
-        unlink "/var/ipcop/red/keepconnected";
+    if (!-e "/var/ofw/red/redial") {
+        unlink "/var/ofw/red/keepconnected";
     }
-    unlink "/var/ipcop/red/redial";
+    unlink "/var/ofw/red/redial";
 
     # Kill PPPD
-    if (open(FILE, "/var/run/ppp-ipcop.pid")) {
+    if (open(FILE, "/var/run/ppp-ofw.pid")) {
         my $pid = <FILE>;
         close FILE;
         chomp($pid);
@@ -360,16 +360,16 @@ elsif ($ARGV[0] eq 'clear') {
     &docleanup();
 
     # Remove possible leftover files
-    unlink '/var/ipcop/red/active';
-    unlink '/var/ipcop/red/connecting';
-    unlink '/var/ipcop/red/device';
-    unlink '/var/ipcop/red/disconnecting';
-    unlink '/var/ipcop/red/dial-on-demand';
-    unlink '/var/ipcop/red/dns1';
-    unlink '/var/ipcop/red/dns2';
-    unlink '/var/ipcop/red/eciadsl-synch-done';
-    unlink '/var/ipcop/red/local-ipaddress';
-    unlink '/var/ipcop/red/remote-ipaddress';
+    unlink '/var/ofw/red/active';
+    unlink '/var/ofw/red/connecting';
+    unlink '/var/ofw/red/device';
+    unlink '/var/ofw/red/disconnecting';
+    unlink '/var/ofw/red/dial-on-demand';
+    unlink '/var/ofw/red/dns1';
+    unlink '/var/ofw/red/dns2';
+    unlink '/var/ofw/red/eciadsl-synch-done';
+    unlink '/var/ofw/red/local-ipaddress';
+    unlink '/var/ofw/red/remote-ipaddress';
 }
 else {
     &General::log("ERROR: rc.red bad argument (start|stop|clear)");
@@ -543,7 +543,7 @@ sub doisdndial {
             'user',            $pppsettings{'USERNAME'},
             'name',            $pppsettings{'USERNAME'},
             'active-filter',   'outbound and not icmp[0] == 3 and not tcp[13] & 4 != 0',
-            'pidfile',         '/var/run/ppp-ipcop.pid',
+            'pidfile',         '/var/run/ppp-ofw.pid',
             '/dev/ippp0',      '/dev/ippp1'
         );
 
@@ -574,7 +574,7 @@ sub doisdndial {
             'user',            $pppsettings{'USERNAME'},
             'name',            $pppsettings{'USERNAME'},
             'active-filter',   'outbound and not icmp[0] == 3 and not tcp[13] & 4 != 0',
-            'pidfile',         '/var/run/ppp-ipcop.pid',
+            'pidfile',         '/var/run/ppp-ofw.pid',
             '/dev/ippp0'
         );
 
@@ -731,8 +731,8 @@ sub dopppoedial {
 sub dopptpdial {
     my %pptpdhcpc;
     my $routerip = $pppsettings{'ROUTERIP'} ? $pppsettings{'ROUTERIP'} : "10.0.0.138";
-    if ($pppsettings{'METHOD'} eq 'DHCP' && -e "/var/ipcop/red/device") {
-        my $device = &General::getinterfacefromfile("/var/ipcop/red/device");
+    if ($pppsettings{'METHOD'} eq 'DHCP' && -e "/var/ofw/red/device") {
+        my $device = &General::getinterfacefromfile("/var/ofw/red/device");
 
         # TODO: verify the fixes from SF #2978513
         if (&General::readhash("/var/log/dhcpclient.info", \%pptpdhcpc)) {
@@ -809,10 +809,10 @@ sub doeciadsldial {
             $iface = "tun0";
         }
 
-        if (open(FILE, ">/var/ipcop/red/iface")) { print FILE $iface; close FILE; }
+        if (open(FILE, ">/var/ofw/red/iface")) { print FILE $iface; close FILE; }
 
         if ($pppsettings{'METHOD'} =~ /^(PPPOE|PPPOE_PLUGIN)$/) {
-            if (open(FILE, ">/var/ipcop/red/device")) { print FILE $iface; close FILE; }
+            if (open(FILE, ">/var/ofw/red/device")) { print FILE $iface; close FILE; }
             $netsettings{'RED_1_DEV'} = $iface;
             &dopppoedial();
         }
@@ -820,8 +820,8 @@ sub doeciadsldial {
             system("/sbin/ip", "addr", "flush", "dev", $iface);
             system("/sbin/ip", "addr", "add", "$pppsettings{'IP'}/$pppsettings{'NETMASK'}", "dev", $iface);
             system("/sbin/ip", "route", "add", "default", "via", $pppsettings{'GATEWAY'});
-            system("/usr/bin/touch", "/var/ipcop/red/active");
-            if (open(FILE, ">/var/ipcop/red/iface")) { print FILE $iface; close FILE; }
+            system("/usr/bin/touch", "/var/ofw/red/active");
+            if (open(FILE, ">/var/ofw/red/iface")) { print FILE $iface; close FILE; }
         }
         elsif ($pppsettings{'METHOD'} eq 'DHCP') {
 
@@ -1033,9 +1033,9 @@ sub doeagleusbadsldial {
     $iface = &General::getinterface($iface);
 
     if ($pppsettings{'PROTOCOL'} eq 'RFC1483') {
-        if (open(FILE, ">/var/ipcop/red/iface")) { print FILE $iface; close FILE; }
+        if (open(FILE, ">/var/ofw/red/iface")) { print FILE $iface; close FILE; }
         if ($pppsettings{'METHOD'} =~ /^(PPPOE|PPPOE_PLUGIN)$/) {
-            if (open(FILE, ">/var/ipcop/red/device")) { print FILE $iface; close FILE; }
+            if (open(FILE, ">/var/ofw/red/device")) { print FILE $iface; close FILE; }
             $netsettings{'RED_1_DEV'} = $iface;
             &dopppoedial();
         }
@@ -1043,7 +1043,7 @@ sub doeagleusbadsldial {
             system("/sbin/ip", "addr", "flush", "dev", $iface);
             system("/sbin/ip", "addr", "add", "$pppsettings{'IP'}/$pppsettings{'NETMASK'}", "dev", $iface);
             system("/sbin/ip", "route", "add", "default", "via", $pppsettings{'GATEWAY'});
-            system("/usr/bin/touch", "/var/ipcop/red/active");
+            system("/usr/bin/touch", "/var/ofw/red/active");
         }
         elsif ($pppsettings{'METHOD'} eq 'DHCP') {
             dodhcpdial($iface, $pppsettings{'DHCP_HOSTNAME'});
@@ -1052,7 +1052,7 @@ sub doeagleusbadsldial {
     else {
 
         # PPPoA
-        if (open(FILE, ">/var/ipcop/red/device")) { print FILE $iface; close FILE; }
+        if (open(FILE, ">/var/ofw/red/device")) { print FILE $iface; close FILE; }
         $netsettings{'RED_1_DEV'} = $iface;
         my @pppcommand = ('/usr/sbin/pppd', 'pty');
         push(@pppcommand, "/usr/sbin/pppoa -I $iface ");
@@ -1188,7 +1188,7 @@ sub doatmdial {
         if ($pppsettings{'METHOD'} =~ /^(PPPOE|PPPOE_PLUGIN)$/) {
             my $itf    = '0';
             my $device = "nas$itf";
-            if (open(FILE, ">/var/ipcop/red/device")) { print FILE $device; close FILE; }
+            if (open(FILE, ">/var/ofw/red/device")) { print FILE $device; close FILE; }
             $netsettings{'RED_1_DEV'} = $device;
             if (system('/bin/ps -ef | /bin/grep -q [b]r2684ctl')) {
                 system('/sbin/modprobe br2684');
@@ -1202,7 +1202,7 @@ sub doatmdial {
         elsif ($pppsettings{'ENCAP'} =~ /^(0|1)$/) {
             my $itf = '0';
             $iface = "nas$itf";
-            if (open(FILE, ">/var/ipcop/red/iface")) { print FILE $iface; close FILE; }
+            if (open(FILE, ">/var/ofw/red/iface")) { print FILE $iface; close FILE; }
             if (system('/bin/ps -ef | /bin/grep -q [b]r2684ctl')) {
                 system('/sbin/modprobe br2684');
                 system('/usr/sbin/br2684ctl', '-b', '-c', "$itf", '-e', $pppsettings{'ENCAP'}, '-a',
@@ -1215,7 +1215,7 @@ sub doatmdial {
                 system("/sbin/ip", "addr", "flush", "dev", $iface);
                 system("/sbin/ip", "addr", "add", "$pppsettings{'IP'}/$pppsettings{'NETMASK'}", "dev", $iface);
                 system("/sbin/ip", "route", "add", "default", "via", $pppsettings{'GATEWAY'});
-                system("/usr/bin/touch", "/var/ipcop/red/active");
+                system("/usr/bin/touch", "/var/ofw/red/active");
                 system("/etc/rc.d/rc.updatered red up");
             }
             elsif ($pppsettings{'METHOD'} eq 'DHCP') {
@@ -1225,7 +1225,7 @@ sub doatmdial {
         elsif ($pppsettings{'ENCAP'} =~ /^(2|3)$/) {
             my $itf = '0';
             $iface = "atm$itf";
-            if (open(FILE, ">/var/ipcop/red/iface")) { print FILE $iface; close FILE; }
+            if (open(FILE, ">/var/ofw/red/iface")) { print FILE $iface; close FILE; }
             if (system('/bin/ps -ef | /bin/grep -q [a]tmarpd')) {
                 if (system('/usr/sbin/atmarpd -b -l syslog')) {
                     &General::log('red', 'atmarpd fail');
@@ -1251,7 +1251,7 @@ sub doatmdial {
                     }
                     system(@atmarp);
                     system("/sbin/ip", "route", "add", "default", "via", $pppsettings{'GATEWAY'});
-                    system("/usr/bin/touch", "/var/ipcop/red/active");
+                    system("/usr/bin/touch", "/var/ofw/red/active");
                 }
             }
         }

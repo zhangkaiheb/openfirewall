@@ -1,20 +1,20 @@
 /*
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2001-2012, the IPCop team
+ * (c) 2001-2012, the Openfirewall Team
  *
  * $Id: ipsecctrl.c 6445 2012-03-02 13:59:08Z owes $
  *
@@ -83,15 +83,15 @@ void add_alias_interfaces(int offset)
     int alias = 0;
 
     /* Check for RED present. If not, exit gracefully.  This is not an error... */
-    if (!VALID_DEVICE(ipcop_ethernet.red_device[1]))
+    if (!VALID_DEVICE(ofw_ethernet.red_device[1]))
         return;
 
     /* Now check the RED_TYPE - aliases only work with STATIC. */
-    if (!(strcmp(ipcop_ethernet.red_type[1], "STATIC") == 0))
+    if (!(strcmp(ofw_ethernet.red_type[1], "STATIC") == 0))
         return;
 
     /* Now set up the new aliases from the config file */
-    if (!(file = fopen("/var/ipcop/ethernet/aliases", "r"))) {
+    if (!(file = fopen("/var/ofw/ethernet/aliases", "r"))) {
         fprintf(stderr, "Unable to open aliases configuration file\n");
         return;
     }
@@ -125,7 +125,7 @@ void add_alias_interfaces(int offset)
         if (strcmp(enabled, "on") == 0) {
             memset(s, 0, STRING_SIZE);
             snprintf(s, STRING_SIZE - 1, "/usr/sbin/ipsec tncfg --attach --virtual ipsec%d --physical %s:%d %s",
-                     offset + alias, ipcop_ethernet.red_device[1], alias, flag_verbose ? "" : ">/dev/null");
+                     offset + alias, ofw_ethernet.red_device[1], alias, flag_verbose ? "" : ">/dev/null");
             safe_system(s);
             alias++;
         }
@@ -310,7 +310,7 @@ int main(int argc, char *argv[])
             }
 
             /* reset firewall rules */
-            safe_system("/usr/local/bin/setfwrules --ipcop");
+            safe_system("/usr/local/bin/setfwrules --ofw");
 
             exit(0);
         }
@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
 
     /* read IPsec config */
     verbose_printf(1, "Reading IPsec settings ... \n");
-    if (read_kv_from_file(&ipsec_kv, "/var/ipcop/ipsec/settings") != SUCCESS) {
+    if (read_kv_from_file(&ipsec_kv, "/var/ofw/ipsec/settings") != SUCCESS) {
         fprintf(stderr, "Cannot read IPsec settings\n");
         exit(1);
     }
@@ -353,13 +353,13 @@ int main(int argc, char *argv[])
         }
 
         for (j = 1; j <= MAX_NETWORK_COLOUR; j++) {
-            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", ipcop_colours_text[i], j);
+            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", ofw_colours_text[i], j);
 
             if (test_kv(ipsec_kv, buffer, "on") == SUCCESS) {
                 /* this card is enabled in vpn/settings */
-                if (j > ipcop_ethernet.count[i]) {
+                if (j > ofw_ethernet.count[i]) {
                     /* card is missing in ethernet/settings */
-                    fprintf(stderr, "%s_%d enabled but no device defined\n", ipcop_colours_text[i], j);
+                    fprintf(stderr, "%s_%d enabled but no device defined\n", ofw_colours_text[i], j);
                     exit(1);
                 }
 
@@ -380,7 +380,7 @@ int main(int argc, char *argv[])
         }
 
         /* reset firewall rules */
-        safe_system("/usr/local/bin/setfwrules --ipcop");
+        safe_system("/usr/local/bin/setfwrules --ofw");
 
         exit(0);
     }
@@ -400,7 +400,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    if (!(file = fopen("/var/ipcop/ipsec/config", "r"))) {
+    if (!(file = fopen("/var/ofw/ipsec/config", "r"))) {
         fprintf(stderr, "Couldn't open vpn settings file");
         exit(1);
     }
@@ -420,14 +420,14 @@ int main(int argc, char *argv[])
         /*  TODO:   check if interface is ENABLED 
                     do we really want/need to block *all* tunnels if only one is using a no longer valid interface?
         */
-        if (!enable_red && (strcmp(interface, "RED") == 0) && VALID_DEVICE(ipcop_ethernet.red_device[1])) {
+        if (!enable_red && (strcmp(interface, "RED") == 0) && VALID_DEVICE(ofw_ethernet.red_device[1])) {
             enable_red += 2;
         }
 
         if (!enable_blue && strcmp(interface, "BLUE") == 0) {
             enable_blue++;
 
-            if (ipcop_ethernet.count[BLUE])
+            if (ofw_ethernet.count[BLUE])
                 enable_blue++;
             else
                 fprintf(stderr, "IPsec enabled on blue but blue interface is invalid or not found\n");
@@ -443,7 +443,7 @@ int main(int argc, char *argv[])
     }
 
     // reset firewall rules
-    safe_system("/usr/local/bin/setfwrules --ipcop");
+    safe_system("/usr/local/bin/setfwrules --ofw");
 
     // exit if nothing to do
     if ((enable_red + enable_blue) == 0) {
@@ -488,7 +488,7 @@ int main(int argc, char *argv[])
     }
 
     // search the connection pointed by 'key'
-    if (!(file = fopen("/var/ipcop/ipsec/config", "r"))) {
+    if (!(file = fopen("/var/ofw/ipsec/config", "r"))) {
         fprintf(stderr, "Couldn't open IPsec settings file");
         exit(1);
     }

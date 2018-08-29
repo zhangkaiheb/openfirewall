@@ -1,4 +1,4 @@
-/* This file is part of the IPCop Firewall.
+/* This file is part of the Openfirewall.
  *
  * This program is distributed under the terms of the GNU General Public
  * Licence.  See the file COPYING for details.
@@ -34,7 +34,7 @@
  * it will drop privileges, becoming the logwatch user & group then run
  * logwatch. In many ways this is much the same as getting cron to run
  *    su -s /etc/logwatch/scripts/logwatch.pl
- * the wrapper however is able to read configuration info from /var/ipcop and
+ * the wrapper however is able to read configuration info from /var/ofw and
  * pass the correct args to logwatch
  */
 
@@ -53,7 +53,7 @@ int main(void)
    }
 
    /* Read in and verify config */
-   if (read_kv_from_file(&log_kv, "/var/ipcop/logging/settings") != SUCCESS)
+   if (read_kv_from_file(&log_kv, "/var/ofw/logging/settings") != SUCCESS)
    {
       fprintf(stderr, "Cannot read syslog settings\n");
       exit(1);

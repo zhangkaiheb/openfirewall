@@ -1,26 +1,26 @@
 /*
- * Ipcop helper program - restartntpd
+ * Openfirewall helper program - restartntpd
  *
  * Starts or stops the ntpd daemon.
  *
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software: you can redistribute it and/or modify
+ * Openfirewall is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
 
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
  * (c) Darren Critchley 2003
- * (c) 2006-2010, the IPCop team
+ * (c) 2006-2010, the Openfirewall Team
  * 
  * $Id: restartntpd.c 4075 2010-01-05 16:13:18Z owes $
  * 
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 
     /* Get configuration settings */
     verbose_printf(1, "Reading NTP settings ... \n");
-    if (read_kv_from_file(&kv, "/var/ipcop/time/settings") != SUCCESS) {
+    if (read_kv_from_file(&kv, "/var/ofw/time/settings") != SUCCESS) {
         fprintf(stderr, "Cannot read time settings\n");
         return 1;
     }
@@ -191,19 +191,19 @@ int main(int argc, char *argv[])
 
     if (enabled && enabled_redirect) {
         /* redirect for GREEN */
-        for (i = 1; i <= ipcop_ethernet.count[GREEN]; i++) {
+        for (i = 1; i <= ofw_ethernet.count[GREEN]; i++) {
             verbose_printf(2, "Setting redirect iptables rule for GREEN %i ... \n", i);
             snprintf(command, STRING_SIZE - 1,
                         "/sbin/iptables -t nat -A NTP -i %s -p udp --dport 123 ! -d %s -j DNAT --to %s",
-                        ipcop_ethernet.device[GREEN][i], ipcop_ethernet.address[GREEN][i], ipcop_ethernet.address[GREEN][i]);
+                        ofw_ethernet.device[GREEN][i], ofw_ethernet.address[GREEN][i], ofw_ethernet.address[GREEN][i]);
             safe_system(command);
         }
         /* redirect for BLUE */
-        for (i = 1; i <= ipcop_ethernet.count[BLUE]; i++) {
+        for (i = 1; i <= ofw_ethernet.count[BLUE]; i++) {
             verbose_printf(2, "Setting redirect iptables rule for BLUE %i ... \n", i);
             snprintf(command, STRING_SIZE - 1,
                         "/sbin/iptables -t nat -A NTP -i %s -p udp --dport 123 ! -d %s -j DNAT --to %s",
-                        ipcop_ethernet.device[BLUE][i], ipcop_ethernet.address[BLUE][i], ipcop_ethernet.address[BLUE][i]);
+                        ofw_ethernet.device[BLUE][i], ofw_ethernet.address[BLUE][i], ofw_ethernet.address[BLUE][i]);
             safe_system(command);
         }
     }

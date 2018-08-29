@@ -1,22 +1,22 @@
 #!/usr/bin/perl
 #
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2009-2015, the IPCop team.
+# Copyright (C) 2009-2015, the Openfirewall Team.
 #
 # $Id: makesquidconf.pl 7901 2015-02-22 22:03:25Z owes $
 #
@@ -25,7 +25,7 @@ use strict;
 use NetAddr::IP;
 #use warnings;
 
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 
 my $http_port='81';
 my $http_intercept_port='82';
@@ -45,26 +45,26 @@ my @temp=();
 my $replybodymaxsize = '';
 my $browser_regexp='';
 
-my $acldir   = "/var/ipcop/proxy/acls";
-my $ncsadir  = "/var/ipcop/proxy/ncsa";
-my $ntlmdir  = "/var/ipcop/proxy/ntlm";
-my $raddir   = "/var/ipcop/proxy/radius";
-my $identdir = "/var/ipcop/proxy/ident";
-my $credir   = "/var/ipcop/proxy/cre";
+my $acldir   = "/var/ofw/proxy/acls";
+my $ncsadir  = "/var/ofw/proxy/ncsa";
+my $ntlmdir  = "/var/ofw/proxy/ntlm";
+my $raddir   = "/var/ofw/proxy/radius";
+my $identdir = "/var/ofw/proxy/ident";
+my $credir   = "/var/ofw/proxy/cre";
 
 my $userdb = "$ncsadir/passwd";
 my $stdgrp = "$ncsadir/standard.grp";
 my $extgrp = "$ncsadir/extended.grp";
 my $disgrp = "$ncsadir/disabled.grp";
 
-my $browserdb = "/var/ipcop/proxy/useragents";
-my $mimetypes = "/var/ipcop/proxy/mimetypes";
-my $throttled_urls = "/var/ipcop/proxy/throttle";
+my $browserdb = "/var/ofw/proxy/useragents";
+my $mimetypes = "/var/ofw/proxy/mimetypes";
+my $throttled_urls = "/var/ofw/proxy/throttle";
 my $redirectwrapper = "/usr/local/bin/redirectwrapper";
 my $activeredirectors = 0;
 
-my $cre_groups  = "/var/ipcop/proxy/cre/classrooms";
-my $cre_svhosts = "/var/ipcop/proxy/cre/supervisors";
+my $cre_groups  = "/var/ofw/proxy/cre/classrooms";
+my $cre_svhosts = "/var/ofw/proxy/cre/supervisors";
 
 my $identhosts = "$identdir/hosts";
 
@@ -98,10 +98,10 @@ my $acl_include = "$acldir/include.acl";
 
 # Read all the settings required for the proxy service
 
-&General::readhash("/var/ipcop/main/settings", \%mainsettings);
-&General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
-&General::readhash("/var/ipcop/proxy/settings", \%proxysettings);
-&General::readhash("/var/ipcop/openvpn/settings", \%ovpnsettings);
+&General::readhash("/var/ofw/main/settings", \%mainsettings);
+&General::readhash("/var/ofw/ethernet/settings", \%netsettings);
+&General::readhash("/var/ofw/proxy/settings", \%proxysettings);
+&General::readhash("/var/ofw/openvpn/settings", \%ovpnsettings);
 
 # Check if OpenVPN is active
 
@@ -156,7 +156,7 @@ sub writewrapper
     my %redirectors = ();
     my $lastredirector = 0;
 
-    foreach my $redirector (</var/ipcop/proxy/redirector/*>) {
+    foreach my $redirector (</var/ofw/proxy/redirector/*>) {
         if (-e $redirector) {
             my %redirectorsettings=();
             $redirectorsettings{'OPTION_CHAIN'} = '';
@@ -297,10 +297,10 @@ sub writeconfigfile
         $remoteport = 80;
     }
 
-    open(FILE, ">/var/ipcop/proxy/squid.conf");
+    open(FILE, ">/var/ofw/proxy/squid.conf");
     flock(FILE, 2);
     print FILE <<END
-# Do not modify '/var/ipcop/proxy/squid.conf' directly since any changes
+# Do not modify '/var/ofw/proxy/squid.conf' directly since any changes
 # you make will be overwritten whenever you resave proxy settings using the
 # web interface!
 #
@@ -371,8 +371,8 @@ END
         print FILE "cache_dir aufs /var/log/cache $proxysettings{'CACHE_SIZE'} $proxysettings{'L1_DIRS'} 256\n\n";
     }
 
-    if (($proxysettings{'ERR_DESIGN'} eq 'ipcop') && ($proxysettings{'VISIBLE_HOSTNAME'} eq '')) {
-        print FILE "error_directory $errordir.ipcop/$proxysettings{'ERR_LANGUAGE'}\n\n";
+    if (($proxysettings{'ERR_DESIGN'} eq 'ofw') && ($proxysettings{'VISIBLE_HOSTNAME'} eq '')) {
+        print FILE "error_directory $errordir.ofw/$proxysettings{'ERR_LANGUAGE'}\n\n";
     } else {
         print FILE "error_directory $errordir/$proxysettings{'ERR_LANGUAGE'}\n\n";
     }
@@ -653,21 +653,21 @@ END
     }
     print FILE <<END
 
-acl IPCop_http  port $http_port
-acl IPCop_https port $https_port
-acl IPCop_ips              dst $netsettings{'GREEN_1_ADDRESS'}
-acl IPCop_networks         src "$acl_src_networks"
-acl IPCop_servers          dst "$acl_src_subnets"
+acl Ofw_http  port $http_port
+acl Ofw_https port $https_port
+acl Ofw_ips              dst $netsettings{'GREEN_1_ADDRESS'}
+acl Ofw_networks         src "$acl_src_networks"
+acl Ofw_servers          dst "$acl_src_subnets"
 END
     ;
-    print FILE "acl IPCop_green_network    src " . NetAddr::IP->new ("$netsettings{'GREEN_1_NETADDRESS'}/$netsettings{'GREEN_1_NETMASK'}") . "\n";
-    print FILE "acl IPCop_green_servers    dst " . NetAddr::IP->new ("$netsettings{'GREEN_1_NETADDRESS'}/$netsettings{'GREEN_1_NETMASK'}") . "\n";
-    if ($netsettings{'BLUE_COUNT'} >= 1) { print FILE "acl IPCop_blue_network     src " . NetAddr::IP->new ("$netsettings{'BLUE_1_NETADDRESS'}/$netsettings{'BLUE_1_NETMASK'}") . "\n"; }
-    if ($netsettings{'BLUE_COUNT'} >= 1) { print FILE "acl IPCop_blue_servers     dst " . NetAddr::IP->new ("$netsettings{'BLUE_1_NETADDRESS'}/$netsettings{'BLUE_1_NETMASK'}") . "\n"; }
-    if (!-z $acl_src_banned_ip) { print FILE "acl IPCop_banned_ips       src \"$acl_src_banned_ip\"\n"; }
-    if (!-z $acl_src_banned_mac) { print FILE "acl IPCop_banned_mac       arp \"$acl_src_banned_mac\"\n"; }
-    if (!-z $acl_src_unrestricted_ip) { print FILE "acl IPCop_unrestricted_ips src \"$acl_src_unrestricted_ip\"\n"; }
-    if (!-z $acl_src_unrestricted_mac) { print FILE "acl IPCop_unrestricted_mac arp \"$acl_src_unrestricted_mac\"\n"; }
+    print FILE "acl Ofw_green_network    src " . NetAddr::IP->new ("$netsettings{'GREEN_1_NETADDRESS'}/$netsettings{'GREEN_1_NETMASK'}") . "\n";
+    print FILE "acl Ofw_green_servers    dst " . NetAddr::IP->new ("$netsettings{'GREEN_1_NETADDRESS'}/$netsettings{'GREEN_1_NETMASK'}") . "\n";
+    if ($netsettings{'BLUE_COUNT'} >= 1) { print FILE "acl Ofw_blue_network     src " . NetAddr::IP->new ("$netsettings{'BLUE_1_NETADDRESS'}/$netsettings{'BLUE_1_NETMASK'}") . "\n"; }
+    if ($netsettings{'BLUE_COUNT'} >= 1) { print FILE "acl Ofw_blue_servers     dst " . NetAddr::IP->new ("$netsettings{'BLUE_1_NETADDRESS'}/$netsettings{'BLUE_1_NETMASK'}") . "\n"; }
+    if (!-z $acl_src_banned_ip) { print FILE "acl Ofw_banned_ips       src \"$acl_src_banned_ip\"\n"; }
+    if (!-z $acl_src_banned_mac) { print FILE "acl Ofw_banned_mac       arp \"$acl_src_banned_mac\"\n"; }
+    if (!-z $acl_src_unrestricted_ip) { print FILE "acl Ofw_unrestricted_ips src \"$acl_src_unrestricted_ip\"\n"; }
+    if (!-z $acl_src_unrestricted_mac) { print FILE "acl Ofw_unrestricted_mac arp \"$acl_src_unrestricted_mac\"\n"; }
     print FILE <<END
 acl CONNECT method CONNECT
 END
@@ -677,32 +677,32 @@ END
         print FILE <<END
 
 #Classroom extensions
-acl IPCop_no_access_ips src "$acl_src_noaccess_ip"
-acl IPCop_no_access_mac arp "$acl_src_noaccess_mac"
+acl Ofw_no_access_ips src "$acl_src_noaccess_ip"
+acl Ofw_no_access_mac arp "$acl_src_noaccess_mac"
 END
         ;
         print FILE "deny_info ";
-        if ((($proxysettings{'ERR_DESIGN'} eq 'ipcop') && (-e "$errordir.ipcop/$proxysettings{'ERR_LANGUAGE'}/ERR_ACCESS_DISABLED")) ||
+        if ((($proxysettings{'ERR_DESIGN'} eq 'ofw') && (-e "$errordir.ofw/$proxysettings{'ERR_LANGUAGE'}/ERR_ACCESS_DISABLED")) ||
             (($proxysettings{'ERR_DESIGN'} eq 'squid') && (-e "$errordir/$proxysettings{'ERR_LANGUAGE'}/ERR_ACCESS_DISABLED")))
         {
             print FILE "ERR_ACCESS_DISABLED";
         } else {
             print FILE "ERR_ACCESS_DENIED";
         }
-        print FILE " IPCop_no_access_ips\n";
+        print FILE " Ofw_no_access_ips\n";
         print FILE "deny_info ";
-        if ((($proxysettings{'ERR_DESIGN'} eq 'ipcop') && (-e "$errordir.ipcop/$proxysettings{'ERR_LANGUAGE'}/ERR_ACCESS_DISABLED")) ||
+        if ((($proxysettings{'ERR_DESIGN'} eq 'ofw') && (-e "$errordir.ofw/$proxysettings{'ERR_LANGUAGE'}/ERR_ACCESS_DISABLED")) ||
             (($proxysettings{'ERR_DESIGN'} eq 'squid') && (-e "$errordir/$proxysettings{'ERR_LANGUAGE'}/ERR_ACCESS_DISABLED")))
         {
             print FILE "ERR_ACCESS_DISABLED";
         } else {
             print FILE "ERR_ACCESS_DENIED";
         }
-        print FILE " IPCop_no_access_mac\n";
+        print FILE " Ofw_no_access_mac\n";
 
         print FILE <<END
-http_access deny IPCop_no_access_ips
-http_access deny IPCop_no_access_mac
+http_access deny Ofw_no_access_ips
+http_access deny Ofw_no_access_mac
 END
     ;
     }
@@ -741,8 +741,8 @@ http_access deny          manager
 http_access allow         localhost
 
 #GUI admin if local machine connects
-http_access allow         IPCop_ips IPCop_networks IPCop_http
-http_access allow CONNECT IPCop_ips IPCop_networks IPCop_https
+http_access allow         Ofw_ips Ofw_networks Ofw_http
+http_access allow CONNECT Ofw_ips Ofw_networks Ofw_https
 
 #Deny not web services
 http_access deny          !Safe_ports
@@ -829,16 +829,16 @@ if ($delaypools) {
         print FILE "\n";
     }
 
-    print FILE "delay_access 1 deny  IPCop_ips\n";
-    if (!-z $acl_src_unrestricted_ip)  { print FILE "delay_access 1 deny  IPCop_unrestricted_ips\n"; }
-    if (!-z $acl_src_unrestricted_mac) { print FILE "delay_access 1 deny  IPCop_unrestricted_mac\n"; }
+    print FILE "delay_access 1 deny  Ofw_ips\n";
+    if (!-z $acl_src_unrestricted_ip)  { print FILE "delay_access 1 deny  Ofw_unrestricted_ips\n"; }
+    if (!-z $acl_src_unrestricted_mac) { print FILE "delay_access 1 deny  Ofw_unrestricted_mac\n"; }
     if (($proxysettings{'AUTH_METHOD'} eq 'ncsa') && (!-z $extgrp)) {
         print FILE "delay_access 1 deny  for_extended_users\n";
     }
 
     if ($netsettings{'BLUE_COUNT'} >= 1)
     {
-        print FILE "delay_access 1 allow IPCop_green_network";
+        print FILE "delay_access 1 allow Ofw_green_network";
         if (!-z $acl_dst_throttle) {
             print FILE " for_throttled_urls";
         }
@@ -855,11 +855,11 @@ if ($delaypools) {
 
     if ($netsettings{'BLUE_COUNT'} >= 1)
     {
-        print FILE "delay_access 2 deny  IPCop_ips\n";
-        if (!-z $acl_src_unrestricted_ip)  { print FILE "delay_access 2 deny  IPCop_unrestricted_ips\n"; }
-        if (!-z $acl_src_unrestricted_mac) { print FILE "delay_access 2 deny  IPCop_unrestricted_mac\n"; }
+        print FILE "delay_access 2 deny  Ofw_ips\n";
+        if (!-z $acl_src_unrestricted_ip)  { print FILE "delay_access 2 deny  Ofw_unrestricted_ips\n"; }
+        if (!-z $acl_src_unrestricted_mac) { print FILE "delay_access 2 deny  Ofw_unrestricted_mac\n"; }
         if (($proxysettings{'AUTH_METHOD'} eq 'ncsa') && (!-z $extgrp)) { print FILE "delay_access 2 deny  for_extended_users\n"; }
-        print FILE "delay_access 2 allow IPCop_blue_network";
+        print FILE "delay_access 2 allow Ofw_blue_network";
         if (!-z $acl_dst_throttle) { print FILE " for_throttled_urls"; }
         print FILE "\n";
         print FILE "delay_access 2 deny  all\n";
@@ -872,46 +872,46 @@ if ($delaypools) {
 if ($proxysettings{'NO_PROXY_LOCAL'} eq 'on')
 {
     print FILE "#Prevent internal proxy access\n";
-    print FILE "http_access deny IPCop_servers\n\n";
+    print FILE "http_access deny Ofw_servers\n\n";
 }
 
 if ($proxysettings{'NO_PROXY_LOCAL_GREEN'} eq 'on')
 {
     print FILE "#Prevent internal proxy access to Green\n";
-    print FILE "http_access deny IPCop_green_servers !IPCop_green_network\n\n";
+    print FILE "http_access deny Ofw_green_servers !Ofw_green_network\n\n";
 }
 
 if (($proxysettings{'NO_PROXY_LOCAL_BLUE'} eq 'on') && ($netsettings{'BLUE_COUNT'} >= 1))
 {
     print FILE "#Prevent internal proxy access from Blue\n";
-    print FILE "http_access allow IPCop_blue_network IPCop_blue_servers\n";
-    print FILE "http_access deny  IPCop_blue_network IPCop_servers\n\n";
+    print FILE "http_access allow Ofw_blue_network Ofw_blue_servers\n";
+    print FILE "http_access deny  Ofw_blue_network Ofw_servers\n\n";
 }
 
     print FILE <<END
 #Set custom configured ACLs
 END
     ;
-    if (!-z $acl_src_banned_ip) { print FILE "http_access deny  IPCop_banned_ips\n"; }
-    if (!-z $acl_src_banned_mac) { print FILE "http_access deny  IPCop_banned_mac\n"; }
+    if (!-z $acl_src_banned_ip) { print FILE "http_access deny  Ofw_banned_ips\n"; }
+    if (!-z $acl_src_banned_mac) { print FILE "http_access deny  Ofw_banned_mac\n"; }
 
     if ((!-z $acl_dst_noauth) && (!($proxysettings{'AUTH_METHOD'} eq 'none')))
     {
         if (!-z $acl_src_unrestricted_ip)
         {
-            if (!-z $acl_dst_noauth_net) { print FILE "http_access allow IPCop_unrestricted_ips to_ipaddr_without_auth\n"; }
-            if (!-z $acl_dst_noauth_dom) { print FILE "http_access allow IPCop_unrestricted_ips to_domains_without_auth\n"; }
-            if (!-z $acl_dst_noauth_url) { print FILE "http_access allow IPCop_unrestricted_ips to_hosts_without_auth\n"; }
+            if (!-z $acl_dst_noauth_net) { print FILE "http_access allow Ofw_unrestricted_ips to_ipaddr_without_auth\n"; }
+            if (!-z $acl_dst_noauth_dom) { print FILE "http_access allow Ofw_unrestricted_ips to_domains_without_auth\n"; }
+            if (!-z $acl_dst_noauth_url) { print FILE "http_access allow Ofw_unrestricted_ips to_hosts_without_auth\n"; }
         }
         if (!-z $acl_src_unrestricted_mac)
         {
-            if (!-z $acl_dst_noauth_net) { print FILE "http_access allow IPCop_unrestricted_mac to_ipaddr_without_auth\n"; }
-            if (!-z $acl_dst_noauth_dom) { print FILE "http_access allow IPCop_unrestricted_mac to_domains_without_auth\n"; }
-            if (!-z $acl_dst_noauth_url) { print FILE "http_access allow IPCop_unrestricted_mac to_hosts_without_auth\n"; }
+            if (!-z $acl_dst_noauth_net) { print FILE "http_access allow Ofw_unrestricted_mac to_ipaddr_without_auth\n"; }
+            if (!-z $acl_dst_noauth_dom) { print FILE "http_access allow Ofw_unrestricted_mac to_domains_without_auth\n"; }
+            if (!-z $acl_dst_noauth_url) { print FILE "http_access allow Ofw_unrestricted_mac to_hosts_without_auth\n"; }
         }
         if (!-z $acl_dst_noauth_net)
         {
-            print FILE "http_access allow IPCop_networks";
+            print FILE "http_access allow Ofw_networks";
             if ($proxysettings{'TIME_ACCESS_MODE'} eq 'deny') {
                 print FILE " !within_timeframe";
             } else {
@@ -921,7 +921,7 @@ END
         }
         if (!-z $acl_dst_noauth_dom)
         {
-            print FILE "http_access allow IPCop_networks";
+            print FILE "http_access allow Ofw_networks";
             if ($proxysettings{'TIME_ACCESS_MODE'} eq 'deny') {
                 print FILE " !within_timeframe";
             } else {
@@ -931,7 +931,7 @@ END
         }
         if (!-z $acl_dst_noauth_url)
         {
-            print FILE "http_access allow IPCop_networks";
+            print FILE "http_access allow Ofw_networks";
             if ($proxysettings{'TIME_ACCESS_MODE'} eq 'deny') {
                 print FILE " !within_timeframe";
             } else {
@@ -963,7 +963,7 @@ END
 
     if (!-z $acl_src_unrestricted_ip)
     {
-        print FILE "http_access allow IPCop_unrestricted_ips";
+        print FILE "http_access allow Ofw_unrestricted_ips";
         if ($proxysettings{'AUTH_ALWAYS_REQUIRED'} eq 'on')
         {
             if ($proxysettings{'AUTH_METHOD'} eq 'ncsa')
@@ -1008,7 +1008,7 @@ END
 
     if (!-z $acl_src_unrestricted_mac)
     {
-        print FILE "http_access allow IPCop_unrestricted_mac";
+        print FILE "http_access allow Ofw_unrestricted_mac";
         if ($proxysettings{'AUTH_ALWAYS_REQUIRED'} eq 'on')
         {
             if ($proxysettings{'AUTH_METHOD'} eq 'ncsa')
@@ -1054,7 +1054,7 @@ END
     if ($proxysettings{'AUTH_METHOD'} eq 'ncsa')
     {
         if (!-z $disgrp) { print FILE "http_access deny  for_disabled_users\n"; }
-        if (!-z $extgrp) { print FILE "http_access allow IPCop_networks for_extended_users\n"; }
+        if (!-z $extgrp) { print FILE "http_access allow Ofw_networks for_extended_users\n"; }
     }
 
     if (
@@ -1098,7 +1098,7 @@ END
         print FILE " !on_ident_aware_hosts\n";
     }
 
-    print FILE "http_access allow IPCop_networks";
+    print FILE "http_access allow Ofw_networks";
     if (
         (
          ($proxysettings{'AUTH_METHOD'} eq 'ntlm') &&
@@ -1183,8 +1183,8 @@ END
     if ($proxysettings{'SUPPRESS_VERSION'} eq 'on') { print FILE "httpd_suppress_version_string on\n\n" }
 
     if ((!-z $mimetypes) && ($proxysettings{'ENABLE_MIME_FILTER'} eq 'on')) {
-        if (!-z $acl_src_unrestricted_ip)  { print FILE "http_reply_access allow IPCop_unrestricted_ips\n"; }
-        if (!-z $acl_src_unrestricted_mac) { print FILE "http_reply_access allow IPCop_unrestricted_mac\n"; }
+        if (!-z $acl_src_unrestricted_ip)  { print FILE "http_reply_access allow Ofw_unrestricted_ips\n"; }
+        if (!-z $acl_src_unrestricted_mac) { print FILE "http_reply_access allow Ofw_unrestricted_mac\n"; }
         if ($proxysettings{'AUTH_METHOD'} eq 'ncsa')
         {
             if (!-z $extgrp) { print FILE "http_reply_access allow for_extended_users\n"; }
@@ -1213,8 +1213,8 @@ request_body_max_size $proxysettings{'MAX_OUTGOING_SIZE'} KB
 END
     ;
     if ($proxysettings{'MAX_INCOMING_SIZE'} > 0) {
-        if (!-z $acl_src_unrestricted_ip) { print FILE "reply_body_max_size none IPCop_unrestricted_ips\n"; }
-        if (!-z $acl_src_unrestricted_mac) { print FILE "reply_body_max_size none IPCop_unrestricted_mac\n"; }
+        if (!-z $acl_src_unrestricted_ip) { print FILE "reply_body_max_size none Ofw_unrestricted_ips\n"; }
+        if (!-z $acl_src_unrestricted_mac) { print FILE "reply_body_max_size none Ofw_unrestricted_mac\n"; }
         if ($proxysettings{'AUTH_METHOD'} eq 'ncsa')
         {
             if (!-z $extgrp) { print FILE "reply_body_max_size none for_extended_users\n"; }
@@ -1257,7 +1257,7 @@ END
             }
         }
 
-        print FILE "\nalways_direct allow IPCop_ips\n";
+        print FILE "\nalways_direct allow Ofw_ips\n";
         print FILE "never_direct  allow all\n\n";
     }
 
@@ -1266,7 +1266,7 @@ END
 url_rewrite_program $redirectwrapper
 url_rewrite_children $proxysettings{'CHILDREN'} startup=1 idle=1 concurrency=0
 url_rewrite_access deny manager
-url_rewrite_access deny IPCop_ips
+url_rewrite_access deny Ofw_ips
 url_rewrite_access allow all
 
 END

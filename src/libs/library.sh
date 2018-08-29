@@ -1,37 +1,37 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 #
-# Copyright (c) 2009 The IPCop Team
+# Copyright (c) 2009 The Openfirewall Team
 #
 # $Id: library.sh 6400 2012-02-21 21:06:36Z dotzball $
 #
 
 
-# Some helper functions useable by IPCop addons
+# Some helper functions useable by Openfirewall addons
 # Return values are 0 if ok, otherwise error
 
 export LIBVERSION=3
-export IPCOPVERSION=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::version;"`
-export IPCOPMACHINE=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions.pl';print \\$General::machine;"`
+export OFWVERSION=`/usr/bin/perl -e "require '/usr/lib/ofw/general-functions.pl';print \\$General::version;"`
+export OFWMACHINE=`/usr/bin/perl -e "require '/usr/lib/ofw/general-functions.pl';print \\$General::machine;"`
 
 
-# Test for IPCop version
-#   Parameter 1 is IPCop version to test for
+# Test for Openfirewall version
+#   Parameter 1 is Openfirewall version to test for
 #   Parameter 2 optional, if set a min-max version test is done
 #
 #   isversion 2.0.0             tests for version equal v2.0.0
@@ -41,7 +41,7 @@ export IPCOPMACHINE=`/usr/bin/perl -e "require '/usr/lib/ipcop/general-functions
 isversion()
 {
     # Test for exact match
-    if [ "x${1}" = "x${IPCOPVERSION}" -o "x${2}" = "x${IPCOPVERSION}" ]; then
+    if [ "x${1}" = "x${OFWVERSION}" -o "x${2}" = "x${OFWVERSION}" ]; then
         return 0
     fi
     if [ -z ${2} ]; then
@@ -50,26 +50,26 @@ isversion()
 
     # Now test if version is within wanted range
     if [ "x${1}" != "xolder" ]; then
-        if [ 0`echo ${IPCOPVERSION} | cut -d"." -f 1` -lt 0`echo ${1} | cut -d"." -f 1` ]; then
+        if [ 0`echo ${OFWVERSION} | cut -d"." -f 1` -lt 0`echo ${1} | cut -d"." -f 1` ]; then
             return 1
-        elif [ 0`echo ${IPCOPVERSION} | cut -d"." -f 1` -eq 0`echo ${1} | cut -d"." -f 1` ]; then
-            if [ 0`echo ${IPCOPVERSION} | cut -d"." -f 2` -lt 0`echo ${1} | cut -d"." -f 2` ]; then
+        elif [ 0`echo ${OFWVERSION} | cut -d"." -f 1` -eq 0`echo ${1} | cut -d"." -f 1` ]; then
+            if [ 0`echo ${OFWVERSION} | cut -d"." -f 2` -lt 0`echo ${1} | cut -d"." -f 2` ]; then
                 return 1
-            elif [ 0`echo ${IPCOPVERSION} | cut -d"." -f 2` -eq 0`echo ${1} | cut -d"." -f 2` ]; then
-                if [ 0`echo ${IPCOPVERSION} | cut -d"." -f 3` -lt 0`echo ${1} | cut -d"." -f 3` ]; then
+            elif [ 0`echo ${OFWVERSION} | cut -d"." -f 2` -eq 0`echo ${1} | cut -d"." -f 2` ]; then
+                if [ 0`echo ${OFWVERSION} | cut -d"." -f 3` -lt 0`echo ${1} | cut -d"." -f 3` ]; then
                     return 1
                 fi
             fi
         fi
     fi
     if [ "x${2}" != "xnewer" ]; then
-        if [ 0`echo ${IPCOPVERSION} | cut -d"." -f 1` -gt 0`echo ${2} | cut -d"." -f 1` ]; then
+        if [ 0`echo ${OFWVERSION} | cut -d"." -f 1` -gt 0`echo ${2} | cut -d"." -f 1` ]; then
             return 1
-        elif [ 0`echo ${IPCOPVERSION} | cut -d"." -f 1` -eq 0`echo ${2} | cut -d"." -f 1` ]; then
-            if [ 0`echo ${IPCOPVERSION} | cut -d"." -f 2` -gt 0`echo ${2} | cut -d"." -f 2` ]; then
+        elif [ 0`echo ${OFWVERSION} | cut -d"." -f 1` -eq 0`echo ${2} | cut -d"." -f 1` ]; then
+            if [ 0`echo ${OFWVERSION} | cut -d"." -f 2` -gt 0`echo ${2} | cut -d"." -f 2` ]; then
                 return 1
-            elif [ 0`echo ${IPCOPVERSION} | cut -d"." -f 2` -eq 0`echo ${2} | cut -d"." -f 2` ]; then
-                if [ 0`echo ${IPCOPVERSION} | cut -d"." -f 3` -gt 0`echo ${2} | cut -d"." -f 3` ]; then
+            elif [ 0`echo ${OFWVERSION} | cut -d"." -f 2` -eq 0`echo ${2} | cut -d"." -f 2` ]; then
+                if [ 0`echo ${OFWVERSION} | cut -d"." -f 3` -gt 0`echo ${2} | cut -d"." -f 3` ]; then
                     return 1
                 fi
             fi
@@ -84,11 +84,11 @@ isversion()
 }
 
 
-# Test for IPCop architecture
+# Test for Openfirewall architecture
 #   Parameter 1 is architecture: alpha, i486, ppc, sparc
 ismachine()
 {
-    if [ "x${1}" = "x${IPCOPMACHINE}" ]; then
+    if [ "x${1}" = "x${OFWMACHINE}" ]; then
         return 0
     fi
 
@@ -102,11 +102,11 @@ ismachine()
 #   Parameter 3 is path to language files
 #
 #   Language textfiles must be named en.pl, de.pl, es.pl, fr.pl, it.pl etc.
-#   For format of these .pl files look at /usr/lib/ipcop/lang.pl
+#   For format of these .pl files look at /usr/lib/ofw/lang.pl
 #
 #   addtolanguage addon en,es,fr,it /my/install/path
 #           will take en.pl,es.pl,fr.pl and it.pl from /my/install/path
-#           copy that as addon.en.pl, addon.es.pl, addon.fr.pl, addon.it.pl into /var/ipcop/addons/lang
+#           copy that as addon.en.pl, addon.es.pl, addon.fr.pl, addon.it.pl into /var/ofw/addons/lang
 #           and then rebuild languages DB
 addtolanguage()
 {
@@ -115,7 +115,7 @@ addtolanguage()
 
     for lang in `echo "${2}" | tr "," " "`; do
         if [ -e "${3}/${lang}.pl" ]; then
-            langfile="/var/ipcop/addons/lang/${1}.${lang}.pl"
+            langfile="/var/ofw/addons/lang/${1}.${lang}.pl"
             cp -f "${3}/${lang}.pl" "${langfile}"
             chown root.root ${langfile}
             chmod 444 ${langfile}
@@ -133,7 +133,7 @@ addtolanguage()
 #
 removefromlanguage()
 {
-    rm -f /var/ipcop/addons/lang/${1}.*.pl
+    rm -f /var/ofw/addons/lang/${1}.*.pl
     /usr/local/bin/rebuildlangtexts
 }
 

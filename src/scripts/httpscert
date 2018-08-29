@@ -14,7 +14,7 @@ case "$1" in
         if [ ! -f /etc/httpd/server.key ]; then
             echo "Generating https server key."
             /usr/bin/openssl genrsa -rand \
-            /boot/vmlinuz:/var/ipcop/ethernet/settings -out \
+            /boot/vmlinuz:/var/ofw/ethernet/settings -out \
             /etc/httpd/server.key 1024
         fi
         echo "Generating CSR"

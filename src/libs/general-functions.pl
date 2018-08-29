@@ -1,20 +1,20 @@
 #
 # general-functions.pl: various global variables, helper functions, etc. for scripts and the web GUI
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) The SmoothWall Team
 # Copyright (C) 2002 Alex Hudson - getcgihash() rewrite
@@ -22,7 +22,7 @@
 # Copyright (c) 2002/04/13 Steve Bootes - add alias section, helper functions
 # Copyright (c) 2002/08/23 Mark Wormgoor <mark@wormgoor.com> validfqdn()
 # Copyright (c) 2003/09/11 Darren Critchley <darrenc@telus.net> srtarray()
-# Copyright (c) 2004-2014 The IPCop Team
+# Copyright (c) 2004-2014 The Openfirewall Team
 #
 # $Id: general-functions.pl 8065 2016-01-10 09:26:44Z owes $
 #
@@ -707,7 +707,7 @@ sub sortHashArray
 sub FetchPublicIp
 {
     my %proxysettings;
-    &General::readhash('/var/ipcop/proxy/settings', \%proxysettings);
+    &General::readhash('/var/ofw/proxy/settings', \%proxysettings);
     if ($_ = $proxysettings{'UPSTREAM_PROXY'}) {
         my ($peer, $peerport) = (
 /^(?:[a-zA-Z ]+\:\/\/)?(?:[A-Za-z0-9\_\.\-]*?(?:\:[A-Za-z0-9\_\.\-]*?)?\@)?([a-zA-Z0-9\.\_\-]*?)(?:\:([0-9]{1,5}))?(?:\/.*?)?$/
@@ -732,8 +732,8 @@ sub connectionstatus
     my $iface       = '';
 
     $pppsettings{'PROFILENAME'} = 'None';
-    &General::readhash('/var/ipcop/ppp/settings',      \%pppsettings);
-    &General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
+    &General::readhash('/var/ofw/ppp/settings',      \%pppsettings);
+    &General::readhash('/var/ofw/ethernet/settings', \%netsettings);
 
     my $profileused = '';
     if (!(($netsettings{'RED_COUNT'} >= 1) && $netsettings{'RED_1_TYPE'} =~ /^(DHCP|STATIC)$/)) {
@@ -747,10 +747,10 @@ sub connectionstatus
     }
 
     my $connstate;
-    my $timestr = &General::age('/var/ipcop/red/active');
-    my $dialondemand = (-e '/var/ipcop/red/dial-on-demand') ? 1 : 0;
-    my $connecting = (-e '/var/ipcop/red/connecting') ? 1 : 0;
-    my $disconnecting = (-e '/var/ipcop/red/disconnecting') ? 1 : 0;
+    my $timestr = &General::age('/var/ofw/red/active');
+    my $dialondemand = (-e '/var/ofw/red/dial-on-demand') ? 1 : 0;
+    my $connecting = (-e '/var/ofw/red/connecting') ? 1 : 0;
+    my $disconnecting = (-e '/var/ofw/red/disconnecting') ? 1 : 0;
 
     if (($netsettings{'RED_COUNT'} == 0) && ($pppsettings{'TYPE'} =~ /^isdn/)) {
 
@@ -799,42 +799,42 @@ sub connectionstatus
 
         if ($timestr) {
             $connstate =
-"<span class='ipcop_StatusBig'>$Lang::tr{'connected'} - $number channel (<span class='ipcop_StatusBigRed'>$timestr</span>) $profileused</span>";
+"<span class='ofw_StatusBig'>$Lang::tr{'connected'} - $number channel (<span class='ofw_StatusBigRed'>$timestr</span>) $profileused</span>";
         }
         else {
             if ($connecting) {
-                $connstate = "<span class='ipcop_StatusBig'>$Lang::tr{'connecting'} $profileused</span>";
+                $connstate = "<span class='ofw_StatusBig'>$Lang::tr{'connecting'} $profileused</span>";
             }
             elsif ($disconnecting) {
-                $connstate = "<span class='ipcop_StatusBig'>$Lang::tr{'disconnecting'} $profileused</span>";
+                $connstate = "<span class='ofw_StatusBig'>$Lang::tr{'disconnecting'} $profileused</span>";
             }
             elsif ($count == 0) {
                 if ($dialondemand) {
-                    $connstate = "<span class='ipcop_StatusBig'>$Lang::tr{'dod waiting'} $profileused</span>";
+                    $connstate = "<span class='ofw_StatusBig'>$Lang::tr{'dod waiting'} $profileused</span>";
                 }
                 else {
-                    $connstate = "<span class='ipcop_StatusBig'>$Lang::tr{'idle'} $profileused</span>";
+                    $connstate = "<span class='ofw_StatusBig'>$Lang::tr{'idle'} $profileused</span>";
                 }
             }
             else {
                 # Final resort, should not happen
-                $connstate = "<span class='ipcop_StatusBig'>$Lang::tr{'connecting'} $profileused</span>";
+                $connstate = "<span class='ofw_StatusBig'>$Lang::tr{'connecting'} $profileused</span>";
             }
         }
     }
     elsif ($netsettings{'RED_1_TYPE'} eq "STATIC" || $pppsettings{'METHOD'} eq 'STATIC') {
         if ($timestr) {
             $connstate =
-"<span class='ipcop_StatusBig'>$Lang::tr{'connected'} (<span class='ipcop_StatusBigRed'>$timestr</span>) $profileused</span>";
+"<span class='ofw_StatusBig'>$Lang::tr{'connected'} (<span class='ofw_StatusBigRed'>$timestr</span>) $profileused</span>";
         }
         else {
-            $connstate = "<span class='ipcop_StatusBig'>$Lang::tr{'idle'} $profileused</span>";
+            $connstate = "<span class='ofw_StatusBig'>$Lang::tr{'idle'} $profileused</span>";
         }
     }
     elsif ($timestr) {
         if ($netsettings{'RED_1_TYPE'} eq 'DHCP') {
             $connstate =
-"<span class='ipcop_StatusBig'>$Lang::tr{'connected'} (<span class='ipcop_StatusBigRed'>$timestr</span>) $profileused</span>";
+"<span class='ofw_StatusBig'>$Lang::tr{'connected'} (<span class='ofw_StatusBigRed'>$timestr</span>) $profileused</span>";
         }
         elsif ($pppsettings{'TYPE'} =~ /^(modem|bewanadsl|conexantpciadsl|eagleusbadsl)$/) {
             my $speed;
@@ -859,24 +859,24 @@ sub connectionstatus
                 $speed = `/usr/sbin/eaglestat | /bin/grep Rate`;
             }
             $connstate =
-"<span class='ipcop_StatusBig'>$Lang::tr{'connected'} (<span class='ipcop_StatusBigRed'>$timestr</span>) $profileused (\@$speed)</span>";
+"<span class='ofw_StatusBig'>$Lang::tr{'connected'} (<span class='ofw_StatusBigRed'>$timestr</span>) $profileused (\@$speed)</span>";
         }
         else {
             $connstate =
-"<span class='ipcop_StatusBig'>$Lang::tr{'connected'} (<span class='ipcop_StatusBigRed'>$timestr</span>) $profileused</span>";
+"<span class='ofw_StatusBig'>$Lang::tr{'connected'} (<span class='ofw_StatusBigRed'>$timestr</span>) $profileused</span>";
         }
     }
     elsif ($dialondemand) {
-        $connstate = "<span class='ipcop_StatusBig'>$Lang::tr{'dod waiting'} $profileused</span>";
+        $connstate = "<span class='ofw_StatusBig'>$Lang::tr{'dod waiting'} $profileused</span>";
     }
     elsif ($connecting) {
-        $connstate = "<span class='ipcop_StatusBig'>$Lang::tr{'connecting'} $profileused</span>";
+        $connstate = "<span class='ofw_StatusBig'>$Lang::tr{'connecting'} $profileused</span>";
     }
     elsif ($disconnecting) {
-        $connstate = "<span class='ipcop_StatusBig'>$Lang::tr{'disconnecting'} $profileused</span>";
+        $connstate = "<span class='ofw_StatusBig'>$Lang::tr{'disconnecting'} $profileused</span>";
     }
     else {
-        $connstate = "<span class='ipcop_StatusBig'>$Lang::tr{'idle'} $profileused</span>";
+        $connstate = "<span class='ofw_StatusBig'>$Lang::tr{'idle'} $profileused</span>";
     }
     return $connstate;
 }
@@ -927,9 +927,9 @@ sub DyndnsServiceSync ($;$;$)
 sub GetDyndnsRedIP
 {
     my %settings;
-    &General::readhash('/var/ipcop/ddns/settings', \%settings);
+    &General::readhash('/var/ofw/ddns/settings', \%settings);
 
-    open(IP, '/var/ipcop/red/local-ipaddress') or return 'unavailable';
+    open(IP, '/var/ofw/red/local-ipaddress') or return 'unavailable';
     my $ip = <IP>;
     close(IP);
     chomp $ip;
@@ -945,7 +945,7 @@ sub GetDyndnsRedIP
 #            my $RealIP = &General::FetchPublicIp;
 #            $ip = (&General::validip($RealIP) ? $RealIP : 'unavailable');
 
-            open(IP, '/var/ipcop/red/internet-ipaddress') or return 'unavailable';
+            open(IP, '/var/ofw/red/internet-ipaddress') or return 'unavailable';
             $ip = <IP>;
             close(IP);
             chomp $ip;
@@ -955,13 +955,13 @@ sub GetDyndnsRedIP
 }
 
 #
-# Get Interface from /var/ipcop/red/iface, return "" if none
+# Get Interface from /var/ofw/red/iface, return "" if none
 #
 sub getredinterface
 {
     my $iface = '';
 
-    return $iface unless (open(IFACE, "/var/ipcop/red/iface"));
+    return $iface unless (open(IFACE, "/var/ofw/red/iface"));
     
     $iface = <IFACE>;
     close IFACE;
@@ -1047,7 +1047,7 @@ sub translateinterface
 sub isrunning($)
 {
     my $cmd     = $_[0];
-    my $status  = "<td align='center' class='ipcop_stopped'>$Lang::tr{'stopped'}</td>";
+    my $status  = "<td align='center' class='ofw_stopped'>$Lang::tr{'stopped'}</td>";
     my $pid     = '';
     my $testcmd = '';
     my $exename;
@@ -1077,7 +1077,7 @@ sub isrunning($)
                 else {
                     $status = "";
                 }
-                $status .= "<td align='center' class='ipcop_running'>$Lang::tr{'running'}</td>";
+                $status .= "<td align='center' class='ofw_running'>$Lang::tr{'running'}</td>";
         }
         
         return($status);
@@ -1086,7 +1086,7 @@ sub isrunning($)
     if ($exename eq 'dhcpd') {
         # Special case for dnsmasq as DHCP server. dnsmasq is both DNS proxy and DHCP server, we want to
         # show both status. For DHCP we check if DHCP is enabled on at least 1 interface first.
-        my $counter = int(`/bin/grep -v BOOTP /var/ipcop/dhcp/settings | /bin/grep -c "ENABLED.*=on"`);
+        my $counter = int(`/bin/grep -v BOOTP /var/ofw/dhcp/settings | /bin/grep -c "ENABLED.*=on"`);
         return $status if ($counter == 0);
 
         $cmd = 'dnsmasq/dnsmasq';
@@ -1110,7 +1110,7 @@ sub isrunning($)
                 else {
                     $status = "";
                 }
-                $status .= "<td align='center' class='ipcop_running'>$Lang::tr{'running'}</td>";
+                $status .= "<td align='center' class='ofw_running'>$Lang::tr{'running'}</td>";
             }
         }
     }
@@ -1121,7 +1121,7 @@ sub isrunning($)
 # Download a file
 sub download
 {
-    return 0 unless (-e '/var/ipcop/red/active');
+    return 0 unless (-e '/var/ofw/red/active');
     return 0 unless (@_ > 0);
     my $URL = $_[0];
 
@@ -1129,7 +1129,7 @@ sub download
     $downloader->timeout(5);
 
     my %proxysettings = ();
-    &General::readhash('/var/ipcop/proxy/settings', \%proxysettings);
+    &General::readhash('/var/ofw/proxy/settings', \%proxysettings);
 
     if ($_ = $proxysettings{'UPSTREAM_PROXY'}) {
         my ($peer, $peerport) = (
@@ -1162,7 +1162,7 @@ sub downloadpatch
     my $ret = 0;
 
     return 0 if (($guiload == 0) && -e "/var/patches/$filename");
-    return 32 if (! -e '/var/ipcop/red/active');
+    return 32 if (! -e '/var/ofw/red/active');
 
     &General::log("installpackage", "Download update: ${filename}");
 
@@ -1210,16 +1210,16 @@ sub downloadpatch
 #   5   not enough diskspace
 sub downloadpatchlist
 {
-    if (! -e '/var/ipcop/red/active') {
+    if (! -e '/var/ofw/red/active') {
         return 1;
     }
 
-    return 2 unless (-e '/var/ipcop/patches/available.xml');
+    return 2 unless (-e '/var/ofw/patches/available.xml');
 
     my $preload = 'off';
     $preload = $_[0] if (@_ > 0);
 
-    my $available = eval { XMLin('/var/ipcop/patches/available.xml') };
+    my $available = eval { XMLin('/var/ofw/patches/available.xml') };
     if ($@) {
         &General::log("Error in updates available XML file.");
         $available->{"latest"} = ${General::version};
@@ -1260,7 +1260,7 @@ sub downloadpatchlist
         return 0;
     }
 
-    unless (open(FILE, '>/var/ipcop/patches/available.xml')) {
+    unless (open(FILE, '>/var/ofw/patches/available.xml')) {
         die "Could not open updates available XML file.";
     }
     flock FILE, 2;
@@ -1306,7 +1306,7 @@ sub downloadpatchlist
 #
 sub ispatchavailable
 {
-    my $available = eval { XMLin('/var/ipcop/patches/available.xml') };
+    my $available = eval { XMLin('/var/ofw/patches/available.xml') };
     if ($@) {
         return "$Lang::tr{'could not open available updates file'}";
     }
@@ -1317,7 +1317,7 @@ sub ispatchavailable
 
     my $age = &General::ageupdate('update.check');
     if ($age == -1) {
-        $age = &General::age('/var/ipcop/patches/available.xml');
+        $age = &General::age('/var/ofw/patches/available.xml');
     }
     if ($age =~ m/(\d{1,3})d*/) {
         if ($1 >= 7) {
@@ -1340,7 +1340,7 @@ sub updateinstalledpatches
         return;
     }
 
-    my $installed = eval { XMLin('/var/ipcop/patches/installed.xml') };
+    my $installed = eval { XMLin('/var/ofw/patches/installed.xml') };
     if ($@) {
         &General::log("Error in updates installed XML file.");
     }
@@ -1353,7 +1353,7 @@ sub updateinstalledpatches
     $installed->{"update-$information->{'update'}->{'version'}"} = $information->{'update'};
 
     # Write the new list of installed updates
-    unless (open(FILE, '>/var/ipcop/patches/installed.xml')) {
+    unless (open(FILE, '>/var/ofw/patches/installed.xml')) {
         die "Could not open updates available XML file.";
     }
     flock FILE, 2;
@@ -1373,7 +1373,7 @@ sub updateavailablepatches
         return;
     }
     
-    my $available = eval { XMLin('/var/ipcop/patches/available.xml') };
+    my $available = eval { XMLin('/var/ofw/patches/available.xml') };
     if ($@) {
         &General::log("Error in updates available XML file.");
         $available->{"latest"} = ${General::version};
@@ -1421,7 +1421,7 @@ sub updateavailablepatches
     $available->{"update-$info_version"} = $information->{update};
     $available->{"latest"} = $info_version;
 
-    unless (open(FILE, '>/var/ipcop/patches/available.xml')) {
+    unless (open(FILE, '>/var/ofw/patches/available.xml')) {
         die "Could not open updates available XML file.";
     }
     flock FILE, 2;
@@ -1488,7 +1488,7 @@ sub GetIcmpDescription ($)
 sub CheckSortOrder
 {
     my %dhcpsettings = ();
-    &General::readhash('/var/ipcop/dhcp/settings', \%dhcpsettings);
+    &General::readhash('/var/ofw/dhcp/settings', \%dhcpsettings);
 
     if ($ENV{'QUERY_STRING'} =~ /^IPADDR|^ETHER|^HOSTNAME|^ENDTIME/) {
         my $newsort = $ENV{'QUERY_STRING'};
@@ -1505,7 +1505,7 @@ sub CheckSortOrder
         }
 
         $dhcpsettings{'SORT_LEASELIST'} = $newsort;
-        &General::writehash('/var/ipcop/dhcp/settings', \%dhcpsettings);
+        &General::writehash('/var/ofw/dhcp/settings', \%dhcpsettings);
     }
 }
 
@@ -1569,7 +1569,7 @@ sub PrintActualLeases
     close(LEASES);
 
     # Get sort method
-    &General::readhash('/var/ipcop/dhcp/settings', \%dhcpsettings);  # maybe saved?
+    &General::readhash('/var/ofw/dhcp/settings', \%dhcpsettings);  # maybe saved?
     if ($dhcpsettings{'SORT_LEASELIST'} eq '') {
         $dhcpsettings{'SORT_LEASELIST'} = 'IPADDR';                  # default, if not
     }
@@ -1650,11 +1650,11 @@ END
         my $macinfixed = '';
         my $subnetcolor = 'green';
         if ($buttonname eq $Lang::tr{'add new lease'}) {
-            $macinfixed = `/bin/grep $entries{$key}->{ETHER} /var/ipcop/dhcp/fixedleases`;
+            $macinfixed = `/bin/grep $entries{$key}->{ETHER} /var/ofw/dhcp/fixedleases`;
 
             # change colour of 'Add a new fixed lease' icon if 
             # the IP address is in a Blue Subnet
-            &General::readhash('/var/ipcop/ethernet/settings', \%networksettings);
+            &General::readhash('/var/ofw/ethernet/settings', \%networksettings);
             my $count;
             for ($count = 1; $count <= $networksettings{'BLUE_COUNT'}; $count++) {
                 if (&IpInSubnet (
@@ -1721,16 +1721,16 @@ sub SelectProfile
     our %modemsettings = ();
     our %pppsettings = ();
 
-    die "No such profile: ${profilenr}" unless(-e "/var/ipcop/ppp/settings-${profilenr}");
+    die "No such profile: ${profilenr}" unless(-e "/var/ofw/ppp/settings-${profilenr}");
 
-    unlink('/var/ipcop/ppp/settings');
-    link("/var/ipcop/ppp/settings-${profilenr}", '/var/ipcop/ppp/settings');
-    system('/usr/bin/touch', '/var/ipcop/ppp/updatesettings');
+    unlink('/var/ofw/ppp/settings');
+    link("/var/ofw/ppp/settings-${profilenr}", '/var/ofw/ppp/settings');
+    system('/usr/bin/touch', '/var/ofw/ppp/updatesettings');
 
     if ($pppsettings{'TYPE'} eq 'eagleusbadsl') {
 
         # eagle-usb.conf is in backup but link DSPcode.bin can't, so the link is created in rc.eagleusbadsl
-        open(FILE, ">//var/ipcop/eagle-usb/eagle-usb.conf") or die "Unable to write eagle-usb.conf file";
+        open(FILE, ">//var/ofw/eagle-usb/eagle-usb.conf") or die "Unable to write eagle-usb.conf file";
         flock(FILE, 2);
 
         # decimal to hexa
@@ -1753,13 +1753,13 @@ sub SelectProfile
     }
 
     # Read pppsettings to be able to write username and password to secrets file
-    &General::readhash("/var/ipcop/ppp/settings-${profilenr}", \%pppsettings);
+    &General::readhash("/var/ofw/ppp/settings-${profilenr}", \%pppsettings);
 
     # Write secrets file
-    open(FILE, ">/var/ipcop/ppp/secrets") or die "Unable to write secrets file.";
+    open(FILE, ">/var/ofw/ppp/secrets") or die "Unable to write secrets file.";
     flock(FILE, 2);
     print FILE "'$pppsettings{'USERNAME'}' * '$pppsettings{'PASSWORD'}'\n";
-    chmod 0600, "/var/ipcop/ppp/secrets";
+    chmod 0600, "/var/ofw/ppp/secrets";
     close FILE;
 }
 
@@ -1770,7 +1770,7 @@ sub color_devices()
     my $output = shift;
     $output = &Header::cleanhtml($output, "y");
     my %netsettings = ();
-    &General::readhash('/var/ipcop/ethernet/settings', \%netsettings);
+    &General::readhash('/var/ofw/ethernet/settings', \%netsettings);
 
     foreach my $itf (@itfs) {
         my $ColorName = '';
@@ -1785,21 +1785,21 @@ sub color_devices()
     }
 
     if (-e '/proc/net/ipsec_eroute') {
-        $output =~ s/ipsec(\d*)/<b><span class='ipcop_iface_ipsec'>ipsec$1<\/span><\/b>/g ;
+        $output =~ s/ipsec(\d*)/<b><span class='ofw_iface_ipsec'>ipsec$1<\/span><\/b>/g ;
     }
 
     if (-e '/var/run/openvpn.pid') {
         # TODO: find the tunX interface used by the OpenVPN server and not fix to tun0
-        $output =~ s/tun0/<b><span class='ipcop_iface_ovpn'>tun0<\/span><\/b>/g ;
+        $output =~ s/tun0/<b><span class='ofw_iface_ovpn'>tun0<\/span><\/b>/g ;
     }
 
     if (!(($netsettings{'RED_COUNT'} >= 1) && $netsettings{'RED_1_TYPE'} =~ /^(DHCP|STATIC)$/)) {
         # Only for PPPoE and similar 'interfaces'
-        if (open(REDIFACE, '/var/ipcop/red/iface')) {
+        if (open(REDIFACE, '/var/ofw/red/iface')) {
             my $reddev = <REDIFACE>;
             close(REDIFACE);
             chomp $reddev;
-            $output =~ s/\b$reddev/<b><span class='ipcop_iface_red'>${reddev}<\/span><\/b>/g;
+            $output =~ s/\b$reddev/<b><span class='ofw_iface_red'>${reddev}<\/span><\/b>/g;
         }
     }
 

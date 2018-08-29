@@ -1,23 +1,23 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # $Id: setreservedports.pl 7523 2014-05-06 18:42:29Z owes $
 # 
-# Copyright (c) 2009-2014 The IPCop Team
+# Copyright (c) 2009-2014 The Openfirewall Team
 #
 #
 # Just a note: existing connections will not be cut when changing ports.
@@ -26,8 +26,8 @@
 
 use strict;
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/DataAccess.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/DataAccess.pl';
 
 
 my $prototest = '';
@@ -101,9 +101,9 @@ sub setgui()
     print "Changing GUI port to $portgui\n";
 
     my %mainsettings = ();
-    &General::readhash('/var/ipcop/main/settings', \%mainsettings);
+    &General::readhash('/var/ofw/main/settings', \%mainsettings);
     $mainsettings{'GUIPORT'} = $portgui;
-    &General::writehash('/var/ipcop/main/settings', \%mainsettings);
+    &General::writehash('/var/ofw/main/settings', \%mainsettings);
 
     # Change apache port
     print "Change httpd configuration ... \n";
@@ -118,13 +118,13 @@ sub setgui()
 
     # Inform squid
     print "Change proxy configuration ... \n";
-    if (-e '/var/ipcop/proxy/squid.conf') {
-        system("/bin/sed -i 's+acl IPCop_https port.*\$+acl IPCop_https port $portgui+' /var/ipcop/proxy/squid.conf");
+    if (-e '/var/ofw/proxy/squid.conf') {
+        system("/bin/sed -i 's+acl Ofw_https port.*\$+acl Ofw_https port $portgui+' /var/ofw/proxy/squid.conf");
 
         # Restart squid if enabled
         if (-e '/var/run/squid.pid') {
             my %proxysettings = ();
-            &General::readhash("/var/ipcop/proxy/settings", \%proxysettings);
+            &General::readhash("/var/ofw/proxy/settings", \%proxysettings);
             if (($proxysettings{'ENABLED_GREEN_1'} eq 'on') || ($proxysettings{'ENABLED_BLUE_1'} eq 'on')) {
                 print "Restarting proxy ... \n";
                 system('/usr/local/bin/restartsquid');
@@ -135,7 +135,7 @@ sub setgui()
     # TODO: we may need a different test here to detect config change from restore during installation
     if (-e '/var/run/httpd.pid') {
         # Rewrite firewall rules
-        system("/usr/local/bin/setfwrules --ipcop >/dev/null");
+        system("/usr/local/bin/setfwrules --ofw >/dev/null");
     }
     
     &General::log("GUI port changed to $portgui");
@@ -147,9 +147,9 @@ sub setssh()
     print "Changing SSH port to $portssh\n";
 
     my %mainsettings = ();
-    &General::readhash('/var/ipcop/main/settings', \%mainsettings);
+    &General::readhash('/var/ofw/main/settings', \%mainsettings);
     $mainsettings{'SSHPORT'} = $portssh;
-    &General::writehash('/var/ipcop/main/settings', \%mainsettings);
+    &General::writehash('/var/ofw/main/settings', \%mainsettings);
 
     # Change sshd port
     print "Change sshd configuration ... \n";
@@ -158,14 +158,14 @@ sub setssh()
     # Not needed to start sshd during installation
     if (-e '/var/run/sshd.pid') {
         my %sshsettings = ();
-        &General::readhash('/var/ipcop/remote/settings', \%sshsettings);
+        &General::readhash('/var/ofw/remote/settings', \%sshsettings);
         if ($sshsettings{'ENABLE_SSH'} eq 'on') {
             print "Restarting SSHd ... \n";
             system('/usr/local/bin/restartssh');
         }
     }
     # Rewrite firewall rules
-    system("/usr/local/bin/setfwrules --ipcop >/dev/null");
+    system("/usr/local/bin/setfwrules --ofw >/dev/null");
 
     &General::log("SSH port changed to $portssh");
 }
@@ -175,8 +175,8 @@ sub cmdhelp()
     print <<END;
 Usage is: [--gui portnumber] [--ssh portnumber] [--test portnumber proto] [--nocheck]
 
-    --gui port              Change the IPCop GUI to tcp/port
-    --ssh port              Change the IPCop SSH to tcp/port
+    --gui port              Change the Openfw GUI to tcp/port
+    --ssh port              Change the Openfw SSH to tcp/port
     --test port proto       Run a quick test to see if proto/port is reserved
     --nocheck               Do not check if port is reserved, use in case of restore only
 

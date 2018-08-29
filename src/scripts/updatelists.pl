@@ -1,50 +1,50 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2006-2016, the IPCop team
+# (c) 2006-2016, the Openfirewall Team
 #
 # $Id: updatelists.pl 8064 2016-01-10 09:24:29Z owes $
 #
 
 use strict;
 use LWP::UserAgent;
-require '/usr/lib/ipcop/general-functions.pl';
+require '/usr/lib/ofw/general-functions.pl';
 
 
 my %mainsettings  = ();
 $mainsettings{'CHECKUPDATES'} = 'off';
 $mainsettings{'PRELOADUPDATES'} = 'off';
-&General::readhash('/var/ipcop/main/settings', \%mainsettings);
+&General::readhash('/var/ofw/main/settings', \%mainsettings);
 
 if (($ARGV[0] eq '--cron') || ($ARGV[0] eq 'cron')) {
-    exit 1 unless (-e "/var/ipcop/red/active");
+    exit 1 unless (-e "/var/ofw/red/active");
 
     # spread the load on the servers by waiting a random length of time...
     my $sleepwait = int(rand(60));
     sleep $sleepwait;
 }
 elsif (($ARGV[0] eq '--red') || ($ARGV[0] eq 'red')) {
-    exit 1 unless (-e "/var/ipcop/red/active");
+    exit 1 unless (-e "/var/ofw/red/active");
 
     exit 0 unless ($mainsettings{'CHECKUPDATES'} eq 'on');
 }
 else {
     # Test connection up here, to avoid dying later.
-    if (! -e "/var/ipcop/red/active") {
+    if (! -e "/var/ofw/red/active") {
         print "RED connection is down.\n";
         exit 1;
     }

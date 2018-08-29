@@ -1,22 +1,22 @@
 /*
  * emailhelper.c: Simple program to send emails.
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2011-2014 The IPCop Team
+ * (c) 2011-2014 The Openfirewall Team
  *
  * $Id: emailhelper.c 7321 2014-03-14 16:16:36Z owes $
  *
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
     }
 
     verbose_printf(1, "Reading email settings ... \n");
-    if (read_kv_from_file(&kv, "/var/ipcop/email/settings") != SUCCESS) {
+    if (read_kv_from_file(&kv, "/var/ofw/email/settings") != SUCCESS) {
         fprintf(stdout, "Cannot read email settings\n");
         exit(EMAIL_ERR_ANY);
     }
@@ -320,7 +320,7 @@ int main(int argc, char **argv)
     verbose_printf(2, "Use TLS: %s\n", tls);
 
     verbose_printf(1, "Reading main settings ... \n");
-    if (read_kv_from_file(&main_kv, "/var/ipcop/main/settings") != SUCCESS) {
+    if (read_kv_from_file(&main_kv, "/var/ofw/main/settings") != SUCCESS) {
         fprintf(stdout, "Cannot read main settings\n");
         exit(EMAIL_ERR_ANY);
     }
@@ -342,7 +342,7 @@ int main(int argc, char **argv)
     }
 
 
-    snprintf(subject_prefix, STRING_SIZE, "[IPCop] %s.%s:", hostname, domainname);
+    snprintf(subject_prefix, STRING_SIZE, "[Openfirewall] %s.%s:", hostname, domainname);
 
 
     if (flag_subject) {

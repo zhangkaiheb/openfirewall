@@ -1,23 +1,23 @@
 /* 
  * host_domain.c: entry of hostname and domainname
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2010, the IPCop team
+ * (c) 2007-2010, the Openfirewall Team
  *
  * $Id: host_domain.c 5041 2010-10-19 20:45:10Z owes $
  *
@@ -64,7 +64,7 @@ static int writehostsfiles(char *hostname, char *domainname)
     }
 
     /* Tell our indian about host & domain */
-    if (!(file = fopen("/var/ipcop/main/hostname.conf", "w"))) {
+    if (!(file = fopen("/var/ofw/main/hostname.conf", "w"))) {
         errorbox(gettext("UNABLE_TO_WRITE_APACHE_HOSTNAME"));
         return FAILURE;
     }
@@ -95,7 +95,7 @@ int handlehostname(void)
     int rc;
     int result;
 
-    if (read_kv_from_file(&kv, "/var/ipcop/main/settings") != SUCCESS) {
+    if (read_kv_from_file(&kv, "/var/ofw/main/settings") != SUCCESS) {
         free_kv(&kv);
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
@@ -130,7 +130,7 @@ int handlehostname(void)
                 errorbox(gettext("TR_HOSTNAME_NOT_VALID_CHARS"));
             else {
                 update_kv(&kv, "HOSTNAME", hostname);
-                write_kv_to_file(&kv, "/var/ipcop/main/settings");
+                write_kv_to_file(&kv, "/var/ofw/main/settings");
                 if (flag_is_state == setup) {
                     /* In case of installation we will simply rewrite the files after setting the domainname */
                     writehostsfiles(hostname, domainname);
@@ -164,7 +164,7 @@ int handledomainname(void)
     int rc;
     int result;
 
-    if (read_kv_from_file(&kv, "/var/ipcop/main/settings") != SUCCESS) {
+    if (read_kv_from_file(&kv, "/var/ofw/main/settings") != SUCCESS) {
         free_kv(&kv);
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
@@ -209,7 +209,7 @@ int handledomainname(void)
                 }
                 else {
                     update_kv(&kv, "DOMAINNAME", domainname);
-                    write_kv_to_file(&kv, "/var/ipcop/main/settings");
+                    write_kv_to_file(&kv, "/var/ofw/main/settings");
                     writehostsfiles(hostname, domainname);
                     result = SUCCESS;
                     break;

@@ -1,32 +1,32 @@
 #!/bin/sh
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2001-2012, the IPCop team
+# (c) 2001-2012, the Openfirewall Team
 #
 # $Id: rc.firewall 6828 2012-11-03 10:59:39Z owes $
 #
 
-eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
-eval $(/usr/local/bin/readhash /var/ipcop/ethernet/settings)
-if [ -f /var/ipcop/red/iface ]; then
-    IFACE=`/bin/cat /var/ipcop/red/iface 2> /dev/null | /usr/bin/tr -d '\012'`
+eval $(/usr/local/bin/readhash /var/ofw/ppp/settings)
+eval $(/usr/local/bin/readhash /var/ofw/ethernet/settings)
+if [ -f /var/ofw/red/iface ]; then
+    IFACE=`/bin/cat /var/ofw/red/iface 2> /dev/null | /usr/bin/tr -d '\012'`
 fi
-if [ -f /var/ipcop/red/device ]; then
-    DEVICE=`/bin/cat /var/ipcop/red/device 2> /dev/null | /usr/bin/tr -d '\012'`
+if [ -f /var/ofw/red/device ]; then
+    DEVICE=`/bin/cat /var/ofw/red/device 2> /dev/null | /usr/bin/tr -d '\012'`
 fi
 
 iptables_init() {
@@ -112,7 +112,7 @@ iptables_red() {
         /sbin/iptables -A REDINPUT -p udp --source-port 67 --destination-port 68 -i $DEVICE -j ACCEPT
     fi
 
-    if [ "$IFACE" != "" -a -f /var/ipcop/red/active ]; then
+    if [ "$IFACE" != "" -a -f /var/ofw/red/active ]; then
         # DHCP
         if [ 0$RED_COUNT -gt 0 -a "$RED_1_TYPE" == "DHCP" ]; then
             /sbin/iptables -A REDINPUT -p udp --source-port 67 --destination-port 68 -i $IFACE -j ACCEPT
@@ -168,13 +168,13 @@ start)
     /sbin/iptables -A INPUT -j FW_INPUT
     /sbin/iptables -N FW_XTACCESS
     /sbin/iptables -A INPUT -j FW_XTACCESS
-    /sbin/iptables -N FW_IPCOP
-    /sbin/iptables -A INPUT -j FW_IPCOP
+    /sbin/iptables -N FW_OFW
+    /sbin/iptables -A INPUT -j FW_OFW
     # FORWARD chains for GUI entered rules
     /sbin/iptables -N FW_OUTGOING
     /sbin/iptables -A FORWARD -j FW_OUTGOING
-    /sbin/iptables -N FW_IPCOP_FORWARD
-    /sbin/iptables -A FORWARD -j FW_IPCOP_FORWARD
+    /sbin/iptables -N FW_OFW_FORWARD
+    /sbin/iptables -A FORWARD -j FW_OFW_FORWARD
 
     # Accept everything connected
     /sbin/iptables -A INPUT   -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
@@ -190,9 +190,9 @@ start)
     #~ /sbin/iptables -A INPUT   -i $GREEN_1_DEV -m conntrack --ctstate NEW -j ACCEPT
     #~ /sbin/iptables -A FORWARD -i $GREEN_1_DEV -m conntrack --ctstate NEW -j ACCEPT
 
-    # If a host on orange tries to initiate a connection to IPCop's red IP and
+    # If a host on orange tries to initiate a connection to Openfirewall's red IP and
     # the connection gets DNATed back through a port forward to a server on orange
-    # we end up with orange -> orange traffic passing through IPCop
+    # we end up with orange -> orange traffic passing through openfirewall
     [ 0$ORANGE_COUNT -gt 0 ] && /sbin/iptables -A FORWARD -i $ORANGE_1_DEV -o $ORANGE_1_DEV -m conntrack --ctstate NEW -j ACCEPT
 
     #~ # allow DHCP on BLUE to be turned on/off

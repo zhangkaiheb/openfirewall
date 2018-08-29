@@ -1,21 +1,21 @@
 #!/usr/bin/perl
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (c) 2009-2012 The IPCop Team
+# Copyright (c) 2009-2012 The Openfirewall Team
 #
 # $Id: scheduler-lib.pl 6427 2012-02-27 18:20:25Z owes $
 #
@@ -27,8 +27,8 @@ package SCHEDULER;
 use warnings; no warnings 'once';
 use CGI::Carp 'fatalsToBrowser';
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/lang.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/lang.pl';
 
 
 @SCHEDULER::actions = (
@@ -55,11 +55,11 @@ $SCHEDULER::maxprofiles = 5;
 sub readSettings
 {
     @SCHEDULER::list = ();
-    if (! -e '/var/ipcop/main/scheduler') {
+    if (! -e '/var/ofw/main/scheduler') {
         return;
     }
 
-    open(FILE, '/var/ipcop/main/scheduler');
+    open(FILE, '/var/ofw/main/scheduler');
     my @tmpfile = <FILE>;
     close (FILE);
 
@@ -103,7 +103,7 @@ sub readSettings
 #
 sub writeSettings
 {
-    open(FILE, '>/var/ipcop/main/scheduler') or die 'Unable to open scheduler settings file.';
+    open(FILE, '>/var/ofw/main/scheduler') or die 'Unable to open scheduler settings file.';
 
     for my $id (0 .. $#SCHEDULER::list) {
         if ( ($SCHEDULER::list[$id]{'ACTIVE'} ne 'on') && ($SCHEDULER::list[$id]{'ACTIVE'} ne 'off') ) { next; }
@@ -116,7 +116,7 @@ sub writeSettings
     close FILE;
 
     # Sort the action list on time, which is field 3
-    system('/usr/bin/sort -t "," -k 3 -o /var/ipcop/main/scheduler /var/ipcop/main/scheduler');
+    system('/usr/bin/sort -t "," -k 3 -o /var/ofw/main/scheduler /var/ofw/main/scheduler');
 
     &readSettings();
 }

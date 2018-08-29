@@ -1,23 +1,23 @@
 /* 
  * restore.c: restore from some backup during installation
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2008, the IPCop team
+ * (c) 2008, the Openfirewall Team
  * 
  * $Id: restore.c 4963 2010-09-19 17:33:05Z owes $
  * 
@@ -37,7 +37,7 @@
 
 
 // tweak for errorbox
-#define  gettext  ipcop_gettext
+#define  gettext  ofw_gettext
 
 #define TMP_RESTORE_PATH_FULL       "/harddisk/tmp/restore"
 #define TMP_RESTORE_PATH_CHROOT     "/tmp/restore"
@@ -58,13 +58,13 @@ static char hostname_filter[STRING_SIZE];
 /* */
 static int copy_change_files(void)
 {
-    if (access(TMP_RESTORE_PATH_FULL "/var/ipcop/main/settings", 0)) {
-        errorbox(ipcop_gettext("TR_NO_MAIN_SETTINGS_IN_BACKUP"));
+    if (access(TMP_RESTORE_PATH_FULL "/var/ofw/main/settings", 0)) {
+        errorbox(ofw_gettext("TR_NO_MAIN_SETTINGS_IN_BACKUP"));
         return FAILURE;
     }
 
     if (testbackupversion(TMP_RESTORE_PATH_FULL) != SUCCESS) {
-        errorbox(ipcop_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
+        errorbox(ofw_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
         return FAILURE;
     }
 
@@ -118,7 +118,7 @@ static int test_backup_key(char *dev, char *hostname)
     /* Test backup .dat */
     snprintf(command, STRING_SIZE, MOUNT_BACKUP_FULL "/%s.dat", hostname);
     if (access(command, 0) == 0) {
-        /* Copy the backup dat file to make it accessable and useable for ipcoprestore */
+        /* Copy the backup dat file to make it accessable and useable for ofwrestore */
         snprintf(command, STRING_SIZE, "cp -f " MOUNT_BACKUP_FULL "/%s.dat " DATFILE_FULL, hostname);
         mysystem(command);
 
@@ -135,7 +135,7 @@ static int test_backup_key(char *dev, char *hostname)
     strcpy(hostname_filter, hostname);
     n = scandir(MOUNT_BACKUP_FULL, &eps, filter_dat, alphasort);
     if (n > 0) {
-        /* Copy the latest backup dat file to make it accessable and useable for ipcoprestore */
+        /* Copy the latest backup dat file to make it accessable and useable for ofwrestore */
         snprintf(command, STRING_SIZE, "cp -f " MOUNT_BACKUP_FULL "/%s " DATFILE_FULL, eps[n-1]->d_name);
         mysystem(command);
 
@@ -176,7 +176,7 @@ static int restorefromfloppy(void)
     struct stat st;
     int i;
 
-    /* since we do not have floppy.ko, grab from already installed IPCop */
+    /* since we do not have floppy.ko, grab from already installed Openfirewall */
 #if defined(__powerpc__) || defined(__powerpc64__)
     mysystem("chroot /harddisk /sbin/modprobe swim3");
 #else
@@ -191,7 +191,7 @@ static int restorefromfloppy(void)
     lstat(device, &st);
     if (S_ISBLK(st.st_mode)) {
         if (mysystem
-            ("chroot /harddisk /bin/tar -X /var/ipcop/backup/exclude.system -C " TMP_RESTORE_PATH_CHROOT
+            ("chroot /harddisk /bin/tar -X /var/ofw/backup/exclude.system -C " TMP_RESTORE_PATH_CHROOT
              " -xvzf /dev/fd0") == 0) {
             newtPopWindow();    // Pop status window
 
@@ -204,7 +204,7 @@ static int restorefromfloppy(void)
     }
 
     newtPopWindow();            // Pop status window
-    errorbox(ipcop_gettext("TR_UNABLE_TO_INSTALL_FILES"));
+    errorbox(ofw_gettext("TR_UNABLE_TO_INSTALL_FILES"));
     return FAILURE;
 }
 
@@ -216,7 +216,7 @@ static int restorefromusb(char *hostname, char *password)
 
     if (mountusb(hostname) == FAILURE) {
         newtPopWindow();
-        errorbox(ipcop_gettext("TR_NO_BACKUP_ON_USB_FOUND"));
+        errorbox(ofw_gettext("TR_NO_BACKUP_ON_USB_FOUND"));
         return FAILURE;
     }
 
@@ -226,28 +226,28 @@ static int restorefromusb(char *hostname, char *password)
                         " -a -d -aes256 -salt"
                         " -pass pass:\"%s\""
                         " -in " MOUNT_BACKUP_CHROOT "/backup.%s.key"
-                        " -out /var/ipcop/backup/backup.key",
+                        " -out /var/ofw/backup/backup.key",
                         password, hostname);
     if (mysystem(command)) {
         newtPopWindow();
-        errorbox(ipcop_gettext("TR_WRONG_PASSWORD_OR_KEYFILE"));
+        errorbox(ofw_gettext("TR_WRONG_PASSWORD_OR_KEYFILE"));
         return FAILURE;
     }
 
     /* adjust mode */
-    mysystem("chroot /harddisk /bin/chmod 400 /var/ipcop/backup/backup.key");
+    mysystem("chroot /harddisk /bin/chmod 400 /var/ofw/backup/backup.key");
 
-    snprintf(command, STRING_SIZE, "chroot /harddisk /usr/local/bin/ipcoprestore"
+    snprintf(command, STRING_SIZE, "chroot /harddisk /usr/local/bin/ofwrestore"
         " --restore=%s --hostname=ipcop --hardware", DATFILE_CHROOT);
     if ((rc = mysystem(command)) != 0) {
         newtPopWindow();
-        fprintf(flog, "ipcoprestore returned errorcode: %d (%d)\n", (rc >> 8), rc);
+        fprintf(flog, "ofwrestore returned errorcode: %d (%d)\n", (rc >> 8), rc);
         if (rc == (BACKUP_ERR_VERSION << 8)) {
             /* Special case, inform with some more detail */
-            errorbox(ipcop_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
+            errorbox(ofw_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
         }
         else {
-            errorbox(ipcop_gettext("TR_UNABLE_TO_INSTALL_FILES"));
+            errorbox(ofw_gettext("TR_UNABLE_TO_INSTALL_FILES"));
         }
         return FAILURE;
     }
@@ -266,7 +266,7 @@ static int restorefromnetwork(char *url, char *hostname, char *password)
     if (mysystem(command)) {
         newtPopWindow();
         snprintf(command, STRING_SIZE, "%s/backup.%s.key", url, hostname);
-        snprintf(message, STRING_SIZE, ipcop_gettext("TR_FILE_NOT_FOUND"), command);
+        snprintf(message, STRING_SIZE, ofw_gettext("TR_FILE_NOT_FOUND"), command);
         errorbox(message);
         return FAILURE;
     }
@@ -275,39 +275,39 @@ static int restorefromnetwork(char *url, char *hostname, char *password)
                         " -a -d -aes256 -salt"
                         " -pass pass:%s"
                         " -in /tmp/backup.key"
-                        " -out /var/ipcop/backup/backup.key",
+                        " -out /var/ofw/backup/backup.key",
                         password);
     if (mysystem(command)) {
         newtPopWindow();
-        errorbox(ipcop_gettext("TR_WRONG_PASSWORD_OR_KEYFILE"));
+        errorbox(ofw_gettext("TR_WRONG_PASSWORD_OR_KEYFILE"));
         return FAILURE;
     }
 
     /* adjust mode */
-    mysystem("chroot /harddisk /bin/chmod 400 /var/ipcop/backup/backup.key");
+    mysystem("chroot /harddisk /bin/chmod 400 /var/ofw/backup/backup.key");
 
     snprintf(command, STRING_SIZE, "wget -O " DATFILE_FULL " %s/%s.dat", url, hostname);
     if (mysystem(command)) {
         newtPopWindow();
         snprintf(command, STRING_SIZE, "%s/%s.dat", url, hostname);
-        snprintf(message, STRING_SIZE, ipcop_gettext("TR_FILE_NOT_FOUND"), command);
+        snprintf(message, STRING_SIZE, ofw_gettext("TR_FILE_NOT_FOUND"), command);
         errorbox(message);
         return FAILURE;
     }
 
-    snprintf(command, STRING_SIZE, "chroot /harddisk /usr/local/bin/ipcoprestore"
+    snprintf(command, STRING_SIZE, "chroot /harddisk /usr/local/bin/ofwrestore"
         " --restore=%s --hostname=ipcop --hardware", DATFILE_CHROOT);
     rc = mysystem(command);
     if (rc != 0) {
         unlink(DATFILE_FULL);
         newtPopWindow();
-        fprintf(flog, "ipcoprestore returned errorcode: %d (%d)\n", (rc >> 8), rc);
+        fprintf(flog, "ofwrestore returned errorcode: %d (%d)\n", (rc >> 8), rc);
         if (rc == (BACKUP_ERR_VERSION << 8)) {
             /* Special case, inform with some more detail */
-            errorbox(ipcop_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
+            errorbox(ofw_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
         }
         else {
-            errorbox(ipcop_gettext("TR_UNABLE_TO_INSTALL_FILES"));
+            errorbox(ofw_gettext("TR_UNABLE_TO_INSTALL_FILES"));
         }
         
         return FAILURE;
@@ -378,17 +378,17 @@ int handlerestore(void)
     }
 
     do {
-        snprintf(message, STRING_SIZE, ipcop_gettext("TR_RESTORE_CONFIGURATION"), NAME);
+        snprintf(message, STRING_SIZE, ofw_gettext("TR_RESTORE_CONFIGURATION"), NAME);
         text = newtTextboxReflowed(1, 1, message, 68, 0, 0, 0);
         numLines = newtTextboxGetNumLines(text);
 
-        newtCenteredWindow(72, 13 + numLines + httpLines, ipcop_gettext("TR_RESTORE"));
+        newtCenteredWindow(72, 13 + numLines + httpLines, ofw_gettext("TR_RESTORE"));
         restoreform = newtForm(NULL, NULL, 0);
         newtFormAddComponent(restoreform, text);
 
         /* selections: floppy, usb */
-        radiofloppy = newtRadiobutton(12, 2 + numLines, ipcop_gettext("TR_FLOPPY"), !strcmp(typevalue, "floppy"), NULL);
-        radiousb = newtRadiobutton(12, 3 + numLines, ipcop_gettext("TR_USB_KEY"), !strcmp(typevalue, "usb"), radiofloppy);
+        radiofloppy = newtRadiobutton(12, 2 + numLines, ofw_gettext("TR_FLOPPY"), !strcmp(typevalue, "floppy"), NULL);
+        radiousb = newtRadiobutton(12, 3 + numLines, ofw_gettext("TR_USB_KEY"), !strcmp(typevalue, "usb"), radiofloppy);
 
         newtComponentAddCallback(radiofloppy, restorecallback, NULL);
         newtComponentAddCallback(radiousb, restorecallback, NULL);
@@ -412,13 +412,13 @@ int handlerestore(void)
 
         /* hostname for network restore */
         labelhostname = newtTextbox(2, 5 + numLines + httpLines, 35, 1, 0);
-        newtTextboxSetText(labelhostname, ipcop_gettext("TR_HOSTNAME"));
+        newtTextboxSetText(labelhostname, ofw_gettext("TR_HOSTNAME"));
         newtFormAddComponent(restoreform, labelhostname);
         entryhostname = newtEntry(25, 5 + numLines + httpLines, hostnameinitvalue, 35, &hostnamevalue, 0);
         newtFormAddComponent(restoreform, entryhostname);
         /* password */
         labelpassword = newtTextbox(2, 6 + numLines + httpLines, 35, 1, 0);
-        newtTextboxSetText(labelpassword, ipcop_gettext("TR_BACKUP_PASSWORD"));
+        newtTextboxSetText(labelpassword, ofw_gettext("TR_BACKUP_PASSWORD"));
         newtFormAddComponent(restoreform, labelpassword);
         entrypassword = newtEntry(25, 6 + numLines + httpLines, "", 20, &passwordvalue, 0);
         newtEntrySetFlags(entrypassword, NEWT_FLAG_PASSWORD, NEWT_FLAGS_SET);
@@ -433,7 +433,7 @@ int handlerestore(void)
             newtEntrySetFlags(entrypassword, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
         }
 
-        ok = newtButton(6, 8 + numLines + httpLines, ipcop_gettext("TR_OK"));
+        ok = newtButton(6, 8 + numLines + httpLines, ofw_gettext("TR_OK"));
         skip = newtButton(26, 8 + numLines + httpLines, gettext("TR_SKIP"));
         newtFormAddComponents(restoreform, ok, skip, NULL);
 
@@ -458,7 +458,7 @@ int handlerestore(void)
         if (exitstruct.u.co == ok) {
             newtComponent selected = newtRadioGetCurrent(radiofloppy);
 
-            statuswindow(72, 5, ipcop_gettext("TR_RESTORE"), ipcop_gettext("TR_READING_BACKUP"));
+            statuswindow(72, 5, ofw_gettext("TR_RESTORE"), ofw_gettext("TR_READING_BACKUP"));
             /* cleanout possible leftovers and (re)create temp path */
             mysystem("/bin/rm -rf " TMP_RESTORE_PATH_FULL);
             mkdir(TMP_RESTORE_PATH_FULL, S_IRWXU | S_IRWXG | S_IRWXO);
@@ -474,7 +474,7 @@ int handlerestore(void)
                 if (!strcmp(passwordinitvalue, "")) {
                     /* password is mandatory to decrypt the key */
                     newtPopWindow();
-                    errorbox(ipcop_gettext("TR_PASSWORD_CANNOT_BE_BLANK"));
+                    errorbox(ofw_gettext("TR_PASSWORD_CANNOT_BE_BLANK"));
                     error = FAILURE;
                 }
                 else {
@@ -486,7 +486,7 @@ int handlerestore(void)
                 if (!strcmp(passwordinitvalue, "")) {
                     /* password is mandatory to decrypt the key */
                     newtPopWindow();
-                    errorbox(ipcop_gettext("TR_PASSWORD_CANNOT_BE_BLANK"));
+                    errorbox(ofw_gettext("TR_PASSWORD_CANNOT_BE_BLANK"));
                     error = FAILURE;
                 }
                 else {

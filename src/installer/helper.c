@@ -1,22 +1,22 @@
 /* 
  * helper.c: helper functions
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2015, the IPCop team
+ * (c) 2007-2015, the Openfirewall Team
  *
  * $Id: helper.c 7846 2015-02-01 18:35:46Z owes $
  * 
@@ -36,13 +36,13 @@
 
 
 /* use ---- for non-assigned card */
-char *ipcop_colours_text[CFG_COLOURS_COUNT] = { "GREEN", "RED", "BLUE", "ORANGE", "----" };
-char *ipcop_aliases_text[CFG_COLOURS_COUNT] = { "lan", "wan", "wlan", "dmz", "unused" };
+char *ofw_colours_text[CFG_COLOURS_COUNT] = { "GREEN", "RED", "BLUE", "ORANGE", "----" };
+char *ofw_aliases_text[CFG_COLOURS_COUNT] = { "lan", "wan", "wlan", "dmz", "unused" };
 
-char *ipcop_red_text[CFG_RED_COUNT] = { "ANALOG", "GSM3G", "ISDN", "PPPOE", "PPTP", "STATIC", "DHCP" };
+char *ofw_red_text[CFG_RED_COUNT] = { "ANALOG", "GSM3G", "ISDN", "PPPOE", "PPTP", "STATIC", "DHCP" };
 
 /* Global structure with everything from ethernet/settings config file */
-struct ethernet_s ipcop_ethernet;
+struct ethernet_s ofw_ethernet;
 /* Verbose level */
 int flag_verbose = 0;
 
@@ -73,7 +73,7 @@ void stripnl(char *s)
 }
 
 
-/* Return a pointer to the actual running version number of IPCop.
+/* Return a pointer to the actual running version number of Openfirewall.
  * Successive updates increase effective version but not compiled VERSION ! */
 char title[STRING_SIZE] = "";
 char *get_title(void)
@@ -109,10 +109,10 @@ char *get_title(void)
 }
 
 
-/* Get IPCop version from /etc/issue.
+/* Get Openfirewall version from /etc/issue.
     0 if version file missing or version invalid.
     (a << 16) + (b << 8) + c for version a.b.c          */
-unsigned int getipcopversion(void)
+unsigned int getofwversion(void)
 {
     FILE *f_version;
     char buffer[STRING_SIZE] = "";
@@ -480,7 +480,7 @@ static int read_ethernet_key(int colour, int index, char *eth_key, char **ptr, i
     char key[STRING_SIZE];
 
     /* Build the key, for example GREEN_1_ADDRESS */
-    snprintf(key, STRING_SIZE, "%s_%d_%s", ipcop_colours_text[colour], index, eth_key);
+    snprintf(key, STRING_SIZE, "%s_%d_%s", ofw_colours_text[colour], index, eth_key);
     if (find_kv(eth_kv, key) == NULL) {
         /* Depending on RED type, the key/value may be missing */
         if (colour == RED) {
@@ -493,18 +493,18 @@ static int read_ethernet_key(int colour, int index, char *eth_key, char **ptr, i
         if (exitonerror) {
             free_kv(&eth_kv);
 
-            fprintf(stderr, "%s for %s_%d not defined\n", error_description, ipcop_colours_text[colour], index);
+            fprintf(stderr, "%s for %s_%d not defined\n", error_description, ofw_colours_text[colour], index);
             exit(1);
         }
 
-        verbose_printf(1, "  %s for %s_%d not defined\n", error_description, ipcop_colours_text[colour], index);
+        verbose_printf(1, "  %s for %s_%d not defined\n", error_description, ofw_colours_text[colour], index);
 
         return FAILURE;
     }
 
     /* Store the keyvalue */
     *ptr = strdup(find_kv(eth_kv, key));
-    verbose_printf(2, "  %s for %s_%d: %s\n", error_description, ipcop_colours_text[colour], index, *ptr);
+    verbose_printf(2, "  %s for %s_%d: %s\n", error_description, ofw_colours_text[colour], index, *ptr);
     return SUCCESS;
 }
 
@@ -518,11 +518,11 @@ int read_ethernet_settings(int exitonerror)
     FILE *ipfile;
 
     /* zap contents */
-    memset(&ipcop_ethernet, 0, sizeof(ipcop_ethernet));
+    memset(&ofw_ethernet, 0, sizeof(ofw_ethernet));
     verbose_printf(1, "Reading Ethernet settings ... \n");
 
-    if (read_kv_from_file(&eth_kv, "/var/ipcop/ethernet/settings") != SUCCESS) {
-        /* What's a IPCop without ethernet/settings...  Nothing... */
+    if (read_kv_from_file(&eth_kv, "/var/ofw/ethernet/settings") != SUCCESS) {
+        /* What's a Openfirewall without ethernet/settings...  Nothing... */
         if (exitonerror) {
             free_kv(&eth_kv);
             fprintf(stderr, "Cannot read ethernet settings\n");
@@ -535,20 +535,20 @@ int read_ethernet_settings(int exitonerror)
     /* special case, default gateway. There can be only one ..... */
     strcpy(value, "");
     find_kv_default(eth_kv, "DEFAULT_GATEWAY", value);
-    ipcop_ethernet.default_gateway = strdup(value);
-    verbose_printf(2, "  Default gateway: %s\n", ipcop_ethernet.default_gateway);
+    ofw_ethernet.default_gateway = strdup(value);
+    verbose_printf(2, "  Default gateway: %s\n", ofw_ethernet.default_gateway);
 
     /* special case, red active */
-    if (access("/var/ipcop/red/active", 0) != -1) {
-        ipcop_ethernet.red_active[1] = 1;
+    if (access("/var/ofw/red/active", 0) != -1) {
+        ofw_ethernet.red_active[1] = 1;
     }
     else {
-        ipcop_ethernet.red_active[1] = 0;
+        ofw_ethernet.red_active[1] = 0;
     }
-    verbose_printf(2, "  RED active: %d\n", ipcop_ethernet.red_active[1]);
+    verbose_printf(2, "  RED active: %d\n", ofw_ethernet.red_active[1]);
 
     /* another special case, (real) red address, from red/local-ipaddress */
-    if ((ipfile = fopen("/var/ipcop/red/local-ipaddress", "r")) != NULL) {
+    if ((ipfile = fopen("/var/ofw/red/local-ipaddress", "r")) != NULL) {
         if (fgets(value, STRING_SIZE, ipfile)) {
             /* remove possible trailing \n */
             stripnl(value);
@@ -558,11 +558,11 @@ int read_ethernet_settings(int exitonerror)
     else {
         strcpy(value, "");
     }
-    ipcop_ethernet.red_address[1] = strdup(value);
-    verbose_printf(2, "  RED address: %s\n", ipcop_ethernet.red_address[1]);
+    ofw_ethernet.red_address[1] = strdup(value);
+    verbose_printf(2, "  RED address: %s\n", ofw_ethernet.red_address[1]);
 
     /* yet another special case, (real) red device, from red/iface */
-    if ((ipfile = fopen("/var/ipcop/red/iface", "r")) != NULL) {
+    if ((ipfile = fopen("/var/ofw/red/iface", "r")) != NULL) {
         if (fgets(value, STRING_SIZE, ipfile)) {
             /* remove possible trailing \n */
             stripnl(value);
@@ -582,48 +582,48 @@ int read_ethernet_settings(int exitonerror)
     else {
         strcpy(value, "");
     }
-    ipcop_ethernet.red_device[1] = strdup(value);
-    verbose_printf(2, "  RED device: %s\n", ipcop_ethernet.red_device[1]);
+    ofw_ethernet.red_device[1] = strdup(value);
+    verbose_printf(2, "  RED device: %s\n", ofw_ethernet.red_device[1]);
 
     /* for all colours */
     for (i = 0; i < NONE; i++) {
-        snprintf(key, STRING_SIZE, "%s_COUNT", ipcop_colours_text[i]);
+        snprintf(key, STRING_SIZE, "%s_COUNT", ofw_colours_text[i]);
         strcpy(value, "0");
         find_kv_default(eth_kv, key, value);
-        ipcop_ethernet.count[i] = atoi(value);
+        ofw_ethernet.count[i] = atoi(value);
 
-        if ((ipcop_ethernet.count[i] < 0) || (ipcop_ethernet.count[i] > MAX_NETWORK_COLOUR)) {
+        if ((ofw_ethernet.count[i] < 0) || (ofw_ethernet.count[i] > MAX_NETWORK_COLOUR)) {
             /* Count is not a sane value */
             if (exitonerror) {
                 free_kv(&eth_kv);
-                fprintf(stderr, "Illegal count (%d) for colour %s\n", ipcop_ethernet.count[i], ipcop_colours_text[i]);
+                fprintf(stderr, "Illegal count (%d) for colour %s\n", ofw_ethernet.count[i], ofw_colours_text[i]);
                 exit(1);
             }
 
             return 1;
         }
 
-        for (j = 1; j <= ipcop_ethernet.count[i]; j++) {
-            if (read_ethernet_key(i, j, "DEV", &ipcop_ethernet.device[i][j], exitonerror, "Device") != SUCCESS)
+        for (j = 1; j <= ofw_ethernet.count[i]; j++) {
+            if (read_ethernet_key(i, j, "DEV", &ofw_ethernet.device[i][j], exitonerror, "Device") != SUCCESS)
                 return FAILURE;
-            if (read_ethernet_key(i, j, "ADDRESS", &ipcop_ethernet.address[i][j], exitonerror, "IP address") != SUCCESS)
+            if (read_ethernet_key(i, j, "ADDRESS", &ofw_ethernet.address[i][j], exitonerror, "IP address") != SUCCESS)
                 return FAILURE;
-            if (read_ethernet_key(i, j, "NETMASK", &ipcop_ethernet.netmask[i][j], exitonerror, "Subnetmask") != SUCCESS)
+            if (read_ethernet_key(i, j, "NETMASK", &ofw_ethernet.netmask[i][j], exitonerror, "Subnetmask") != SUCCESS)
                 return FAILURE;
-            if (read_ethernet_key(i, j, "NETADDRESS", &ipcop_ethernet.netaddress[i][j], exitonerror, "Network address")
+            if (read_ethernet_key(i, j, "NETADDRESS", &ofw_ethernet.netaddress[i][j], exitonerror, "Network address")
                 != SUCCESS)
                 return FAILURE;
 
-            read_ethernet_key(i, j, "DRIVER", &ipcop_ethernet.driver[i][j], 0, "Driver");
+            read_ethernet_key(i, j, "DRIVER", &ofw_ethernet.driver[i][j], 0, "Driver");
         }
     }
 
     /* We need at least 1 RED connection type */
-    if (read_ethernet_key(RED, 1, "TYPE", &ipcop_ethernet.red_type[1], exitonerror, "Connection type") != SUCCESS)
+    if (read_ethernet_key(RED, 1, "TYPE", &ofw_ethernet.red_type[1], exitonerror, "Connection type") != SUCCESS)
         return FAILURE;
     /* more red types, we may one day allow for more red devices */
-    for (j = 2; j <= ipcop_ethernet.count[RED]; j++) {
-        if (read_ethernet_key(RED, j, "TYPE", &ipcop_ethernet.red_type[j], exitonerror, "Type") != SUCCESS)
+    for (j = 2; j <= ofw_ethernet.count[RED]; j++) {
+        if (read_ethernet_key(RED, j, "TYPE", &ofw_ethernet.red_type[j], exitonerror, "Type") != SUCCESS)
             return FAILURE;
     }
 

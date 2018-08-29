@@ -1,19 +1,19 @@
-/* IPCop helper program - restartshaping
+/* Openfirewall helper program - restartshaping
  *
- * This file is part of the IPCop Firewall.
+ * This file is part of the Openfirewall.
  *
- * IPCop is free software; you can redistribute it and/or modify
+ * Openfirewall is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * IPCop is distributed in the hope that it will be useful,
+ * Openfirewall is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with IPCop; if not, write to the Free Software
+ * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
  * Copyright (C) 2002-04-09 Mark Wormgoor <mark@wormgoor.com>
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     }
 
     verbose_printf(1, "Reading shaping settings ... \n");
-    if (read_kv_from_file(&shp_kv, "/var/ipcop/shaping/settings") != SUCCESS) {
+    if (read_kv_from_file(&shp_kv, "/var/ofw/shaping/settings") != SUCCESS) {
         fprintf(stderr, "Cannot read shaping settings\n");
         goto EXIT;
     }
@@ -102,12 +102,12 @@ int main(int argc, char *argv[])
     read_ethernet_settings(1);
 
     /* See what interface there is */
-    if (ipcop_ethernet.red_device[1][0] == 0) {
+    if (ofw_ethernet.red_device[1][0] == 0) {
         fprintf(stderr, "Couldn't open iface file\n");
         return (1);
     }
 
-    iface = ipcop_ethernet.red_device[1];
+    iface = ofw_ethernet.red_device[1];
 
     /* Remove old shaping, silence error since shaping may have been inactive */
     verbose_printf(1, "Remove qdiscs ... \n");
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
     safe_system(command);
 
     verbose_printf(1, "Add shaping rules ... \n");
-    file = fopen("/var/ipcop/shaping/config", "r");
+    file = fopen("/var/ofw/shaping/config", "r");
     if (file) {
         while (fgets(s, STRING_SIZE, file) != NULL) {
             if (s[strlen(s) - 1] == '\n')

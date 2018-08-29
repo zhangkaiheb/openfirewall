@@ -1,27 +1,27 @@
 #!/bin/bash
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (c) 2003-2011 The IPCop Team
+# Copyright (c) 2003-2011 The Openfirewall Team
 #
 # $Id: rc.eagleusbadsl 5949 2011-10-15 20:42:40Z owes $
 #
 
 DEBUG="off"
-eval $(/usr/local/bin/readhash /var/ipcop/ppp/settings)
+eval $(/usr/local/bin/readhash /var/ofw/ppp/settings)
 
 # Debugging. Comment it out to use DEBUG from ppp settings
 DEBUG="on"
@@ -71,9 +71,9 @@ start)
     fi
 
     # TODO: unsure how to best handle this section
-#    if [[ ( -e /var/ipcop/ppp/updatesettings) ||
+#    if [[ ( -e /var/ofw/ppp/updatesettings) ||
 #            ( `/usr/sbin/eaglestat | /bin/grep "$DSPstr"` = "$DSPstr" ) ]]; then
-#        /usr/sbin/eaglectrl -d -o/var/ipcop/eagle-usb/eagle-usb.conf
+#        /usr/sbin/eaglectrl -d -o/var/ofw/eagle-usb/eagle-usb.conf
 #        if [ $? -ne 0 ]; then
 #            msg "init fail"
 #            exit 1

@@ -1,19 +1,19 @@
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2009-2015 The IPCop Team
+# (c) 2009-2015 The Openfirewall Team
 #
 # $Id: vpn-functions.pl 7885 2015-02-09 17:09:40Z owes $
 #
@@ -22,13 +22,13 @@ package VPN;
 
 use strict;
 
-require '/usr/lib/ipcop/general-functions.pl';
-require '/usr/lib/ipcop/header.pl';
+require '/usr/lib/ofw/general-functions.pl';
+require '/usr/lib/ofw/header.pl';
 
 
 # netsettings required in several places, read once here for all functions
 my %netsettings = ();
-&General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
+&General::readhash("/var/ofw/ethernet/settings", \%netsettings);
 
 
 ###
@@ -36,53 +36,53 @@ my %netsettings = ();
 ### this         : let the counter go, so that each cert is numbered.
 ###
 sub cleanssldatabase {
-    if (open(FILE, '>/var/ipcop/certs/serial')) {
+    if (open(FILE, '>/var/ofw/certs/serial')) {
         print FILE '01';
         close FILE;
     }
-    if (open(FILE, '>/var/ipcop/certs/index.txt')) {
+    if (open(FILE, '>/var/ofw/certs/index.txt')) {
         print FILE '';
         close FILE;
     }
-    unlink('/var/ipcop/certs/index.txt.old');
-    unlink('/var/ipcop/certs/serial.old');
-    unlink('/var/ipcop/certs/01.pem');
+    unlink('/var/ofw/certs/index.txt.old');
+    unlink('/var/ofw/certs/serial.old');
+    unlink('/var/ofw/certs/01.pem');
 
-    if (open(FILE, '>/var/ipcop/openvpn/certs/serial')) {
+    if (open(FILE, '>/var/ofw/openvpn/certs/serial')) {
         print FILE '01';
         close FILE;
     }
-    if (open(FILE, '>/var/ipcop/openvpn/certs/index.txt')) {
+    if (open(FILE, '>/var/ofw/openvpn/certs/index.txt')) {
         print FILE '';
         close FILE;
     }
-    unlink('/var/ipcop/openvpn/certs/index.txt.old');
-    unlink('/var/ipcop/openvpn/certs/serial.old');
-    unlink('/var/ipcop/openvpn/certs/01.pem');
+    unlink('/var/ofw/openvpn/certs/index.txt.old');
+    unlink('/var/ofw/openvpn/certs/serial.old');
+    unlink('/var/ofw/openvpn/certs/01.pem');
 }
 
 sub newcleanssldatabase {
-    if (! -s '/var/ipcop/certs/serial' ) {
-        open(FILE, '>/var/ipcop/certs/serial');
+    if (! -s '/var/ofw/certs/serial' ) {
+        open(FILE, '>/var/ofw/certs/serial');
         print FILE '01';
         close FILE;
     }
-    if (! -s '>/var/ipcop/certs/index.txt') {
-        system('touch /var/ipcop/certs/index.txt');
+    if (! -s '>/var/ofw/certs/index.txt') {
+        system('touch /var/ofw/certs/index.txt');
     }
-    unlink('/var/ipcop/certs/index.txt.old');
-    unlink('/var/ipcop/certs/serial.old');
+    unlink('/var/ofw/certs/index.txt.old');
+    unlink('/var/ofw/certs/serial.old');
 
-    if (! -s '/var/ipcop/openvpn/certs/serial' ) {
-        open(FILE, '>/var/ipcop/openvpn/certs/serial');
+    if (! -s '/var/ofw/openvpn/certs/serial' ) {
+        open(FILE, '>/var/ofw/openvpn/certs/serial');
         print FILE '01';
         close FILE;
     }
-    if (! -s '>/var/ipcop/openvpn/certs/index.txt') {
-        system('touch /var/ipcop/openvpn/certs/index.txt');
+    if (! -s '>/var/ofw/openvpn/certs/index.txt') {
+        system('touch /var/ofw/openvpn/certs/index.txt');
     }
-    unlink('/var/ipcop/openvpn/certs/index.txt.old');
-    unlink('/var/ipcop/openvpn/certs/serial.old');
+    unlink('/var/ofw/openvpn/certs/index.txt.old');
+    unlink('/var/ofw/openvpn/certs/serial.old');
 }
 
 ###
@@ -142,7 +142,7 @@ sub ipsecenabled {
     }
     else {
         my %vpnsettings = ();
-        &General::readhash("/var/ipcop/ipsec/settings", \%vpnsettings);
+        &General::readhash("/var/ofw/ipsec/settings", \%vpnsettings);
         return (($vpnsettings{'ENABLED_RED_1'} eq 'on') || ($vpnsettings{'ENABLED_BLUE_1'} eq 'on'));
     }
 }
@@ -163,12 +163,12 @@ sub writeipsecfiles {
     # klips or netkey
     my $protostack = (system('/sbin/modinfo ipsec 2>/dev/null')) ? 'netkey' : 'klips';
 
-    &General::readhasharray("/var/ipcop/ipsec/config", \%lconfighash);
-    &General::readhash("/var/ipcop/ipsec/settings", \%lvpnsettings);
-    &General::readhash("/var/ipcop/ethernet/settings", \%netsettings);
+    &General::readhasharray("/var/ofw/ipsec/config", \%lconfighash);
+    &General::readhash("/var/ofw/ipsec/settings", \%lvpnsettings);
+    &General::readhash("/var/ofw/ethernet/settings", \%netsettings);
 
-    open(CONF,    ">/var/ipcop/ipsec/ipsec.conf") or die "Unable to open /var/ipcop/ipsec/ipsec.conf: $!";
-    open(SECRETS, ">/var/ipcop/ipsec/ipsec.secrets") or die "Unable to open /var/ipcop/ipsec/ipsec.secrets: $!";
+    open(CONF,    ">/var/ofw/ipsec/ipsec.conf") or die "Unable to open /var/ofw/ipsec/ipsec.conf: $!";
+    open(SECRETS, ">/var/ofw/ipsec/ipsec.secrets") or die "Unable to open /var/ofw/ipsec/ipsec.secrets: $!";
     flock CONF, 2;
     flock SECRETS, 2;
     print CONF <<END
@@ -230,8 +230,8 @@ END
     print CONF "\tleftupdown=/usr/local/bin/ipsecupdown.sh\n" if ($protostack eq 'netkey');
     print CONF "\n";
 
-    if (-f "/var/ipcop/certs/hostkey.pem") {
-        print SECRETS ": RSA /var/ipcop/certs/hostkey.pem\n"
+    if (-f "/var/ofw/certs/hostkey.pem") {
+        print SECRETS ": RSA /var/ofw/certs/hostkey.pem\n"
     }
     my $last_secrets = ''; # old the less specifics connections
 
@@ -276,8 +276,8 @@ END
 
         # Local Cert and Remote Cert (unless auth is DN dn-auth)
         if ($lconfighash{$key}[4] eq 'cert') {
-            print CONF "\tleftcert=/var/ipcop/certs/hostcert.pem\n";
-            print CONF "\trightcert=/var/ipcop/certs/$lconfighash{$key}[1]cert.pem\n" if ($lconfighash{$key}[2] ne '%auth-dn');
+            print CONF "\tleftcert=/var/ofw/certs/hostcert.pem\n";
+            print CONF "\trightcert=/var/ofw/certs/$lconfighash{$key}[1]cert.pem\n" if ($lconfighash{$key}[2] ne '%auth-dn');
         }
 
         # Local and Remote IDs
@@ -383,9 +383,9 @@ END
 
 sub writeovpnradiusconf {
     my %radiussettings = ();
-    &General::readhash('/var/ipcop/openvpn/settings', \%radiussettings);
+    &General::readhash('/var/ofw/openvpn/settings', \%radiussettings);
 
-    open(CONF, ">/var/ipcop/openvpn/radiusplugin.cnf") or die "Unable to open /var/ipcop/openvpn/radiusplugin.cnf: $!";
+    open(CONF, ">/var/ofw/openvpn/radiusplugin.cnf") or die "Unable to open /var/ofw/openvpn/radiusplugin.cnf: $!";
     flock CONF, 2;
     print CONF "NAS-Identifier=OpenVPN\n";
     print CONF "\n";
@@ -397,7 +397,7 @@ sub writeovpnradiusconf {
     print CONF "\n";
     print CONF "NAS-IP-Address=$netsettings{'GREEN_1_ADDRESS'}\n";
     print CONF "\n";
-    print CONF "OpenVPNConfig=/var/ipcop/openvpn/server.conf\n";
+    print CONF "OpenVPNConfig=/var/ofw/openvpn/server.conf\n";
     print CONF "\n";
     print CONF "overwriteccfiles=false\n";
     print CONF "\n";
@@ -420,13 +420,13 @@ sub writeovpnradiusconf {
 ###
 sub writeovpnserverconf {
     my %sovpnsettings = ();
-    &General::readhash('/var/ipcop/openvpn/settings', \%sovpnsettings);
+    &General::readhash('/var/ofw/openvpn/settings', \%sovpnsettings);
 
-    open(CONF, ">/var/ipcop/openvpn/server.conf") or die "Unable to open /var/ipcop/openvpn/server.conf: $!";
+    open(CONF, ">/var/ofw/openvpn/server.conf") or die "Unable to open /var/ofw/openvpn/server.conf: $!";
     flock CONF, 2;
     print CONF <<END
 # OpenVPN server configuration
-# Do not modify '/var/ipcop/openvpn/server.conf' directly since any changes
+# Do not modify '/var/ofw/openvpn/server.conf' directly since any changes
 # you make will be overwritten whenever you resave openvpn settings using the
 # web interface!
 
@@ -437,15 +437,15 @@ $sovpnsettings{'DDEVICE'}-mtu $sovpnsettings{'DMTU'}
 proto $sovpnsettings{'DPROTOCOL'}
 port $sovpnsettings{'DDEST_PORT'}
 tls-server
-ca /var/ipcop/ca/cacert.pem
-cert /var/ipcop/certs/hostcert.pem
-key /var/ipcop/certs/hostkey.pem
-dh /var/ipcop/private/dh1024.pem
+ca /var/ofw/ca/cacert.pem
+cert /var/ofw/certs/hostcert.pem
+key /var/ofw/certs/hostkey.pem
+dh /var/ofw/private/dh1024.pem
 script-security 2
 END
     ;
     if ($sovpnsettings{RADIUS_ENABLED} eq 'on') {
-        print CONF "plugin /usr/lib/radiusplugin.so /var/ipcop/openvpn/radiusplugin.cnf\n";
+        print CONF "plugin /usr/lib/radiusplugin.so /var/ofw/openvpn/radiusplugin.cnf\n";
     }
     # Make sure server IP settings are written as: server 10.0.10.0 255.255.255.0
     my $tmpnetaddr = NetAddr::IP->new($sovpnsettings{'DOVPN_SUBNET'});
@@ -466,7 +466,7 @@ END
         print CONF "keepalive $sovpnsettings{'KEEPALIVE_1'} $sovpnsettings{'KEEPALIVE_2'}\n";
     }
     if ($sovpnsettings{'STATICIP'} eq 'on') {
-        print CONF "client-config-dir /var/ipcop/openvpn/ccd\n";
+        print CONF "client-config-dir /var/ofw/openvpn/ccd\n";
         print CONF "ccd-exclusive\n";
     }
     print CONF "client-connect /usr/local/bin/openvpn.sh\n";
@@ -509,7 +509,7 @@ END
         print CONF "max-clients $sovpnsettings{MAX_CLIENTS}\n";
     }
     print CONF "tls-verify /usr/local/bin/openvpnverify\n";
-    print CONF "crl-verify /var/ipcop/crls/cacrl.pem\n";
+    print CONF "crl-verify /var/ofw/crls/cacrl.pem\n";
     print CONF "user nobody\n";
     print CONF "group nobody\n";
     print CONF "persist-key\n";

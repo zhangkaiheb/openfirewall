@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall.
 # (c) Gilles Espinasse
 #
 # something too easy to run would not be good on installed machine
