@@ -1,4 +1,4 @@
-# This is the ipcop (CGI) language file with english text which are not yet inserted into the language
+# This is the openfirewall (CGI) language file with english text which are not yet inserted into the language
 # database.
 # Developers can insert new language texts here to have them on the ISO for testing until someone adds
 # them to the database. If you add a language text to the database, please delete it here to avoid confusion.
@@ -43,7 +43,7 @@
 #'interfaces settings txt' => 'Interfaces settings',
 #'invalid iface color' => 'Invalid interface color',
 #'invalid src port' => 'Invalid Source port',
-#'ipcop access only from green and blue' => 'IPCop access is only allowed from Green and Blue!',
+#'openfirewall access only from green and blue' => 'Openfirewall access is only allowed from Green and Blue!',
 #'new rule' => 'New Rule',
 # 'notes' => 'Notes',
 # 'ntp after boot' => 'Synchronize Time after Boot',
@@ -105,8 +105,8 @@
 #'OpenVPN' => 'OpenVPN',
 #'o-yes' => 'Activ',
 #'o-no' => 'Inactiv',
-#'error external access' => 'Could not open /var/ipcop/xtaccess/config (external acccess could not be granted)!',
-#'error config' => 'Could not open /var/ipcop/ovpn/config/ZERINA.ovpn !',
+#'error external access' => 'Could not open /var/openfirewall/xtaccess/config (external acccess could not be granted)!',
+#'error config' => 'Could not open /var/openfirewall/ovpn/config/ZERINA.ovpn !',
 #'hint' => 'Hint:',
 #'debugme' => 'Not yet implemented',
 #'Act as' => 'Act as:',

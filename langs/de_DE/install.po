@@ -1,24 +1,24 @@
 # German (de) Data File 
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # (c) 2003-2014 Dirk Loss, Ludwig Steininger, Michael Knappe, Michael Linke,
 # Richard Hartmann, Ufuk Altinkaynak, Gerhard Abrahams, Benjamin Kohberg,
 # Samuel Wiktor, Tom Eichstaedt  
@@ -261,7 +261,7 @@ msgstr "Keine Festplatte gefunden."
 msgid "TR_NO_HARDDISK_MODPROBE"
 msgstr "Keine Festplatte oder Medium gefunden. Sie können jetzt die Erkennung neu starten, einen Modulnamen für 'modprobe' eingeben oder die Installation abbrechen."
 msgid "TR_NO_MAIN_SETTINGS_IN_BACKUP"
-msgstr "Keine /var/ipcop/main/settings in diese Datensicherung gefunden."
+msgstr "Keine /var/openfirewall/main/settings in diese Datensicherung gefunden."
 msgid "TR_NO_RED_INTERFACE"
 msgstr "Keine ROTE Schnittstelle zugewiesen."
 msgid "TR_NO_RED_INTERFACE_RESET_TYPE"
@@ -327,7 +327,7 @@ msgstr "Auswahlmenu"
 msgid "TR_SELECT"
 msgstr "Auswählen"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "Wählen Sie das Medium auf welchem IPCop installiert wird. Die Installationsroutine wird das Medium partitionieren und Dateisysteme installieren. ALLE Daten auf dem Medium werden hierbei gelöscht!"
+msgstr "Wählen Sie das Medium auf welchem Openfirewall installiert wird. Die Installationsroutine wird das Medium partitionieren und Dateisysteme installieren. ALLE Daten auf dem Medium werden hierbei gelöscht!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s kann von verschiedenen Programmquellen installiert werden.  Am einfachsten ist, Sie benutzen das eingebaute CD-ROM-Laufwerk. Falls der Computer kein CD-ROM-Laufwerk besitzt, können Sie von einem anderen Rechner im LAN installieren, der die Installationsdateien per HTTP oder FTP zur Verfügung stellt. In diesem Fall benötigen Sie zusätzlich die Treiberdiskette."
 msgid "TR_SELECT_NETWORK_DRIVER"

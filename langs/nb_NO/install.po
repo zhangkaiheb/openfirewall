@@ -1,24 +1,24 @@
 # Norwegian (no) Data File 
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # (c) 2003 Morten Grendal, Alexander Dawson, Mounir S. Chermiti, 
 # Runar Skraastad, Alf-Ivar Holm
 # 
@@ -124,7 +124,7 @@ msgstr "Skriv inn %s 'admin'-passord. Denne brukeren benyttes ved innlogging på
 msgid "TR_ENTER_BACKUP_PASSWORD"
 msgstr "Skriv inn 'backup'-passordet for sikker eksport av sikkerhetskopinøkkelen."
 msgid "TR_ENTER_DIAL_PASSWORD"
-msgstr "Enter the 'dial' user password. This user can use the Connect and Disconnect buttons on the IPCop Home web page."
+msgstr "Enter the 'dial' user password. This user can use the Connect and Disconnect buttons on the Openfirewall Home web page."
 msgid "TR_ENTER_DOMAINNAME"
 msgstr "Skriv inn domenenavn"
 msgid "TR_ENTER_HOSTNAME"
@@ -262,7 +262,7 @@ msgstr "Ingen harddisk funnet."
 msgid "TR_NO_HARDDISK_MODPROBE"
 msgstr "No hard disk found. You can now either Rescan drives, enter a modulename for manual Modprobe or Cancel installation."
 msgid "TR_NO_MAIN_SETTINGS_IN_BACKUP"
-msgstr "Fant ikke /var/ipcop/main/settings i backup"
+msgstr "Fant ikke /var/openfirewall/main/settings i backup"
 msgid "TR_NO_RED_INTERFACE"
 msgstr "RØDT grensesnitt ikke tildelt."
 msgid "TR_NO_RED_INTERFACE_RESET_TYPE"
@@ -328,7 +328,7 @@ msgstr "Seksjonsmeny"
 msgid "TR_SELECT"
 msgstr "Velg"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "Select the disk on which to install IPCop. The installation program will then partition the disk, put filesystems and files onto it. This means losing ALL information on the disk!"
+msgstr "Select the disk on which to install Openfirewall. The installation program will then partition the disk, put filesystems and files onto it. This means losing ALL information on the disk!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s kan installeres fra flere kilder. Det enkleste er å bruke maskinens CDROM-spiller. Hvis maskinen ikke har CDROM-spiller, kan du installere fra en annen maskin på nettverket som har installasjonsfilene tilgjengelig via HTTP. I så fall behøves disketten med nettverksdrivere."
 msgid "TR_SELECT_NETWORK_DRIVER"

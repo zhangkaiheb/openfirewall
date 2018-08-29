@@ -1,18 +1,18 @@
 # Dutch (nl) Data File 
 #
-# Dit bestand is een deel van de IPCop Firewall
+# Dit bestand is een deel van de Openfirewall Firewall
 # 
-# IPCop is vrije software; het staat u vrij het de her-distribueren of
+# Openfirewall is vrije software; het staat u vrij het de her-distribueren of
 # aan te passen onder de voorwaarden van de GNU General Public License
 # zoals deze gepubliceerd is door de Free Software Foundation; of
 # versie 2 van deze licentie, of (naar uw keuze) een latere versie.
 # 
-# IPCop wordt gedistribueerd in de hoop dat het nuttig is, maar
+# Openfirewall wordt gedistribueerd in de hoop dat het nuttig is, maar
 # ZONDER ENIGE GARANTIE; zonder zelfs een impliciete garantie door
 # WEDERVERKOOPBAARHEID of geschikbaarheid voor een bepaalde
 # toepassing. Zie de GNU General Public License voor meer details.
 # 
-# U zou een kopie van de GNU General Public License bij IPCop
+# U zou een kopie van de GNU General Public License bij Openfirewall
 # ontvangen moeten hebben. Mocht dit niet het geval zijn, schrijf
 # een brief naar:
 # 
@@ -22,9 +22,9 @@
 # Boston
 # MA 02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # (c) 2003-2014 Gerard Zwart, Berdt van der Lingen, Tony Vroon, Mark Wormgoor
 # (c) 2005 Jacques Hylkema, Maikel Punie
 # (c) 2010 Bjorn Kaag 
@@ -129,7 +129,7 @@ msgstr "Geef %s 'admin' wachtwoord op. Dit is de gebruiker die kan inloggen via 
 msgid "TR_ENTER_BACKUP_PASSWORD"
 msgstr "Geef het 'backup' wachtwoord om de backup sleutel veilig te kunnen exporteren."
 msgid "TR_ENTER_DIAL_PASSWORD"
-msgstr "Voer het 'inbel' wachtwoord in. Deze gebruiker kan de Verbind en Verbreek knoppen op de IPCop hoofdpagina gebruiken."
+msgstr "Voer het 'inbel' wachtwoord in. Deze gebruiker kan de Verbind en Verbreek knoppen op de Openfirewall hoofdpagina gebruiken."
 msgid "TR_ENTER_DOMAINNAME"
 msgstr "Geef domein naam op"
 msgid "TR_ENTER_HOSTNAME"
@@ -267,7 +267,7 @@ msgstr "Geen opslag gevonden."
 msgid "TR_NO_HARDDISK_MODPROBE"
 msgstr "Geen opslag gevonden. U kunt nu hetzij de opslag opnieuw scannen, een modulenaam opgeven voor manuele 'modprobe', danwel de installatie Annuleren."
 msgid "TR_NO_MAIN_SETTINGS_IN_BACKUP"
-msgstr "Geen /var/ipcop/main/settings bestand gevonden in de backup"
+msgstr "Geen /var/openfirewall/main/settings bestand gevonden in de backup"
 msgid "TR_NO_RED_INTERFACE"
 msgstr "Er is geen RODE interface toegekend."
 msgid "TR_NO_RED_INTERFACE_RESET_TYPE"
@@ -333,7 +333,7 @@ msgstr "Sectie menu"
 msgid "TR_SELECT"
 msgstr "Selecteer"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "Selecteer de disk waarop IPCop wordt geinstalleerd. Het installatieprogramma partitioneert de disk en zet de bestandssystemen en bestanden erop. Dit betekent dat ALLE huidige informatie op de disk verloren zal gaan!"
+msgstr "Selecteer de disk waarop Openfirewall wordt geinstalleerd. Het installatieprogramma partitioneert de disk en zet de bestandssystemen en bestanden erop. Dit betekent dat ALLE huidige informatie op de disk verloren zal gaan!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s kan vanaf meerdere bronnen geinstalleerd worden.  Het simpelste is om gebruik te maken van de cdrom. Als de computer geen cdrom speler heeft kunt u installeren via een andere computer op het netwerk die de bestanden ter beschikking stelt via HTTP. In dit geval zult u de 'netwerk driver diskette' nodig hebben."
 msgid "TR_SELECT_NETWORK_DRIVER"

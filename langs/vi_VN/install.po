@@ -1,24 +1,24 @@
 # Vietnamese  (vi) Data File 
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # (c) 2004 Le Dinh Long 
 #
 msgid ""
@@ -121,7 +121,7 @@ msgstr "Nhập mật khẩu quản trị %s. Nó sẽ được dùng để user 
 msgid "TR_ENTER_BACKUP_PASSWORD"
 msgstr "Nhập mật khẩu 'dự phòng' dùng để xuất ra một cách an toàn khóa sao lưu. "
 msgid "TR_ENTER_DIAL_PASSWORD"
-msgstr "Enter the 'dial' user password. This user can use the Connect and Disconnect buttons on the IPCop Home web page."
+msgstr "Enter the 'dial' user password. This user can use the Connect and Disconnect buttons on the Openfirewall Home web page."
 msgid "TR_ENTER_DOMAINNAME"
 msgstr "Nhập Tên miền"
 msgid "TR_ENTER_HOSTNAME"
@@ -259,7 +259,7 @@ msgstr "Không tìm thấy đĩa cứng."
 msgid "TR_NO_HARDDISK_MODPROBE"
 msgstr "No hard disk found. You can now either Rescan drives, enter a modulename for manual Modprobe or Cancel installation."
 msgid "TR_NO_MAIN_SETTINGS_IN_BACKUP"
-msgstr "Không tìm thấy /var/ipcop/main/settings trong bản sao lưu."
+msgstr "Không tìm thấy /var/openfirewall/main/settings trong bản sao lưu."
 msgid "TR_NO_RED_INTERFACE"
 msgstr "Chưa chỉ định giao tiếp RED."
 msgid "TR_NO_RED_INTERFACE_RESET_TYPE"
@@ -325,7 +325,7 @@ msgstr "Phần menu "
 msgid "TR_SELECT"
 msgstr "Chọn"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "Select the disk on which to install IPCop. The installation program will then partition the disk, put filesystems and files onto it. This means losing ALL information on the disk!"
+msgstr "Select the disk on which to install Openfirewall. The installation program will then partition the disk, put filesystems and files onto it. This means losing ALL information on the disk!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s có thể được cài đặt từ nhiều nguồn. Cách đơn giản nhất là dùng máy tính có ổ CDROM. Nếu máy tính không có ổ CDROM, bạn có thể cài thông qua một máy khác trong mạng LAN có chứa các file cài đặt qua HTTP. Trong trường hợp này cần phải có đĩa mềm chứa driver mạng."
 msgid "TR_SELECT_NETWORK_DRIVER"

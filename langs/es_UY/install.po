@@ -1,24 +1,24 @@
 # Latino-American Span (la) Data File 
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # (c) 2003, 2010 Fernando D. Diaz Bottaro
 # (c) 2013 Marcelo Zunino 
 #
@@ -122,7 +122,7 @@ msgstr "Ingrese la contraseña para 'admin' de %s. Este es el usuario que se usa
 msgid "TR_ENTER_BACKUP_PASSWORD"
 msgstr "Ingrese la contraseña de 'backup' usada para exportar en forma segura la clave del backup."
 msgid "TR_ENTER_DIAL_PASSWORD"
-msgstr "Ingrese la contrasña del usuario 'dial'. Este usuario puede usar los botones Conectar y Desconectar en la página de Inicio de IPCop."
+msgstr "Ingrese la contrasña del usuario 'dial'. Este usuario puede usar los botones Conectar y Desconectar en la página de Inicio de Openfirewall."
 msgid "TR_ENTER_DOMAINNAME"
 msgstr "Ingrese Nombre de Dominio"
 msgid "TR_ENTER_HOSTNAME"
@@ -260,7 +260,7 @@ msgstr "No se ha encontrado Disco Duro."
 msgid "TR_NO_HARDDISK_MODPROBE"
 msgstr "No se encontró disco duro. Puede Re-escanear las unidades, ingresar un nombre de módulo para un Modprobe manual o Cancelar la instalación."
 msgid "TR_NO_MAIN_SETTINGS_IN_BACKUP"
-msgstr "No se encontró /var/ipcop/main/settings en el backup."
+msgstr "No se encontró /var/openfirewall/main/settings en el backup."
 msgid "TR_NO_RED_INTERFACE"
 msgstr "No hay ninguna interface ROJA asignada."
 msgid "TR_NO_RED_INTERFACE_RESET_TYPE"
@@ -326,7 +326,7 @@ msgstr "Sección menú"
 msgid "TR_SELECT"
 msgstr "Seleccionar"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "Seleccione el disco en el cual se instalará IPCop. El programa de instalación particionará el disco, creará el sistema de archivos y copiará los archivos en él. Esto significa que perderá TODA la información del mismo!"
+msgstr "Seleccione el disco en el cual se instalará Openfirewall. El programa de instalación particionará el disco, creará el sistema de archivos y copiará los archivos en él. Esto significa que perderá TODA la información del mismo!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s puede ser instalado desde diferentes medios. Lo más fácil es instalarlo desde la unidad de CDROM. Si la computadora carece de una, puede hacer la instalación desde otra máquina en la LAN que tenga los archivos de instalación disponibles via HTTP o FTP. En este caso deberá preparar disquetes para acceder a la red. "
 msgid "TR_SELECT_NETWORK_DRIVER"

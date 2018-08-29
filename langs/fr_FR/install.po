@@ -1,24 +1,24 @@
 # French (fr) Data File 
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # (c) 2003 Bertrand Sarthre, Michel Janssens, Erwann Simon, Patrick Bernaud,
 # Marc Faid'herbe, Eric Legigan, Eric Berthomier, Stèphane Le Bourdon,
 # Stèphane Thirion, Jan M. Dziewulski, spoutnik, Eric Darriak, Eric Boniface,
@@ -66,7 +66,7 @@ msgstr "Etes vous sûr de vouloir continuer et perdre TOUTES les informations su
 msgid "TR_CONGRATULATIONS"
 msgstr "Félicitations!"
 msgid "TR_CONGRATULATIONS_LONG"
-msgstr "%s a été installé avec succès. Veuillez retirer toute disquette ou CD-ROM de l'ordinateur. L'utilitaire de configuration va maintenant s'exécuter et vous permettre de configurer les cartes réseaux, le RNIS et les mots de passe système. Une fois la configuration terminée, vous pourrez utiliser votre navigateur sur https://192.168.1.1:8443 ou https://%s:8443 (ou tout autre nom que vous aurez donné à votre IPCop), et configurer la connexion via modem (si requise) et l'accès externe. Pensez à donner un mot de passe à l'utilisateur 'dial' %s, si vous voulez que des utilisateurs non 'admin' de %s puissent contrôler la connexion."
+msgstr "%s a été installé avec succès. Veuillez retirer toute disquette ou CD-ROM de l'ordinateur. L'utilitaire de configuration va maintenant s'exécuter et vous permettre de configurer les cartes réseaux, le RNIS et les mots de passe système. Une fois la configuration terminée, vous pourrez utiliser votre navigateur sur https://192.168.1.1:8443 ou https://%s:8443 (ou tout autre nom que vous aurez donné à votre Openfirewall), et configurer la connexion via modem (si requise) et l'accès externe. Pensez à donner un mot de passe à l'utilisateur 'dial' %s, si vous voulez que des utilisateurs non 'admin' de %s puissent contrôler la connexion."
 msgid "TR_CREATING_RAID"
 msgstr "Création du RAID..."
 msgid "TR_DATE"
@@ -126,7 +126,7 @@ msgstr "Entrez le mot de passe de l'utilisateur 'admin' de %s. C'est l'utilisate
 msgid "TR_ENTER_BACKUP_PASSWORD"
 msgstr "Entrer le mot de passe de protection de la clé de cryptage des sauvegardes."
 msgid "TR_ENTER_DIAL_PASSWORD"
-msgstr "Saisir le mot de passe pour l'utilisateur 'dial'. Cet utilisateur est autorisé à utiliser les boutons Connecter et Déconnecter sur la page d'accueil d'IPCop."
+msgstr "Saisir le mot de passe pour l'utilisateur 'dial'. Cet utilisateur est autorisé à utiliser les boutons Connecter et Déconnecter sur la page d'accueil d'Openfirewall."
 msgid "TR_ENTER_DOMAINNAME"
 msgstr "Entrez le nom de domaine"
 msgid "TR_ENTER_HOSTNAME"
@@ -330,7 +330,7 @@ msgstr "Menu Section "
 msgid "TR_SELECT"
 msgstr "Sélectionner"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "Sélectionner le disque sur lequel installer IPCop. Le programme d'installation procèdera au partitionnement du disque, créera les systèmes de fichiers et copiera les fichiers. Cela signifie la perte de TOUTES les données existant sur le disque!"
+msgstr "Sélectionner le disque sur lequel installer Openfirewall. Le programme d'installation procèdera au partitionnement du disque, créera les systèmes de fichiers et copiera les fichiers. Cela signifie la perte de TOUTES les données existant sur le disque!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s peut être installé depuis de multiples sources, le plus simple étant d'utiliser le CD-ROM fourni. Si l'ordinateur ne possède pas de lecteur de CD-ROM, vous devrez installer via une autre machine mettant à disposition les fichiers d'installation par HTTP. Dans ce cas, la disquette de pilotes réseaux sera requise."
 msgid "TR_SELECT_NETWORK_DRIVER"

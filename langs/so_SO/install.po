@@ -1,24 +1,24 @@
 # Somali  (so) Data File 
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # Copyright (c) 2004 Arnt Karlsen, Mohamed Musa Ali, Michael Spann
 #  
 #
@@ -122,7 +122,7 @@ msgstr "Gelii %s 'admin' password."
 msgid "TR_ENTER_BACKUP_PASSWORD"
 msgstr "Enter the 'backup' password used to safely export the backup key."
 msgid "TR_ENTER_DIAL_PASSWORD"
-msgstr "Enter the 'dial' user password. This user can use the Connect and Disconnect buttons on the IPCop Home web page."
+msgstr "Enter the 'dial' user password. This user can use the Connect and Disconnect buttons on the Openfirewall Home web page."
 msgid "TR_ENTER_DOMAINNAME"
 msgstr "Gelii domainmagac"
 msgid "TR_ENTER_HOSTNAME"
@@ -260,7 +260,7 @@ msgstr "Harddisk la ma helin shabakada dhexdeda."
 msgid "TR_NO_HARDDISK_MODPROBE"
 msgstr "No hard disk found. You can now either Rescan drives, enter a modulename for manual Modprobe or Cancel installation."
 msgid "TR_NO_MAIN_SETTINGS_IN_BACKUP"
-msgstr "No /var/ipcop/main/settings found in backup."
+msgstr "No /var/openfirewall/main/settings found in backup."
 msgid "TR_NO_RED_INTERFACE"
 msgstr "Ma jiro GUDUUD interface hawl gaar ah lagu qeybiyay."
 msgid "TR_NO_RED_INTERFACE_RESET_TYPE"
@@ -326,7 +326,7 @@ msgstr "Dooro liiska"
 msgid "TR_SELECT"
 msgstr "Dooro"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "Select the disk on which to install IPCop. The installation program will then partition the disk, put filesystems and files onto it. This means losing ALL information on the disk!"
+msgstr "Select the disk on which to install Openfirewall. The installation program will then partition the disk, put filesystems and files onto it. This means losing ALL information on the disk!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s waxa laga soxigankara meelo kaladuwaan .Ta uku sahlaan waa in aad isticmashid CDROM driverka kambuyuutarka.  Hadii u kambuyuutarku lahaayn drive ,waxa isticmaligartaa kambuyuutar klaee adoo adeegsanaya LAN taasi oo lee faylal HTTP.  Tani waxay ubahantahay diskette aqriyee."
 msgid "TR_SELECT_NETWORK_DRIVER"

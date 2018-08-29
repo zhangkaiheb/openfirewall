@@ -1,24 +1,24 @@
 # Turkish (tr) Data File 
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # (c) 2003 Ismail Murat Dilek
 # (c) 2010 Caglar Ulkuderner
 # (c) 2012 Ersan Yildirim 
@@ -123,7 +123,7 @@ msgstr "%s admin parolasını girin. Bu, %s web yönetimi sayfalarının kayıtl
 msgid "TR_ENTER_BACKUP_PASSWORD"
 msgstr "'backup' parolası girerek yedeklerinizi güvenle koruyabilirsiniz."
 msgid "TR_ENTER_DIAL_PASSWORD"
-msgstr "'dial' kullanıcı parolasını girin. Bu kullanıcı IPCop ana sayfasındaki Bağlan ve Bağlantıyı Kes düğmelerini kullanabilir."
+msgstr "'dial' kullanıcı parolasını girin. Bu kullanıcı Openfirewall ana sayfasındaki Bağlan ve Bağlantıyı Kes düğmelerini kullanabilir."
 msgid "TR_ENTER_DOMAINNAME"
 msgstr "Alan adı girin"
 msgid "TR_ENTER_HOSTNAME"
@@ -261,7 +261,7 @@ msgstr "Sabit disk bulunamadı."
 msgid "TR_NO_HARDDISK_MODPROBE"
 msgstr "Sabit disk bulunamadı. Aygıtları yeniden taratabilir, elle Modprobe işlemi yapmak için modül adı girin ya da yüklemeyi iptal edin."
 msgid "TR_NO_MAIN_SETTINGS_IN_BACKUP"
-msgstr "/var/ipcop/main/settings yedekte bulunamadı."
+msgstr "/var/openfirewall/main/settings yedekte bulunamadı."
 msgid "TR_NO_RED_INTERFACE"
 msgstr "KIRMIZI arabirim atanmamış."
 msgid "TR_NO_RED_INTERFACE_RESET_TYPE"
@@ -327,7 +327,7 @@ msgstr "Bölüm listesi"
 msgid "TR_SELECT"
 msgstr "Seç"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "IPCop sisteminin yükleneceği diski seçin. Yükleme programı daha sonra diski yapılandıracak, dosya sistemlerini ve dosyaları yerleştirecek. Bu disk üzerindeki TÜM bilgiyi kaybedeceğiniz anlamına gelir!"
+msgstr "Openfirewall sisteminin yükleneceği diski seçin. Yükleme programı daha sonra diski yapılandıracak, dosya sistemlerini ve dosyaları yerleştirecek. Bu disk üzerindeki TÜM bilgiyi kaybedeceğiniz anlamına gelir!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s çoklu kaynaktan kurulabilir. En basit olanı makinenin cdrom sürücüsünü kullanmaktır. Eğer bilgisayarın sürücüsü yoksa, yerel ağ üzerinde HTTP ile dosya alabileceğiniz bir bilgisayar mevcut ise onun üzerinden de kurulum yapabilirsiniz. Bu durumda ağ sürücü disketi gerekecektir."
 msgid "TR_SELECT_NETWORK_DRIVER"

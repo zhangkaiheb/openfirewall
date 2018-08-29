@@ -1,24 +1,24 @@
 # Chinese Traditional (zt) Data File 
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # (c) 2005 Ronald Ng 
 #
 msgid ""
@@ -121,7 +121,7 @@ msgstr "輸入%s管理員密碼，用於進入%s 的web管理頁面"
 msgid "TR_ENTER_BACKUP_PASSWORD"
 msgstr "Enter the 'backup' password used to safely export the backup key."
 msgid "TR_ENTER_DIAL_PASSWORD"
-msgstr "Enter the 'dial' user password. This user can use the Connect and Disconnect buttons on the IPCop Home web page."
+msgstr "Enter the 'dial' user password. This user can use the Connect and Disconnect buttons on the Openfirewall Home web page."
 msgid "TR_ENTER_DOMAINNAME"
 msgstr "輸入域名"
 msgid "TR_ENTER_HOSTNAME"
@@ -259,7 +259,7 @@ msgstr "沒有找到硬碟"
 msgid "TR_NO_HARDDISK_MODPROBE"
 msgstr "No hard disk found. You can now either Rescan drives, enter a modulename for manual Modprobe or Cancel installation."
 msgid "TR_NO_MAIN_SETTINGS_IN_BACKUP"
-msgstr "No /var/ipcop/main/settings found in backup."
+msgstr "No /var/openfirewall/main/settings found in backup."
 msgid "TR_NO_RED_INTERFACE"
 msgstr "紅色接口未分配"
 msgid "TR_NO_RED_INTERFACE_RESET_TYPE"
@@ -325,7 +325,7 @@ msgstr "部分菜單"
 msgid "TR_SELECT"
 msgstr "選擇"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "Select the disk on which to install IPCop. The installation program will then partition the disk, put filesystems and files onto it. This means losing ALL information on the disk!"
+msgstr "Select the disk on which to install Openfirewall. The installation program will then partition the disk, put filesystems and files onto it. This means losing ALL information on the disk!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s可以通過多種途徑安裝，最簡單的是用光碟，如果你沒有光碟機可以通過網絡安裝"
 msgid "TR_SELECT_NETWORK_DRIVER"

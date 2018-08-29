@@ -1,24 +1,24 @@
 # Swedish (sv) Data File 
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # (c) 2003, 2010 Anders Johansson, Christer Jonson
 #  
 #
@@ -122,7 +122,7 @@ msgstr "Skriv in lösenordet för %s admin.  Det här är användaren som använ
 msgid "TR_ENTER_BACKUP_PASSWORD"
 msgstr "Ange 'backup'-lösenord som amvändes för att exportera backup-nyckeln."
 msgid "TR_ENTER_DIAL_PASSWORD"
-msgstr "Enter the 'dial' user password. This user can use the Connect and Disconnect buttons on the IPCop Home web page."
+msgstr "Enter the 'dial' user password. This user can use the Connect and Disconnect buttons on the Openfirewall Home web page."
 msgid "TR_ENTER_DOMAINNAME"
 msgstr "Ange domännamn"
 msgid "TR_ENTER_HOSTNAME"
@@ -260,7 +260,7 @@ msgstr "Ingen hårddisk funnen."
 msgid "TR_NO_HARDDISK_MODPROBE"
 msgstr "No hard disk found. You can now either Rescan drives, enter a modulename for manual Modprobe or Cancel installation."
 msgid "TR_NO_MAIN_SETTINGS_IN_BACKUP"
-msgstr "Filen /var/ipcop/main/settings saknas i backup"
+msgstr "Filen /var/openfirewall/main/settings saknas i backup"
 msgid "TR_NO_RED_INTERFACE"
 msgstr "Inget RÖTT gränssnitt är tilldelat."
 msgid "TR_NO_RED_INTERFACE_RESET_TYPE"
@@ -326,7 +326,7 @@ msgstr "Sektions menu"
 msgid "TR_SELECT"
 msgstr "Välj"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "Select the disk on which to install IPCop. The installation program will then partition the disk, put filesystems and files onto it. This means losing ALL information on the disk!"
+msgstr "Select the disk on which to install Openfirewall. The installation program will then partition the disk, put filesystems and files onto it. This means losing ALL information on the disk!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s kan installeras från olika källor.  Det är enklast att använda datorns CDROM läsare. Om datorn saknar en CDROM så kan du installera från en annan dator på nätverket som har installationsfilerna tillgängliga via HTTP. I så fall så kommer disketten med nätverksdrivrutiner att behövas."
 msgid "TR_SELECT_NETWORK_DRIVER"

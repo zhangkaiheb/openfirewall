@@ -1,24 +1,24 @@
 # Russian (ru) Data File 
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the Openfirewall Firewall.
 # 
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # 
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with IPCop; if not, write to the Free Software
+# along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# (c) The IPCop Team
+# (c) The Openfirewall Team
 # 
-# IPCop translation
+# Openfirewall translation
 # (c) 2004 Vladimir Grichina, Vitaly Tarasov, Rodion Kotelnikov
 # (c) 2010 Nikolay Parukhin 
 #
@@ -122,7 +122,7 @@ msgstr "Введите пароль пользователя %s 'admin'.  Это
 msgid "TR_ENTER_BACKUP_PASSWORD"
 msgstr "Введите пароль пользователя 'backup', используемый для безопасного экспорта ключа резервного копирования."
 msgid "TR_ENTER_DIAL_PASSWORD"
-msgstr "Введите пароль пользователя 'dial'. Этот пользователь может использовать кнопки Подключить и Отключить на домашней странице IPCop."
+msgstr "Введите пароль пользователя 'dial'. Этот пользователь может использовать кнопки Подключить и Отключить на домашней странице Openfirewall."
 msgid "TR_ENTER_DOMAINNAME"
 msgstr "Введите имя домена."
 msgid "TR_ENTER_HOSTNAME"
@@ -260,7 +260,7 @@ msgstr "Жесткий диск не обнаружен."
 msgid "TR_NO_HARDDISK_MODPROBE"
 msgstr "Не найден жесткий диск. Вы можете пересканировать диски, ввести название модуля для ручной Modprobe или отменить установку."
 msgid "TR_NO_MAIN_SETTINGS_IN_BACKUP"
-msgstr "В резервной копии не найдено /var/ipcop/main/settings."
+msgstr "В резервной копии не найдено /var/openfirewall/main/settings."
 msgid "TR_NO_RED_INTERFACE"
 msgstr "КРАСНЫЙ интерфейс не назначен."
 msgid "TR_NO_RED_INTERFACE_RESET_TYPE"
@@ -326,7 +326,7 @@ msgstr "Меню разделов"
 msgid "TR_SELECT"
 msgstr "Выберите"
 msgid "TR_SELECT_DEVICE_FOR_INSTALLATION"
-msgstr "Выберите диск для установки IPCop. Программа установки создаст разделы на диске, поместит файловые системы и файлы на него. Это означает потерю ВСЕЙ информации на диске!"
+msgstr "Выберите диск для установки Openfirewall. Программа установки создаст разделы на диске, поместит файловые системы и файлы на него. Это означает потерю ВСЕЙ информации на диске!"
 msgid "TR_SELECT_INSTALLATION_MEDIA_LONG"
 msgstr "%s может быть установлен из разных источников.  Самый простой способ - это использовать устройство чтения CDROM. Если компьютер не имеет CDROM, Вы можете установить систему через другой компьютер в сети, предоставляющий доступ к инсталляционным файлам по протоколу HTTP. Для этого Вам потребуется дискета с сетевыми драйверами"
 msgid "TR_SELECT_NETWORK_DRIVER"
