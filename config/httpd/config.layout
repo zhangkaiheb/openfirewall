@@ -13,14 +13,16 @@
 
 #   Openfirewall Apache path layout (Achim: modified example GNU Layout)
 <Layout Openfirewall>
-	prefix:        /home/httpd
+#	prefix:        /home/httpd
+	prefix:        /usr/local/apache
 	exec_prefix:   /usr
 	bindir:        ${exec_prefix}/bin
 	sbindir:       ${exec_prefix}/sbin
 	libdir:        ${exec_prefix}/lib
 	libexecdir:    ${exec_prefix}/libexec
 	mandir:        /usr/share/man
-	sysconfdir:    /etc/httpd/conf
+#	sysconfdir:    /etc/httpd/conf
+	sysconfdir:    /usr/local/apache/conf
 	datadir:       ${prefix}
 	installbuilddir: ${datadir}/build
 	errordir:      ${datadir}/error

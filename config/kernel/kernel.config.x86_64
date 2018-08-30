@@ -1241,7 +1241,12 @@ CONFIG_NF_TABLES_BRIDGE=m
 # CONFIG_IP_SCTP is not set
 # CONFIG_RDS is not set
 # CONFIG_TIPC is not set
-# CONFIG_ATM is not set
+CONFIG_ATM=m
+CONFIG_ATM_CLIP=m
+# CONFIG_ATM_CLIP_NO_ICMP is not set
+# CONFIG_ATM_LANE is not set
+CONFIG_ATM_BR2684=m
+# CONFIG_ATM_BR2684_IPFILTER is not set
 CONFIG_L2TP=m
 # CONFIG_L2TP_DEBUGFS is not set
 CONFIG_L2TP_V3=y
@@ -1274,6 +1279,7 @@ CONFIG_NET_SCHED=y
 # CONFIG_NET_SCH_CBQ is not set
 # CONFIG_NET_SCH_HTB is not set
 # CONFIG_NET_SCH_HFSC is not set
+# CONFIG_NET_SCH_ATM is not set
 # CONFIG_NET_SCH_PRIO is not set
 # CONFIG_NET_SCH_MULTIQ is not set
 # CONFIG_NET_SCH_RED is not set
@@ -1867,6 +1873,21 @@ CONFIG_TUN=m
 # CONFIG_VETH is not set
 # CONFIG_NLMON is not set
 # CONFIG_ARCNET is not set
+CONFIG_ATM_DRIVERS=y
+# CONFIG_ATM_DUMMY is not set
+# CONFIG_ATM_TCP is not set
+# CONFIG_ATM_LANAI is not set
+# CONFIG_ATM_ENI is not set
+# CONFIG_ATM_FIRESTREAM is not set
+# CONFIG_ATM_ZATM is not set
+# CONFIG_ATM_NICSTAR is not set
+# CONFIG_ATM_IDT77252 is not set
+# CONFIG_ATM_AMBASSADOR is not set
+# CONFIG_ATM_HORIZON is not set
+# CONFIG_ATM_IA is not set
+# CONFIG_ATM_FORE200E is not set
+# CONFIG_ATM_HE is not set
+# CONFIG_ATM_SOLOS is not set
 
 #
 # CAIF transport drivers
@@ -2079,8 +2100,20 @@ CONFIG_PHYLIB=y
 # CONFIG_TERANETICS_PHY is not set
 # CONFIG_VITESSE_PHY is not set
 # CONFIG_XILINX_GMII2RGMII is not set
-# CONFIG_PPP is not set
+CONFIG_PPP=y
+# CONFIG_PPP_BSDCOMP is not set
+# CONFIG_PPP_DEFLATE is not set
+# CONFIG_PPP_FILTER is not set
+# CONFIG_PPP_MPPE is not set
+# CONFIG_PPP_MULTILINK is not set
+CONFIG_PPPOATM=m
+CONFIG_PPPOE=m
+CONFIG_PPTP=m
+CONFIG_PPPOL2TP=m
+# CONFIG_PPP_ASYNC is not set
+# CONFIG_PPP_SYNC_TTY is not set
 # CONFIG_SLIP is not set
+CONFIG_SLHC=y
 # CONFIG_USB_NET_DRIVERS is not set
 CONFIG_WLAN=y
 CONFIG_WLAN_VENDOR_ADMTEK=y
@@ -3349,6 +3382,7 @@ CONFIG_USB_SERIAL=m
 # CONFIG_USB_HSIC_USB4604 is not set
 # CONFIG_USB_LINK_LAYER_TEST is not set
 # CONFIG_USB_CHAOSKEY is not set
+# CONFIG_USB_ATM is not set
 
 #
 # USB Physical Layer drivers

@@ -37,7 +37,7 @@
 #include "setuid.h"
 
 
-#define MOUNTPOINT "/home/httpd/html/backup"
+#define MOUNTPOINT "/usr/local/apache/html/backup"
 #define BACKUP_KEY "/var/ofw/backup/backup.key"
 
 

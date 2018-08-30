@@ -23,7 +23,7 @@ require '/usr/lib/ofw/header.pl';
 my %cgiparams=();
 my @cgigraphs=();
 my @graphs = ();
-my $graphdir = '/home/httpd/html/graphs';
+my $graphdir = '/usr/local/apache/html/graphs';
 
 &Header::showhttpheaders();
 

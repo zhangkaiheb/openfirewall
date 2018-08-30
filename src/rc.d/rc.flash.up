@@ -98,14 +98,14 @@ if [ ! -e /var/log/lastlog ]; then
     chmod 640 /var/log/lastlog
 fi
 
-if [ ! -L /home/httpd/html/graphs ]; then
-    rm -rf /home/httpd/html/graphs
-    ln -fs /ram/graphs /home/httpd/html/graphs
+if [ ! -L /usr/local/apache/html/graphs ]; then
+    rm -rf /usr/local/apache/html/graphs
+    ln -fs /ram/graphs /usr/local/apache/html/graphs
 fi
 
-if [ ! -L /home/httpd/html/sgraph ]; then
-    rm -rf /home/httpd/html/sgraph
-    ln -fs /ram/sgraph /home/httpd/html/sgraph
+if [ ! -L /usr/local/apache/html/sgraph ]; then
+    rm -rf /usr/local/apache/html/sgraph
+    ln -fs /ram/sgraph /usr/local/apache/html/sgraph
 fi
 
 mkdir -p /ram/var/lock

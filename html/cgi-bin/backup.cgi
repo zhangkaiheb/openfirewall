@@ -48,7 +48,7 @@ require '/usr/lib/ofw/header.pl';
 
 my $errormessage = '';
 my $warnmessage  = '';
-my $setdir       = '/home/httpd/html/backup';    # location where sets are stored and imported
+my $setdir       = '/usr/local/apache/html/backup';    # location where sets are stored and imported
 my $datafile     = hostname() . '.dat';          # file containing data backup after upload
 my $disabled     = '';                           # without key to disable many buttons
 my %settings     = ();
@@ -410,7 +410,7 @@ sub readfreespace() {
     #
     # or this:
     #   Filesystem           1M-blocks      Used Available Use% Mounted on
-    #   /dev/sda                  175M       11M      156M   7% /home/httpd/html/backup
+    #   /dev/sda                  175M       11M      156M   7% /usr/local/apache/html/backup
     #
     # find the correct line & cut it to pieces. We want the Available column.
     my $space = 0;

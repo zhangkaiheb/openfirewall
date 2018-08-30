@@ -47,7 +47,7 @@
 #               - Use a bigger /boot partition to allow easier kernel upgrade and support smp kernel
 #               - Define zlog_MB at 30MB for 512 and 1gb like with 256 flash
 # Copyright (C) 2007-07-23 Mario Zimmermann <zisoft@ipcop-forum.de>        
-#               - Moved directories /home/httpd/html/graphs and /home/httpd/html/sgraph to ramdisk
+#               - Moved directories /usr/local/apache/html/graphs and /usr/local/apache/html/sgraph to ramdisk
 #               - Moved directory /var/lock to ramdisk
 #               - Moved directory /var/spool to ramdisk
 #               - Start fcron with parameter -s 86400
@@ -413,9 +413,10 @@ ln -sf /dev/$CF'4' /mnt/flash/dev/harddisk4
 cp -a  /root /mnt/flash/
 rm -f  /mnt/flash/root/.bash_history
 cp -a  /etc  /mnt/flash/
-rm -rf /mnt/flash/etc/{httpd/conf/ssl*,makedev.d/}
+rm -rf /mnt/flash/etc/makedev.d/
+rm -rf /mnt/flash/usr/local/apache/conf/ssl*
 rm -f  /mnt/flash/etc/ssh/*key
-rm -f  /mnt/flash/etc/httpd/server.*
+rm -f  /mnt/flash/usr/local/apache/server.*
 cp -a  /home /mnt/flash/
 cp -a  /usr /mnt/flash
 rm -rf /mnt/flash/{tmp/,usr/tmp/,var/tmp/}
@@ -423,10 +424,10 @@ ln -sf /ram/tmp/ /mnt/flash/tmp
 ln -sf /ram/tmp/ /mnt/flash/usr/tmp
 ln -sf /ram/tmp/ /mnt/flash/var/tmp
 
-rm -rf /mnt/flash/home/httpd/html/graphs
-ln -sf /ram/graphs /mnt/flash/home/httpd/html/graphs
-rm -rf /mnt/flash/home/httpd/html/sgraph
-ln -sf /ram/sgraph /mnt/flash/home/httpd/html/sgraph
+rm -rf /mnt/flash/usr/local/apache/html/graphs
+ln -sf /ram/graphs /mnt/flash/usr/local/apache/html/graphs
+rm -rf /mnt/flash/usr/local/apache/html/sgraph
+ln -sf /ram/sgraph /mnt/flash/usr/local/apache/html/sgraph
 rm -rf /mnt/flash/var/lock
 ln -sf /ram/var/lock /mnt/flash/var/lock
 
@@ -466,12 +467,12 @@ touch /mnt/flash/etc/FLASH
 
 ############################################################################
 #                                                                          #
-# Configure apache to follow symlinks in /home/httpd/html                  #
+# Configure apache to follow symlinks in /usr/local/apache/html                  #
 #                                                                          #
 ############################################################################
-echo "`date '+%b %e %T'`: Reconfiguring /etc/httpd/conf/httpd.conf"
-if [ -z "`/bin/grep \"Options ExecCGI FollowSymlinks\" /mnt/flash/etc/httpd/conf/httpd.conf`" ]; then
-  sed -i -e s/"Options ExecCGI"/"Options ExecCGI FollowSymlinks"/1 /mnt/flash/etc/httpd/conf/httpd.conf
+echo "`date '+%b %e %T'`: Reconfiguring /usr/local/apache/conf/httpd.conf"
+if [ -z "`/bin/grep \"Options ExecCGI FollowSymlinks\" /mnt/flash/usr/local/apache/conf/httpd.conf`" ]; then
+  sed -i -e s/"Options ExecCGI"/"Options ExecCGI FollowSymlinks"/1 /mnt/flash/usr/local/apache/conf/httpd.conf
 fi
 
 

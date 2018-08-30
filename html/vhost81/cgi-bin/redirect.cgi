@@ -93,7 +93,7 @@ my $image = '';
 if ($filtersettings{'ENABLE_BG_IMAGE'} eq 'on') {
     $image = "background-image: url('http://$netsettings{'GREEN_1_ADDRESS'}:$http_port/images/";
 
-    if (-e "/home/httpd/html/images/custom-redirect-background.png") {
+    if (-e "/usr/local/apache/html/images/custom-redirect-background.png") {
          $image .= "custom-redirect-background.png";
     }
     else {

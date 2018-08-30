@@ -11,26 +11,26 @@ case "$1" in
     new)
         # set temporary random file
         export RANDFILE=/root/.rnd
-        if [ ! -f /etc/httpd/server.key ]; then
+        if [ ! -f /usr/local/apache/server.key ]; then
             echo "Generating https server key."
             /usr/bin/openssl genrsa -rand \
             /boot/vmlinuz:/var/ofw/ethernet/settings -out \
-            /etc/httpd/server.key 1024
+            /usr/local/apache/server.key 1024
         fi
         echo "Generating CSR"
         /bin/cat /etc/certparams | sed "s/HOSTNAME/$HOSTNAME/" | /usr/bin/openssl \
-            req -new -key /etc/httpd/server.key -out /etc/httpd/server.csr
+            req -new -key /usr/local/apache/server.key -out /usr/local/apache/server.csr
         echo "Signing certificate"
         /usr/bin/openssl x509 -req -days 999999 -in \
-            /etc/httpd/server.csr -signkey /etc/httpd/server.key -out \
-            /etc/httpd/server.crt
+            /usr/local/apache/server.csr -signkey /usr/local/apache/server.key -out \
+            /usr/local/apache/server.crt
         # unset and remove random file
         export -n RANDFILE
         rm -f /root/.rnd
         ;;
     read)
-        if [ -f /etc/httpd/server.key -a -f /etc/httpd/server.crt -a -f /etc/httpd/server.csr ]; then
-            ISSUER=`openssl x509 -in /etc/httpd/server.crt -text -noout | grep Issuer | /usr/bin/cut -f2 -d '='`
+        if [ -f /usr/local/apache/server.key -a -f /usr/local/apache/server.crt -a -f /usr/local/apache/server.csr ]; then
+            ISSUER=`openssl x509 -in /usr/local/apache/server.crt -text -noout | grep Issuer | /usr/bin/cut -f2 -d '='`
             if [ "$ISSUER" != "$HOSTNAME" ]; then
                 echo "Certificate issuer '$ISSUER' is not the same as the hostname'$HOSTNAME'"
                 echo "Probably host or domain name has been changed in setup"

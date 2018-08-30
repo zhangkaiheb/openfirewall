@@ -119,9 +119,6 @@ if ! /bin/mountpoint -q /proc; then
     test_ok
 fi
 
-# 
-/bin/mkdir -pv /run/lock
-
 # Start udev
 echo -ne "Starting udev ... "
 
@@ -161,6 +158,9 @@ rm -f /forcefsck
 
 # Remove the reboot required flagfile
 rm -f /rebootrequired
+
+# why i donot have this dir
+/bin/mkdir -pv /run/lock
 
 # Copy the udev rules generated before root was mounted read/write
 # Multiple rulefiles can exist, but we only care for 70-persistent-net
@@ -339,7 +339,7 @@ if [ ! -e /var/ofw/backup/backup.key ]; then
     test_ok
 fi
 # https certificate
-if [ -f /etc/httpd/server.key -a -f /etc/httpd/server.crt -a -f /etc/httpd/server.csr ]; then
+if [ -f /usr/local/apache/server.key -a -f /usr/local/apache/server.crt -a -f /usr/local/apache/server.csr ]; then
     /usr/local/bin/httpscert read
 else
     echo -ne "Generating new http server SSL certificate keys ... "

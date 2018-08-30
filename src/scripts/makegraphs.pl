@@ -46,7 +46,7 @@ if (${Lang::language} =~ /^(ar|bg|el|fa|gu|ja|ru|th|ur|vi|zh|zt)$/) {
 
 # Settings
 my $rrdlog = "/var/log/rrd";
-my $graphs = "/home/httpd/html/graphs";
+my $graphs = "/usr/local/apache/html/graphs";
 $ENV{PATH} = "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 # This from munin-graph which is: Copyright (C) 2002-2004 Jimmy Olsen, Audun Ytterdal

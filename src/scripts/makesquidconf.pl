@@ -206,7 +206,7 @@ sub writewrapper
 
 sub writepacfile
 {
-    open(FILE, ">/home/httpd/vhost81/html/proxy.pac");
+    open(FILE, ">/usr/local/apache/vhost81/html/proxy.pac");
     flock(FILE, 2);
     print FILE "function FindProxyForURL(url, host)\n{\n";
 

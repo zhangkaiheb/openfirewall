@@ -43,7 +43,7 @@
 
 
 #define EXCLUDE_HARDWARE "exclude.hardware"     // exclude file not used on backup but only optionally on restore
-#define MOUNTPOINT "/home/httpd/html/backup"
+#define MOUNTPOINT "/usr/local/apache/html/backup"
 #define BACKUP_KEY "/var/ofw/backup/backup.key"
 #define TMPLOGFILE "/tmp/logfile.XXXXXX"
 

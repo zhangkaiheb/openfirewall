@@ -59,33 +59,57 @@ md5 :
 $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(DIR_SRC)/html/cgi-bin/* $(DIR_SRC)/html/html/* $(DIR_SRC)/html/html/images/* $(DIR_SRC)/html/html/include/*
 	@$(PREBUILD)
 
-	mkdir -p /home/httpd
+####	mkdir -p /home/httpd
+	mkdir -p /usr/local/apache
 	# Copy all html/cgi-bin files
-	cp -aR $(DIR_SRC)/html/* /home/httpd
-	find /home/httpd -name .svn -print | xargs --no-run-if-empty rm -rf
+####	cp -aR $(DIR_SRC)/html/* /home/httpd
+####	find /home/httpd -name .svn -print | xargs --no-run-if-empty rm -rf
+	cp -aR $(DIR_SRC)/html/* /usr/local/apache/
+	find /usr/local/apache -name .svn -print | xargs --no-run-if-empty rm -rf
 
 	# Additional directories for RRD graphs and Squid graphs
-	mkdir -p /home/httpd/html/graphs
-	mkdir -p /home/httpd/html/sgraph
+####	mkdir -p /home/httpd/html/graphs
+####	mkdir -p /home/httpd/html/sgraph
+####
+####	chown -R root:root /home/httpd
+####	chmod -R 755 /home/httpd/cgi-bin
+####	chmod -R 644 /home/httpd/html
+####	chmod 755 /home/httpd/html /home/httpd/html/{index.cgi,graphs,images,include,sgraph}
 
-	chown -R root:root /home/httpd
-	chmod -R 755 /home/httpd/cgi-bin
-	chmod -R 644 /home/httpd/html
-	chmod 755 /home/httpd/html /home/httpd/html/{index.cgi,graphs,images,include,sgraph}
+	mkdir -p /usr/local/apache/html/graphs
+	mkdir -p /usr/local/apache/html/sgraph
+
+	chown -R root:root /usr/local/apache
+	chmod -R 755 /usr/local/apache/cgi-bin
+	chmod -R 644 /usr/local/apache/html
+	chmod 755 /usr/local/apache/html /usr/local/apache/html/{index.cgi,graphs,images,include,sgraph}
+
 
 	# backup directory needs nobody:nobody permissions
-	mkdir -p /home/httpd/html/backup
-	chown nobody:nobody /home/httpd/html/backup
-	chmod 744 /home/httpd/html/backup
+####	mkdir -p /home/httpd/html/backup
+####	chown nobody:nobody /home/httpd/html/backup
+####	chmod 744 /home/httpd/html/backup
 
+	mkdir -p /usr/local/apache/html/backup
+	chown nobody:nobody /usr/local/apache/html/backup
+	chmod 744 /usr/local/apache/html/backup
 	# repository directory for urlfilter
-	mkdir -p /home/httpd/vhost81/html/repository
+	mkdir -p /usr/local/apache/vhost81/html/repository
 
 	# vhost81 directories need nobody:nobody permissions
-	mkdir -p /home/httpd/vhost81/cgi-bin
-	chown -R nobody:nobody /home/httpd/vhost81/*
-	chmod -R 755 /home/httpd/vhost81/cgi-bin
-	chmod -R 644 /home/httpd/vhost81/html
-	chmod 755 /home/httpd/vhost81/html /home/httpd/vhost81/html/images /home/httpd/vhost81/html/repository
+####	mkdir -p /home/httpd/vhost81/cgi-bin
+####	chown -R nobody:nobody /home/httpd/vhost81/*
+####	chmod -R 755 /home/httpd/vhost81/cgi-bin
+####	chmod -R 644 /home/httpd/vhost81/html
+####	chmod 755 /home/httpd/vhost81/html /home/httpd/vhost81/html/images /home/httpd/vhost81/html/repository
+
+	mkdir -p /usr/local/apache/vhost81/cgi-bin
+	chown -R nobody:nobody /usr/local/apache/vhost81/*
+	chmod -R 755 /usr/local/apache/vhost81/cgi-bin
+	chmod -R 644 /usr/local/apache/vhost81/html
+	chmod 755 /usr/local/apache/vhost81/html
+	chmod 755 /usr/local/apache/vhost81/html/images
+	chmod 755 /usr/local/apache/vhost81/html/repository
+
 
 	@$(POSTBUILD)

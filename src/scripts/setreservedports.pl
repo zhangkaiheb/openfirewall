@@ -109,7 +109,7 @@ sub setgui()
     print "Change httpd configuration ... \n";
     system("/bin/sed", "-i", "-e", "s+^Listen .*\$+Listen $portgui+",
                 "-e", "s+^<VirtualHost _default_:.*\$+<VirtualHost _default_:$portgui>+",
-                "/etc/httpd/conf/portgui.conf");
+                "/usr/local/apache/conf/portgui.conf");
     # Not needed to start httpd during installation
     if (-e '/var/run/httpd.pid') {
         print 'Restarting httpd ... \n';

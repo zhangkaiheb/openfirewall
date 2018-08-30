@@ -72,9 +72,9 @@ rm test.full test.tail test.position
 # Test CGI addition
 touch /tmp/test.cgi
 addcgi /tmp/test.cgi
-ls -l /home/httpd/cgi-bin/test.cgi
+ls -l /usr/local/apache/cgi-bin/test.cgi
 
 # And removal
 removecgi test.cgi
-ls -l /home/httpd/cgi-bin/test.cgi
+ls -l /usr/local/apache/cgi-bin/test.cgi
 rm /tmp/test.cgi

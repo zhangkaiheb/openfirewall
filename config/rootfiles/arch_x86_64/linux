@@ -1312,6 +1312,11 @@ lib/modules/KVER/kernel/net/bridge
 lib/modules/KVER/kernel/net/bridge/netfilter
 lib/modules/KVER/kernel/net/bridge/netfilter/nf_tables_bridge.ko.gz
 lib/modules/KVER/kernel/net/bridge/br_netfilter.ko.gz
+lib/modules/KVER/kernel/net/atm
+lib/modules/KVER/kernel/net/atm/atm.ko.gz
+lib/modules/KVER/kernel/net/atm/br2684.ko.gz
+lib/modules/KVER/kernel/net/atm/clip.ko.gz
+lib/modules/KVER/kernel/net/atm/pppoatm.ko.gz
 lib/modules/KVER/kernel/net/ipv4
 lib/modules/KVER/kernel/net/ipv4/netfilter
 lib/modules/KVER/kernel/net/ipv4/netfilter/arptable_filter.ko.gz
@@ -1373,6 +1378,10 @@ lib/modules/KVER/kernel/drivers/net/mdio.ko.gz
 lib/modules/KVER/kernel/drivers/net/phy
 lib/modules/KVER/kernel/drivers/net/phy/mdio-thunder.ko.gz
 lib/modules/KVER/kernel/drivers/net/phy/mdio-cavium.ko.gz
+lib/modules/KVER/kernel/drivers/net/ppp
+lib/modules/KVER/kernel/drivers/net/ppp/pppox.ko.gz
+lib/modules/KVER/kernel/drivers/net/ppp/pptp.ko.gz
+lib/modules/KVER/kernel/drivers/net/ppp/pppoe.ko.gz
 lib/modules/KVER/kernel/drivers/net/ethernet
 lib/modules/KVER/kernel/drivers/net/ethernet/sis
 lib/modules/KVER/kernel/drivers/net/ethernet/sis/sis190.ko.gz

@@ -43,8 +43,8 @@
 #define TMP_RESTORE_PATH_CHROOT     "/tmp/restore"
 #define MOUNT_BACKUP_FULL           "/harddisk/mnt/usb"
 #define MOUNT_BACKUP_CHROOT         "/mnt/usb"
-#define DATFILE_FULL                "/harddisk/home/httpd/html/backup/ipcop-xxxx-xx-xx_xx-xx-xx.dat"
-#define DATFILE_CHROOT              "/home/httpd/html/backup/ipcop-xxxx-xx-xx_xx-xx-xx.dat"
+#define DATFILE_FULL                "/harddisk/usr/local/apache/html/backup/ipcop-xxxx-xx-xx_xx-xx-xx.dat"
+#define DATFILE_CHROOT              "/usr/local/apache/html/backup/ipcop-xxxx-xx-xx_xx-xx-xx.dat"
 
 static char command[STRING_SIZE];
 static char message[STRING_SIZE_LARGE];

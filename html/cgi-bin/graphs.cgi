@@ -46,7 +46,7 @@ my $iface='';
 
 &Header::showhttpheaders();
 
-my $graphdir = '/home/httpd/html/graphs';
+my $graphdir = '/usr/local/apache/html/graphs';
 &General::readhash('/var/ofw/ethernet/settings', \%netsettings);
 
 $ENV{'QUERY_STRING'} =~ s/&//g;

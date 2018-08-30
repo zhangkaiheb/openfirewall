@@ -63,10 +63,10 @@ tar -czf /var/log_compressed/spool.tgz -C /var/spool cron
 
 ############################################################################
 #                                                                          #
-# Configure apache to follow symlinks in /home/httpd/html                  #
+# Configure apache to follow symlinks in /usr/local/apache/html            #
 #                                                                          #
 ############################################################################
-if [ -z "`/bin/grep \"Options ExecCGI FollowSymlinks\" /etc/httpd/conf/httpd.conf`" ]; then
-    sed -i -e s/"^\s*Options ExecCGI.*"/"    Options ExecCGI FollowSymlinks"/1 /etc/httpd/conf/httpd.conf
+if [ -z "`/bin/grep \"Options ExecCGI FollowSymlinks\" /usr/local/apache/conf/httpd.conf`" ]; then
+    sed -i -e s/"^\s*Options ExecCGI.*"/"    Options ExecCGI FollowSymlinks"/1 /usr/local/apache/conf/httpd.conf
 fi
 

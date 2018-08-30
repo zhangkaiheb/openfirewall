@@ -45,7 +45,7 @@ use strict;
 require '/usr/lib/ofw/lang.pl';
 
 # Where we store our CGIs
-my $path = "/home/httpd/cgi-bin/";
+my $path = "/usr/local/apache/cgi-bin/";
 
 my @lines;
 my @sublines = ();

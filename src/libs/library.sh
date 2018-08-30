@@ -145,7 +145,7 @@ addcgi()
 {
     local filename
 
-    filename="/home/httpd/cgi-bin/`basename ${1}`"
+    filename="/usr/local/apache/cgi-bin/`basename ${1}`"
     cp -f ${1} ${filename}
     chown root.root ${filename}
     chmod 755 ${filename}
@@ -158,7 +158,7 @@ addcgi()
 #
 removecgi()
 {
-    rm -f /home/httpd/cgi-bin/${1}
+    rm -f /usr/local/apache/cgi-bin/${1}
     /usr/local/bin/updatemenu.pl
 }
 
