@@ -215,7 +215,7 @@ int VALID_IP(const char *ip);
 /* Again, can't find any hard and fast rules for protocol names, these
  * restrictions are based on the keywords currently listed in
  * <http://www.iana.org/assignments/protocol-numbers>
- * though currently the ipcop cgis will only pass tcp, udp or gre anyway */
+ * though currently the openfirewall cgis will only pass tcp, udp or gre anyway */
 #define VALID_PROTOCOL(prot) (strlen(prot) \
                           &&  strlen(prot) <16 \
                           &&  strspn(prot, LETTERS_NUMBERS "-") == strlen(prot))
