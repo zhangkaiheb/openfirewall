@@ -190,9 +190,9 @@ b2ac336059dece2098e7699f4ad5022a  /etc/rc.d/rc.flash.up
 e71104a5869a8ddf39e323d7743536e6  /etc/rc.d/rc.fritzdsl
 7e09bbddc6a866f97f62814af5883687  /etc/rc.d/rc.halt
 232d54fdacddc7aecff43855d68d5807  /etc/rc.d/rc.isdn
-efe3e986d28835638459767e692c3fed  /etc/rc.d/rc.net
+5d742bccc5fab19ed16ecddc5f425996  /etc/rc.d/rc.net
 9459ee3e72b41e1c71ebc522f6404639  /etc/rc.d/rc.pulsardsl
-99da4e1b92ebce146f61ac35fa134763  /etc/rc.d/rc.red
+eb2b6a33476750879def980932977a95  /etc/rc.d/rc.red
 305aa7744bab3dee85e0d9951bf319a4  /etc/rc.d/rc.solosdsl
 6052d7f361c19fe51efc81cf826f2ae0  /etc/rc.d/rc.sysinit
 a5bff6af675f442a05029e5d683ca607  /etc/rc.d/rc.updatered
@@ -1564,7 +1564,7 @@ d2a30da7c9792e74c6d4781715a72469  /usr/lib/locale/zh_TW.utf8/LC_MESSAGES/SYS_LC_
 5cf51ae8279119ff4c1a67b81b5a6cdf  /usr/lib/locale/zh_TW.utf8/LC_PAPER
 4953483ba3018f01be76d1a4b2c46033  /usr/lib/locale/zh_TW.utf8/LC_TELEPHONE
 381f2aab6a7878b8b4b6d7b01fed89da  /usr/lib/locale/zh_TW.utf8/LC_TIME
-cdb2a1ca2e3ae2095b5b8aa384c09775  /usr/lib/mkinitramfs.tar.gz
+638a79436f49e6b214e9495c6fbb6986  /usr/lib/mkinitramfs.tar.gz
 fb8f50b4955436188264a9cd18bf0b52  /usr/lib/ofw/countries.pl
 98c96f22a797109687ab91c689610178  /usr/lib/ofw/DataAccess.pl
 a6da25e1890aa701d24817fdae3d568a  /usr/lib/ofw/ddns-lib.pl
