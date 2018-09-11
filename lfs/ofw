@@ -1,0 +1,159 @@
+###############################################################################
+# This file is part of the Openfirewall.                                    #
+#                                                                             #
+# Openfirewall is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# Openfirewall is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with Openfirewall; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for Openfirewall build                                #
+#                                                                             #
+# $Id: ipcop 7044 2013-05-23 13:36:31Z dotzball $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = ipcop
+HOST_ARCH  = all
+OTHER_SRC  = no
+
+THISAPP    = ipcop
+DIR_APP    = $(DIR_SRC)/$(THISAPP)
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+install : $(TARGET)
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(firstword $(MAKEFILE_LIST))
+	@$(PREBUILD)
+
+	# Create all directories
+	for i in addons addons/lang alcatelusb auth backup ca certs cnx_pci crls ddns dhcp \
+		eagle-usb eciadsl email email/templates ethernet firewall firmware key logging main modem  \
+		ipsec openvpn openvpn/ccd openvpn/certs openvpn/crls openvpn/openssl patches \
+		ppp private proxy proxy/blacklists proxy/blacklistupdate proxy/redirector red remote shaping time \
+		traffic vpn ; do \
+			mkdir -p $(CONFIG_ROOT)/$$i; \
+	done
+
+	# Touch empty files
+	for i in auth/users backup/include.user backup/exclude.user \
+		certs/index.txt ddns/config ddns/settings \
+		dhcp/settings dhcp/fixedleases dhcp/advoptions dhcp/dnsmasq.statichosts dhcp/dnsmasq.staticopts \
+		email/settings ethernet/aliases ethernet/isdn ethernet/settings \
+		firewall/addressGroups firewall/config firewall/custominterfaces firewall/customnetworks \
+		firewall/customservices firewall/policy firewall/serviceGroups firewall/settings firewall/wireless \
+		ipsec/config ipsec/settings ipsec/ipsec.conf ipsec/ipsec.secrets \
+		main/hosts main/flashsettings main/scheduler \
+		patches/available.xml patches/installed.xml openvpn/config \
+		ppp/settings-1 ppp/settings-2 ppp/settings-3 ppp/settings-4 ppp/settings-5 ppp/settings \
+		proxy/settings remote/settings shaping/settings shaping/config traffic/settings \
+		proxy/filtersettings \
+		vpn/caconfig; do \
+			touch $(CONFIG_ROOT)/$$i; \
+	done
+	# Touch empty timeframe log for firewall rules
+	touch /var/log/fw_timeframe_log;
+
+	# Make updates flagfile dir (the dir needs nobody owner for [Instant Updates] from WebGUI)
+	mkdir -p /var/log/updates
+	chown nobody:nobody /var/log/updates
+
+	# Make dyndns log dir (the dir needs nobody owner for [Instant Update] from WebGUI)
+	mkdir -p /var/log/dyndns
+	chown nobody:nobody /var/log/dyndns
+
+	# URLfilter Database directory with custom blacklists
+	mkdir -p /var/lib/squidguard
+	mkdir -p /var/lib/squidguard/db
+	mkdir -p /var/lib/squidguard/db/custom
+	mkdir -p /var/lib/squidguard/db/custom/allowed
+	touch    /var/lib/squidguard/db/custom/allowed/domains
+	touch    /var/lib/squidguard/db/custom/allowed/urls
+	mkdir -p /var/lib/squidguard/db/custom/blocked
+	touch    /var/lib/squidguard/db/custom/blocked/domains
+	touch    /var/lib/squidguard/db/custom/blocked/expressions
+	touch    /var/lib/squidguard/db/custom/blocked/files
+	touch    /var/lib/squidguard/db/custom/blocked/urls
+	chown -R nobody:nobody /var/lib/squidguard/db
+
+	# Copy initial configfiles
+	cp $(DIR_SRC)/config/cfgroot/backup-exclude		$(CONFIG_ROOT)/backup/exclude.system
+	cp $(DIR_SRC)/config/cfgroot/backup-include		$(CONFIG_ROOT)/backup/include.system
+	cp $(DIR_SRC)/config/cfgroot/backup-exclude.hardware	$(CONFIG_ROOT)/backup/exclude.hardware
+	cp $(DIR_SRC)/config/cfgroot/dnsmasq.conf		$(CONFIG_ROOT)/dhcp/dnsmasq.conf
+	cp $(DIR_SRC)/config/cfgroot/dnsmasq.local		$(CONFIG_ROOT)/dhcp/dnsmasq.local
+	cp $(DIR_SRC)/config/cfgroot/advoptions-list		$(CONFIG_ROOT)/dhcp/advoptions-list
+	cp $(DIR_SRC)/config/cfgroot/parameters-list		$(CONFIG_ROOT)/dhcp/parameters-list
+	cp $(DIR_SRC)/config/cfgroot/defaultservices		$(CONFIG_ROOT)/firewall/
+	cp $(DIR_SRC)/config/cfgroot/icmptypes			$(CONFIG_ROOT)/firewall/
+	cp $(DIR_SRC)/config/cfgroot/ipcop.gpg			$(CONFIG_ROOT)/key/
+	cp $(DIR_SRC)/config/cfgroot/logging-settings		$(CONFIG_ROOT)/logging/settings
+	cp $(DIR_SRC)/config/cfgroot/main-settings		$(CONFIG_ROOT)/main/settings
+	cp $(DIR_SRC)/config/cfgroot/menu.lst			$(CONFIG_ROOT)/main/menu.lst
+	cp $(DIR_SRC)/config/cfgroot/modem-defaults		$(CONFIG_ROOT)/modem/defaults
+	cp $(DIR_SRC)/config/cfgroot/modem-settings		$(CONFIG_ROOT)/modem/settings
+	cp $(DIR_SRC)/config/cfgroot/openvpn			$(CONFIG_ROOT)/openvpn/settings
+	cp $(DIR_SRC)/config/cfgroot/scheduler			$(CONFIG_ROOT)/main/scheduler
+	cp $(DIR_SRC)/config/cfgroot/blacklistupdate.urls	$(CONFIG_ROOT)/proxy/blacklistupdate/blacklistupdate.urls
+	cp $(DIR_SRC)/config/cfgroot/squidGuard.conf		$(CONFIG_ROOT)/proxy/squidGuard.conf
+	cp $(DIR_SRC)/config/cfgroot/redirector-urlfilter	$(CONFIG_ROOT)/proxy/redirector/urlfilter
+	cp $(DIR_SRC)/config/cfgroot/ntp.conf			$(CONFIG_ROOT)/time/ntp.conf
+	cp $(DIR_SRC)/config/cfgroot/time-settings		$(CONFIG_ROOT)/time/settings
+	cp $(DIR_SRC)/config/cfgroot/useragents			$(CONFIG_ROOT)/proxy/
+	cp $(DIR_SRC)/config/cfgroot/isdn-card-list		/etc/isdn-card-list
+	cp $(DIR_SRC)/config/cfgroot/nic-modules-list		/etc/nic-modules-list
+
+	# Copy email templates
+	cp $(DIR_SRC)/config/cfgroot/templates/*		$(CONFIG_ROOT)/email/templates
+
+	# Oneliner configfiles
+	echo  "ENABLED=off"					> $(CONFIG_ROOT)/ipsec/settings
+	echo  "VPN_DELAYED_START=0"				>>$(CONFIG_ROOT)/ipsec/settings
+	echo  "VALID=yes"					> $(CONFIG_ROOT)/shaping/settings
+	echo  "01"						> $(CONFIG_ROOT)/certs/serial
+	echo  "nameserver    1.2.3.4"				> $(CONFIG_ROOT)/ppp/fake-resolv.conf
+	echo  -e "<ipcop>\n</ipcop>"				> $(CONFIG_ROOT)/patches/available.xml
+	echo  -e "<ipcop>\n</ipcop>"				> $(CONFIG_ROOT)/patches/installed.xml
+
+	# Configroot permissions
+	chown -R nobody:nobody $(CONFIG_ROOT)
+	chown      root:root   $(CONFIG_ROOT)
+
+	for i in backup addons/lang red ; do \
+		chown -R root:root $(CONFIG_ROOT)/$$i; \
+	done
+
+	@$(POSTBUILD)

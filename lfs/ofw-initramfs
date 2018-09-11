@@ -1,0 +1,811 @@
+###############################################################################
+# This file is part of the Openfirewall.                                    #
+#                                                                             #
+# Openfirewall is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# Openfirewall is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with Openfirewall; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for Openfirewall build                                #
+#                                                                             #
+# $Id: ipcop-initramfs 7950 2015-03-23 07:20:36Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME			= initramfs
+HOST_ARCH			= all
+OTHER_SRC			= no
+
+THISAPP				= initramfs
+DIR_APP				= $(DIR_SRC)/$(THISAPP)
+TARGET				= $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+INITRAMFS_DIR			= /$(INSTALLER_DIR)/initramfs
+
+# Special settings to limit memory requirement (2MiB) on kernel decompression for floppy
+XZMINI				= xz --check=crc32 --lzma2=dict=2MiB,nice=273,depth=512
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+install : $(TARGET)
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) :
+	# make new dependencies wit all modules (stop on error with -u and display error with -e)
+	depmod -aeu -F /boot/System.map-$(KVER) $(KVER)
+
+	#################################################################################################
+	#################################################################################################
+	# START of general section									#
+	# This part applies to all initramfs images							#
+	#################################################################################################
+	#################################################################################################
+	# Make sure some directories exist
+	mkdir -p						$(INITRAMFS_DIR)/bin
+	mkdir -p						$(INITRAMFS_DIR)/cdrom
+	mkdir -p						$(INITRAMFS_DIR)/dev
+	mkdir -p						$(INITRAMFS_DIR)/etc/modprobe.d
+	mkdir -p						$(INITRAMFS_DIR)/etc/pcmcia
+	mkdir -p						$(INITRAMFS_DIR)/harddisk
+	mkdir -p						$(INITRAMFS_DIR)/lib
+	mkdir -p						$(INITRAMFS_DIR)/mnt
+	mkdir -p						$(INITRAMFS_DIR)/proc
+	mkdir -p						$(INITRAMFS_DIR)/root
+	mkdir -p						$(INITRAMFS_DIR)/usr
+	mkdir -p						$(INITRAMFS_DIR)/sbin
+	mkdir -p						$(INITRAMFS_DIR)/sys
+	mkdir -p						$(INITRAMFS_DIR)/tmp
+	mkdir -p						$(INITRAMFS_DIR)/usr/bin
+	mkdir -p						$(INITRAMFS_DIR)/usr/lib
+	mkdir -p						$(INITRAMFS_DIR)/usr/sbin
+	mkdir -p						$(INITRAMFS_DIR)/usr/share/locale
+	mkdir -p						$(INITRAMFS_DIR)/usr/share/terminfo/l
+	mkdir -p						$(INITRAMFS_DIR)/usr/share/terminfo/v
+	mkdir -p						$(INITRAMFS_DIR)/usr/share/udhcpc
+	mkdir -p						$(INITRAMFS_DIR)/var/run
+	mkdir -p						$(INITRAMFS_DIR)/run
+
+	# Create /dev/console and /dev/null needed by the initramfs
+	cp -a /dev/console					$(INITRAMFS_DIR)/dev/
+	cp -a /dev/null						$(INITRAMFS_DIR)/dev/
+
+	# Install udev
+	install -D /sbin/udevd					$(INITRAMFS_DIR)/sbin
+	install -D /sbin/udevadm				$(INITRAMFS_DIR)/sbin
+	# Copy some udev devices, helpers and rules (basically the whole /lib/udev tree)
+	cp -a /lib/udev						$(INITRAMFS_DIR)/lib/
+	# Remove persistent net generator rule
+	rm -f $(INITRAMFS_DIR)/lib/udev/rules.d/75-persistent-net-generator.rules
+	# Copy our own additional udev rules
+	mkdir -p						$(INITRAMFS_DIR)/etc/udev/rules.d/
+	cp -a $(DIR_SRC)/config/udev/rules.d/*			$(INITRAMFS_DIR)/etc/udev/rules.d/
+	# Install blkid (pulls libblkid later) for disk labels
+	install -D /sbin/blkid					$(INITRAMFS_DIR)/sbin
+
+	# Copy the zoneinfo files
+	mkdir -p						$(INITRAMFS_DIR)/usr/share/zoneinfo/posix
+	cp -a /usr/share/zoneinfo/posix/*			$(INITRAMFS_DIR)/usr/share/zoneinfo/posix
+
+	# Copy the PCI and USB ids files
+	cp -a /usr/share/pci.ids.gz				$(INITRAMFS_DIR)/usr/share
+	cp -a /usr/share/usb.ids.gz				$(INITRAMFS_DIR)/usr/share
+
+	# Create an empty file to use changeaddress on networkinstall manual
+	touch $(INITRAMFS_DIR)/etc/ethernetsettings
+
+	# Copy busybox
+	cp -a /$(INSTALLER_DIR)/busybox/* $(INITRAMFS_DIR)/
+
+	# Install iowrap (from misc-progs)
+	install -D /usr/local/bin/iowrap			$(INITRAMFS_DIR)/bin/iowrap
+
+	# Install pccardctl and lspcmcia (from pcmciautils). pcmcia-check-broken-cis is already installed thru /lib/udev
+###	install -D /sbin/pccardctl				$(INITRAMFS_DIR)/usr/bin/pccardctl
+###	ln -sf pccardctl					$(INITRAMFS_DIR)/usr/bin/lspcmcia
+###	install -m 644 -D /etc/pcmcia/config.opts		$(INITRAMFS_DIR)/etc/pcmcia/config.opts
+
+	# Install a few keyboard utilities (from kbd)
+	install -D /usr/bin/kbd_mode				$(INITRAMFS_DIR)/usr/bin/kbd_mode
+	install -D /usr/bin/loadkeys				$(INITRAMFS_DIR)/usr/bin/loadkeys
+	install -D /usr/bin/setfont				$(INITRAMFS_DIR)/usr/bin/setfont
+	install -D /usr/bin/setleds				$(INITRAMFS_DIR)/usr/bin/setleds
+	install -D /usr/bin/dumpkeys				$(INITRAMFS_DIR)/usr/bin/dumpkeys
+	install -D /usr/bin/loadunimap			$(INITRAMFS_DIR)/usr/bin/loadunimap
+	install -D /usr/bin/showconsolefont			$(INITRAMFS_DIR)/usr/bin/showconsolefont
+	install -D /usr/bin/unicode_start			$(INITRAMFS_DIR)/usr/bin/unicode_start
+	install -D /usr/bin/unicode_stop			$(INITRAMFS_DIR)/usr/bin/unicode_stop
+
+	# silent stty: invalid number 'iutf8' because busybox stty does not yet support iutf8 option
+	sed -i -e 's/stty iutf8//' $(INITRAMFS_DIR)/usr/bin/unicode_start
+
+	# Install mke2fs and fsck.ext3 (from e2fsprogs)
+	install -D /sbin/mke2fs				$(INITRAMFS_DIR)/usr/bin/mke2fs
+	install -D /sbin/fsck.ext3			$(INITRAMFS_DIR)/sbin/fsck.ext3
+
+	# Install parted and disk-partition helper script (libparted will be later)
+	install -D /sbin/sfdisk                     $(INITRAMFS_DIR)/sbin
+	install -D /usr/sbin/{parted,partprobe}     $(INITRAMFS_DIR)/usr/sbin
+	install -D /usr/local/bin/disk-partition.sh $(INITRAMFS_DIR)/usr/bin
+
+
+	# Install some console fonts needed by the installer
+	mkdir -p						$(INITRAMFS_DIR)/usr/share/kbd/consolefonts
+
+	for font in	/usr/share/kbd/consolefonts/lat0-16.psfu.gz \
+			/usr/share/kbd/consolefonts/lat1-16.psfu.gz \
+			/usr/share/kbd/consolefonts/lat2-16.psfu.gz \
+			/usr/share/kbd/consolefonts/lat5-16.psfu.gz \
+			/usr/share/kbd/consolefonts/lat5-16.psfu.gz \
+			/usr/share/kbd/consolefonts/iso07u-16.psfu.gz \
+			/usr/share/kbd/consolefonts/koi8u_8x16.psfu.gz \
+			/usr/share/kbd/consolefonts/viscii10-8x16.psfu.gz; \
+	do \
+		install -m 0644 $$font				$(INITRAMFS_DIR)/$$font; \
+	done
+
+	# Install keymaps for installer
+	mkdir -p						$(INITRAMFS_DIR)/usr/share/kbd/keymaps
+	cp -af /usr/share/kbd/keymaps/i386			$(INITRAMFS_DIR)/usr/share/kbd/keymaps
+	cp -af /usr/share/kbd/keymaps/include			$(INITRAMFS_DIR)/usr/share/kbd/keymaps
+
+	# Language info for installer
+	cp $(DIR_SRC)/langs/list				$(INITRAMFS_DIR)/usr/share/locale/language.lst
+
+	# Locale for installer, do not create but copy
+	for i in /usr/share/locale/*_*/LC_MESSAGES/install.mo ; do \
+		mkdir -p $(INITRAMFS_DIR)/`dirname $$i`; \
+		cp $$i $(INITRAMFS_DIR)/$$i; \
+	done
+
+	# Install a locale archive with only utf8
+	mkdir -p $(INITRAMFS_DIR)/usr/lib/locale/
+	localedef --prefix=$(INITRAMFS_DIR) -i en_GB -f UTF-8 en_GB.utf8
+
+	# Copy over udhcp settings for busybox
+	install -m 0755 $(DIR_SRC)/config/busybox/default.script \
+							$(INITRAMFS_DIR)/usr/bin/udhcpc.script
+
+	# Debugging only, strace sometimes helpful for problem tracking
+	install -D /usr/bin/strace			$(INITRAMFS_DIR)/usr/bin/strace
+
+	# Add blacklist.conf for blacklisting
+	install --owner=root --group=root $(DIR_SRC)/config/etc/modprobe.d/blacklist.conf $(INITRAMFS_DIR)/etc/modprobe.d
+
+	# Finish up initramfs directory
+	install --owner=root --group=root $(DIR_SRC)/config/install/* $(INITRAMFS_DIR)/etc/
+	mv $(INITRAMFS_DIR)/etc/init				$(INITRAMFS_DIR)/
+	rm -rf							$(INITRAMFS_DIR)/etc/.svn
+	rm -rf							$(INITRAMFS_DIR)/usr/share/man
+	cp -f /etc/issue					$(INITRAMFS_DIR)/etc/
+	chmod 755						$(INITRAMFS_DIR)/init
+	chmod 755						$(INITRAMFS_DIR)/etc/halt
+	cp -f /usr/share/terminfo/l/linux			$(INITRAMFS_DIR)/usr/share/terminfo/l
+	cp -f /usr/share/terminfo/v/vt102			$(INITRAMFS_DIR)/usr/share/terminfo/v
+
+	# Delete the mini-initramfs init
+	rm -f $(INITRAMFS_DIR)/etc/init-mini-initramfs
+
+	# Copy the filesystem modules
+	mkdir -p $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs
+	cp -af /lib/modules/$(KVER)/kernel/fs/*			$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs
+
+	# For ATA/IDE disks
+	mkdir -p $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+###	cp -af	/lib/modules/$(KVER)/kernel/drivers/ata \
+###		/lib/modules/$(KVER)/kernel/drivers/ide \
+###								$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+###
+# For SCSI disks
+	cp -af	/lib/modules/$(KVER)/kernel/drivers/scsi \
+							$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+
+	# Sparcs don't have pcmcia, skip
+ifneq "$(MACHINE)" "sparc"
+	# Copy the PCMCIA modules
+###	cp -af /lib/modules/$(KVER)/kernel/drivers/pcmcia \
+###								$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+endif
+
+	# Copy the CDROM modules
+###	cp -af /lib/modules/$(KVER)/kernel/drivers/cdrom \
+###								$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+
+	# Copy the USB/HID modules
+###	mkdir -p $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/usb
+###	cp -af	/lib/modules/$(KVER)/kernel/drivers/usb/{core,host,storage,usb-common.ko.gz} \
+###								$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/usb
+###	cp -af	/lib/modules/$(KVER)/kernel/drivers/hid \
+###								$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+
+	# Copy the NETWORK modules
+	cp -af /lib/modules/$(KVER)/kernel/drivers/net		$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+	# a few of them are not needed there as configuration is later than initramfs/install
+###	rm -rf $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/net/{bonding,bsd_comp.ko.gz,ppp*,tun.ko,usb,wireless}
+
+	# Copy some additional modules and remove those not required by nics and blocks drivers
+	cp -af /lib/modules/$(KVER)/kernel/lib 			$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel
+###	rm -f $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/lib/{crc-itu-t,ts_*}.ko.gz
+
+	# Raid
+###	cp -af /lib/modules/$(KVER)/kernel/drivers/md		$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+	install -D /sbin/mdadm				$(INITRAMFS_DIR)/sbin
+
+	# Will see in the futur
+	# cp /sbin/badblocks $(INITRAMFS_DIR)/bin
+	# cp /usr/sbin/smartctl $(INITRAMFS_DIR)/usr/bin
+
+	# Strip the installer binaries, ignore xargs strip error on non elf code, and filter non-elf code message
+	cd $(INITRAMFS_DIR) && find {bin,sbin} usr/{bin,sbin} lib/udev -type f | \
+		xargs /$(TOOLS_DIR)/bin/strip --strip-all 2>&1 | grep -v 'File format not recognized' || true
+
+	# Install a shrinked glibc and other libs required by the programs we put on bin and usr/bin.
+	# mklibs does both the shrinking and the stripping, so we don't have to strip libs separately
+	# NOTE: "E: Dynamic linker not found, aborting." means the binary is not dynamically linked.  Safe to ignore.
+	# replace -v by -v -v -v for more details
+	# Use -D to omit default lib path and add /lib:usr/lib (without ending /) to -L. This remove double / in mklibs log
+	/usr/bin/mklibs -v -D -L /lib:/usr/lib:/usr/lib/libc_pic \
+				-d $(INITRAMFS_DIR)/lib \
+				$(INITRAMFS_DIR)/bin/* \
+				$(INITRAMFS_DIR)/sbin/* \
+				$(INITRAMFS_DIR)/usr/bin/* \
+				$(INITRAMFS_DIR)/usr/sbin/* \
+				$(INITRAMFS_DIR)/lib/udev/*_id
+
+	# libs are installed, we are now able to run busybox programs
+
+	# Create modules.{alias,dep} from busybox depmod and the limited list of installed modules
+	chroot $(INITRAMFS_DIR) /sbin/depmod -a $(KVER)
+	# busybox modprobe support relative path, so .dep file is 1/3 smaller by removing /lib/modules/$(KVER)/
+	chroot $(INITRAMFS_DIR) /bin/sed -i 's|/lib/modules/$(KVER)/||g' /lib/modules/$(KVER)/modules.dep
+
+	# Create the images directory
+	mkdir -p /$(INSTALLER_DIR)/images
+	#################################################################################################
+	#################################################################################################
+	# END of general section									#
+	#################################################################################################
+	#################################################################################################
+
+
+
+
+
+
+	#################################################################################################
+	#################################################################################################
+	# START of mkinitramfs section									#
+	# This part only applies to mkinitramfs								#
+	#################################################################################################
+	#################################################################################################
+	# Start from scratch
+	rm -fr /usr/lib/mkinitramfs
+	mkdir -p /usr/lib/mkinitramfs
+
+	# Copy the initramfs init
+	cp -af $(INITRAMFS_DIR)/init /usr/lib/mkinitramfs/
+
+	# Create a basic initramfs directory structure
+	for directory in bin cdrom dev etc harddisk lib mnt proc root sbin sys tmp usr/bin usr/sbin var; do \
+		install -d -m 755 /usr/lib/mkinitramfs/$$directory; \
+	done
+
+	# Copy important configuration
+	cp -af $(INITRAMFS_DIR)/etc/* /usr/lib/mkinitramfs/etc/
+
+	# Copy udev, other tools, busybox, and its links
+	cp -af $(INITRAMFS_DIR)/bin/* /usr/lib/mkinitramfs/bin/
+	cp -af $(INITRAMFS_DIR)/sbin/* /usr/lib/mkinitramfs/sbin/
+	cp -af $(INITRAMFS_DIR)/usr/bin/* /usr/lib/mkinitramfs/usr/bin/
+	cp -af $(INITRAMFS_DIR)/usr/sbin/* /usr/lib/mkinitramfs/usr/sbin/
+
+	# Remove the installer
+	rm -f /usr/lib/mkinitramfs/bin/installer
+
+	# Copy udev helpers
+	cp -af $(INITRAMFS_DIR)/lib/udev /usr/lib/mkinitramfs/lib/
+
+	# Now shrink glibc for the initramfs
+	/usr/bin/mklibs -v -D -L /lib:/usr/lib:/usr/lib/libc_pic \
+				-d /usr/lib/mkinitramfs/lib \
+				/usr/lib/mkinitramfs/bin/* \
+				/usr/lib/mkinitramfs/sbin/* \
+				/usr/lib/mkinitramfs/usr/bin/* \
+				/usr/lib/mkinitramfs/usr/sbin/* \
+				/usr/lib/mkinitramfs/lib/udev/*_id
+
+	# Create a tar.gz to spare size on disk
+	cd /usr/lib/mkinitramfs && tar cf /usr/lib/mkinitramfs.tar ./
+	gzip -9fn /usr/lib/mkinitramfs.tar
+	rm -rf /usr/lib/mkinitramfs
+
+	#################################################################################################
+	#################################################################################################
+	# END of mkinitramfs section									#
+	#################################################################################################
+	#################################################################################################
+
+
+
+
+
+
+	#################################################################################################
+	#################################################################################################
+	# START of cdrom, floppy and mini-initramfs initramfs section					#
+	# This part only applies to the installation floppy and cdrom initramfs				#
+	#################################################################################################
+	#################################################################################################
+
+	#################################################################################################
+	# START of cdrom section									#
+	#################################################################################################
+	# Copy over any binary firmware that may be needed by the installer.  We also copy the LICENSE files.
+	cp -a /lib/firmware $(INITRAMFS_DIR)/lib/
+
+	# We still need the mark to check this is the matching arch
+	echo $(MACHINE) > $(INITRAMFS_DIR)/CDROMBOOT
+
+	# Finally, create the cpio archive
+ifeq "$(MACHINE)" "x86_64"
+	cd $(INITRAMFS_DIR) && find . | cpio -o -H newc | lzma -3 > \
+		/$(INSTALLER_DIR)/images/cdinitramfs-$(VERSION).img
+endif
+ifeq "$(MACHINE)" "i486"
+	cd $(INITRAMFS_DIR) && find . | cpio -o -H newc | lzma -3 > \
+		/$(INSTALLER_DIR)/images/cdinitramfs-$(VERSION).img
+else
+	cd $(INITRAMFS_DIR) && find . | cpio -o -H newc | gzip -9 > \
+		/$(INSTALLER_DIR)/images/cdinitramfs-$(VERSION).img
+endif
+	#################################################################################################
+	# END of cdrom section										#
+	#################################################################################################
+
+
+ifneq "${SKIP_FLOPPY_IMAGES}" "yes"
+	# Sparcs don't need boot floppies, so skip the floppy and mini-initramfs sections
+ifneq "$(MACHINE)" "sparc"
+	#################################################################################################
+	# START of root-1 floppy section								#
+	#################################################################################################
+
+	# Create the floppy root directory in /tmp
+	rm -fr							$(FLOPPY_ROOT_DIR)
+	mkdir -p						$(FLOPPY_ROOT_DIR)
+
+	# Copy all the directories from the cdinitramfs directory, except for lib and usr
+	cp -af $(INITRAMFS_DIR)/bin				$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/cdrom				$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/dev				$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/etc				$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/harddisk			$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/init				$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/mnt				$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/proc				$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/root				$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/sys				$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/tmp				$(FLOPPY_ROOT_DIR)/
+	cp -af $(INITRAMFS_DIR)/var				$(FLOPPY_ROOT_DIR)/
+	ln -sf bin						$(FLOPPY_ROOT_DIR)/sbin
+
+	# Just a stupid flag file
+	echo $(MACHINE) > $(FLOPPY_ROOT_DIR)/FLOPPYBOOT
+
+	# Empty out /etc/modules because the mini-initramfs has only very few kernel modules
+	cat /dev/null >	$(FLOPPY_ROOT_DIR)/etc/modules
+
+	# Copy libraries
+	mkdir -p $(FLOPPY_ROOT_DIR)/lib
+	cp -a $(INITRAMFS_DIR)/lib/*.so.*			$(FLOPPY_ROOT_DIR)/lib/
+
+	# Shifted to root-2 or root-1 is full
+	rm -f $(FLOPPY_ROOT_DIR)/lib/libparted-* $(FLOPPY_ROOT_DIR)/usr/sbin/{parted,partprobe}
+
+	# Copy the udev helpers into the floppy root directory
+	cp -a $(INITRAMFS_DIR)/lib/udev				$(FLOPPY_ROOT_DIR)/lib/
+
+	# Copy modules.dep to the floppy root directory
+	mkdir -p						$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)
+	cp -a $(INITRAMFS_DIR)/lib/modules/$(KVER)/modules.dep	$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/
+
+	# Create the kernel modules directory
+	mkdir -p $(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers
+
+	# Copy the EXT3 FS module
+	mkdir -p $(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/fs
+
+ifneq "$(MACHINE)" "ppc"
+	# ppc has ext2 built-in so mbcache is also built-in
+	# ext2 is smaller than ext3 and with less dependencies
+	# anyway both should be unneeded as we mount files on tmpfs
+	#cp -a	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs/ext2 \
+	#	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs/mbcache.ko.gz \
+	#		$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/fs/
+endif
+
+	#cp -a	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs/ext3 \
+	#	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs/jbd \
+	#		$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/fs/
+
+	# Copy some extra binaries
+	mkdir -p $(FLOPPY_ROOT_DIR)/usr
+	cp -a $(INITRAMFS_DIR)/usr/bin				$(FLOPPY_ROOT_DIR)/usr/
+
+	# Copy the installer i18n messages
+	mkdir -p						$(FLOPPY_ROOT_DIR)/usr/share
+	cp -a $(INITRAMFS_DIR)/usr/share/locale			$(FLOPPY_ROOT_DIR)/usr/share/
+
+ifneq "$(MACHINE)" "ppc"
+	# Now create a cpio archive of the root-1 floppy
+	cd $(FLOPPY_ROOT_DIR) && find . | cpio -o -H newc | $(XZMINI) \
+		> /$(INSTALLER_DIR)/images/$(SNAME)-$(VERSION)-root-1.img
+else
+	# For ppc, we're using an ext2 initrd image
+	dd if=/dev/zero of=/tmp/$(SNAME)-$(VERSION)-root-1.img bs=1024k count=5 && \
+	mkfs.ext2 -F -m 0 /tmp/$(SNAME)-$(VERSION)-root-1.img && \
+	for i in {1..7}; do \
+		if (! losetup /dev/loop$${i} >/dev/null 2>&1 ); then \
+			LOOPDEV="/dev/loop$${i}"; \
+			break; \
+		fi; \
+	done; \
+	losetup $$LOOPDEV /tmp/$(SNAME)-$(VERSION)-root-1.img && \
+	mkdir -p /tmp/temp-root && \
+	mount -t ext2 $$LOOPDEV /tmp/temp-root && \
+	cp -a $(FLOPPY_ROOT_DIR)/* /tmp/temp-root/ && \
+	umount /tmp/temp-root && \
+	losetup -d $$LOOPDEV && \
+	gzip -9c /tmp/$(SNAME)-$(VERSION)-root-1.img > /$(INSTALLER_DIR)/images/$(SNAME)-$(VERSION)-root-1.img && \
+	rm -fr /tmp/temp-root /tmp/$(SNAME)-$(VERSION)-root-1.img
+endif
+
+	# List floppy content
+	@$(LIST_FILES_SIZES)
+	mv $(SIZELIST) $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(SNAME)-$(VERSION)-root-1.img
+
+	# Clean and prepare for the root-2 floppy
+	rm -fr $(FLOPPY_ROOT_DIR)/*
+	#################################################################################################
+	# END of root-1 floppy section									#
+	#################################################################################################
+
+	#################################################################################################
+	# START of root-2 floppy section								#
+	#################################################################################################
+	# Just a stupid flag file
+	echo $(MACHINE) > $(FLOPPY_ROOT_DIR)/FLOPPY2
+
+	# parted / libparted (or root-1 is full)
+	mkdir -p $(FLOPPY_ROOT_DIR)/usr/sbin
+	cp -a $(INITRAMFS_DIR)/usr/sbin/{parted,partprobe} $(FLOPPY_ROOT_DIR)/usr/sbin
+	mkdir -p $(FLOPPY_ROOT_DIR)/lib
+	cp -a $(INITRAMFS_DIR)/lib/libparted* $(FLOPPY_ROOT_DIR)/lib
+
+	# Create the kernel modules directory
+	mkdir -p $(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers
+
+	# Copy the CDROM kernel modules
+	cp -a $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/cdrom \
+								$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/
+
+	# Copy the IDE kernel modules
+	cp -a $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/ide \
+								$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/
+	# Copy the ATA kernel modules
+	cp -a $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/ata \
+								$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/
+
+	# Copy the PCMCIA kernel modules
+	cp -a $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/pcmcia \
+								$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/
+
+	# Copy the USB/HID kernel modules
+	mkdir -p $(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/usb
+	cp -a	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/usb/{core,host,storage} \
+								$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/usb
+	cp -a	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/hid \
+								$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/
+
+	# Copy the FIREWIRE kernel modules
+	#cp -a	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/firewire \
+	#	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/ieee1394 \
+	#							$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/
+
+	# Install only one utf8 locale on floppy
+	mkdir -p						$(FLOPPY_ROOT_DIR)/usr/lib/locale
+	localedef --prefix=$(FLOPPY_ROOT_DIR) -i en_GB -f UTF-8 en_GB.utf8
+
+	# Copy some final files
+	mkdir -p						$(FLOPPY_ROOT_DIR)/usr/share
+	for directory in kbd terminfo; do \
+		cp -a /$(INITRAMFS_DIR)/usr/share/$$directory	$(FLOPPY_ROOT_DIR)/usr/share/; \
+	done
+
+	# Now create a cpio archive of the root-2 floppy
+	# Uncompress each module for better global compression
+	find $(FLOPPY_ROOT_DIR) -name *.ko.gz -exec gzip -d {} \;
+	cd $(FLOPPY_ROOT_DIR) && find . | cpio -o -H newc | $(XZMINI) \
+		> /$(INSTALLER_DIR)/images/$(SNAME)-$(VERSION)-root-2.img
+
+	# List floppy content
+	@$(LIST_FILES_SIZES)
+	mv $(SIZELIST) $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(SNAME)-$(VERSION)-root-2.img
+
+	# Clean and prepare for the scsi drivers floppy
+	rm -fr $(FLOPPY_ROOT_DIR)/*
+	#################################################################################################
+	# END of root-2 floppy section									#
+	#################################################################################################
+
+	#################################################################################################
+	# START of scsi drivers floppy section								#
+	#################################################################################################
+	# Create the kernel modules directory
+	mkdir -p $(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers
+
+	# Copy the BASE kernel modules
+	#cp -a $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/base \
+	#							$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/
+
+	# Copy the BLOCK kernel modules
+	cp -a $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/block \
+								$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/
+
+	# Copy the SCSI kernel modules
+	cp -a   $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/scsi \
+								$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/
+
+	# Uncompress each module for better global compression
+	find $(FLOPPY_ROOT_DIR) -name *.ko.gz -exec gzip -d {} \;
+	# Now create a cpio archive of the scsi drivers floppy
+	cd $(FLOPPY_ROOT_DIR) && find . | cpio -o -H newc | $(XZMINI) \
+		> /$(INSTALLER_DIR)/images/$(SNAME)-$(VERSION)-scsi-drivers.img
+
+	# List floppy content
+	@$(LIST_FILES_SIZES)
+	mv $(SIZELIST) $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(SNAME)-$(VERSION)-scsi-drivers.img
+
+	# Clean and prepare for the network drivers floppy
+	rm -fr $(FLOPPY_ROOT_DIR)/*
+	#################################################################################################
+	# END of scsi drivers floppy section								#
+	#################################################################################################
+
+	#################################################################################################
+	# START of network drivers floppy section							#
+	#################################################################################################
+	# Create the kernel modules directory
+	mkdir -p $(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers
+
+	# Copy the NETWORK kernel modules
+	cp -a   $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers/net \
+								$(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/
+
+	# Remove unneeded modules
+	for files in bonding bsd_comp.ko dummy.ko ppp tun.ko.gz usb wan wireless; do \
+		rm -fr $(FLOPPY_ROOT_DIR)/lib/modules/$(KVER)/kernel/drivers/net/$$files*; \
+	done
+
+	# Uncompress each module for better global compression
+	find $(FLOPPY_ROOT_DIR) -name *.ko.gz -exec gzip -d {} \;
+	# Now create a cpio archive
+	cd $(FLOPPY_ROOT_DIR) && find . | cpio -o -H newc | $(XZMINI) \
+		> /$(INSTALLER_DIR)/images/$(SNAME)-$(VERSION)-network-drivers.img
+
+	# List floppy content
+	@$(LIST_FILES_SIZES)
+	mv $(SIZELIST) $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(SNAME)-$(VERSION)-network-drivers.img
+
+	# Clean and prepare for the network drivers floppy
+	rm -fr $(FLOPPY_ROOT_DIR)/*
+	#################################################################################################
+	# END of network drivers floppy section								#
+	#################################################################################################
+
+	# mini-initramfs is only used for x86. ppc still uses initrd (ext2) as miboot for some reason ignores
+	# initramfs images
+ifeq "$(MACHINE)" "x86_64"
+	#################################################################################################
+	# START of mini-initramfs section								#
+	#################################################################################################
+	# Start from scratch
+	rm -fr /$(INSTALLER_DIR)/mini-initramfs/*
+
+	# Now create a very basic mini-initramfs directory structure
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/bin
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/cdrom
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/dev
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/etc
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/floppy
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/initramfs
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/lib
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/mnt
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/proc
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/sys
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/tmp
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/var
+
+	# klibc builds a shared library with a unique, unpredictable name and all the binaries expect
+	# to find that uniquely named library
+	cp -a /lib/klibc-*.so /$(INSTALLER_DIR)/mini-initramfs/lib
+
+	# klibc has a few more programs, but we're trying to keep the mini-initramfs very very small
+	for binary in cat cpio insmod mknod mount run-init sh.shared sleep umount uname xzminidec; do \
+		cp -a /usr/lib/klibc/bin/$$binary /$(INSTALLER_DIR)/mini-initramfs/bin/; \
+	done
+
+	# Make sure the shell has a normal name
+	mv /$(INSTALLER_DIR)/mini-initramfs/bin/sh.shared /$(INSTALLER_DIR)/mini-initramfs/bin/sh
+
+	# Copy the floppy module into the mini-initramfs
+	mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/block
+	cp /lib/modules/$(KVER)/kernel/drivers/block/floppy.ko.gz \
+		/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/block
+
+	# Following lines are commented as there is not enought space remaining on first floppy
+	# Copy the ide-core, ide-generic, and ide-cd modules into the mini-initramfs
+	#mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/ide
+	#cp -a	/lib/modules/$(KVER)/kernel/drivers/ide/ide-core.ko.gz \
+	#	/lib/modules/$(KVER)/kernel/drivers/ide/ide-generic.ko.gz \
+	#	/lib/modules/$(KVER)/kernel/drivers/ide/ide-cd_mod.ko.gz \
+	#		/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/ide/
+
+	# Copy the cdrom module
+	#mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/cdrom
+	#cp -a	/lib/modules/$(KVER)/kernel/drivers/cdrom/cdrom.ko.gz \
+	#		/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/cdrom/
+
+	# Copy nls_cp437.ko.gz -- not mandatory but since it's so small it's ok to include it to avoid a warning
+	# message when booting the mini-initramfs floppy
+	mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/fs/nls
+	cp -a	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs/nls/nls_cp437.ko.gz \
+			/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/fs/nls/
+
+	# Uncompress each module as klibc insmod does not support compression
+	find /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel -name *.ko.gz -exec gzip -d {} \;
+
+	# Create a modules.dep with modules installed in mini-initramfs
+	# using bb depmod as M-I-T depmod use a relative path (does klibc support that?)
+	$(INITRAMFS_DIR)/sbin/depmod -a $(KVER) -b /$(INSTALLER_DIR)/mini-initramfs
+
+	# Finally copy the init script shamelessly stolen from debian-floppy
+	install -m 755 $(DIR_SRC)/config/install/init-mini-initramfs /$(INSTALLER_DIR)/mini-initramfs/init
+	sed -i "s,^KVER=KVER,KVER=$(KVER),g" /$(INSTALLER_DIR)/mini-initramfs/init
+
+	cd /$(INSTALLER_DIR)/mini-initramfs && find . | cpio -o -H newc | lzma -3 > \
+		/$(INSTALLER_DIR)/images/$(SNAME)-$(VERSION)-mini-initramfs.img
+	
+	# just to be able to list files size to the log
+	cp -R /$(INSTALLER_DIR)/mini-initramfs $(FLOPPY_ROOT_DIR)
+	@$(LIST_FILES_SIZES)
+	mv $(SIZELIST) $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(SNAME)-$(VERSION)-mini-initramfs.img
+	# and cleanup
+	rm -fr $(FLOPPY_ROOT_DIR)/*
+
+	#################################################################################################
+	# END of mini-initramfs section									#
+	#################################################################################################
+endif # eq x86_64
+ifeq "$(MACHINE)" "i486"
+	#################################################################################################
+	# START of mini-initramfs section								#
+	#################################################################################################
+	# Start from scratch
+	rm -fr /$(INSTALLER_DIR)/mini-initramfs/*
+
+	# Now create a very basic mini-initramfs directory structure
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/bin
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/cdrom
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/dev
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/etc
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/floppy
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/initramfs
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/lib
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/mnt
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/proc
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/sys
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/tmp
+	mkdir -p						/$(INSTALLER_DIR)/mini-initramfs/var
+
+	# klibc builds a shared library with a unique, unpredictable name and all the binaries expect
+	# to find that uniquely named library
+	cp -a /lib/klibc-*.so /$(INSTALLER_DIR)/mini-initramfs/lib
+
+	# klibc has a few more programs, but we're trying to keep the mini-initramfs very very small
+	for binary in cat cpio insmod mknod mount run-init sh.shared sleep umount uname xzminidec; do \
+		cp -a /usr/lib/klibc/bin/$$binary /$(INSTALLER_DIR)/mini-initramfs/bin/; \
+	done
+
+	# Make sure the shell has a normal name
+	mv /$(INSTALLER_DIR)/mini-initramfs/bin/sh.shared /$(INSTALLER_DIR)/mini-initramfs/bin/sh
+
+	# Copy the floppy module into the mini-initramfs
+	mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/block
+	cp /lib/modules/$(KVER)/kernel/drivers/block/floppy.ko.gz \
+		/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/block
+
+	# Following lines are commented as there is not enought space remaining on first floppy
+	# Copy the ide-core, ide-generic, and ide-cd modules into the mini-initramfs
+	#mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/ide
+	#cp -a	/lib/modules/$(KVER)/kernel/drivers/ide/ide-core.ko.gz \
+	#	/lib/modules/$(KVER)/kernel/drivers/ide/ide-generic.ko.gz \
+	#	/lib/modules/$(KVER)/kernel/drivers/ide/ide-cd_mod.ko.gz \
+	#		/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/ide/
+
+	# Copy the cdrom module
+	#mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/cdrom
+	#cp -a	/lib/modules/$(KVER)/kernel/drivers/cdrom/cdrom.ko.gz \
+	#		/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/drivers/cdrom/
+
+	# Copy nls_cp437.ko.gz -- not mandatory but since it's so small it's ok to include it to avoid a warning
+	# message when booting the mini-initramfs floppy
+	mkdir -p /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/fs/nls
+	cp -a	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/fs/nls/nls_cp437.ko.gz \
+			/$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel/fs/nls/
+
+	# Uncompress each module as klibc insmod does not support compression
+	find /$(INSTALLER_DIR)/mini-initramfs/lib/modules/$(KVER)/kernel -name *.ko.gz -exec gzip -d {} \;
+
+	# Create a modules.dep with modules installed in mini-initramfs
+	# using bb depmod as M-I-T depmod use a relative path (does klibc support that?)
+	$(INITRAMFS_DIR)/sbin/depmod -a $(KVER) -b /$(INSTALLER_DIR)/mini-initramfs
+
+	# Finally copy the init script shamelessly stolen from debian-floppy
+	install -m 755 $(DIR_SRC)/config/install/init-mini-initramfs /$(INSTALLER_DIR)/mini-initramfs/init
+	sed -i "s,^KVER=KVER,KVER=$(KVER),g" /$(INSTALLER_DIR)/mini-initramfs/init
+
+	cd /$(INSTALLER_DIR)/mini-initramfs && find . | cpio -o -H newc | lzma -3 > \
+		/$(INSTALLER_DIR)/images/$(SNAME)-$(VERSION)-mini-initramfs.img
+	
+	# just to be able to list files size to the log
+	cp -R /$(INSTALLER_DIR)/mini-initramfs $(FLOPPY_ROOT_DIR)
+	@$(LIST_FILES_SIZES)
+	mv $(SIZELIST) $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(SNAME)-$(VERSION)-mini-initramfs.img
+	# and cleanup
+	rm -fr $(FLOPPY_ROOT_DIR)/*
+
+	#################################################################################################
+	# END of mini-initramfs section									#
+	#################################################################################################
+endif # eq i486
+
+endif # neq sparc
+endif # neq skip floppy
+
+	#################################################################################################
+	#################################################################################################
+	# END of floppy and cdrom initramfs section							#
+	#################################################################################################
+	#################################################################################################
+
+	# yes we want it rebuilt each time, so no POSTBUILD

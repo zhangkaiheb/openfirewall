@@ -1,0 +1,353 @@
+###############################################################################
+# This file is part of the Openfirewall.                                    #
+#                                                                             #
+# Openfirewall is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# Openfirewall is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with Openfirewall; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for Openfirewall build                                #
+#                                                                             #
+# $Id: ipcop-boot-cd 7583 2014-05-31 11:16:33Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = cdrom
+HOST_ARCH  = all
+OTHER_SRC  = no
+
+THISAPP    = cdrom
+DL_FILE    = rawrite.exe
+DL_FROM    = http://www.tux.org/pub/dos/rawrite
+TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
+
+# A common name for the ISO on all architectures
+IPCOP_ISO = $(SNAME)-$(VERSION)-install-cd.$(MACHINE).iso
+
+PACKAGE_LIST := $(LFS_BASEDIR)/doc/$(NAME)-$(VERSION)-packages-list.$(MACHINE).txt
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+##objects = $(DL_FILE) \
+
+objects = rawwritewin-0.7.zip \
+	admin-de-1.4.pdf \
+	admin-en-1.4.12.pdf \
+	install-de-1.4.pdf \
+	install-en-1.4.pdf \
+	install-fr-1.4.pdf \
+	quickstart-en-1.4.pdf \
+	quickstart-fr-1.4.pdf
+
+##$(DL_FILE)			= $(DL_FROM)/$(DL_FILE)
+rawwritewin-0.7.zip		= http://www.chrysocome.net/downloads/rawwritewin-0.7.zip
+admin-de-1.4.pdf		= $(URL_SFNET)/ipcop/ipcop-admin-de-1.4.pdf
+admin-en-1.4.12.pdf		= $(URL_SFNET)/ipcop/ipcop-admin-en-1.4.12.pdf
+install-de-1.4.pdf		= $(URL_SFNET)/ipcop/ipcop-install-de-1.4.pdf
+install-en-1.4.pdf		= $(URL_SFNET)/ipcop/ipcop-install-en-1.4.pdf
+install-fr-1.4.pdf		= $(URL_SFNET)/ipcop/ipcop-install-fr-1.4.pdf
+quickstart-en-1.4.pdf		= $(URL_SFNET)/ipcop/ipcop-quickstart-en-1.4.pdf
+quickstart-fr-1.4.pdf		= $(URL_SFNET)/ipcop/ipcop-quickstart-fr-1.4.pdf
+
+##$(DL_FILE)_MD5			= 7dac6ea496014d32dbce6c50feb254ca
+rawwritewin-0.7.zip_MD5		= 0130b497c8c3bc7d136a4236b0d9fbf6
+admin-de-1.4.pdf_MD5		= ce0816ca9396aee082ce4433d5639af3
+admin-en-1.4.12.pdf_MD5		= e50d659c288e40ba608d382791d050f0
+install-de-1.4.pdf_MD5		= 2deb82e00f4191ab9b5be6e416be7562
+install-en-1.4.pdf_MD5		= 7efdb5bc51a70920f771086cfdd55ecf
+install-fr-1.4.pdf_MD5		= 2626cb0a2f53b08e22e4f4e4680ccf67
+quickstart-en-1.4.pdf_MD5	= 045e40576d980ac9b1d04e70699c2804
+quickstart-fr-1.4.pdf_MD5	= 82b1c22c337860ea359158e296c9ca51
+
+install : $(TARGET)
+
+check : $(patsubst %,$(DIR_CHK)/%,$(objects))
+
+download :$(patsubst %,$(DIR_DL)/%,$(objects))
+
+md5 : $(subst %,%_MD5,$(objects))
+
+###############################################################################
+# Downloading, checking, md5sum
+###############################################################################
+
+$(patsubst %,$(DIR_CHK)/%,$(objects)) :
+	@$(CHECK)
+
+$(patsubst %,$(DIR_DL)/%,$(objects)) :
+	@$(LOAD)
+
+$(subst %,%_MD5,$(objects)) :
+	@$(MD5)
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+$(TARGET) : $(patsubst %,$(DIR_DL)/%,$(objects))
+
+	rm -rf /$(INSTALLER_DIR)/cdrom /tmp/*
+	mkdir -p /$(INSTALLER_DIR)/cdrom/{doc,dosutils,images}
+
+	# Create list of packages include in cdrom doc
+	# Add title on top
+	echo "List of software packages used to build $(NAME) Version: $(VERSION) for $(MACHINE)" > $(PACKAGE_LIST)
+	# Then add content with filter for strings without mean outside of our build system
+	for i in `ls -1tr $(DIR_INFO)/0{1,2,3,4}*/* | sed 's/-pass.*$$//' | egrep -v 'stage|adjust-toolchain|strip'`; do \
+		echo " * `basename $$i`"; done | sort -u >> $(PACKAGE_LIST)
+
+	# Create the global include list from each package rootfile
+	find $(DIR_SRC)/config/rootfiles/common -maxdepth 1 -type f | grep -v SKIP | xargs cat >> /tmp/ROOTFILES
+	find $(DIR_SRC)/config/rootfiles/arch_$(MACHINE) -maxdepth 1 -type f | grep -v SKIP | xargs cat >>/tmp/ROOTFILES
+	echo $(CONFIG_ROOT) | sed -e 's/\///' >> /tmp/ROOTFILES
+	sed -e "s/KVER/$(KVER)/g" -e "s/PERLVER/$(PERLVER)/g" -e "s/MACHINE/$(MACHINE)/g" -i /tmp/ROOTFILES
+
+	sed -e '/^#/d' -i /tmp/ROOTFILES
+	sed -e '/^proc/d' -i /tmp/ROOTFILES
+	sed -e '/^sys/d' -i /tmp/ROOTFILES
+
+	echo "tar ROOTFILES"
+	tar -v -c -C /	--files-from=/tmp/ROOTFILES \
+			-f /tmp/$(SNAME).tar
+
+###			--exclude=tmp/$(SNAME).tar \
+###			--exclude='dev/pts/*' \
+###			--exclude='proc/*' \
+###			--exclude='sys/*' \
+###			--exclude='#*' \
+
+	echo "tar ROOTFILES complete"
+	# A file may be include more than once in tar (directly by file name and by directory inclusion)
+	# Avoid that, creating again tar from fs
+	tar -x -C /tmp -f /tmp/$(SNAME).tar
+	rm -f /tmp/$(SNAME).tar /tmp/ROOTFILES
+
+	# Build list of everything include, removing '.' line, './' prefix for all-files to stay the same
+	cd /tmp && find . | sed -e '/^\.$$/d' -e 's|^\./||' | sort > ${ALLFILES}
+	# Create a list of files only (no directories) for md5sum and scanelf usage later
+	# Keep '/' prefix as that's what we need for md5sum and scanelf
+	cd /tmp && find . -type f | sed -e '/^\.$$/d' -e 's|^\.||' | sort >${ALL_NODIR}
+
+	# These used to be done in the installer - no more....
+	cd /tmp/lib/modules/$(KVER) && touch modules.dep
+
+	# We do the stripping here because we don't want to destroy our development tree by stripping all symbols
+	# Instead we strip all binaries and libraries as we create the ISO.
+	# It's safe to do strip --strip-all even on libraries as those files will not be used for compilation.
+	# kernel modules are compressed, strip does not yet no to handle that
+	# Using xargs strip, we need to allow failure that happen with non elf files
+	# Filter non elf files error
+	# Similar code is in lfs/update
+	cd /tmp && find ${EXEC_PATH} -type f | xargs /$(TOOLS_DIR)/bin/strip --strip-all 2>&1 | \
+		grep -v 'File format not recognized' || true
+
+	# Create a tmp directory
+	cd /tmp && mkdir -p tmp
+
+	#####
+	cd /tmp && mkdir -p sys
+	cd /tmp && mkdir -p proc
+
+	# Create a tarball
+	cd /tmp && tar -czf /$(INSTALLER_DIR)/cdrom/ipcop-$(VERSION).tar.gz .
+	cd /tmp && rm -rf *
+
+	# Other files
+	sed 's/VERSION/$(VERSION)/' $(DIR_SRC)/config/cdrom/README.txt > \
+								/$(INSTALLER_DIR)/cdrom/README.txt
+	cp $(DIR_SRC)/doc/COPYING				/$(INSTALLER_DIR)/cdrom/
+	cp /$(INSTALLER_DIR)/images/*.img			/$(INSTALLER_DIR)/cdrom/images
+	
+	# Remove the mini-initramfs image as it's part of the boot floppy
+	rm -f /$(INSTALLER_DIR)/cdrom/images/$(SNAME)-$(VERSION)-mini-initramfs.img
+
+	# Remove the cdinitramfs image as it doesn't make sense to have it on the CDROM
+	rm -f /$(INSTALLER_DIR)/cdrom/images/cdinitramfs-$(VERSION).img
+
+	#mkdir -p /$(INSTALLER_DIR)/cdrom/doc/{english,francais,deutsch}
+	#cp $(DIR_DL)/*-de-*.pdf							/$(INSTALLER_DIR)/cdrom/doc/deutsch
+	#cp $(DIR_DL)/*-en-*.pdf							/$(INSTALLER_DIR)/cdrom/doc/english
+	#cp $(DIR_DL)/*-fr-*.pdf							/$(INSTALLER_DIR)/cdrom/doc/francais
+	#cp $(DIR_SRC)/doc/ChangeLog						/$(INSTALLER_DIR)/cdrom/doc
+	cp $(DIR_SRC)/doc/$(NAME)-$(VERSION)-packages-list.$(MACHINE).txt	/$(INSTALLER_DIR)/cdrom/doc
+
+ifeq "$(MACHINE)" "i486"
+	cp $(DIR_SRC)/doc/README-netboot.$(MACHINE)				/$(INSTALLER_DIR)/cdrom/doc
+##	cp $(DIR_DL)/rawrite.exe				/$(INSTALLER_DIR)/cdrom/dosutils
+	unzip -j -L $(DIR_DL)/rawwritewin*.zip -x "*.txt" -d	/$(INSTALLER_DIR)/cdrom/dosutils
+endif
+ifeq "$(MACHINE)" "x86_64"
+	cp $(DIR_SRC)/doc/README-netboot.$(MACHINE)				/$(INSTALLER_DIR)/cdrom/doc
+##	cp $(DIR_DL)/rawrite.exe				/$(INSTALLER_DIR)/cdrom/dosutils
+	unzip -j -L $(DIR_DL)/rawwritewin*.zip -x "*.txt" -d	/$(INSTALLER_DIR)/cdrom/dosutils
+endif
+
+# make the ISO
+
+ifeq "$(MACHINE)" "i486"
+	mkdir -p                            /$(INSTALLER_DIR)/cdrom/boot/isolinux
+	dd if=/dev/zero  bs=1k count=2 >    /$(INSTALLER_DIR)/cdrom/boot/isolinux/boot.catalog
+	cp /$(INSTALLER_DIR)/images/cdinitramfs-$(VERSION).img /$(INSTALLER_DIR)/cdrom/boot/isolinux/instroot.img
+	cp /boot/vmlinuz-$(KVER)            /$(INSTALLER_DIR)/cdrom/boot/isolinux/vmlinuz
+	cp /boot/memtest                    /$(INSTALLER_DIR)/cdrom/boot/isolinux/memtest
+	# IPAPPEND exist on PXELINUX only
+	sed -e '/IPAPPEND/d' \
+		-e "s|LOCALBOOTTYPE|0x80|g" \
+		-e "s|ipcopboot=|ipcopboot=cdrom|g" \
+			$(DIR_SRC)/config/arch/$(MACHINE)/syslinux.cfg >    /$(INSTALLER_DIR)/cdrom/boot/isolinux/isolinux.cfg
+	sed -e 's/boot IPCop/boot IPCop $(VERSION)/' \
+			$(DIR_SRC)/config/arch/$(MACHINE)/install-message > /$(INSTALLER_DIR)/cdrom/boot/isolinux/message
+	sed -e 's/boot IPCop/boot IPCop $(VERSION)/' \
+			$(DIR_SRC)/config/arch/$(MACHINE)/f1.txt >          /$(INSTALLER_DIR)/cdrom/boot/isolinux/f1.txt
+	sed -e 's/boot IPCop/boot IPCop $(VERSION)/' \
+			$(DIR_SRC)/config/arch/$(MACHINE)/f2.txt >          /$(INSTALLER_DIR)/cdrom/boot/isolinux/f2.txt
+	sed -e 's/boot IPCop/boot IPCop $(VERSION)/' \
+			$(DIR_SRC)/config/arch/$(MACHINE)/f3.txt >          /$(INSTALLER_DIR)/cdrom/boot/isolinux/f3.txt
+
+	cp /usr/share/syslinux/isolinux.bin             /$(INSTALLER_DIR)/cdrom/boot/isolinux/isolinux.bin
+	cp /usr/share/syslinux/*.c32                    /$(INSTALLER_DIR)/cdrom/boot/isolinux/
+	cp $(DIR_SRC)/config/arch/$(MACHINE)/splash.rle /$(INSTALLER_DIR)/cdrom/boot/isolinux/splash.rle
+
+	cd /$(INSTALLER_DIR)/cdrom && xorrisofs \
+		-joliet -rational-rock \
+		-publisher "The IPCop Team" \
+		-volid "$(NAME)-$(VERSION) ($(MACHINE))" \
+		-o /$(INSTALLER_DIR)/images/$(IPCOP_ISO) \
+		-b boot/isolinux/isolinux.bin \
+		-no-emul-boot \
+		-boot-load-size 4 \
+		-boot-info-table \
+		-c boot/isolinux/boot.catalog \
+		.
+
+	# hybrid ISO image
+	/usr/bin/isohybrid /$(INSTALLER_DIR)/images/$(IPCOP_ISO)
+endif
+
+ifeq "$(MACHINE)" "x86_64"
+	mkdir -p                            /$(INSTALLER_DIR)/cdrom/boot/isolinux
+	dd if=/dev/zero  bs=1k count=2 >    /$(INSTALLER_DIR)/cdrom/boot/isolinux/boot.catalog
+	cp /$(INSTALLER_DIR)/images/cdinitramfs-$(VERSION).img /$(INSTALLER_DIR)/cdrom/boot/isolinux/instroot.img
+	cp /boot/vmlinuz-$(KVER)            /$(INSTALLER_DIR)/cdrom/boot/isolinux/vmlinuz
+####	cp /boot/memtest                    /$(INSTALLER_DIR)/cdrom/boot/isolinux/memtest
+	# IPAPPEND exist on PXELINUX only
+	sed -e '/IPAPPEND/d' \
+		-e "s|LOCALBOOTTYPE|0x80|g" \
+		-e "s|ipcopboot=|ipcopboot=cdrom|g" \
+			$(DIR_SRC)/config/arch/$(MACHINE)/syslinux.cfg >    /$(INSTALLER_DIR)/cdrom/boot/isolinux/isolinux.cfg
+	sed -e 's/boot IPCop/boot IPCop $(VERSION)/' \
+			$(DIR_SRC)/config/arch/$(MACHINE)/install-message > /$(INSTALLER_DIR)/cdrom/boot/isolinux/message
+	sed -e 's/boot IPCop/boot IPCop $(VERSION)/' \
+			$(DIR_SRC)/config/arch/$(MACHINE)/f1.txt >          /$(INSTALLER_DIR)/cdrom/boot/isolinux/f1.txt
+	sed -e 's/boot IPCop/boot IPCop $(VERSION)/' \
+			$(DIR_SRC)/config/arch/$(MACHINE)/f2.txt >          /$(INSTALLER_DIR)/cdrom/boot/isolinux/f2.txt
+	sed -e 's/boot IPCop/boot IPCop $(VERSION)/' \
+			$(DIR_SRC)/config/arch/$(MACHINE)/f3.txt >          /$(INSTALLER_DIR)/cdrom/boot/isolinux/f3.txt
+
+	cp /usr/share/syslinux/isolinux.bin             /$(INSTALLER_DIR)/cdrom/boot/isolinux/isolinux.bin
+	cp /usr/share/syslinux/*.c32                    /$(INSTALLER_DIR)/cdrom/boot/isolinux/
+	cp $(DIR_SRC)/config/arch/$(MACHINE)/splash.rle /$(INSTALLER_DIR)/cdrom/boot/isolinux/splash.rle
+
+	cd /$(INSTALLER_DIR)/cdrom && xorrisofs \
+		-joliet -rational-rock \
+		-publisher "The IPCop Team" \
+		-volid "$(NAME)-$(VERSION) ($(MACHINE))" \
+		-o /$(INSTALLER_DIR)/images/$(IPCOP_ISO) \
+		-b boot/isolinux/isolinux.bin \
+		-no-emul-boot \
+		-boot-load-size 4 \
+		-boot-info-table \
+		-c boot/isolinux/boot.catalog \
+		.
+
+	# hybrid ISO image
+	/usr/bin/isohybrid /$(INSTALLER_DIR)/images/$(IPCOP_ISO)
+endif
+
+ifeq "$(MACHINE)" "alpha"
+	mkdir -p /$(INSTALLER_DIR)/cdrom/etc
+	cp /boot/vmlinuz-$(KVER)				/$(INSTALLER_DIR)/cdrom/vmlinuz
+	cp /$(INSTALLER_DIR)/images/cdinitramfs-$(VERSION).img	/$(INSTALLER_DIR)/cdrom/boot/instroot-$(VERSION).img
+	cp /boot/bootlx						/$(INSTALLER_DIR)/cdrom
+	sed "s,VERSION,$(VERSION),g" 				$(DIR_SRC)/config/arch/$(MACHINE)/aboot-install.conf > \
+								/$(INSTALLER_DIR)/cdrom/etc/aboot.conf
+
+	cd /$(INSTALLER_DIR)/cdrom && xorrisofs			-r \
+								-publisher "The IPCop Team" \
+								-V "$(NAME)-$(VERSION) ($(MACHINE))" \
+								-o /$(INSTALLER_DIR)/images/$(IPCOP_ISO) \
+								.
+	isomarkboot						/$(INSTALLER_DIR)/images/$(IPCOP_ISO) bootlx
+endif
+
+ifeq "$(MACHINE)" "ppc"
+	mkdir -p /$(INSTALLER_DIR)/cdrom/boot
+	cp $(DIR_SRC)/config/cdrom/README_OldWorld_Macs.txt	/$(INSTALLER_DIR)/cdrom
+	cp /boot/vmlinuz-$(KVER)				/$(INSTALLER_DIR)/cdrom/boot/vmlinuz
+	cp /$(INSTALLER_DIR)/images/cdinitramfs-$(VERSION).img	/$(INSTALLER_DIR)/cdrom/boot/instroot-$(VERSION).img
+	sed 	-e "s,VERSION,$(VERSION),g" \
+		-e "s|ipcopboot=|ipcopboot=cdrom|g"		$(DIR_SRC)/config/arch/$(MACHINE)/yaboot-install.conf > \
+								/$(INSTALLER_DIR)/cdrom/boot/yaboot.conf
+	cp /usr/lib/yaboot/yaboot				/$(INSTALLER_DIR)/cdrom/boot
+	cp $(DIR_SRC)/config/arch/$(MACHINE)/ofboot-install.b	/$(INSTALLER_DIR)/cdrom/boot/ofboot.b
+	sed -e 's/boot IPCop/boot IPCop $(VERSION)/'		$(DIR_SRC)/config/kernel/install-message > \
+								/$(INSTALLER_DIR)/cdrom/boot/message
+
+	cd /$(INSTALLER_DIR) && xorrisofs			-r \
+								-publisher "The IPCop Team" \
+								-V "$(NAME)-$(VERSION) ($(MACHINE))" \
+								-o /$(INSTALLER_DIR)/images/$(IPCOP_ISO) \
+								-hfs \
+								-part \
+								-map $(DIR_SRC)/config/arch/$(MACHINE)/hfs.map \
+								-no-desktop \
+								-hfs-volid "$(NAME)-$(VERSION) $(MACHINE) CDRom" \
+								-hfs-bless cdrom/boot \
+								cdrom
+endif
+
+ifeq "$(MACHINE)" "sparc"
+	cp $(DIR_SRC)/doc/README-netboot.$(MACHINE)		/$(INSTALLER_DIR)/cdrom/doc
+	mkdir -p						/$(INSTALLER_DIR)/cdrom/boot
+	cp -a /boot/{isofs,second}.b				/$(INSTALLER_DIR)/cdrom/boot
+	cp /boot/vmlinuz-$(KVER)				/$(INSTALLER_DIR)/cdrom/boot/vmlinuz64
+	cp /$(INSTALLER_DIR)/images/cdinitramfs-$(VERSION).img	/$(INSTALLER_DIR)/cdrom/boot/instroot-$(VERSION).img
+	sed 	-e "s,VERSION,$(VERSION),g" \
+		-e "s|ipcopboot=|ipcopboot=cdrom|g"		$(DIR_SRC)/config/arch/$(MACHINE)/silo-install.conf > \
+								/$(INSTALLER_DIR)/cdrom/boot/silo.conf
+	sed -e 's/boot IPCop/boot IPCop $(VERSION)/'		$(DIR_SRC)/config/kernel/install-message > \
+								/$(INSTALLER_DIR)/cdrom/boot/message
+
+	cd /$(INSTALLER_DIR)/cdrom && xorrisofs			-r \
+								-publisher "The IPCop Team" \
+								-V "$(NAME)-$(VERSION) ($(MACHINE))" \
+								-o /$(INSTALLER_DIR)/images/$(IPCOP_ISO) \
+								-sparc-label "$(NAME)-$(VERSION) $(MACHINE) CDRom" \
+								-G boot/isofs.b \
+								-B ... \
+								.
+endif
+
+	# yes we want it rebuild at each time, so no POSTBUILD

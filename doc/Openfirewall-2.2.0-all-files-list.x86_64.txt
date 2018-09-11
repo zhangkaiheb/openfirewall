@@ -1054,7 +1054,6 @@ root/.vimrc
 run
 run/dnsmasq
 run/pluto
-run/run
 run/utmp
 sbin
 sbin/agetty
