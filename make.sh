@@ -3,20 +3,20 @@
 #
 #########################################################################################################
 #
-# This file is part of the IPCop Firewall.
+# This file is part of the OpenFirewall.
 #
-# IPCop is free software; you can redistribute it and/or modify
+# Openfirewall is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# IPCop is distributed in the hope that it will be useful,
+# Openfirewall is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with IPCop.  If not, see <http://www.gnu.org/licenses/>.
+# along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2001 Mark Wormgoor <mark@wormgoor.com>.
 #
@@ -44,37 +44,36 @@
 #########################################################################################################
 
 # The official project name
-NAME="IPCop"
+NAME="Openfirewall"
 
-# Just a short name for IPCop
-SNAME="ipcop"
+# Just a short name for Openfirewall
+SNAME="openfirewall"
 
-# This is the IPCop version number for the release.
+# This is the Openfirewall version number for the release.
 VERSION=2.2.0
 
 # VERSIONSTEP is only used when the update is split into 2 versions/packages.
 #VERSIONSTEP=2.1.0
 
-# This is the last official IPCop version number. Needed for ./make.sh newupdate.
+# This is the last official Openfirewall version number. Needed for ./make.sh newupdate.
 PREVIOUSVERSION=2.1.9
-# This is the SVN revision number for the last IPCop version. Needed for ChangeLog.
+# This is the SVN revision number for the last Openfirewall version. Needed for ChangeLog.
 PREVIOUSSVNREV=7814
 
 # Just an arbitrary name for the downloadable, prebuilt toolchain (if you want to save time compiling).
 TOOLCHAINVERSION=2.1.4
 
-# A collection of all the external software needed to build, install, and run ipcop.  This is for GPL compliance.
+# A collection of all the external software needed to build, install, and run openfirewall.  This is for GPL compliance.
 OTHERSRC=${SNAME}-${VERSION}-othersrc.tar.bz2
 
-# The official IPCop slogan
+# The official Openfireall slogan
 SLOGAN="The Bad Packets Stop Here"
 
-# Where the ipcop specific config files will be installed (this is the path on a running ipcop system)
-#CONFIG_ROOT=/var/ipcop
+# Where the openfireall specific config files will be installed (this is the path on a running openfirewall system)
 CONFIG_ROOT=/var/ofw
 
 # What's the kernel version we're building (this is not the host kernel)
-KVER=`grep --max-count=1 VER lfs/linux | awk '{ print $3 }' | tr -d '\n'; grep --max-count=1 IPCOPKRELEASE lfs/linux | awk '{ print $3 }'`
+KVER=`grep --max-count=1 VER lfs/linux | awk '{ print $3 }' | tr -d '\n'; grep --max-count=1 OFW_KRELEASE lfs/linux | awk '{ print $3 }'`
 
 # Get Perl version
 PERLVER=`grep --max-count=1 VER lfs/perl | awk '{ print $3 }'  | tr -d '\n'`
@@ -105,7 +104,7 @@ export BASEDIR
 DIR_CHK=${BASEDIR}/cache/check
 
 # This is an optional .config file with variables overriding the default values
-IPCOP_CONFIG=${BASEDIR}/.config
+OFW_CONFIG=${BASEDIR}/.config
 
 # Set up INSTALLER_DIR
 INSTALLER_DIR=installer
@@ -123,11 +122,11 @@ PASS=""
 #LFS_BRANCH=stable
 LFS_BRANCH=development
 
-# This is the URL that lists the versions of packages for the LFS branch we are using as the basis for IPCop
+# This is the URL that lists the versions of packages for the LFS branch we are using as the basis for Openfirewall
 LFS_PACKAGES_URL=http://www.linuxfromscratch.org/lfs/view/${LFS_BRANCH}/chapter03/packages.html
 
 # HOST SYSTEM REQUIREMENTS
-# IPCop-2.0 is based on LFS-6.6 / LFS-6.7.
+# Openfirewall-2.0 is based on LFS-8.0.
 # Check http://www.linuxfromscratch.org/lfs/view/stable/prologue/hostreqs.html for a list of
 # host system requirements.  The values below are based on LFS-6.3
 
@@ -221,7 +220,7 @@ do
 	# Should we skip creation of package with avm drivers
 	SKIP_AVM_DRIVERS=yes && CUSTOMIZABLE_VARIABLES[${COUNTER}]="SKIP_AVM_DRIVERS" && COUNTER=$[ ${COUNTER} + 1 ]
 
-	# If you *absolutely* want to build ipcop as root, override this in .config. STRONGLY DISCOURAGED
+	# If you *absolutely* want to build openfirewall as root, override this in .config. STRONGLY DISCOURAGED
 	ALLOW_ROOT_TO_BUILD=no && CUSTOMIZABLE_VARIABLES[${COUNTER}]="ALLOW_ROOT_TO_BUILD" && COUNTER=$[ ${COUNTER} +1 ]
 
 	# A timeout variable (in seconds) for when we need user input within a specified amount of time
@@ -396,8 +395,7 @@ TOOLS_DIR=tools_${MACHINE}
 ##	export DISTCC_DIR=${BASEDIR}/distcc
 ##fi
 
-# This is the directory that holds the newly built ipcop system
-#LFS=${BASEDIR}/build_${MACHINE}/ipcop
+# This is the directory that holds the newly built openfirewall system
 LFS=${BASEDIR}/build_${MACHINE}/ofw
 
 # For toolchain LFS chap5
@@ -474,8 +472,8 @@ rm -f ${BASEDIR}/log_${MACHINE}/_build_06_othersrc-list.log
 #													#
 # NO MORE VARIABLE OVERRIDING BELOW THIS LINE								#
 #########################################################################################################
-if [ -e ${IPCOP_CONFIG} ]; then
-	echo -ne "${BOLD}*** IPCop build .config found. Parsing ...${NORMAL}\n"
+if [ -e ${OFW_CONFIG} ]; then
+	echo -ne "${BOLD}*** Openfirewall build .config found. Parsing ...${NORMAL}\n"
 
 	# Now write the list of overwritten variables
 	echo "=== LIST OF OVERWRITTEN VARIABLES ===" >> ${PREPLOGFILE}
@@ -484,16 +482,16 @@ if [ -e ${IPCOP_CONFIG} ]; then
 	IFS=$'\n'
 
 	# Take care of garbage
-	sed -i "s@^ .*@#& ## DISABLED by make.sh@g" ${IPCOP_CONFIG}
+	sed -i "s@^ .*@#& ## DISABLED by make.sh@g" ${OFW_CONFIG}
 
-	for LINE in `grep -v '^#' ${IPCOP_CONFIG}`
+	for LINE in `grep -v '^#' ${OFW_CONFIG}`
 	do
 		VARIABLE=`echo "${LINE}" | cut -d= -f 1`
 		VALUE=`echo "${LINE}" | cut -d= -f 2-`
 
 		if [ -z $(eval echo "\${${VARIABLE}}") ]; then
 			echo -ne "*** ${WARN}Ignoring invalid variable ${VARIABLE} and disabling in .config\n"
-			sed -i "s@^.*${VARIABLE}.*@#& ## DISABLED by make.sh@g" ${IPCOP_CONFIG}
+			sed -i "s@^.*${VARIABLE}.*@#& ## DISABLED by make.sh@g" ${OFW_CONFIG}
 		elif echo ${CUSTOMIZABLE_VARIABLES[*]} | grep -qEi "${VARIABLE}"; then
 			echo -ne "*** Setting ${BOLD}${VARIABLE}${NORMAL} to '${BOLD}${VALUE}${NORMAL}'\n"
 
@@ -510,7 +508,7 @@ if [ -e ${IPCOP_CONFIG} ]; then
 
 		else
 			echo -ne "*** ${WARN}Skipping non-customizable variable ${VARIABLE} and disabling in .config\n"
-			sed -i "s@^.*${VARIABLE}.*@#& ## DISABLED by make.sh@g" ${IPCOP_CONFIG}
+			sed -i "s@^.*${VARIABLE}.*@#& ## DISABLED by make.sh@g" ${OFW_CONFIG}
 		fi
 	done
 	IFS=${ORG_IFS}
@@ -518,7 +516,7 @@ if [ -e ${IPCOP_CONFIG} ]; then
 
 	echo -ne "${BOLD}*** Done parsing .config${NORMAL}\n"
 else
-	echo -ne "${BOLD}*** IPCop build .config not found. Using defaults${NORMAL}\n"
+	echo -ne "${BOLD}*** Openfirewall build .config not found. Using defaults${NORMAL}\n"
 fi
 
 #########################################################################################################
@@ -852,9 +850,9 @@ exiterror()
 
 
 
-#########################################################################################################
-# This is the function that makes sure our build environment meets the requirements for building ipcop	#
-#########################################################################################################
+###############################################################################################################
+# This is the function that makes sure our build environment meets the requirements for building openfirewall #
+###############################################################################################################
 check_build_env()
 {
 	echo -ne "${BOLD}*** Checking for host prerequisites${NORMAL}\n"
@@ -927,8 +925,8 @@ check_build_env()
 			echo -ne "${BOLD}"
 			echo -ne "\nAs root, use visudo to add these lines to /etc/sudoers\n"
 			echo -ne "Make sure you don't break the lines!\n\n"
-			echo -ne "# *** IPCop configuration ***\n"
-			echo -ne "User_Alias IPCOP_BUILDER = ${CURRENT_USER}\n\n"
+			echo -ne "# *** Openfirewall configuration ***\n"
+			echo -ne "User_Alias OFW_BUILDER = ${CURRENT_USER}\n\n"
 			echo -ne "Cmnd_Alias BIND = ${BIND} /dev* ${LFS}/dev*, \\ \n"
 			echo -ne "\t\t${BIND} /proc ${LFS}/proc, \\ \n"
 			echo -ne "\t\t${BIND} /sys ${LFS}/sys, \\ \n"
@@ -951,8 +949,8 @@ check_build_env()
 			echo -ne "Cmnd_Alias UMOUNT = ${UMOUNT} ${LFS}/*, \\ \n"
 			echo -ne "\t\t${UMOUNT} /dev/loop*, \\ \n"
 			echo -ne "\t\t${UMOUNT} /run/shm\n\n"
-			echo -ne "IPCOP_BUILDER	ALL = NOPASSWD: BIND,CHMOD,DU,LN,LOSETUP,MKDIR,MKNOD,MV,NICECMD,RM,UMOUNT\n"
-			echo -ne "# *** End of IPCop configuration ***\n"
+			echo -ne "OFW_BUILDER	ALL = NOPASSWD: BIND,CHMOD,DU,LN,LOSETUP,MKDIR,MKNOD,MV,NICECMD,RM,UMOUNT\n"
+			echo -ne "# *** End of Openfirewall configuration ***\n"
 			echo -ne "${NORMAL}"
 
 			exiterror "sudo is not fully configured for user \"${CURRENT_USER}\"."
@@ -1075,7 +1073,7 @@ prepareenv()
 	#################################################################################
 	# Make sure ${LFS}/bin/bash exists.  We used to do this check in lfs/bash, but	#
 	# it's better to do it here so that the toolchain becomes completely		#
-	# self-sufficient (ie you can start with no build_MACHINE/ipcop and lfs/stage2)	#
+	# self-sufficient (ie you can start with no build_MACHINE/ofw and lfs/stage2)	#
 	#################################################################################
 	${SUDO} ${MKDIR} ${LFS}/bin
 	if [ ! -f ${LFS}/bin/bash ]; then
@@ -1452,7 +1450,7 @@ entershell()
 	STAGE_ORDER=02; STAGE=base
 
 	# Set CCACHE_COMPILERCHECK
-	###for GCC_AVAILABLE in ${BASEDIR}/build_${MACHINE}/ipcop/usr/bin/gcc /${TOOLS_DIR}/bin/${TARGET_2}-gcc; do
+	###for GCC_AVAILABLE in ${BASEDIR}/build_${MACHINE}/ofw/usr/bin/gcc /${TOOLS_DIR}/bin/${TARGET_2}-gcc; do
 	for GCC_AVAILABLE in ${BASEDIR}/build_${MACHINE}/ofw/usr/bin/gcc /${TOOLS_DIR}/bin/${TARGET_2}-gcc; do
 		[ -f ${GCC_AVAILABLE} ] && update-gcc-hash "$GCC_AVAILABLE" && break
 	done
@@ -1815,7 +1813,7 @@ base_build()
 	chroot_make mpfr
 	chroot_make mpc
 	chroot_make gcc
-##	update-gcc-hash "${BASEDIR}/build_${MACHINE}/ipcop/usr/bin/gcc"
+##	update-gcc-hash "${BASEDIR}/build_${MACHINE}/ofw/usr/bin/gcc"
 ##	chroot_make sed
 	chroot_make bzip2
 	chroot_make pkg-config
@@ -1892,13 +1890,13 @@ base_build()
 
 
 #########################################################################################################
-# This builds the entire stage "ipcop"									#
+# This builds the entire stage "ofw"	                                 								#
 #########################################################################################################
-ipcop_build()
+ofw_build()
 {
-	beautify build_stage "Building ipcop"
+	beautify build_stage "Building openfirewall"
 	STAGE_ORDER=03
-	STAGE=ipcop
+	STAGE=ofw
 
 	# Build these first as some of the kernel packages below rely on
 	# these for some of their client program functionality
@@ -1907,7 +1905,7 @@ ipcop_build()
 	chroot_make Python		# glib require Python
 	chroot_make glib		# for cairo
 	chroot_make tcl			# for krb5 and db tests
-	chroot_make ipcop
+	chroot_make ofw
 	chroot_make which
 	chroot_make net-tools
 	chroot_make libusb
@@ -1982,8 +1980,8 @@ ipcop_build()
 	chroot_make conntrack-tools   ###############################
 	chroot_make iptstate
 	chroot_make iftop
-	chroot_make ipcop-gui
-	chroot_make ipcop-progs
+	chroot_make ofw-gui
+	chroot_make ofw-progs
 	chroot_make iperf
 	chroot_make iputils
 ##	chroot_make isdn4k-utils
@@ -2048,7 +2046,7 @@ ipcop_build()
 	chroot_make libnl
 	chroot_make iw
 	chroot_make 3c5x9setup
-} # End of ipcop_build()
+} # End of ofw_build()
 
 
 
@@ -2072,7 +2070,7 @@ misc_build()
 	chroot_make slang
 	chroot_make newt
 	chroot_make busybox
-	chroot_make ipcop-lang
+	chroot_make ofw-lang
 	chroot_make mklibs
 	chroot_make dosfstools
 	if [ x"${SKIP_FLOPPY_IMAGES}" != x"yes" ]; then
@@ -2098,10 +2096,10 @@ packages_build()
 	STAGE=packages
 
 	chroot_make fix-up
-	chroot_make ipcop-installer
-	chroot_make ipcop-initramfs
+	chroot_make ofw-installer
+	chroot_make ofw-initramfs
 	if [ x"${SKIP_FLOPPY_IMAGES}" != x"yes" ]; then
-		chroot_make ipcop-boot-floppy
+		chroot_make ofw-boot-floppy
 	else
 		echo "Skip floppy images"
 	fi
@@ -2113,17 +2111,17 @@ packages_build()
 
 ###	if [ "${VERSIONSTEP}" ]; then
 ###		PASS="${VERSIONSTEP}"
-###		chroot_make ipcop-update
+###		chroot_make ofw-update
 ###	fi
 ###	PASS="${VERSION}"
-###	chroot_make ipcop-update
+###	chroot_make ofw-update
 ###	PASS=""
-	chroot_make ipcop-boot-cd
-	chroot_make ipcop-boot-net
+	chroot_make ofw-boot-cd
+	chroot_make ofw-boot-net
 	chroot_make check_files
 
 	if [ x"${SKIP_USB_IMAGES}" != x"yes" ]; then
-		chroot_make ipcop-boot-usb
+		chroot_make ofw-boot-usb
 	else
 		echo "Skip usb images to save time"
 	fi
@@ -2394,7 +2392,7 @@ build)
 
 	base_build
 
-	ipcop_build
+	ofw_build
 
 	misc_build
 
@@ -2438,7 +2436,7 @@ buildsingle)
 	if [ ${STAGE_ORDER} == '02' ]; then
 		STAGE=base
 	elif [ ${STAGE_ORDER} == '03' ]; then
-		STAGE=ipcop
+		STAGE=ofw
 	elif [ ${STAGE_ORDER} == '04' ]; then
 		STAGE=misc
 	else
@@ -2518,7 +2516,7 @@ check_url_clean)
 	;;
 check_versions)
 		echo -ne "${BOLD}*** Comparing LFS-${LFS_BRANCH} & ${NAME}-${VERSION}"
-		echo -ne "${SET_REQUIRED_COL}      LFS${SET_FOUND_COL}    IPCOP"
+		echo -ne "${SET_REQUIRED_COL}      LFS${SET_FOUND_COL}    OPENFIREWALL"
 		echo -ne "${SET_RESULT_COL} status${NORMAL}\n"
 
 		wget -q ${LFS_PACKAGES_URL} -O - \
@@ -2550,7 +2548,7 @@ check_versions)
 	;;
 check_distrowatch)
         echo -ne "${BOLD}*** Comparing DistroWatch & ${NAME}-${VERSION}"
-        echo -ne "${SET_REQUIRED_COL}  Distrowatch${SET_FOUND_COL}    IPCOP"
+        echo -ne "${SET_REQUIRED_COL}  Distrowatch${SET_FOUND_COL}    OPENFIREWALL"
         echo -ne "${SET_RESULT_COL} status${NORMAL}\n"
 
         wget -q --user-agent=Lynx http://distrowatch.com/packages.php -O - \
@@ -2604,11 +2602,11 @@ dist)
 	# TODO: build list of changed files
 
 	echo "Calculating MD5 of release files"
-	MD5INSTALL=`md5sum ipcop-${VERSION}-install*`
+	MD5INSTALL=`md5sum openfirewall-${VERSION}-install*`
 	if [ "${VERSIONSTEP}" ]; then
-		MD5UPDATE=`md5sum ipcop-${VERSIONSTEP}-update*.gpg ipcop-${VERSION}-update*.gpg`
+		MD5UPDATE=`md5sum openfirewall-${VERSIONSTEP}-update*.gpg openfirewall-${VERSION}-update*.gpg`
 	else
-		MD5UPDATE=`md5sum ipcop-${VERSION}-update*.gpg`
+		MD5UPDATE=`md5sum openfirewall-${VERSION}-update*.gpg`
 	fi
 
 	# Create release-notes-<VERSION>.txt, the file will need some manual modification
@@ -2616,7 +2614,7 @@ dist)
 	echo "Creating release notes file for ${VERSION}"
 	NOTESFILE=${BASEDIR}/doc/release-notes-${VERSION}.txt
 	cat > ${NOTESFILE} <<END
-IPCop ${VERSION} is released
+Openfirewall ${VERSION} is released
 
 ### Modification summary here
 
@@ -2738,14 +2736,14 @@ toolchain)
 gettoolchain)
 	# Create cache and cache/tmp
 	prepareenv
-	URL_SFNET=`grep URL_SFNET lfs/Config | awk '{ print $3 }'`
+	URL_OFPKGS=`grep URL_OFPKGS lfs/Config | awk '{ print $3 }'`
 	echo "Loading ${TOOLCHAINNAME}"
 
 	# load to temp directory and move only if md5 match
 	# that's the only way to support wget -c and load same toolchain name
 	# wich may or may not have a different size when locally build
 	cd ${BASEDIR}/cache/tmp
-	wget -c ${URL_SFNET}/ipcop/${TOOLCHAINNAME} ${URL_SFNET}/ipcop/${TOOLCHAINNAME}.md5 -P ${BASEDIR}/cache/tmp
+	wget -c ${URL_OFPKGS}/o/${TOOLCHAINNAME} ${URL_OFPKGS}/o/${TOOLCHAINNAME}.md5 -P ${BASEDIR}/cache/tmp
 
 	if [ ${?} -ne 0 ]; then
 		echo -ne "Error downloading toolchain for ${MACHINE} machine"
