@@ -35,7 +35,7 @@ include Config
 PKG_NAME   = linux
 VER        = 4.15.3
 #PATCHLEVEL = 3.10.101
-IPCOPKRELEASE =
+OFW_KRELEASE =
 HOST_ARCH  = all
 OTHER_SRC  = yes
 
@@ -43,7 +43,7 @@ THISAPP    = linux-$(VER)
 DL_FILE    = $(THISAPP).tar.xz
 #DL_FROM    = $(URL_KERNEL)/linux/kernel/v3.x
 DL_FROM    = $(URL_KERNEL)/linux/kernel/v4.x
-##DIR_APP    = $(DIR_SRC)/$(THISAPP)$(IPCOPKRELEASE)
+##DIR_APP    = $(DIR_SRC)/$(THISAPP)$(OFW_KRELEASE)
 DIR_APP    = $(DIR_SRC)/$(THISAPP)-build
 CFLAGS     =
 CXXFLAGS   =
@@ -105,14 +105,14 @@ $(subst %,%_MD5,$(objects)) :
 
 $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects)) $(DIR_SRC)/config/kernel/kernel.config.$(MACHINE)
 	# so list of installed files is always real, even if .config is changed and a module removed
-	@rm -rf /lib/modules/$(IPCOPKRELEASE) /boot/System.map* /boot/vmlinuz* $(DIR_SRC)/lsalr $(TARGET)
+	@rm -rf /lib/modules/$(OFW_KRELEASE) /boot/System.map* /boot/vmlinuz* $(DIR_SRC)/lsalr $(TARGET)
 	@$(PREBUILD)
 	@rm -rf $(DIR_APP) $(DIR_SRC)/$(THISAPP) && cd $(DIR_SRC) && tar --no-same-owner --no-same-permissions -xf $(DIR_DL)/$(DL_FILE)
 	mv $(DIR_SRC)/$(THISAPP) $(DIR_APP)
 ###	cd $(DIR_APP) && xzcat $(DIR_DL)/patch-$(PATCHLEVEL).xz | patch -p1
 	# Remove patch level in EXTRAVERSION and add our own versioning (wanpipe-3.5.11 does not support localversion).
 #####	cd $(DIR_APP) && sed -i -e "s/SUBLEVEL\ =.*//" Makefile
-#####	cd $(DIR_APP) && sed -i -e "s/EXTRAVERSION\ =.*/EXTRAVERSION\ =$(IPCOPKRELEASE)/" Makefile
+#####	cd $(DIR_APP) && sed -i -e "s/EXTRAVERSION\ =.*/EXTRAVERSION\ =$(OFW_KRELEASE)/" Makefile
 
 	# get working isapnp, not yet ready, need some others changes to retrieve the events
 	#cd $(DIR_APP) && patch -Np1 -i $(DIR_PATCHES)/$(THISAPP)_isapnp1.patch
