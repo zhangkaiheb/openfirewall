@@ -1,0 +1,89 @@
+###############################################################################
+# This file is part of the Openfirewall.                                    #
+#                                                                             #
+# Openfirewall is free software; you can redistribute it and/or modify               #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation; either version 2 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# Openfirewall is distributed in the hope that it will be useful,                    #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with Openfirewall; if not, write to the Free Software                        #
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
+#                                                                             #
+# Makefiles are based on LFSMake, which is                                    #
+# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
+#                                                                             #
+# Modifications by:                                                           #
+# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
+#          - Modified Makefile for Openfirewall build                                #
+#                                                                             #
+# $Id: openfirewall-update 7551 2014-05-18 07:20:47Z owes $
+#                                                                             #
+###############################################################################
+
+###############################################################################
+# Definitions
+###############################################################################
+
+include Config
+
+PKG_NAME   = update
+HOST_ARCH  = all
+OTHER_SRC  = no
+
+THISAPP    = $(PKG_NAME)
+# no TARGET as no POSTBUILD
+
+OPENFIREWALL_UPDATE_DIR  = $(DIR_SRC)/updates/$(PASS)
+OPENFIREWALL_UPDATE_FILE = $(SNAME)-$(PASS)-update.$(MACHINE).tgz
+
+###############################################################################
+# Top-level Rules
+###############################################################################
+
+check :
+
+download :
+
+md5 :
+
+###############################################################################
+# Installation Details
+###############################################################################
+
+install :
+	# Clean out some old stuff first
+	rm -rf /$(INSTALLER_DIR)/images/$(OPENFIREWALL_UPDATE_FILE) /tmp/*
+
+	# Build update for architecture: $(MACHINE) version: $(PASS)
+
+	# Collect the files that have changed since last Openfirewall version
+	tar -c --files-from=$(OPENFIREWALL_UPDATE_DIR)/ROOTFILES.${MACHINE}-${PASS} \
+		-f /tmp/patch.tar --exclude='#*'
+	cd /tmp && tar -xf /tmp/patch.tar && rm /tmp/patch.tar
+	# Same stripping code as lfs/openfirewall-boot-cd plus hide empty path from find that may happen
+	cd /tmp && find ${EXEC_PATH} -type f 2>/dev/null | xargs /$(TOOLS_DIR)/bin/strip --strip-all 2>&1 | \
+		grep -v 'File format not recognized' || true
+
+	# allow tar to fail when nothing yet is include in update
+	cd /tmp && tar -cz --exclude=/tmp/patch.tar.gz -f /tmp/patch.tar.gz * || true
+	# now remove everything except the package as other files are inside
+	find /tmp/* -not -name patch.tar.gz -delete
+	
+	# Add some additional files for the update
+	cp $(OPENFIREWALL_UPDATE_DIR)/{setup,information.xml} /tmp
+	echo "$(MACHINE)" >/tmp/ARCH
+	find $(OPENFIREWALL_UPDATE_DIR) -name '*.patch' -type f -exec cp -v {} /tmp \;
+
+	# Make sure setup is executable
+	chmod 755 /tmp/setup
+
+	# Build the update, make sure that the files are root owned
+	cd /tmp && tar --owner root -cz -C /tmp -f /$(INSTALLER_DIR)/images/$(OPENFIREWALL_UPDATE_FILE) *
+
+	# yes we want it rebuild at each time, so no POSTBUILD
