@@ -145,7 +145,7 @@ elsif ($uploadsettings{'ACTION'} eq $Lang::tr{'refresh update list'}) {
     my $return = 1;
     if (-e '/var/ofw/red/active') {
         # Start gathering the information from scratch, do not zap the list if offline
-        system('/bin/echo -e "<ipcop>\n</ipcop>" > /var/ofw/patches/available.xml');
+        system('/bin/echo -e "<openfirewall>\n</openfirewall>" > /var/ofw/patches/available.xml');
         $return = &General::downloadpatchlist();
     }
     if ($return == 0) {
@@ -179,7 +179,7 @@ if (! system("/bin/ps ax | /bin/grep -q [i]nstallpackage") ) {
         $langtxt = $Lang::tr{'openfirewall will now update'};
     }
     else {
-        $langtxt = 'IPCop will now update.';
+        $langtxt = 'Openfirewall will now update.';
     }
     &Header::page_show($Lang::tr{'updates'}, 'warning', $langtxt, "<meta http-equiv='refresh' content='5; URL=/cgi-bin/updates.cgi' />");
     exit(0);
@@ -314,7 +314,7 @@ END
     <td>$available->{"update-${version}"}->{description}</td>
     <td>$available->{"update-${version}"}->{releasedate}</td>
     <td nowrap='nowrap'>
-        <a href='http://prdownloads.sourceforge.net/ipcop/release-notes-${version}.txt?download' target='_blank'>
+        <a href='http://prdownloads.sourceforge.net/openfirewall/release-notes-${version}.txt?download' target='_blank'>
             notes-${version}
         </a>
     </td>

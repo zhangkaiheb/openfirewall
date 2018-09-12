@@ -43,7 +43,7 @@ my $remote = `/bin/cat /var/ofw/red/remote-ipaddress 2>/dev/null | /usr/bin/tr -
 
 
 if (($ARGV[0] eq '') || ($ARGV[1] eq '')) {
-    &General::log('ipcop', 'rc.updatered missing parameters');
+    &General::log('openfirewall', 'rc.updatered missing parameters');
     exit 1;
 }
 
@@ -155,7 +155,7 @@ elsif ($updown eq 'down') {
     system('/usr/local/bin/ipsecctrl --stop &');
 }
 else {
-    &General::log('ipcop', "rc.updatered unknown updown parameter: $updown");
+    &General::log('openfirewall', "rc.updatered unknown updown parameter: $updown");
 }
 
 

@@ -1892,11 +1892,11 @@ base_build()
 #########################################################################################################
 # This builds the entire stage "ofw"	                                 								#
 #########################################################################################################
-ofw_build()
+openfirewall_build()
 {
 	beautify build_stage "Building openfirewall"
 	STAGE_ORDER=03
-	STAGE=ofw
+	STAGE=openfirewall
 
 	# Build these first as some of the kernel packages below rely on
 	# these for some of their client program functionality
@@ -1905,7 +1905,7 @@ ofw_build()
 	chroot_make Python		# glib require Python
 	chroot_make glib		# for cairo
 	chroot_make tcl			# for krb5 and db tests
-	chroot_make ofw
+	chroot_make openfirewall
 	chroot_make which
 	chroot_make net-tools
 	chroot_make libusb
@@ -1980,8 +1980,8 @@ ofw_build()
 	chroot_make conntrack-tools   ###############################
 	chroot_make iptstate
 	chroot_make iftop
-	chroot_make ofw-gui
-	chroot_make ofw-progs
+	chroot_make openfirewall-gui
+	chroot_make openfirewall-progs
 	chroot_make iperf
 	chroot_make iputils
 ##	chroot_make isdn4k-utils
@@ -2046,7 +2046,7 @@ ofw_build()
 	chroot_make libnl
 	chroot_make iw
 	chroot_make 3c5x9setup
-} # End of ofw_build()
+} # End of openfirewall_build()
 
 
 
@@ -2070,7 +2070,7 @@ misc_build()
 	chroot_make slang
 	chroot_make newt
 	chroot_make busybox
-	chroot_make ofw-lang
+	chroot_make openfirewall-lang
 	chroot_make mklibs
 	chroot_make dosfstools
 	if [ x"${SKIP_FLOPPY_IMAGES}" != x"yes" ]; then
@@ -2096,10 +2096,10 @@ packages_build()
 	STAGE=packages
 
 	chroot_make fix-up
-	chroot_make ofw-installer
-	chroot_make ofw-initramfs
+	chroot_make openfirewall-installer
+	chroot_make openfirewall-initramfs
 	if [ x"${SKIP_FLOPPY_IMAGES}" != x"yes" ]; then
-		chroot_make ofw-boot-floppy
+		chroot_make openfirewall-boot-floppy
 	else
 		echo "Skip floppy images"
 	fi
@@ -2111,17 +2111,17 @@ packages_build()
 
 ###	if [ "${VERSIONSTEP}" ]; then
 ###		PASS="${VERSIONSTEP}"
-###		chroot_make ofw-update
+###		chroot_make openfirewall-update
 ###	fi
 ###	PASS="${VERSION}"
-###	chroot_make ofw-update
+###	chroot_make openfirewall-update
 ###	PASS=""
-	chroot_make ofw-boot-cd
-	chroot_make ofw-boot-net
+	chroot_make openfirewall-boot-cd
+	chroot_make openfirewall-boot-net
 	chroot_make check_files
 
 	if [ x"${SKIP_USB_IMAGES}" != x"yes" ]; then
-		chroot_make ofw-boot-usb
+		chroot_make openfirewall-boot-usb
 	else
 		echo "Skip usb images to save time"
 	fi
@@ -2392,7 +2392,7 @@ build)
 
 	base_build
 
-	ofw_build
+	openfirewall_build
 
 	misc_build
 
@@ -2436,7 +2436,7 @@ buildsingle)
 	if [ ${STAGE_ORDER} == '02' ]; then
 		STAGE=base
 	elif [ ${STAGE_ORDER} == '03' ]; then
-		STAGE=ofw
+		STAGE=openfirewall
 	elif [ ${STAGE_ORDER} == '04' ]; then
 		STAGE=misc
 	else

@@ -9000,6 +9000,7 @@ var/ofw/ipsec/ipsec.secrets
 var/ofw/ipsec/settings
 var/ofw/key
 var/ofw/key/ipcop.gpg
+var/ofw/key/openfirewall.gpg
 var/ofw/logging
 var/ofw/logging/settings
 var/ofw/main

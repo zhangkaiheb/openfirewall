@@ -6,7 +6,7 @@ Also output to logfile for later reading.
       test -f $symlink || rm -f $symlink
    done
    echo "done."
-+  /usr/bin/logger -t ipcop "Cleared $ETCCERTSDIR"
++  /usr/bin/logger -t openfirewall "Cleared $ETCCERTSDIR"
  fi
  
  echo -n "Updating certificates in $ETCCERTSDIR... "
@@ -14,7 +14,7 @@ Also output to logfile for later reading.
  mv -f "$TEMPBUNDLE" "$CERTBUNDLE"
  
  echo "$ADDED_CNT added, $REMOVED_CNT removed; done."
-+/usr/bin/logger -t ipcop "CA certificates bundle $ADDED_CNT added, $REMOVED_CNT removed"
++/usr/bin/logger -t openfirewall "CA certificates bundle $ADDED_CNT added, $REMOVED_CNT removed"
  
  # vim:set et sw=2:
  

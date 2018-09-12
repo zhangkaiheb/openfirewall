@@ -135,7 +135,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'export'}) {
     print "Content-type: text/plain\n";
     print "Content-Disposition: attachment; filename=\"ofw-urlfilter-$date.log\";\n";
     print "\n";
-    print "IPCop URL filter log\r\n";
+    print "Openfirewall URL filter log\r\n";
     print "$Lang::tr{'date'}: $date\r\n\r\n";
     print "Category: $cgiparams{'CATEGORY'}\r\n";
     print "Client: $cgiparams{'SOURCE_IP'}\r\n";

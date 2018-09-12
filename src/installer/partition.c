@@ -317,7 +317,7 @@ PARTITION_EXIT:
         int percentage;
 
         snprintf(command, STRING_SIZE,
-            "/sbin/mdadm --create /dev/md%d --homehost=ipcop --metadata=0.9 --level=1 --raid-devices=2 %s%d %s%d < /tmp/yes",
+            "/sbin/mdadm --create /dev/md%d --homehost=openfirewall --metadata=0.9 --level=1 --raid-devices=2 %s%d %s%d < /tmp/yes",
             i, device, partition_index[i]+1, device2, partition_index[i]+1);
         if (mysystem(command)) {
             newtPopWindow();
@@ -364,7 +364,7 @@ PARTITION_EXIT:
 
 
 /*
-    Format and copy ipcop files.
+    Format and copy openfirewall files.
     We assume the disk is partitioned.
     No manual labelling.
 */

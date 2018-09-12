@@ -58,12 +58,12 @@ $General::noipprefix = 'noipg-';
 # $Lang::tr{'september'}, $Lang::tr{'october'},  $Lang::tr{'november'}, $Lang::tr{'december'}
 
 #
-# log ("message") use default 'ipcop' tag
+# log ("message") use default 'openfirewall' tag
 # log ("tag","message") use your tag
 #
 sub log
 {
-    my $tag = 'ipcop';
+    my $tag = 'openfirewall';
     $tag = shift if (@_ > 1);
     my $logmessage = $_[0];
     $logmessage =~ /([\w\W]*)/;
@@ -89,11 +89,11 @@ sub getcgihash
     $cgi->url() =~ m/^https?\:\/\/([^\/]+)/;
     my $servername = $1;
     if ($referer eq "") {
-        &General::log('ipcop', "No referer: activate 'send referer' in your web browser.");
+        &General::log('openfirewall', "No referer: activate 'send referer' in your web browser.");
         return;
     }
     elsif ($referer ne $servername) {
-        &General::log('ipcop', "Invalid referer: doesn't match servername!");
+        &General::log('openfirewall', "Invalid referer: doesn't match servername!");
         return;
     }
 
@@ -117,7 +117,7 @@ sub readhash
     my $hash     = $_[1];
     my ($var, $val);
 
-    # Some ipcop code expects that readhash 'complete' the hash if new entries
+    # Some openfirewall code expects that readhash 'complete' the hash if new entries
     # are presents. Not clear it !!!
     #%$hash = ();
 
@@ -1158,7 +1158,7 @@ sub downloadpatch
 {
     my $version = shift;
     my $guiload = shift;
-    my $filename  = "ipcop-${version}-update.${General::machine}.tgz.gpg";
+    my $filename  = "openfirewall-${version}-update.${General::machine}.tgz.gpg";
     my $ret = 0;
 
     return 0 if (($guiload == 0) && -e "/var/patches/$filename");
@@ -1166,7 +1166,7 @@ sub downloadpatch
 
     &General::log("installpackage", "Download update: ${filename}");
 
-    my $URL = "http://prdownloads.sourceforge.net/ipcop/${filename}?download";
+    my $URL = "http://prdownloads.sourceforge.net/openfirewall/${filename}?download";
     my $databuf = &General::download($URL);
 
     if ($databuf && $databuf->is_success) {
@@ -1234,7 +1234,7 @@ sub downloadpatchlist
     while (! $done) {
         #print "Retrieving $version\n";
 
-        my $URL = "http://www.ipcop.org/patches/$version.xml";
+        my $URL = "http://www.openfirewall.org/patches/$version.xml";
         my $return = download($URL);
         unless ($return && $return->is_success) {
             return 3;
@@ -1928,7 +1928,7 @@ validate_day:
 
 
 ###
-### escape all characters not digit-letter eg: frank&ipcop => franck\&ipcop
+### escape all characters not digit-letter eg: frank&openfirewall => franck\&openfirewall
 ###
 sub escape_shell ($) {
     my $ret = shift;

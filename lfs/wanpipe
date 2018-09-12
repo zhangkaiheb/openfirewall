@@ -18,12 +18,6 @@
 # Makefiles are based on LFSMake, which is                                    #
 # Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
 #                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# Sangoma Wanpipe 2.3.3-2 15/03/2006 Andre Newman <ipcop@dinkum.org.uk>	      #
-# Based on scripts contributed by Enrique E. Martinez Cardenas                #
 #                                                                             #
 # $Id: wanpipe 7606 2014-06-19 12:06:10Z owes $
 #

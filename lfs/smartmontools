@@ -89,7 +89,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 	cd $(DIR_APP) && sed -i 's/clock_gettime ftime/ftime/' configure
 
 	cd $(DIR_APP) && ./configure --prefix=/usr --sysconfdir=/etc --with-docdir=/usr/share/doc/smartmontools
-	cd $(DIR_APP) && make -j $(PARALLELISM) BUILDINFO='"(IPCop)"'
+	cd $(DIR_APP) && make -j $(PARALLELISM) BUILDINFO='"(Openfirewall)"'
 	cd $(DIR_APP) && make install
 
 	@rm -rf $(DIR_APP)

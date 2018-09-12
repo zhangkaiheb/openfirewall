@@ -96,7 +96,6 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 	#cd $(DIR_APP) && for d in pgsql sqlite3 extensions mysql pcap ; do sed -i -e 's/$$(LD)/$$(CC) -nostartfiles/' $$d/Makefile.in; done
 
 	# remove database(s) in case of a partial build
-	#rm -f /var/ipcop/traffic/empty-ulogd.db
 	rm -f /var/ofw/traffic/empty-ulogd.db
 	rm -f /var/log/traffic/ulogd.db
 
@@ -119,8 +118,6 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 	sed -i -e 's+LIBDIR+/usr/lib/ulogd+' /etc/ulogd.conf
 	# Create database, since we currently cannot create a fresh new DB in target system
 	# we create empty-ulogd.db additionally so we can flush the DB and start from scratch.
-	#sqlite3 /var/ipcop/traffic/empty-ulogd.db < $(DIR_SRC)/config/ulogd/sqlite3.table
-	#cp /var/ipcop/traffic/empty-ulogd.db /var/log/traffic/ulogd.db
 	sqlite3 /var/ofw/traffic/empty-ulogd.db < $(DIR_SRC)/config/ulogd/sqlite3.table
 	cp /var/ofw/traffic/empty-ulogd.db /var/log/traffic/ulogd.db
 

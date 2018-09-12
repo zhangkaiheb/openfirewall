@@ -470,7 +470,7 @@ static int source_cdrom(void)
                     continue;
                 }
 
-                /* Let us see if this is an IPCop CD or USB key */
+                /* Let us see if this is an Openfirewall CD or USB key */
                 strcpy(filename, TARBALL_OFW);
                 snprintf(filepath, STRING_SIZE, "/cdrom/%s", filename);
                 if (!access(filepath, 0)) {
@@ -562,7 +562,7 @@ static int findsource(void)
 }
 
 
-/* Choose a destination disk (harddisk, cf?) and verify it can support IPCop */
+/* Choose a destination disk (harddisk, cf?) and verify it can support Openfirewall */
 int selectdestination(int *ddisk, int *ddisk2, long int *disk_size, long int *ramdisk_size)
 {
     int rc;

@@ -431,7 +431,7 @@ test_ok
 echo "Running rc.event"
 /etc/rc.d/rc.event system up
 
-/usr/bin/logger -t ipcop "openfirewall ${OFWVERSION} started with kernel ${OFWKERNEL}."
+/usr/bin/logger -t openfirewall "openfirewall ${OFWVERSION} started with kernel ${OFWKERNEL}."
 
 # Start RED if 'Connect on Openfirewall restart' enabled
 /etc/rc.d/rc.net --startred

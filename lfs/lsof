@@ -104,7 +104,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 			-e 's|.*#define\s*HASNOSOCKSECURITY\s*1.*|#define HASNOSOCKSECURITY 1)|' machine.h
 
 	# Pass our CFLAGS to DEBUG variable
-	cd $(DIR_APP)/$(PKG_NAME)_$(VER)_src && LSOF_HOST=IPCop LSOF_USER=builder LSOF_SYSINFO=none make -j $(PARALLELISM) DEBUG="${CFLAGS}"
+	cd $(DIR_APP)/$(PKG_NAME)_$(VER)_src && LSOF_HOST=Openfirewall LSOF_USER=builder LSOF_SYSINFO=none make -j $(PARALLELISM) DEBUG="${CFLAGS}"
 
 ifeq "$(RUNNING_TEST)" "yes"
 	# Want the test to run, without interactive effect, so change standard input with yes pipe and hack tty detection to exit with success

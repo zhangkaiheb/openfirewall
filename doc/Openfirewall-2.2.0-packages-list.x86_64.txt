@@ -121,6 +121,11 @@ List of software packages used to build Openfirewall Version: 2.2.0 for x86_64
  * net-tools-1.60
  * newt-0.52.18
  * ntp-4.2.8p11
+ * openfirewall
+ * openfirewall-gui
+ * openfirewall-lang
+ * openfirewall_missing_rootfile
+ * openfirewall-progs
  * openldap-2.4.40
  * openssh-7.7p1
  * openssl-1.1.0g

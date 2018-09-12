@@ -39,17 +39,14 @@ PKG_NAME   = linux-headers
 # IF YOU DO YOU WILL BREAK THINGS BADLY
 # Now that you're scared :-) please keep in mind that if you upgrade this
 # you have to recompile _every_ single package in all stages
-# Also keep in mind that once we release ipcop-2.0, there can be
+# Also keep in mind that once we release openfirewall-2.0, there can be
 # NO UPGRADING of this package.  You can still upgrade lfs/linux though
-#VER        = 3.10
 VER        = 4.15.3
-#PATCHLEVEL = 3.10.68
 HOST_ARCH  = all
 OTHER_SRC  = yes
 
 THISAPP    = linux-${VER}
 DL_FILE    = $(THISAPP).tar.xz
-#DL_FROM    = $(URL_KERNEL)/linux/kernel/v3.x
 DL_FROM    = $(URL_KERNEL)/linux/kernel/v4.x
 DIR_APP    = $(DIR_SRC)/$(THISAPP)-headers
 CFLAGS     =

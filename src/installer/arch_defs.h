@@ -71,7 +71,7 @@
 #define LOGCOMPRESSED    64
 
 
-#define TARBALL_OFW    "ipcop-" VERSION ".tar.gz"
+#define TARBALL_OFW    "openfirewall-" VERSION ".tar.gz"
 
 
 typedef enum

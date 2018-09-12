@@ -89,7 +89,6 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar xf $(DIR_DL)/$(DL_FILE)
 
 	# remove database(s) in case of a partial build
-	#rm -f /var/ipcop/traffic/empty-aggregate.db
 	rm -f /var/ofw/traffic/empty-aggregate.db
 	rm -f /var/log/traffic/aggregate.db
 
@@ -109,8 +108,6 @@ endif
 
 	# Create database
 	mkdir -p /var/log/traffic/
-	#sqlite3 /var/ipcop/traffic/empty-aggregate.db < $(DIR_SRC)/config/cfgroot/aggregate.table
-	#cp /var/ipcop/traffic/empty-aggregate.db /var/log/traffic/aggregate.db
 	sqlite3 /var/ofw/traffic/empty-aggregate.db < $(DIR_SRC)/config/cfgroot/aggregate.table
 	cp /var/ofw/traffic/empty-aggregate.db /var/log/traffic/aggregate.db
 

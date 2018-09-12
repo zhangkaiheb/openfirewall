@@ -103,9 +103,9 @@ ifeq "$(RUNNING_TEST)" "yes"
 endif
 
 	cd $(DIR_APP) && make install
-	# Import IPCop key for updates
-	gpg --import $(DIR_SRC)/config/cfgroot/ipcop2.gpg
-	gpg --import $(DIR_SRC)/config/cfgroot/ipcop.gpg
+	# Import openfirewall key for updates
+	gpg --import $(DIR_SRC)/config/cfgroot/openfirewall2.gpg
+	gpg --import $(DIR_SRC)/config/cfgroot/openfirewall.gpg
 	# we don't need it, create one empty
 	touch /root/.gnupg/gpg.conf
 	chmod 600 /root/.gnupg/gpg.conf

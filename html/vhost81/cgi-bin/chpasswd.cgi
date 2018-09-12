@@ -116,7 +116,7 @@ print <<END
  
 <body>
 
-<!-- IPCOP CONTENT -->
+<!-- OPENFIREWALL CONTENT -->
 
   <table width='100%' border='0'>
     <tr>

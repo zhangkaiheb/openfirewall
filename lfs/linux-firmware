@@ -40,17 +40,9 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.xz
-#DL_FROM    = http://ipcop-addons.mooo.com/misc/IPCop
 DL_FROM    = $(URL_OFPKGS)/l
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
-
-#git://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git
-# linux-firmware lives in GIT http://git.kernel.org/cgit/linux/kernel/git/firmware/linux-firmware.git/
-# The procedure to create a snapshot is something like:
-#   git pull
-#   TAG=`git log -1 --pretty=format:%h`
-#   git archive --prefix=linux-firmware-${TAG}/ HEAD | xz > /ipcop/cache/linux-firmware-${TAG}.tar.xz
 
 ###############################################################################
 # Top-level Rules
@@ -60,7 +52,6 @@ objects = $(DL_FILE)
 
 $(DL_FILE) = $(DL_FROM)/$(DL_FILE)
 
-#$(DL_FILE)_MD5 = 23d36ed14292be37d1578c3c4949ce59
 $(DL_FILE)_MD5 = e7d83ec3b8862097085b9b49e18e48ff
 
 install : $(TARGET)

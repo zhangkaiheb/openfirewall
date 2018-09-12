@@ -104,7 +104,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 	# Fix 'yyunput' and 'input' defined but not used
 	cd $(DIR_APP) && sed -i 's/ignore  /%option noinput\n%option nounput\n&/' src/sg.l
 	# add additional version info
-	cd $(DIR_APP) && sed -i 's:#define VERSION\(.*\):#define VERSION\1 \" \(IPCop patchlevel 3\)\":g' src/version.h
+	cd $(DIR_APP) && sed -i 's:#define VERSION\(.*\):#define VERSION\1 \" \(Openfirewall patchlevel 3\)\":g' src/version.h
 
 	# Use --with-db, so /usr/local does not appear for db
 	cd $(DIR_APP) && ./configure --prefix=/usr \

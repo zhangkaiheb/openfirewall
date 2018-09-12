@@ -154,7 +154,8 @@ endif
 	# and strip them, so they are not enormous and directly usable by copy
 	strip --strip-all /usr/bin/gdb{,server}
 
-	# On installed ipcop, copy manually unstripped program with unstripped corresponding lib (ldd <program>),
+	# On installed openfirewall, copy manually unstripped program with unstripped
+	# corresponding lib (ldd <program>),
 	# and copy gdb (or gdbserver to debug from network)
 	# To debug setup for example, use, gdb --args /usr/local/bin/setup --install
 	# Then, r to run. Once segfault has been reached, bt

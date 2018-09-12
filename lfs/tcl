@@ -107,7 +107,7 @@ endif
 	ln -sf tclsh8.6 /$(TOOLS_DIR)/bin/tclsh
 endif
 
-ifeq "$(STAGE)" "ipcop"
+ifeq "$(STAGE)" "openfirewall"
 	cd $(DIR_APP)/unix && ./configure --prefix=/usr --mandir=/usr/share/man/tcl8 --without-tzdata
 	cd $(DIR_APP)/unix && make -j $(PARALLELISM)
 ifeq "$(RUNNING_TEST)" "yes"

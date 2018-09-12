@@ -65,10 +65,6 @@ ifeq "$(STAGE)" "toolchain"
 #	$(LFS_TGT)-gcc -dumpspecs | sed -e 's@/lib\(64\)\?/ld@/$(TOOLS_DIR)&@g' \
 #			-e "/^\*cpp:$$/{n;s,$$, -isystem /$(TOOLS_DIR)/include,}" \
 #			> `dirname $$($(LFS_TGT)-gcc -print-libgcc-file-name)`/specs
-
-#	$(LFS_TGT)-gcc -dumpspecs | sed -e 's@/lib\(64\)\?/ld@/$(TOOLS_DIR)&@g' \
-#			> /home/kai/network/ipcop-svn/ipcop/trunk/build_x86_64/tools_x86_64/bin/../lib/gcc/x86_64-lfs-linux-gnu/7.3.0/specs
-
 #
 #	# fix problem with glibc configure switch --with-headers=/$(TOOLS_DIR)/include
 #	$(LFS_TGT)-gcc -dumpspecs | sed -e "/^\*cpp:$$/{n;s,$$, -isystem /$(TOOLS_DIR)/include,}" \

@@ -122,7 +122,7 @@ int password(char *user)
 
     if (getpassword(password, message) == SUCCESS) {
         if (!strcmp(user, "admin") || !strcmp(user, "dial")) {
-            snprintf(commandstring, STRING_SIZE, "/usr/sbin/htpasswd -m -b /var/ipcop/auth/users %s '%s'",
+            snprintf(commandstring, STRING_SIZE, "/usr/sbin/htpasswd -m -b /var/ofw/auth/users %s '%s'",
                      user, password);
         }
         else {

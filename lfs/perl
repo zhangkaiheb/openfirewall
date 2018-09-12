@@ -59,8 +59,6 @@ TIMESTAMP = "Feb 14 2015 19:27"
 objects = $(DL_FILE)
 
 $(DL_FILE) = $(DL_FROM)/$(DL_FILE)
-#$(PATCH1)  = $(URL_DEBIAN)/p/$(PKG_NAME)/$(PATCH1)
-#$(PATCH1)  = http://ipcop-addons.mooo.com/misc/IPCop/$(PATCH1)
 
 #$(DL_FILE)_MD5 = 21062666f1c627aeb6dbff3c6952738b
 $(DL_FILE)_MD5 = 70e988b4318739b0cf3ad5e120bfde88
@@ -107,11 +105,6 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 #	done
 #	# patchlevel contain reference to applied patches visible with perl -V
 #	# remove DEBPKG: prefix
-#	cd $(DIR_APP) && sed -i -e 's/^prefix=.*/prefix=""/' debian/gen-patchlevel
-#	# generate ipcop patchlevel info from patches
-#	cd $(DIR_APP) && debian/gen-patchlevel > patchlevel-ipcop.h
-#	# include ipcop patchlevel info in patchlevel.h
-#	cd $(DIR_APP) && sed -i -e '/do not remove this line/a #include "patchlevel-ipcop.h"' patchlevel.h
 #
 #	# Use our own TIMESTAMP instead of __DATE__ and __TIME__ so everyone has same md5
 #	cd $(DIR_APP) && sed -i -r 's|(.*)Compiled at ".*__DATE__.*__TIME__(.*)|\1Compiled at " $(TIMESTAMP)\2|' perl.c
@@ -189,6 +182,6 @@ endif
 	@rm -rf $(DIR_APP)
 ifeq "$(STAGE)" "base"
 	# Finally, force the rebuilding of the CPAN modules. Note that the modules are build in stage 03.
-	@rm -f $(DIR_INFO)/03_ipcop/perl-*
+	@rm -f $(DIR_INFO)/03_openfirewall/perl-*
 endif
 	@$(POSTBUILD)

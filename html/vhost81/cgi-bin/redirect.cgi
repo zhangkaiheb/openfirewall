@@ -142,7 +142,7 @@ print <<END
     </div>
     </div>
     <div style="padding:5px; background-color:#C0C0C0; text-align:right; color:#FFFFFF; font-size:60%; font-family:verdana,arial,'sans serif';">
-        Web Filtering by <a style="color:#FFFFFF;" href="http://www.openfirewall.cn"><b>IPCop</b></a> and
+        Web Filtering by <a style="color:#FFFFFF;" href="http://www.openfirewall.cn"><b>Openfirewall</b></a> and
         <a style="color:#FFFFFF;" href="http://www.squidguard.org"><b>SquidGuard</b></a>
     </div>
 </div>

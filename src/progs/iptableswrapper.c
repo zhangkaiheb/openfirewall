@@ -4,8 +4,6 @@
  * This program is distributed under the terms of the GNU General Public
  * Licence.  See the file COPYING for details.
  *
- * Copyright (C) 2007-2008 weizen_42 at ipcop-forum dot de
- *
  * $Id: iptableswrapper.c 2404 2009-01-31 19:33:51Z owes $
  *
  */

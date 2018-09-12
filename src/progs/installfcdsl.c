@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright (C) 2004-10-14 Gilles Espinasse <g.esp.ipcop@free.fr>
- *
  * $Id: installfcdsl.c 6320 2012-02-05 17:32:05Z owes $
  *
  */

@@ -184,9 +184,9 @@ if ($timesettings{'ACTION'} eq $Lang::tr{'set time now'} && $timesettings{'ENABL
 
 if ($timesettings{'NTP_VALID'} eq '') {
     $timesettings{'ENABLED_NTP'} = 'off';
-    $timesettings{'NTP_ADDR_1'} = '0.ipcop.pool.ntp.org';
-    $timesettings{'NTP_ADDR_2'} = '1.ipcop.pool.ntp.org';
-    $timesettings{'NTP_ADDR_3'} = '2.ipcop.pool.ntp.org';
+    $timesettings{'NTP_ADDR_1'} = '0.openfirewall.pool.ntp.org';
+    $timesettings{'NTP_ADDR_2'} = '1.openfirewall.pool.ntp.org';
+    $timesettings{'NTP_ADDR_3'} = '2.openfirewall.pool.ntp.org';
 }
 
 unless ($errormessage) {

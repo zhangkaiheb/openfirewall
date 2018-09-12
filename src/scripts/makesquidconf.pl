@@ -284,7 +284,7 @@ sub writeconfigfile
 
     if ($proxysettings{'AUTH_REALM'} eq '')
     {
-        $authrealm = "IPCop Proxy Server";
+        $authrealm = "Openfirewall Proxy Server";
     }
     else {
         $authrealm = $proxysettings{'AUTH_REALM'};

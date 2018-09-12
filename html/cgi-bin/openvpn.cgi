@@ -383,22 +383,22 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'save'} && $cgiparams{'TYPE'} eq '' && $cg
     }
 
     if (&General::validip($netsettings{'RED_1_ADDRESS'}) && $tmpnetaddr->contains(NetAddr::IP->new($netsettings{'RED_1_ADDRESS'}))) {
-        $errormessage = "$Lang::tr{'openvpn subnet overlap'}: IPCop RED Network $netsettings{'RED_1_ADDRESS'}";
+        $errormessage = "$Lang::tr{'openvpn subnet overlap'}: Openfirewall RED Network $netsettings{'RED_1_ADDRESS'}";
         goto SETTINGS_ERROR;
     }
 
     if ($tmpnetaddr->contains(NetAddr::IP->new($netsettings{'GREEN_1_ADDRESS'}))) {
-        $errormessage = "$Lang::tr{'openvpn subnet overlap'}: IPCop Green Network $netsettings{'GREEN_1_ADDRESS'}";
+        $errormessage = "$Lang::tr{'openvpn subnet overlap'}: Openfirewall Green Network $netsettings{'GREEN_1_ADDRESS'}";
         goto SETTINGS_ERROR;
     }
 
     if (&General::validip($netsettings{'BLUE_1_ADDRESS'}) && $tmpnetaddr->contains(NetAddr::IP->new($netsettings{'BLUE_1_ADDRESS'}))) {
-        $errormessage = "$Lang::tr{'openvpn subnet overlap'}: IPCop Blue Network $netsettings{'BLUE_1_ADDRESS'}";
+        $errormessage = "$Lang::tr{'openvpn subnet overlap'}: Openfirewall Blue Network $netsettings{'BLUE_1_ADDRESS'}";
         goto SETTINGS_ERROR;
     }
 
     if (&General::validip($netsettings{'ORANGE_1_ADDRESS'}) && $tmpnetaddr->contains(NetAddr::IP->new($netsettings{'ORANGE_1_ADDRESS'}))) {
-        $errormessage = "$Lang::tr{'openvpn subnet overlap'}: IPCop Orange Network $netsettings{'ORANGE_1_ADDRESS'}";
+        $errormessage = "$Lang::tr{'openvpn subnet overlap'}: Openfirewall Orange Network $netsettings{'ORANGE_1_ADDRESS'}";
         goto SETTINGS_ERROR;
     }
     open(ALIASES, '/var/ofw/ethernet/aliases') or die 'Unable to open aliases file.';
@@ -407,7 +407,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'save'} && $cgiparams{'TYPE'} eq '' && $cg
         my @tempalias = split(/\,/,$_);
         if ($tempalias[1] eq 'on') {
             if (&General::validip($tempalias[0]) && $tmpnetaddr->contains(NetAddr::IP->new($tempalias[0]))) {
-                $errormessage = "$Lang::tr{'openvpn subnet overlap'}: IPCop alias entry $tempalias[0]";
+                $errormessage = "$Lang::tr{'openvpn subnet overlap'}: Openfirewall alias entry $tempalias[0]";
             }
         }
     }

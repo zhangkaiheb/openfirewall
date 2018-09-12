@@ -497,7 +497,7 @@ print <<END
         <td align='center' class='ofw_iface_bg_red'><b>$Lang::tr{'internet'}</b></td>
         <td align='center' class='ofw_iface_bg_blue'><b>$Lang::tr{'wireless'}</b></td>
         <td align='center' class='ofw_iface_bg_orange'><b>$Lang::tr{'dmz'}</b></td>
-        <td align='center' class='ofw_iface_bg_fw'><b>IPCop</b></td>
+        <td align='center' class='ofw_iface_bg_fw'><b>Openfirewall</b></td>
         <td align='center' class='ofw_iface_bg_ipsec'><b>IPsec</b></td>
         <td align='center' class='ofw_iface_bg_ovpn'><b>OpenVPN</b></td>
     </tr></table></td>

@@ -248,7 +248,7 @@ sub openpage
         $full_title = "$settings{'HOSTNAME'}.$settings{'DOMAINNAME'} - $title";
     }
     else {
-        $full_title = "IPCop - $title";
+        $full_title = "Openfirewall - $title";
     }
 
     $onload_menu = "onload=\"domMenu_activate('domMenu_main');\"" if ($menu == 1);
@@ -321,7 +321,7 @@ END
     }
 
     print <<END
-<!-- IPCOP HEADER -->
+<!-- OPENFIREWALL HEADER -->
 <table width='100%' border='0' cellpadding='0' cellspacing='0'>
 <col width='719' /><col /><col width='32' />
 <tr><td align='center' colspan='3'><img src='/images/header_top.png' width='310' height='14' alt='' /></td></tr>
@@ -351,7 +351,7 @@ END
 <td style='background: url(/images/header_right.png); background-repeat:no-repeat;'>&nbsp;</td>
 </tr>
 </table>
-<!-- IPCOP CONTENT -->
+<!-- OPENFIREWALL CONTENT -->
 END
         ;
 }
@@ -364,16 +364,16 @@ sub closepage
     my $connected = shift;
     my $extraversion = '';
     $extraversion = '| ' . `cat /etc/svn-install` . ' ' if (! -e '/var/log/updates/update.check');
-    my $status = "<small>IPCop v${General::version} $extraversion &copy; 2001-2016 The Openfirewall Team</small>";
+    my $status = "<small>Openfirewall v${General::version} $extraversion &copy; 2001-2016 The Openfirewall Team</small>";
 
     $status = &General::connectionstatus() . "<br />" . `/bin/date "+%Y-%m-%d %H:%M:%S"`. "<br /><br />$status" if ($connected ne 'skip_connected');
 
     print <<END
-<!-- IPCOP FOOTER -->
+<!-- OPENFIREWALL FOOTER -->
     <table width='100%' border='0'><tr>
-    <td width='175' align='left'><img src='/images/null.gif' width='15' height='12' alt='' /><a href='http://sourceforge.net/projects/ipcop' target='_blank'><img src='/images/sflogo.gif' width='153' height='30' alt='Get Openfirewall at SourceForge.net. Fast, secure and Free Open Source software downloads' /></a></td>
+    <td width='175' align='left'><img src='/images/null.gif' width='15' height='12' alt='' /><a href='http://sourceforge.net/projects/openfirewall' target='_blank'><img src='/images/sflogo.gif' width='153' height='30' alt='Get Openfirewall at SourceForge.net. Fast, secure and Free Open Source software downloads' /></a></td>
     <td align='center' valign='middle'>$status</td>
-    <td width='175' align='right' valign='bottom'><a href='http://www.ipcop.org/' target='_blank'><img src='/images/shieldedtux.png' width='113' height='82' alt='IPCop Tux' /></a><img src='/images/null.gif' width='15' height='12' alt='' /></td>
+    <td width='175' align='right' valign='bottom'><a href='http://www.openfirewall.org/' target='_blank'><img src='/images/shieldedtux.png' width='113' height='82' alt='Openfirewall Tux' /></a><img src='/images/null.gif' width='15' height='12' alt='' /></td>
     </tr></table>
 </body></html>
 END

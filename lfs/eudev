@@ -135,7 +135,7 @@ endif
 
 	cd $(DIR_APP) && make LD_LIBRARY_PATH=/$(TOOLS_DIR)/lib install
 
-	# And finally copy our ipcop rules
+	# And finally copy our openfirewall rules
 	cp $(DIR_SRC)/config/udev/rules.d/*.rules /etc/udev/rules.d/
 
 	# Install some custom rules and support files useful in an LFS environment

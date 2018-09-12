@@ -93,7 +93,7 @@ foreach $line (@lines) {
 
     if (defined($menunumbers{$name})) {
         # protect against duplicates
-        system("/usr/bin/logger -t ipcop Duplicate MENUTOP: $name");
+        system("/usr/bin/logger -t openfirewall Duplicate MENUTOP: $name");
         next;
     }
 
@@ -131,7 +131,7 @@ foreach $line (sort @sublines) {
 
     if (!defined($menunumbers{$name})) {
         # protect against non existing top-level
-        system("/usr/bin/logger -t ipcop Missing MENUTOP ($name) for $cginame");
+        system("/usr/bin/logger -t openfirewall Missing MENUTOP ($name) for $cginame");
         next;
     }
     push(@lines, "$menunumbers{$name} $sub $cginame $line\n");

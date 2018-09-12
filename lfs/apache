@@ -152,8 +152,6 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects)) $
 	mkdir -pv /usr/local/apache/conf.ofw
 	cp -f $(DIR_SRC)/config/httpd/{port81,portgui}.conf    /usr/local/apache/conf/
 	cp -f $(DIR_SRC)/config/httpd/{httpd,port81,portgui}.conf    /usr/local/apache/conf.ofw/
-	#cp -f $(DIR_SRC)/config/httpd/hostname.conf /var/ipcop/main/hostname.conf
-	#ln -sf /var/ipcop/main/hostname.conf        /etc/httpd/conf/
 	cp -f $(DIR_SRC)/config/httpd/hostname.conf /var/ofw/main/hostname.conf
 ####	ln -sf /var/ofw/main/hostname.conf        /etc/httpd/conf/
 	ln -sf /var/ofw/main/hostname.conf        /usr/local/apache/conf/

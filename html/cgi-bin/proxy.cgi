@@ -1045,7 +1045,7 @@ END
 <tr>
     <td class='base'>$Lang::tr{'error design'}:</td>
     <td class='base'><select name='ERR_DESIGN'>
-        <option value='ipcop' $selected{'ERR_DESIGN'}{'ipcop'}>IPCop</option>
+        <option value='ipcop' $selected{'ERR_DESIGN'}{'ipcop'}>Openfirewall</option>
         <option value='squid' $selected{'ERR_DESIGN'}{'squid'}>$Lang::tr{'standard'}</option>
     </select></td>
     <td>&nbsp;</td>

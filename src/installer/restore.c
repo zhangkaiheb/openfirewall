@@ -43,8 +43,8 @@
 #define TMP_RESTORE_PATH_CHROOT     "/tmp/restore"
 #define MOUNT_BACKUP_FULL           "/harddisk/mnt/usb"
 #define MOUNT_BACKUP_CHROOT         "/mnt/usb"
-#define DATFILE_FULL                "/harddisk/usr/local/apache/html/backup/ipcop-xxxx-xx-xx_xx-xx-xx.dat"
-#define DATFILE_CHROOT              "/usr/local/apache/html/backup/ipcop-xxxx-xx-xx_xx-xx-xx.dat"
+#define DATFILE_FULL                "/harddisk/usr/local/apache/html/backup/openfirewall-xxxx-xx-xx_xx-xx-xx.dat"
+#define DATFILE_CHROOT              "/usr/local/apache/html/backup/openfirewall-xxxx-xx-xx_xx-xx-xx.dat"
 
 static char command[STRING_SIZE];
 static char message[STRING_SIZE_LARGE];
@@ -238,7 +238,7 @@ static int restorefromusb(char *hostname, char *password)
     mysystem("chroot /harddisk /bin/chmod 400 /var/ofw/backup/backup.key");
 
     snprintf(command, STRING_SIZE, "chroot /harddisk /usr/local/bin/ofwrestore"
-        " --restore=%s --hostname=ipcop --hardware", DATFILE_CHROOT);
+        " --restore=%s --hostname=openfirewall --hardware", DATFILE_CHROOT);
     if ((rc = mysystem(command)) != 0) {
         newtPopWindow();
         fprintf(flog, "ofwrestore returned errorcode: %d (%d)\n", (rc >> 8), rc);
@@ -296,7 +296,7 @@ static int restorefromnetwork(char *url, char *hostname, char *password)
     }
 
     snprintf(command, STRING_SIZE, "chroot /harddisk /usr/local/bin/ofwrestore"
-        " --restore=%s --hostname=ipcop --hardware", DATFILE_CHROOT);
+        " --restore=%s --hostname=openfirewall --hardware", DATFILE_CHROOT);
     rc = mysystem(command);
     if (rc != 0) {
         unlink(DATFILE_FULL);
@@ -367,7 +367,7 @@ int handlerestore(void)
     int error;
     int userskip;
 
-    strcpy(hostnameinitvalue, "ipcop.localdomain");
+    strcpy(hostnameinitvalue, "openfirewall.localdomain");
     strcpy(typevalue, "floppy");
 
     httpLines = 0;

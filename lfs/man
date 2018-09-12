@@ -32,19 +32,13 @@
 
 include Config
 
-#PKG_NAME   = man
-#VER        = 1.6f
 PKG_NAME   = man-db
 VER        = 2.7.6.1.orig
 HOST_ARCH  = all
 OTHER_SRC  = yes
 
-#THISAPP    = $(PKG_NAME)-$(VER)
 THISAPP    = $(PKG_NAME)_$(VER)
-#DL_FILE    = $(THISAPP).tar.gz
 DL_FILE    = $(THISAPP).tar.xz
-#DL_FROM    = http://primates.ximian.com/~flucifredi/man
-#DL_FROM    = http://ipcop-addons.mooo.com/misc/IPCop
 DL_FROM    = https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/man-db/2.7.6.1-2
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)

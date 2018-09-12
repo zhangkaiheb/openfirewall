@@ -220,9 +220,9 @@ while ($loop) {
 if ($cgiparams{'ACTION'} eq $Lang::tr{'export'}) {
     print "Content-type: text/plain\n";
     # Use short identifier in filename instead of translation, so the filename is not broken.
-    print "Content-Disposition: attachment; filename=\"ipcop-$cgiparams{'SECTION'}-$date.log\";\n";
+    print "Content-Disposition: attachment; filename=\"openfirewall-$cgiparams{'SECTION'}-$date.log\";\n";
     print "\n";
-    print "IPCop diagnostics\r\n";
+    print "Openfirewall diagnostics\r\n";
     print "$Lang::tr{'section'}: $trsections{$cgiparams{'SECTION'}}\n";
     print "$Lang::tr{'date'}: $date\r\n\r\n";
 

@@ -800,7 +800,7 @@ END
     <td><input type='text' size='5' name='TIMEOUT' value='$pppsettings{'TIMEOUT'}' /></td>
     <td colspan='2'>&nbsp;</td>
 </tr><tr>
-    <td>$Lang::tr{'connect on ipcop restart'}:</td>
+    <td>$Lang::tr{'connect on openfirewall restart'}:</td>
     <td><input type='checkbox' $disabledautoconnect name='AUTOCONNECT' value='on' $checked{'AUTOCONNECT'}{'on'} /></td>
     <td>$Lang::tr{'connection debugging'}:</td>
     <td><input type='checkbox' name='DEBUG' $checked{'DEBUG'}{'on'} /></td>

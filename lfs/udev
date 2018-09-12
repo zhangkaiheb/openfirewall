@@ -72,7 +72,6 @@ objects = $(DL_FILE) $(TESTFILE)
 
 $(DL_FILE)				= $(DL_FROM)/$(DL_FILE)
 # in case anduin does not have the file yet, use a different location
-#$(TESTFILE)				=  http://ipcop-addons.mooo.com/misc/IPCop/$(TESTFILE)
 $(TESTFILE)				=  $(URL_OFPKGS)/u/$(TESTFILE)
 
 $(DL_FILE)_MD5				= 3c4e45df312e69b34b27be5e47ca0b46
@@ -131,7 +130,7 @@ endif
 
 	cd $(DIR_APP) && make install
 
-	# And finally copy our ipcop rules
+	# And finally copy our openfirewall rules
 	cp $(DIR_SRC)/config/udev/rules.d/*.rules /etc/udev/rules.d/
 
 	@rm -rf $(DIR_APP)

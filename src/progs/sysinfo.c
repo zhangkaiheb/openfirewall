@@ -15,8 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright (C) 2006-05-27 weizen_42 at ipcop-forum dot de
- * (c) 2007-2011, the Openfirewall Team
+ * (c) 2007-2018, the Openfirewall Team
  *
  * $Id: sysinfo.c 5760 2011-07-31 15:11:53Z owes $
  *

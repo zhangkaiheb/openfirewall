@@ -86,11 +86,11 @@ $(subst %,%_MD5,$(objects)) :
 # Installation Details
 ###############################################################################
 
-IPCOP_ERR_STYLE_CODE = <style type="text/css"><!--body{background-color:\#e0e0e0;margin-left:0px;margin-right:0px;margin-top:0px;margin-bottom:0px;margin-width:0px;margin-height:0px;font-family:verdana,sans-serif}pre{font-family:sans-serif}--></style>
+OPENFIREWALL_ERR_STYLE_CODE = <style type="text/css"><!--body{background-color:\#e0e0e0;margin-left:0px;margin-right:0px;margin-top:0px;margin-bottom:0px;margin-width:0px;margin-height:0px;font-family:verdana,sans-serif}pre{font-family:sans-serif}--></style>
 
-IPCOP_ERR_BODY_CODE  = <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:\#000000"> <tr><td><img src="http://%h:81/images/blacklogo.png" width="480" height="72" alt="Openfirewall" /></td></tr> </table>
+OPENFIREWALL_ERR_BODY_CODE  = <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:\#000000"> <tr><td><img src="http://%h:81/images/blacklogo.png" width="480" height="72" alt="Openfirewall" /></td></tr> </table>
 
-IPCOP_ERR_POST_CODE  = <div id="footer"><address><small>Generated %T by %h (%s)</small></address></div> </body></html>
+OPENFIREWALL_ERR_POST_CODE  = <div id="footer"><address><small>Generated %T by %h (%s)</small></address></div> </body></html>
 
 $(TARGET) : $(firstword $(MAKEFILE_LIST))
 	# Build every time the exact list, not only on first build.
@@ -111,7 +111,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST))
 		sed -i -e 's#http://%h#http://%h:81#' $${LANGUAGE}/ERR_CACHE_ACCESS_DENIED ; \
 	done
 
-	# Adding IPCop design to the built-in error files
+	# Adding Openfirewall design to the built-in error files
 	cp -rp $(ERRMSG_DIR)/* $(ERRMSG_DIR).ofw
 
 	# 1 - remove all empty lines and the H1 header tag (if any)
@@ -127,10 +127,10 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST))
 		for ERRMSG_FILE in $${LANGUAGE}/* ; do \
 			sed -i -e 's/^ *//' -e '/^$$/d' -e '/^<h1>.*<\/h1>/d' $${ERRMSG_FILE} ; \
 			sed -i -e '/<style/,/<\/style/'d $${ERRMSG_FILE} ; \
-			sed -i -e '/<title/ a\$(IPCOP_ERR_STYLE_CODE)' $${ERRMSG_FILE} ; \
-			sed -i -e '/<body/ a\$(IPCOP_ERR_BODY_CODE)' $${ERRMSG_FILE} ; \
+			sed -i -e '/<title/ a\$(OPENFIREWALL_ERR_STYLE_CODE)' $${ERRMSG_FILE} ; \
+			sed -i -e '/<body/ a\$(OPENFIREWALL_ERR_BODY_CODE)' $${ERRMSG_FILE} ; \
 			sed -i -e '/<div id="footer">/,$$d' $${ERRMSG_FILE} ; \
-			sed -i -e '$$a\$(IPCOP_ERR_POST_CODE)' $${ERRMSG_FILE} ; \
+			sed -i -e '$$a\$(OPENFIREWALL_ERR_POST_CODE)' $${ERRMSG_FILE} ; \
 		done ; \
 	done
 

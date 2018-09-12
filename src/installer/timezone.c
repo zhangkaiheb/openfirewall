@@ -131,7 +131,7 @@ int handletimezone(void)
             update_kv(&kv, "TIMEZONE", timezone_setting);
             write_kv_to_file(&kv, "/var/ofw/main/settings");
 
-            snprintf(command, STRING_SIZE, "/usr/bin/logger -t ipcop \"Timezone set to: %s\"", displaynames[choice]);
+            snprintf(command, STRING_SIZE, "/usr/bin/logger -t openfirewall \"Timezone set to: %s\"", displaynames[choice]);
             mysystem(command);
         }
         unlink("/etc/localtime");

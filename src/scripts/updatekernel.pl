@@ -114,7 +114,7 @@ if (($oldversion ne '') && (-e "/lib/modules/$oldversion")) {
     system("rm -rf /boot/vmlinuz-$oldversion");
 }
 
-if (($oldversion ne '') && system("/bin/grep IPCop $bootconfig{$General::machine} | /bin/grep old > /dev/null") == 0) {
+if (($oldversion ne '') && system("/bin/grep Openfirewall $bootconfig{$General::machine} | /bin/grep old > /dev/null") == 0) {
     # Shift the old (removed) kernel to the now previous one is easy
     &General::log("installpackage", "Shifting boot configfile from $oldversion to $keepversion");
     system("/bin/sed -i -e 's/$oldversion/$keepversion/' $bootconfig{$General::machine}");

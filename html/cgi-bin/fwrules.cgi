@@ -870,7 +870,7 @@ END
 
         if($type eq 'PORTFW') {
 
-            # Only display ipcop external destination line if address is not the red address or the service is different
+            # Only display openfirewall external destination line if address is not the red address or the service is different
             if($rule->{'PORTFW_EXT_ADR'} ne 'Red Address'
                 || $rule->{'PORTFW_SERVICE'} ne $rule->{'SERVICE'}
                 || $rule->{'PORTFW_SERVICE_TYPE'} ne $rule->{'SERVICE_TYPE'})
@@ -1105,7 +1105,7 @@ sub validateDestParams
         ## Openfirewall external destination
         ######################
         if ($cgiparams{'PORTFW_EXT_ADR'} eq '') {
-            $errormessage .= "$Lang::tr{'invalid ipcop red address'}<br />";
+            $errormessage .= "$Lang::tr{'invalid openfirewall red address'}<br />";
         }
 
         if ($cgiparams{'PORTFW_SERVICE_TYPE'} eq 'custom') {
@@ -1374,7 +1374,7 @@ sub checkBetweenParams
 
                 # only allow Openfirewall access from Green, Blue or VPN
                 if (($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') && ($FW::interfaces{$cgiparams{'DEFAULT_SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR')) {
-                    $errormessage .= "$Lang::tr{'ipcop access only from green blue and vpn'}<br />";
+                    $errormessage .= "$Lang::tr{'openfirewall access only from green blue and vpn'}<br />";
                 }
             }
             else {
@@ -1382,7 +1382,7 @@ sub checkBetweenParams
 
                     # only allow Openfirewall access from Green, Blue or VPN
                     if ($FW::interfaces{$cgiparams{'DEFAULT_SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR') {
-                        $errormessage .= "$Lang::tr{'ipcop access only from green blue and vpn'}<br />";
+                        $errormessage .= "$Lang::tr{'openfirewall access only from green blue and vpn'}<br />";
                     }
                 }
                 else {    # we don't know if the custom source interface opens the Firewall

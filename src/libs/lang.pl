@@ -109,13 +109,13 @@ sub reload
 
     # set admin manual URL
     if ($locale eq 'de_DE') {
-        $General::adminmanualurl = 'http://www.ipcop.org/2.0.0/de/admin/html';
+        $General::adminmanualurl = 'http://www.openfirewall.org/2.0.0/de/admin/html';
     }
     elsif (($locale eq 'es_ES') || ($locale eq 'es_UY')) {
-        $General::adminmanualurl = 'http://www.ipcop.org/2.0.0/es/admin/html';
+        $General::adminmanualurl = 'http://www.openfirewall.org/2.0.0/es/admin/html';
     }
     else {
-        $General::adminmanualurl = 'http://www.ipcop.org/2.0.0/en/admin/html';
+        $General::adminmanualurl = 'http://www.openfirewall.org/2.0.0/en/admin/html';
     }
 }
 
