@@ -268,7 +268,7 @@ create_initramfs()
     elif [ x"${MANYMODULES}" == x"yes" ]; then
         # We want many modules
         echo -ne "Copying many modules.  This may take some time "
-        for d in fs drivers/scsi
+        for d in fs drivers
         do
             LIBPATH=lib/modules/${KVER}/kernel/$d
             mkdir -p ${TMPDIR}/${LIBPATH}

@@ -287,9 +287,8 @@ int changedhcpserver(void)
 
         write_kv_to_file(&dhcpkv, "/var/ofw/dhcp/settings");
 
-        if (flag_is_state == setup) {
+        if (flag_is_state == INST_SETUP)
             mysystem("/usr/local/bin/restartdhcp");
-        }
     }
 
     free_kv(&dhcpkv);

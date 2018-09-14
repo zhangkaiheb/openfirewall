@@ -51,11 +51,11 @@
 
 
 /* global variables */
-installer_setup_t flag_is_state = installer;
-supported_media_t medium_boot = unknown;
-supported_media_t medium_sources = none;
-supported_media_t medium_target = none;
-supported_media_t medium_console = console;
+installer_setup_t flag_is_state = INST_INSTALLER;
+supported_media_t medium_boot = MT_UNKNOWN;
+supported_media_t medium_sources = MT_NONE;
+supported_media_t medium_target = MT_NONE;
+supported_media_t medium_console = MT_CONSOLE;
 char network_source[STRING_SIZE];
 unsigned int memtotal = 0;                  /* Total memory in MB */
 
@@ -108,7 +108,7 @@ static void read_netboot_values(void)
         fprintf(flog, "       netmask:%s\n    netboot IP:%s\n"
                       "TFTP server IP:%s\nDHCP server IP:%s\n",
                        netmask, local_IP, server_IP, netboot_dhcp_IP);
-        medium_boot = network;
+        medium_boot = MT_NETWORK;
     }
     if (find_kv_default(kv, "BOOTIF", netboot_mac) == SUCCESS) {
         /* convert format to lowercase */
@@ -124,7 +124,7 @@ static void read_netboot_values(void)
         strncpy(netboot_mac, &netboot_mac[3], 18);
         netboot_mac[18] = '\0';
         fprintf(flog, "   netboot MAC:%s\n", netboot_mac);
-        medium_boot = network;
+        medium_boot = MT_NETWORK;
     }
 }
 
@@ -139,7 +139,7 @@ static int find_boot_itf(void)
         i++;
         snprintf(command, STRING_SIZE, "eth%d", i);
         mac_addr = strdup(getmac(command));
-    } while ((i < numnetwork) && (strcmp(mac_addr, netboot_mac)));
+    } while ((i < get_network_num()) && (strcmp(mac_addr, netboot_mac)));
     if (strcmp(mac_addr, netboot_mac)) {
         fprintf(flog, "Failed to find boot interface\n");
         return FAILURE;
@@ -153,9 +153,9 @@ static int find_boot_itf(void)
 static void build_network_list(void)
 {
     int i = 0;
-    networks = realloc(networks, sizeof(struct network_s) * (numnetwork + 1));
+    networks = realloc(networks, sizeof(struct network_s) * (get_network_num() + 1));
 
-    for (i = 0; i < numnetwork; i++) {
+    for (i = 0; i < get_network_num(); i++) {
         snprintf(command, STRING_SIZE, "eth%d", i);
         networks[i].device = strdup(command);
         networks[i].address = strdup(getmac(command));
@@ -224,7 +224,7 @@ static int select_interface(void)
     int choice = 0;
     char *interfacelist[CFG_COLOURS_COUNT];
 
-    for (i = 0; i < numnetwork; i++) {
+    for (i = 0; i < get_network_num(); i++) {
         interfacelist[i] = malloc(STRING_SIZE +1);
         snprintf(interfacelist[i], STRING_SIZE, "%s MAC:%s  %s", networks[i].device, networks[i].address, networks[i].module);
     }
@@ -241,7 +241,7 @@ static int select_interface(void)
             done = 2;       /* canceled by user */
         }
     }
-    for (i = 0; i < numnetwork; i++) {
+    for (i = 0; i < get_network_num(); i++) {
         free(interfacelist[i]);
     }
     if (done == 1 ) {
@@ -292,7 +292,7 @@ static int source_network(void)
     static int changed_green = 0;       /* IP and netmask green       */
     char *tmpstring;
 
-    if (numnetwork == 0) {
+    if (get_network_num() == 0) {
         fprintf(flog, "Fail to discover at least one network card\n");
         return FAILURE;
     }
@@ -301,8 +301,8 @@ static int source_network(void)
     statuswindow(72, 5, ofw_gettext("TR_TITLE_SOURCE"), ofw_gettext("TR_SEARCH_NETWORKS"));
 
     /* load net drivers from discovered hardware */
-    for (i = 0; i < numhardwares; i++) {
-        if (hardwares[i].type == network) {
+    for (i = 0; i < get_hardwares_num(); i++) {
+        if (hardwares[i].type == MT_NETWORK) {
             snprintf(command, STRING_SIZE, "modprobe %s", hardwares[i].module);
             mysystem(command);
         }
@@ -331,12 +331,12 @@ static int source_network(void)
         /* FIXME be smarter if the machine is connected to more than one dhcp server */
         /* we actually keep only the last discovered server */
         /* we don't need to try disconnected cards */
-        for (i = 0; i < numnetwork; i++) {
+        for (i = 0; i < get_network_num(); i++) {
             /* 3 probes at approx. 3 second interval with 1 second pause after failure should suffice */
             if (!find_network_by_dhcp(i)) {
                 fprintf(flog, "Found dhcp server at eth%d\n", i);
             }
-            newtScaleSet(scale, (i+1) * 100 / numnetwork);
+            newtScaleSet(scale, (i+1) * 100 / get_network_num());
             newtRefresh();
         }
         newtPopWindow();
@@ -439,9 +439,9 @@ static int source_cdrom(void)
 
     statuswindow(72, 5, ofw_gettext("TR_TITLE_SOURCE"), ofw_gettext("TR_MOUNTING_CDROM"));
 
-    for (i = 0; i < numhardwares; i++) {
-        if ((hardwares[i].type == cdrom) || 
-              ((hardwares[i].type == harddisk) && (hardwares[i].device[0] == 's'))) {
+    for (i = 0; i < get_hardwares_num(); i++) {
+        if ((hardwares[i].type == MT_CDROM) || 
+              ((hardwares[i].type == MT_HARDDISK) && (hardwares[i].device[0] == 's'))) {
 
             /*  We need to try different partitions here
                 hd?, sd? and sr? for IDE CD, usb-fdd and SCSI,SATA CD
@@ -476,11 +476,11 @@ static int source_cdrom(void)
                 if (!access(filepath, 0)) {
                     /* TODO: some fancy test (md5 ?) to verify CD */
                     newtPopWindow();
-                    if (hardwares[i].type == harddisk) {
+                    if (hardwares[i].type == MT_HARDDISK) {
                         /* USB key, change type to remove from destination selection list */
-                        hardwares[i].type = cdrom;
+                        hardwares[i].type = MT_CDROM;
                     }
-                    medium_sources = cdrom;
+                    medium_sources = MT_CDROM;
                     scsi_cdrom = (hardwares[i].device[0] == 's');
                     fprintf(flog, "Source tarball found on device %s\n", test_device);
                     return SUCCESS;
@@ -516,19 +516,19 @@ static int findsource(void)
     char line[STRING_SIZE_LARGE];
 
 
-    if ((medium_boot == cdrom) || (medium_boot == usb)) {
+    if ((medium_boot == MT_CDROM) || (medium_boot == MT_USB)) {
         if (source_cdrom() == SUCCESS) {
             /* We boot from media with all we need, no point to ask for HTTP/FTP install */
             return SUCCESS;
         }
     }
 
-    for (i = 0; i < numhardwares; i++) {
-        if (hardwares[i].type == network)
+    for (i = 0; i < get_hardwares_num(); i++) {
+        if (hardwares[i].type == MT_NETWORK)
             numnetworks++;
     }
 
-    if (medium_boot == network) {
+    if (medium_boot == MT_NETWORK) {
         /* Set default selection for source to http/ftp */
         installtype = 1;
     }
@@ -540,21 +540,22 @@ static int findsource(void)
     while (1) {
         snprintf(line, STRING_SIZE_LARGE, ofw_gettext("TR_SELECT_INSTALLATION_MEDIA_LONG"), NAME);
         rc = newtWinMenu(ofw_gettext("TR_TITLE_SOURCE"),
-                         line, 65, 5, 5, 8,
-                         installtypes, &installtype, ofw_gettext("TR_OK"), ofw_gettext("TR_CANCEL"), NULL);
+						line, 65, 5, 5, 8,
+						installtypes, &installtype, ofw_gettext("TR_OK"),
+						ofw_gettext("TR_CANCEL"), NULL);
         if (rc == 2) {
             return FAILURE;     // give up
         }
 
         if (installtype == 1) {
             if (source_network() == SUCCESS) {
-                medium_sources = network;
+                medium_sources = MT_NETWORK;
                 return SUCCESS;
             }
         }
         else {
             if (source_cdrom() == SUCCESS) {
-                medium_sources = cdrom;
+                medium_sources = MT_CDROM;
                 return SUCCESS;
             }
         }
@@ -587,8 +588,8 @@ int selectdestination(int *ddisk, int *ddisk2, long int *disk_size, long int *ra
             }
         }
 
-        for (c = 0, i = 0; i < numhardwares; i++) {
-            if (hardwares[i].type == harddisk) {
+        for (c = 0, i = 0; i < get_hardwares_num(); i++) {
+            if (hardwares[i].type == MT_HARDDISK) {
                 snprintf(string, STRING_SIZE, "%s: %s", hardwares[i].device, hardwares[i].description);
                 harddisklist = realloc(harddisklist, sizeof(char *) * (c + 1));
                 harddisklist[c] = strdup(string);
@@ -647,7 +648,7 @@ NEXTDISK:
 
         disklist[raid] = -1;
         /* retrieve selection from hardwares list */
-        for (i = 0; i < numhardwares; i++) {
+        for (i = 0; i < get_hardwares_num(); i++) {
             if (!strncmp(harddisklist[c], hardwares[i].device, 3)) {
                 disklist[raid] = i;
                 break;
@@ -710,7 +711,7 @@ NEXTDISK:
 
         while (1) {
             /* Should this be a harddisk or flash installation? */
-            medium_target = harddisk;
+            medium_target = MT_HARDDISK;
 
             rc = newtWinTernary(ofw_gettext("TR_TITLE_DISK"),
                                 ofw_gettext("TR_HARDDISK"), ofw_gettext("TR_FLASH"), ofw_gettext("TR_GO_BACK"),
@@ -756,7 +757,7 @@ NEXTDISK:
                     /* Verify against minimum sensible size and total available memory here.
                        Maximize against total memory minus 16 MiB, though we probably need more than 16 MiB. */
                     if ((strlen(values[0]) < 5) && (*ramdisk_size >= 32) && (*ramdisk_size <= (memtotal - 16))) {
-                        medium_target = flash;
+                        medium_target = MT_FLASH;
                         fprintf(flog, "FLASH installation, RAM disk size wanted: %ld MiB\n", *ramdisk_size);
                         return SUCCESS; // OK flash      
                     }
@@ -799,13 +800,13 @@ int main(int argc, char **argv)
             exit(0);
         }
         fstderr = freopen("/dev/tty3", "w+", stderr);
-        medium_console = console;
+        medium_console = MT_CONSOLE;
     }
     else {
         /* Special console, do not use tty2/tty3 but temporary files. */
         flog = fopen("/tmp/flog", "w");
         fstderr = freopen("/tmp/fstderr", "w", stderr);
-        medium_console = serial;
+        medium_console = MT_SERIAL;
         serial_commandline = strdup(find_kv(kv, "console"));
 
         /* serial_commandline is of format ttyS0,38400n81 */
@@ -839,7 +840,7 @@ int main(int argc, char **argv)
     fprintf(flog, "MemTotal is %d MB\n", memtotal);
 
     /* Determine boot medium, in case of i486 with netboot it is already detected */
-    if (medium_boot == unknown) {
+    if (medium_boot == MT_UNKNOWN) {
         if (access("/CDROMBOOT", 0) != -1) {
             /* CDROM, NET, USB key, boot floppy + CDROM detected */
             char strboot[STRING_SIZE] = "none";
@@ -848,38 +849,38 @@ int main(int argc, char **argv)
             fprintf(flog, "ofwboot=%s\n", strboot);
             if (!strcmp(strboot, "usb")) {
                 mysystem("/sbin/modprobe vfat");    /* necessary for usb-key */
-                medium_boot = usb;
+                medium_boot = MT_USB;
             }
             else if (!strcmp(strboot, "net")) {
-                medium_boot = network;
+                medium_boot = MT_NETWORK;
             }
             else if (!strcmp(strboot, "cdrom")) {
-                medium_boot = cdrom;
+                medium_boot = MT_CDROM;
             }
             else {
-                medium_boot = unknown;
+                medium_boot = MT_UNKNOWN;
             }
         }
         else if (access("/FLOPPYBOOT", 0) != -1) {
             /* boot + root floppy */
-            medium_boot = floppy;
+            medium_boot = MT_FLOPPY;
         }
     }
 
-    switch(medium_boot) {
-    case cdrom:
+    switch (medium_boot) {
+    case MT_CDROM:
         fprintf(flog, "Boot is cdrom (or others)\n");
         break;
-    case floppy:
+    case MT_FLOPPY:
         fprintf(flog, "Boot is floppy\n");
         break;
-    case network:
+    case MT_NETWORK:
         fprintf(flog, "Boot is net\n");
         break;
-    case usb:
+    case MT_USB:
         fprintf(flog, "Boot is usb\n");
         break;
-    case unknown:
+    case MT_UNKNOWN:
     default:
         /* actually this cannot be, boot must have used something */
         fprintf(flog, "Boot is unknown or sparc netboot ?!\n");
@@ -980,7 +981,7 @@ int main(int argc, char **argv)
     scan_hardware(1, nopcmcia, nousb, manualmodule);
 
     /* any possible target drives found */
-    if (numharddisk == 0) {
+    if (get_harddisk_num() == 0) {
         errorbox(ofw_gettext("TR_NO_HARDDISK"));
         fprintf(flog, "NO HARDDRIVES\n");
         goto EXIT;
@@ -1011,24 +1012,23 @@ int main(int argc, char **argv)
 
     /*  Partition, format, mount, initramfs and make bootable
        manual partitioning if PART_OPTIONS_PARTED set */
-    if (make_ofw_disk(hardwares[selected_hd].device, hardwares[selected_hd2].device, disk_size, swapfilesize, part_options) != SUCCESS)
+    if (make_ofw_disk(hardwares[selected_hd].device,
+			hardwares[selected_hd2].device,
+			disk_size, swapfilesize, part_options) != SUCCESS)
         goto EXIT;
 
 
     // Now, /harddisk           is mounted
     //      /harddisk/var/log   is mounted
 
-        fprintf(flog, "Writing MBR 30\n");
     /* Target is up&running so we can store some previously made settings */
     write_lang_configs();
-        fprintf(flog, "Writing MBR 31\n");
     write_keymap();
-        fprintf(flog, "Writing MBR 32\n");
     write_timezone();
     /* Copy the info about detected HW for later reference */
     mysystem("/bin/cp /tmp/hwdetect /harddisk/var/log/hwdetect");
 
-    if (medium_target == flash) {
+    if (medium_target == MT_FLASH) {
         /* Specials for flash disk */
         NODEKV *kv_flash = NULL;
         char value[STRING_SIZE];
@@ -1041,9 +1041,8 @@ int main(int argc, char **argv)
         mysystem("chroot /harddisk /usr/local/sbin/flashfinal.sh");
     }
 
-
     /* Some tidbits for serial console */
-    if (medium_console == serial) {
+    if (medium_console == MT_SERIAL) {
         snprintf(line, STRING_SIZE, "echo \"ttyS%u\" >> /harddisk/etc/securetty", serial_console);
         if (system(line)) {
             /* TODO: make this a fatal error ? */
@@ -1058,7 +1057,6 @@ int main(int argc, char **argv)
         }
     }
 
-        fprintf(flog, "Writing MBR 40\n");
     /* Offer restore here, if no restore -> launch setup later */
     restore_success = handlerestore();
 
@@ -1066,18 +1064,18 @@ int main(int argc, char **argv)
     snprintf(message, STRING_SIZE_LARGE, ofw_gettext("TR_CONGRATULATIONS_LONG"), NAME, SNAME, SNAME, NAME, NAME, NAME);
     newtWinMessage(get_title(), ofw_gettext("TR_CONGRATULATIONS"), message);
 
-    if ((medium_sources == network) && (restore_success == FAILURE)) {
+    if ((medium_sources == MT_NETWORK) && (restore_success == FAILURE)) {
         /* running udhcp may have given us some acceptable defaults */
         mysystem("[ -e /etc/dhcp-eth*.params ] && /bin/cp /etc/dhcp-eth*.params /harddisk/tmp/");
     }
-    else if (medium_sources == cdrom) {
+    else if (medium_sources == MT_CDROM) {
         mysystem("/bin/umount /cdrom");
     }
 
     /* Now that we've unmounted the cdrom, try to eject it 
         If we use medium_boot here, we would also eject when installing from other media,
         since CDROM, PXE and USB source have the CDROMBOOT flagfile */
-    if (medium_sources == cdrom) {
+    if (medium_sources == MT_CDROM) {
         if (scsi_cdrom) {
             /* Might need something additionally/different here */
             strcpy(line, "eject -s /dev/cdrom");
@@ -1086,9 +1084,8 @@ int main(int argc, char **argv)
             strcpy(line, "eject /dev/cdrom");
         }
 
-        if (mysystem(line)) {
+        if (mysystem(line))
             errorbox(ofw_gettext("TR_UNABLE_TO_EJECT_CDROM"));
-        }
     }
 
     if (restore_success == FAILURE) {
@@ -1097,7 +1094,7 @@ int main(int argc, char **argv)
 
         /* Run setup to configure remaining bits & pieces */
         snprintf(command, STRING_SIZE, "chroot /harddisk /usr/local/sbin/setup --install %s", 
-            (medium_console == serial) ? "--serial" : "");
+            (medium_console == MT_SERIAL) ? "--serial" : "");
         if (system(command))
             printf("Unable to run setup.\n");
     }
@@ -1111,7 +1108,7 @@ int main(int argc, char **argv)
     /* No need to make this complicated, we know what we've mounted */
 /*
     mysystem("/bin/umount -n /harddisk/boot");
-    if (medium_target == flash) {
+    if (medium_target == MT_FLASH) {
         mysystem("/bin/umount -n /harddisk/var/log_compressed");
     }
     else {

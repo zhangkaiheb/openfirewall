@@ -105,7 +105,7 @@ int handletimezone(void)
     displaynames[c] = NULL;
 
     strcpy(timezone_setting, ZONEFILES "/CET");
-    if (flag_is_state == setup) {
+    if (flag_is_state == INST_SETUP) {
         if (read_kv_from_file(&kv, "/var/ofw/main/settings") != SUCCESS) {
             free_kv(&kv);
             errorbox(ofw_gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
@@ -122,12 +122,12 @@ int handletimezone(void)
     }
 
     rc = newtWinMenu(ofw_gettext("TR_TIMEZONE"), ofw_gettext("TR_TIMEZONE_LONG"), 50, 5, 5, 6, displaynames, &choice,
-                     ofw_gettext("TR_OK"), (flag_is_state != setup) ? ofw_gettext("TR_SKIP") : ofw_gettext("TR_GO_BACK"), NULL);
+                     ofw_gettext("TR_OK"), (flag_is_state != INST_SETUP) ? ofw_gettext("TR_SKIP") : ofw_gettext("TR_GO_BACK"), NULL);
 
     strcpy(timezone_setting, filenames[choice]);
 
     if (rc != 2) {
-        if (flag_is_state == setup) {
+        if (flag_is_state == INST_SETUP) {
             update_kv(&kv, "TIMEZONE", timezone_setting);
             write_kv_to_file(&kv, "/var/ofw/main/settings");
 
@@ -136,7 +136,7 @@ int handletimezone(void)
         }
         unlink("/etc/localtime");
         if (link(timezone_setting, "/etc/localtime") == 0) {
-            if (flag_is_state == installer) {
+            if (flag_is_state == INST_INSTALLER) {
                 /* Set time from hw clock and configured timezone */
                 mysystem("/sbin/hwclock --hctosys --utc");
             }
@@ -155,7 +155,7 @@ int handletimezone(void)
         free(displaynames[c]);
     }
 
-    if (flag_is_state == setup) {
+    if (flag_is_state == INST_SETUP) {
         free_kv(&kv);
     }
 

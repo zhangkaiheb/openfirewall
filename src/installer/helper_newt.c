@@ -229,7 +229,7 @@ void changeaddress(char *colour, int *changed_flag)
 
     ok = newtButton(6, 5 + numLines, gettext("TR_OK"));
     /* In case of installer we need a valid address, no turning back */
-    if (flag_is_state == setupchroot) {
+    if (flag_is_state == INST_SETUPCHROOT) {
         newtFormAddComponent(networkform, ok);
     }
     else {

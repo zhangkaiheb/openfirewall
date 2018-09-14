@@ -112,7 +112,6 @@ char *find_modulename(char *bus, uint16_t vendor_id, uint16_t device_id)
     return NULL;
 }
 
-
 /* 
  * Get kernel module, vendor and device ID for device using 
  *     /sys/class/net/interface/device/driver/module

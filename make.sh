@@ -396,7 +396,7 @@ TOOLS_DIR=tools_${MACHINE}
 ##fi
 
 # This is the directory that holds the newly built openfirewall system
-LFS=${BASEDIR}/build_${MACHINE}/ofw
+LFS=${BASEDIR}/build_${MACHINE}/openfirewall
 
 # For toolchain LFS chap5
 # /${TOOLS_DIR}/usr/bin is for ccache symlink
@@ -1070,11 +1070,11 @@ prepareenv()
 	${SUDO} ${MKDIR} ${LFS}/tmp
 	${SUDO} ${CHMOD} 1777 ${LFS}/tmp
 
-	#################################################################################
-	# Make sure ${LFS}/bin/bash exists.  We used to do this check in lfs/bash, but	#
-	# it's better to do it here so that the toolchain becomes completely		#
-	# self-sufficient (ie you can start with no build_MACHINE/ofw and lfs/stage2)	#
-	#################################################################################
+	#########################################################################################
+	# Make sure ${LFS}/bin/bash exists.  We used to do this check in lfs/bash, but	        #
+	# it's better to do it here so that the toolchain becomes completely		            #
+	# self-sufficient (ie you can start with no build_MACHINE/openfirewall and lfs/stage2)	#
+	#########################################################################################
 	${SUDO} ${MKDIR} ${LFS}/bin
 	if [ ! -f ${LFS}/bin/bash ]; then
 		${SUDO} ${LN} /${TOOLS_DIR}/bin/bash ${LFS}/bin/bash
@@ -1450,8 +1450,8 @@ entershell()
 	STAGE_ORDER=02; STAGE=base
 
 	# Set CCACHE_COMPILERCHECK
-	###for GCC_AVAILABLE in ${BASEDIR}/build_${MACHINE}/ofw/usr/bin/gcc /${TOOLS_DIR}/bin/${TARGET_2}-gcc; do
-	for GCC_AVAILABLE in ${BASEDIR}/build_${MACHINE}/ofw/usr/bin/gcc /${TOOLS_DIR}/bin/${TARGET_2}-gcc; do
+###for GCC_AVAILABLE in ${BASEDIR}/build_${MACHINE}/openfirewall/usr/bin/gcc /${TOOLS_DIR}/bin/${TARGET_2}-gcc; do
+	for GCC_AVAILABLE in ${BASEDIR}/build_${MACHINE}/openfirewall/usr/bin/gcc /${TOOLS_DIR}/bin/${TARGET_2}-gcc; do
 		[ -f ${GCC_AVAILABLE} ] && update-gcc-hash "$GCC_AVAILABLE" && break
 	done
 
@@ -1813,7 +1813,7 @@ base_build()
 	chroot_make mpfr
 	chroot_make mpc
 	chroot_make gcc
-##	update-gcc-hash "${BASEDIR}/build_${MACHINE}/ofw/usr/bin/gcc"
+##	update-gcc-hash "${BASEDIR}/build_${MACHINE}/openfirewall/usr/bin/gcc"
 ##	chroot_make sed
 	chroot_make bzip2
 	chroot_make pkg-config
@@ -1890,7 +1890,7 @@ base_build()
 
 
 #########################################################################################################
-# This builds the entire stage "ofw"	                                 								#
+# This builds the entire stage "openfirewall"	                          								#
 #########################################################################################################
 openfirewall_build()
 {

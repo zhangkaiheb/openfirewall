@@ -136,7 +136,7 @@ static int filternet(const struct dirent *d)
         return 0;
     }
 
-    for (i = 0; i < numnetwork; i++) {
+    for (i = 0; i < get_network_num(); i++) {
         if (networks[i].device[0] && !strcmp(d->d_name, networks[i].device)) {
             /* we've already got this one listed */
             return 0;
@@ -157,6 +157,7 @@ static int probecard(char *module, char *description, char *options, int error)
     struct dirent **scndir;
     int newcards;
     int i, j, k;
+	int num = get_network_num();
 
     if (module != NULL) {
         /* owes: ToDo test if module already loaded ? */
@@ -164,9 +165,9 @@ static int probecard(char *module, char *description, char *options, int error)
 
         snprintf(command, STRING_SIZE, "/sbin/modprobe %s %s", module, options);
         if (mysystem(command)) {
-            if (error) {
+            if (error)
                 errorbox(gettext("TR_UNABLE_TO_LOAD_DRIVER_MODULE"));
-            }
+
             return FAILURE;
         }
     }
@@ -191,7 +192,7 @@ static int probecard(char *module, char *description, char *options, int error)
             /* First match on Vendor and Device ID (if present) */
             fprintf(flog, "  %s %s %s %s\n", scndir[i]->d_name, kernelmodule, vendorid_buffer, deviceid_buffer);
             if ((strlen(vendorid_buffer) > 0) && (strlen(deviceid_buffer) > 0)) {
-                for (k = 0; !found && (k < numnetwork); k++) {
+                for (k = 0; !found && (k < num); k++) {
                     if (!networks[k].device[0] && 
                             (strlen(networks[k].vendorid) > 0) && !strcmp(networks[k].vendorid, vendorid_buffer) &&
                             (strlen(networks[k].modelid) > 0) && !strcmp(networks[k].modelid, deviceid_buffer)) {
@@ -211,7 +212,7 @@ static int probecard(char *module, char *description, char *options, int error)
                 continue;
             }
 
-            for (k = 0; !found && (k < numnetwork); k++) {
+            for (k = 0; !found && (k < num); k++) {
                 if (!networks[k].device[0] && !strcmp(kernelmodule, networks[k].module)) {
                     free(networks[k].device);
                     networks[k].device = strdup(scndir[i]->d_name);
@@ -228,7 +229,7 @@ static int probecard(char *module, char *description, char *options, int error)
         fprintf(flog, "probed kernel module %s, found %d new network cards\n", module, newcards);
 
         /* walk thru our information list and try to match kernel modules */
-        for (i = 0, j = 0; (i < numnetwork) && (j < newcards); i++) {
+        for (i = 0, j = 0; (i < num) && (j < newcards); i++) {
             if (!networks[i].device[0] && !strcmp(module, networks[i].module)) {
                 free(networks[i].device);
                 networks[i].device = strdup(scndir[j]->d_name);
@@ -243,20 +244,22 @@ static int probecard(char *module, char *description, char *options, int error)
             This can be ISA NIC or manually modprobed (multiple NICS possible?) */
         while ((j < newcards) && (description != NULL)) {
 
-            networks = realloc(networks, sizeof(struct network_s) * (numnetwork + 1));
-            networks[numnetwork].module = strdup(module);
-            networks[numnetwork].options = strdup(options);
-            networks[numnetwork].device = strdup(scndir[j]->d_name);
-            networks[numnetwork].description = strdup(description);
-            networks[numnetwork].colour = NONE;
-            networks[numnetwork].address = strdup(getmac(networks[numnetwork].device));
-            networks[numnetwork].vendorid = "";
-            networks[numnetwork].modelid = "";
-            fprintf(flog, "  hwlist (ISA/manual) %s device %s MAC %s\n", module, networks[numnetwork].device, networks[numnetwork].address);
+            networks = realloc(networks, sizeof(struct network_s) * (num + 1));
+            networks[num].module = strdup(module);
+            networks[num].options = strdup(options);
+            networks[num].device = strdup(scndir[j]->d_name);
+            networks[num].description = strdup(description);
+            networks[num].colour = NONE;
+            networks[num].address = strdup(getmac(networks[num].device));
+            networks[num].vendorid = "";
+            networks[num].modelid = "";
+            fprintf(flog, "  hwlist (ISA/manual) %s device %s MAC %s\n",
+					module, networks[num].device, networks[num].address);
 
-            numnetwork++;
+			num++;
             j++;
         }
+		set_network_num(num);
     }
 
     if (j < newcards) {
@@ -272,34 +275,36 @@ static int probecard(char *module, char *description, char *options, int error)
 static void scancards(void)
 {
     int i;
+	int num = 0;
 
-    if (hardware_scanned) {
+    if (hardware_scanned)
         return;
-    }
+
     hardware_scanned = 1;
 
     /* scan for NICs, disable SCSI, no need to add modules manually */
     scan_hardware(0, 0, 0, 0);
-    numnetwork = 0;
+    set_network_num(0);
 
     /* setup our own table */
-    for (i = 0; i < numhardwares; i++) {
-        if (hardwares[i].type == network) {
-            networks = realloc(networks, sizeof(struct network_s) * (numnetwork + 1));
-            networks[numnetwork].module = hardwares[i].module;
-            networks[numnetwork].options = strdup("");
-            networks[numnetwork].device = strdup("");
-            networks[numnetwork].description = hardwares[i].description;
-            networks[numnetwork].colour = NONE;
-            networks[numnetwork].address = strdup("");
-            networks[numnetwork].vendorid = hardwares[i].vendorid;
-            networks[numnetwork].modelid = hardwares[i].modelid;
+    for (i = 0; i < get_hardwares_num(); i++) {
+        if (hardwares[i].type == MT_NETWORK) {
+            networks = realloc(networks, sizeof(struct network_s) * (num + 1));
+            networks[num].module = hardwares[i].module;
+            networks[num].options = strdup("");
+            networks[num].device = strdup("");
+            networks[num].description = hardwares[i].description;
+            networks[num].colour = NONE;
+            networks[num].address = strdup("");
+            networks[num].vendorid = hardwares[i].vendorid;
+            networks[num].modelid = hardwares[i].modelid;
 
-            numnetwork++;
+			num++;
         }
     }
+	set_network_num(num);
 
-    if (flag_is_state == setup) {
+    if (flag_is_state == INST_SETUP) {
         /* 
            special case, we already have module(s) and card(s) 
            match ethernet/settings to hwlist
@@ -329,7 +334,7 @@ static void scancards(void)
                 /* Check for Vendor / Device ID first */
                 getkernelmodule(device);
                 if ((strlen(vendorid_buffer) > 0) && (strlen(deviceid_buffer) > 0)) {
-                    for (n = 0; !found && (n < numnetwork); n++) {
+                    for (n = 0; !found && (n < num); n++) {
                         if (!networks[n].device[0] && 
                             (strlen(networks[n].vendorid) > 0) && !strcmp(networks[n].vendorid, vendorid_buffer) &&
                             (strlen(networks[n].modelid) > 0) && !strcmp(networks[n].modelid, deviceid_buffer)) {
@@ -347,7 +352,7 @@ static void scancards(void)
                 }
 
                 snprintf(key, STRING_SIZE, "%s_%d_DRIVER", ofw_colours_text[i], j);
-                for (n = 0; !found && (n < numnetwork); n++) {
+                for (n = 0; !found && (n < num); n++) {
                     if (!networks[n].device[0] && (find_kv(eth_kv, key) != NULL)
                         && !strcmp(networks[n].module, find_kv(eth_kv, key))) {
                         /* 3,2,1 meins */
@@ -364,19 +369,20 @@ static void scancards(void)
 
                 if (!found && strlen(module_buffer) && strlen(vendorid_buffer) && strlen(deviceid_buffer)) {
                     /* Not detected by our HW scanner, but plenty of information from device itself */
-                    networks = realloc(networks, sizeof(struct network_s) * (numnetwork + 1));
+                    networks = realloc(networks, sizeof(struct network_s) * (num + 1));
 
-                    networks[numnetwork].module = module_buffer;
-                    networks[numnetwork].options = strdup("");
-                    networks[numnetwork].device = device;
-                    networks[numnetwork].description = strdup("Unknown card");
-                    networks[numnetwork].colour = i;
+                    networks[num].module = module_buffer;
+                    networks[num].options = strdup("");
+                    networks[num].device = device;
+                    networks[num].description = strdup("Unknown card");
+                    networks[num].colour = i;
                     /* find MAC address */
                     networks[n].address = strdup(getmac(networks[n].device));
-                    networks[numnetwork].vendorid = vendorid_buffer;
-                    networks[numnetwork].modelid = deviceid_buffer;
+                    networks[num].vendorid = vendorid_buffer;
+                    networks[num].modelid = deviceid_buffer;
 
-                    numnetwork++;
+					num++;
+                    set_network_num(num);
                     found = 1;
                     fprintf(flog, "  HW undetected %s_%d %s\n", ofw_colours_text[i], j, device);
                 }
@@ -393,10 +399,9 @@ static void scancards(void)
     probecard(NULL, NULL, "", 0);
 
     /* modprobe cards found by hardware detection */
-    for (i = 0; i < numnetwork; i++) {
-        if (!networks[i].device[0]) {
+    for (i = 0; i < num; i++) {
+        if (!networks[i].device[0])
             probecard(networks[i].module, NULL, "", 0);
-        }
     }
 }
 
@@ -447,7 +452,7 @@ static void redconfigtype(void)
 
     ok = newtButton(6, 3 + CFG_RED_COUNT + numLines, gettext("TR_OK"));
     /* In case of installer we must make a decision */
-    if (flag_is_state == setupchroot) {
+    if (flag_is_state == INST_SETUPCHROOT) {
         newtFormAddComponent(networkform, ok);
     }
     else {
@@ -540,22 +545,22 @@ static void cardconfig(int n)
         int used = 0;
 
         /* skip RED if type is Modem or ISDN */
-        if ((i == RED) && (!strcmp(kv_red_type, "ANALOG") || !strcmp(kv_red_type, "GSM3G") || !strcmp(kv_red_type, "ISDN"))) {
+        if ((i == RED) && (!strcmp(kv_red_type, "ANALOG") ||
+				!strcmp(kv_red_type, "GSM3G") || !strcmp(kv_red_type, "ISDN"))) {
             continue;
         }
 
         /* test for already used colours here */
-        for (j = 0; j < numnetwork && !used; j++) {
+        for (j = 0; j < get_network_num() && !used; j++) {
 
-            if (i == networks[j].colour) {
+            if (i == networks[j].colour)
                 used = 1;
-            }
         }
 
-        if (!used) {
+        if (!used)
             colourchoices[choice++] = ofw_colours_text[i];
-        }
     }
+
     colourchoices[choice++] = gettext("TR_NOT_USED");
     colourchoices[choice++] = NULL;
     choice = 0;
@@ -570,15 +575,14 @@ static void cardconfig(int n)
         if ((rc == 0) || (rc == 1)) {
             changed_config = 1;
             if (!strcmp(colourchoices[choice], gettext("TR_NOT_USED"))) {
-                if (networks[n].colour != NONE) {
+                if (networks[n].colour != NONE)
                     updatesettings(ofw_colours_text[networks[n].colour], -1);
-                }
+
                 networks[n].colour = NONE;
             }
             else {
-                if (networks[n].colour != NONE) {
+                if (networks[n].colour != NONE)
                     updatesettings(ofw_colours_text[networks[n].colour], -1);
-                }
 
                 /* since choices is a selected list of colours, we cannot directly correlate numeric choice to a colour */
                 for (i = 0; i < CFG_COLOURS_COUNT - 1; i++) {
@@ -641,7 +645,7 @@ static void udevconfig(void)
     fprintf(fnet, "# Do not make any modifications, rerun setup instead.\n\n");
 
     /* set the device names with the help of udev */
-    for (i = 0; i < numnetwork; i++) {
+    for (i = 0; i < get_network_num(); i++) {
         if (networks[i].address[0]) {
             if (networks[i].colour == NONE) {
                 snprintf(device, STRING_SIZE, "%s-%d", ofw_aliases_text[NONE], counter++);
@@ -691,19 +695,16 @@ static int addmanual(void)
                 *ptr = 0;
                 rc = probecard(modulewithoption, "Unknown card", ptr+1, 1);
                 free(modulewithoption);
-                if (rc == SUCCESS) {
+                if (rc == SUCCESS)
                     return SUCCESS;
-                }
             }
             else
             {
                 rc = probecard(values[0], "Unknown card", "", 1);
-                if (rc) {
+                if (rc)
                     return SUCCESS;
-                }
             }
-        }
-        else {
+        } else {
             return FAILURE; /* canceled by user */
         }
     }
@@ -754,13 +755,13 @@ static void cardlist(void)
 
     for (;;) {
         choice = -1;
-        for (count = 0, i = 0; i < numnetwork; i++) {
+        for (count = 0, i = 0; i < get_network_num(); i++) {
             char line[STRING_SIZE];
 
             /* set first unused card as default choice */
-            if ((choice == -1) && (networks[i].colour == NONE)) {
+            if ((choice == -1) && (networks[i].colour == NONE))
                 choice = count;
-            }
+
             snprintf(line, STRING_SIZE, "%-60.60s (%s)", networks[i].description, ofw_colours_text[networks[i].colour]);
             cardchoices[count++] = strdup(line);
         }
@@ -768,12 +769,12 @@ static void cardlist(void)
 
         /* TODO: we probably need an option to bail out, without changing anything here */
         rc = newtWinMenu(gettext("TR_CARD_ASSIGNMENT"),
-                         gettext("TR_CARD_ASSIGNMENT_LONG"), 65, 5, 5, 11,
-                         cardchoices, &choice, gettext("TR_SELECT"), gettext("TR_MANUAL"), gettext("TR_DONE"), NULL);
+						gettext("TR_CARD_ASSIGNMENT_LONG"), 65, 5, 5, 11,
+						cardchoices, &choice, gettext("TR_SELECT"),
+						gettext("TR_MANUAL"), gettext("TR_DONE"), NULL);
 
-        for (i = 0; i < numnetwork; i++) {
+        for (i = 0; i < get_network_num(); i++)
             free(cardchoices[i]);
-        }
 
         switch (rc) {
         case 0:
@@ -785,10 +786,9 @@ static void cardlist(void)
             break;
         case 3:
             /* Do we have GREEN ? */
-            for (i = 0, count = 0; i < numnetwork && !count; i++) {
-                if (networks[i].colour == GREEN) {
+            for (i = 0, count = 0; i < get_network_num() && !count; i++) {
+                if (networks[i].colour == GREEN)
                     count++;
-                }
             }
             if (!count) {
                 /* We will always need at least 1 green NIC */
@@ -798,13 +798,12 @@ static void cardlist(void)
 
             if (strcmp(kv_red_type, "ANALOG") && strcmp(kv_red_type, "GSM3G") && strcmp(kv_red_type, "ISDN")) {
                 /* Do we have RED ? */
-                for (i = 0, count = 0, notused = 0; i < numnetwork; i++) {
-                    if (networks[i].colour == RED) {
+                for (i = 0, count = 0, notused = 0; i < get_network_num(); i++) {
+                    if (networks[i].colour == RED)
                         count++;
-                    }
-                    if (networks[i].colour == NONE) {
+
+                    if (networks[i].colour == NONE)
                         notused++;
-                    }
                 }
                 if (!count && notused) {
                     /* RED needed but not configured, at least 1 NIC currently not used */
@@ -832,9 +831,9 @@ static void cardlist(void)
                 }
             }
 
-            if (changed_config) {
+            if (changed_config)
                 udevconfig();
-            }
+
             return;
         }
     }
@@ -885,7 +884,8 @@ static void changehostname(void)
     newtFormAddComponent(networkform, dhcphostnameentry);
 
     ok = newtButton(6, 4 + numLines, gettext("TR_OK"));
-    cancel = newtButton(26, 4 + numLines, (flag_is_state == setupchroot) ? gettext("TR_SKIP") : gettext("TR_GO_BACK"));
+    cancel = newtButton(26, 4 + numLines,
+				(flag_is_state == INST_SETUPCHROOT) ? gettext("TR_SKIP") : gettext("TR_GO_BACK"));
     newtFormAddComponents(networkform, ok, cancel, NULL);
 
     newtRefresh();
@@ -933,9 +933,8 @@ static void selectchangeaddress(void)
         snprintf(key, STRING_SIZE, "%s_1_DEV", ofw_colours_text[i]);
         strcpy(keyvalue, "");
         find_kv_default(eth_kv, key, keyvalue);
-        if (keyvalue[0]) {
+        if (keyvalue[0])
             menuchoices[choice++] = ofw_colours_text[i];
-        }
     }
 
     menuchoices[choice] = NULL;
@@ -949,18 +948,17 @@ static void selectchangeaddress(void)
         if (rc == 2)
             break;
 
-        if (!strcmp(menuchoices[choice], "GREEN")) {
+        if (!strcmp(menuchoices[choice], "GREEN"))
             changeaddress("GREEN", &changed_green);
-        }
-        if (!strcmp(menuchoices[choice], "RED")) {
+
+        if (!strcmp(menuchoices[choice], "RED"))
             changeaddress("RED", &changed_red);
-        }
-        if (!strcmp(menuchoices[choice], "BLUE")) {
+
+        if (!strcmp(menuchoices[choice], "BLUE"))
             changeaddress("BLUE", &changed_blue);
-        }
-        if (!strcmp(menuchoices[choice], "ORANGE")) {
+
+        if (!strcmp(menuchoices[choice], "ORANGE"))
             changeaddress("ORANGE", &changed_orange);
-        }
     }
 }
 
@@ -1026,7 +1024,8 @@ static void changednsgateway(void)
     newtFormAddComponent(networkform, gatewayentry);
 
     ok = newtButton(8, 6 + numLines, gettext("TR_OK"));
-    cancel = newtButton(26, 6 + numLines, (flag_is_state == setupchroot) ? gettext("TR_SKIP") : gettext("TR_GO_BACK"));
+    cancel = newtButton(26, 6 + numLines,
+				(flag_is_state == INST_SETUPCHROOT) ? gettext("TR_SKIP") : gettext("TR_GO_BACK"));
     newtFormAddComponents(networkform, ok, cancel, NULL);
 
     newtRefresh();
@@ -1106,10 +1105,10 @@ int handlenetworking(void)
     /* make sure these are always present */
     for (rc = 0; rc < CFG_COLOURS_COUNT - 1; rc++) {
         snprintf(keyvalue, STRING_SIZE, "%s_COUNT", ofw_colours_text[rc]);
-        if ((find_kv(eth_kv, keyvalue)) == NULL) {
+        if ((find_kv(eth_kv, keyvalue)) == NULL)
             update_kv(&eth_kv, keyvalue, "0");
-        }
     }
+
     strcpy(kv_red_type, "");
     find_kv_default(eth_kv, "RED_1_TYPE", kv_red_type);
     update_kv(&eth_kv, "RED_1_TYPE", kv_red_type);
@@ -1117,7 +1116,7 @@ int handlenetworking(void)
     find_kv_default(eth_kv, "RED_1_DEV", keyvalue);
     update_kv(&eth_kv, "RED_1_DEV", keyvalue);
 
-    if (flag_is_state == setupchroot) {
+    if (flag_is_state == INST_SETUPCHROOT) {
         /* When installing we run (some) configwindows in sequence */
         NODEKV *kv_dhcp_params = NULL;
 
@@ -1194,14 +1193,12 @@ int handlenetworking(void)
             if (strcmp(kv_red_type, "ANALOG") && strcmp(kv_red_type, "GSM3G") && strcmp(kv_red_type, "ISDN")) {
                 int i, count;
                 /* Do we have RED ? */
-                for (i = 0, count = 0; i < numnetwork && !count; i++) {
-                    if (networks[i].colour == RED) {
+                for (i = 0, count = 0; i < get_network_num() && !count; i++) {
+                    if (networks[i].colour == RED)
                         count++;
-                    }
                 }
-                if (!count) {
+                if (!count)
                     cardlist();
-                }
             }
             break;
         case 1:

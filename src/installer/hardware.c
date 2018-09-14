@@ -18,8 +18,6 @@
  *
  * (c) 2007-2015, the Openfirewall Team
  *
- * $Id: hardware.c 7909 2015-03-01 11:25:39Z owes $
- * 
  */
 
 
@@ -42,20 +40,34 @@
 // List of all interesting hardware items
 struct hardware_s *hardwares;
 // How many did we find
-unsigned int numhardwares;
-unsigned int numharddisk;
-unsigned int numcdrom;
-unsigned int numnetwork;
+static unsigned int numhardwares;
+static unsigned int numharddisk;
+static unsigned int numcdrom;
+static unsigned int numnetwork;
 
 
 static FILE *fhwdetect;
 static char logline[STRING_SIZE];
-static int have_idedisk = 0;
-static int have_scsidisk = 0;   /* Also for SATA controller */
-static int have_usbdisk = 0;
-static int have_idecd = 0;
 static int install_setup = 0;   /* 0 when running setup (NIC detection), 1 for installer */
 
+int get_hardwares_num(void)
+{
+	return numhardwares;
+}
+
+int get_harddisk_num(void)
+{
+	return numharddisk;
+}
+
+int get_network_num(void)
+{
+	return numnetwork;
+}
+void set_network_num(int num)
+{
+	numnetwork = num;
+}
 
 /* Retrieve disk capacity from proc or sys.
    Size is reported in blocks of 512 bytes, make a string with info GiB, MiB, KiB.
@@ -96,8 +108,8 @@ static unsigned long getdrivesize(char *procname, char *strsize)
 
 
 /* Add something to our hardware list */
-static void hardwareadd(supported_media_t type, char *module, char *device, char *vendor, char *description,
-                        u16 vendorid, u16 modelid)
+static void hardwareadd(supported_media_t type, char *module,
+		char *device, char *vendor, char *description, u16 vendorid, u16 modelid)
 {
     char vendordesc[STRING_SIZE] = "";
     char tmpstring[STRING_SIZE];
@@ -107,9 +119,8 @@ static void hardwareadd(supported_media_t type, char *module, char *device, char
         int i;
 
         for (i = 0; i < numhardwares; i++) {
-            if (!strcmp(device, hardwares[i].device)) {
+            if (!strcmp(device, hardwares[i].device))
                 return;
-            }
         }
     }
 
@@ -117,22 +128,19 @@ static void hardwareadd(supported_media_t type, char *module, char *device, char
 
     hardwares[numhardwares].type = type;
 
-    if (module != NULL) {
+    if (module != NULL)
         hardwares[numhardwares].module = strdup(module);
-    }
-    else {
+    else
         hardwares[numhardwares].module = strdup("");
-    }
 
-    if (device != NULL) {
+    if (device != NULL)
         hardwares[numhardwares].device = strdup(device);
-    }
-    else {
+    else
         hardwares[numhardwares].device = strdup("");
-    }
 
     snprintf(tmpstring, STRING_SIZE, "%04x", vendorid);
     hardwares[numhardwares].vendorid = vendorid ? strdup(tmpstring) : strdup("");
+
     snprintf(tmpstring, STRING_SIZE, "%04x", modelid);
     hardwares[numhardwares].modelid = modelid ? strdup(tmpstring) : strdup("");
 
@@ -155,21 +163,22 @@ static void hardwareadd(supported_media_t type, char *module, char *device, char
             hardwares[numhardwares].device, hardwares[numhardwares].description);
     fprintf(flog, "%s", logline);
     fprintf(fhwdetect, "%s", logline);
-    // increment tallies
-    numhardwares++;
-    switch (type) {
-    case network:
-        numnetwork++;
-        break;
-    case harddisk:
-        numharddisk++;
-        break;
-    case cdrom:
-        numcdrom++;
-        break;
-    default:
-        break;
-    }
+
+	// increment tallies
+	numhardwares++;
+	switch (type) {
+		case MT_NETWORK:
+			numnetwork++;
+			break;
+		case MT_HARDDISK:
+			numharddisk++;
+			break;
+		case MT_CDROM:
+			numcdrom++;
+			break;
+		default:
+			break;
+	}
 }
 
 
@@ -184,9 +193,8 @@ int ide_filter(const struct dirent *b)
 
     snprintf(string, STRING_SIZE, "/sys/bus/ide/devices/%s/media", b->d_name);
 
-    if (access(string, 0) == 0) {
+    if (access(string, 0) == 0)
         return 1;
-    }
 
     return 0;
 }
@@ -199,30 +207,30 @@ static void scanprocdrives(int modprobe)
     char procname[STRING_SIZE];
     char media[STRING_SIZE];
     char model[STRING_SIZE];
-    supported_media_t type = none;
+    supported_media_t type = MT_NONE;
     char command[STRING_SIZE];
     char deviceletter;
     char strsize[STRING_SIZE];
     struct dirent **names;
     int numdevices = 0;
     int i;
+	static int have_idecd = 0;
 
     /* look for IDE harddisk and cdrom */
     numdevices = scandir("/sys/bus/ide/devices", &names, &ide_filter, alphasort);
     for (i = 0; i < numdevices; i++) {
         snprintf(procname, STRING_SIZE, "/sys/bus/ide/devices/%s/media", names[i]->d_name);
-        if ((f = fopen(procname, "r")) == NULL) {
+        if ((f = fopen(procname, "r")) == NULL)
             continue;
-        }
 
         /* media holds disk or cdrom */
         if (fgets(media, STRING_SIZE, f)) {
             stripnl(media);
             if (!strcmp(media, "disk")) {
-                type = harddisk;
+                type = MT_HARDDISK;
             }
             else if (!strcmp(media, "cdrom")) {
-                type = cdrom;
+                type = MT_CDROM;
                 if (modprobe && !have_idecd) {
                     have_idecd = 1;
                     /* Since kernel 2.6.25 ide-cd is ide-cd_mod */
@@ -237,7 +245,7 @@ static void scanprocdrives(int modprobe)
         }
         fclose(f);
 
-        if (type != none) {
+        if (type != MT_NONE) {
             char device[STRING_SIZE];
             char description[STRING_SIZE] = "Unknown";
 
@@ -252,7 +260,7 @@ static void scanprocdrives(int modprobe)
                     if ((f = fopen(procname, "r")) != NULL) {
                         if (fgets(model, STRING_SIZE, f)) {
                             stripnl(model);
-                            if (type == harddisk) {
+                            if (type == MT_HARDDISK) {
                                 snprintf(procname, STRING_SIZE, "/sys/block/%s/size", device);
                                 getdrivesize(procname, strsize);
 
@@ -277,9 +285,8 @@ static void scanprocdrives(int modprobe)
     for (deviceletter = 'a'; deviceletter <= 'z'; deviceletter++) {
         snprintf(procname, STRING_SIZE, "/sys/block/sd%c/device/model", deviceletter);
 
-        if ((f = fopen(procname, "r")) == NULL) {
+        if ((f = fopen(procname, "r")) == NULL)
             continue;
-        }
 
         /* We need some mechanism to differentiate between installation from USB stick
            or installation on USB device
@@ -305,13 +312,12 @@ static void scanprocdrives(int modprobe)
             }
             else if (drivesize < DISK_MINIMUM) {
                 /* Too small as target drive but could be installation USB stick */
-                hardwareadd(cdrom, NULL, device, NULL, description, 0, 0);
+                hardwareadd(MT_CDROM, NULL, device, NULL, description, 0, 0);
             }
             else {
-                hardwareadd(harddisk, NULL, device, NULL, description, 0, 0);
+                hardwareadd(MT_HARDDISK, NULL, device, NULL, description, 0, 0);
             }
         }
-
         fclose(f);
     }
 
@@ -319,16 +325,15 @@ static void scanprocdrives(int modprobe)
     for (deviceletter = '0'; deviceletter <= '9'; deviceletter++) {
         snprintf(procname, STRING_SIZE, "/sys/block/sr%c/device/model", deviceletter);
 
-        if ((f = fopen(procname, "r")) == NULL) {
+        if ((f = fopen(procname, "r")) == NULL)
             continue;
-        }
 
         if (fgets(model, STRING_SIZE, f)) {
             char device[4];
 
             stripnl(model);
             sprintf(device, "sr%c", deviceletter);
-            hardwareadd(cdrom, NULL, device, NULL, model, 0, 0);
+            hardwareadd(MT_CDROM, NULL, device, NULL, model, 0, 0);
         }
 
         fclose(f);
@@ -380,6 +385,9 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
     char vendor[STRING_SIZE];
     char description[STRING_SIZE];
     int i;
+	static int have_usbdisk = 0;
+	static int have_idedisk = 0;
+	static int have_scsidisk = 0;   /* Also for SATA controller */
 
 
     install_setup = flag_i_s;
@@ -399,16 +407,15 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
     numharddisk = 0;
     numcdrom = 0;
     numnetwork = 0;
-    hardwareadd(none, NULL, NULL, NULL, "Dummy for initialization", 0, 0);
+    hardwareadd(MT_NONE, NULL, NULL, NULL, "Dummy for initialization", 0, 0);
 
     numBusses = 3;
     /* disable stuff the user does not want or does not need */
-    if (nopcmcia) {
+    if (nopcmcia)
         numBusses--;
-    }
-    if (nousb) {
+
+    if (nousb)
         numBusses--;
-    }
 
     snprintf(line, STRING_SIZE, ofw_gettext("TR_SCANNING_HARDWARE"), "");
     text = newtLabel(1, 1, line);
@@ -426,7 +433,6 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
      *
      *
      */
-
     snprintf(line, STRING_SIZE, ofw_gettext("TR_SCANNING_HARDWARE"), "PCI");
     strcat(line, "           ");
     newtLabelSetText(text, line);
@@ -441,8 +447,8 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
     pci_init(pciacc);                   /* Initialize the PCI library */
 
     pci_scan_bus(pciacc);
-    for (pcidev=pciacc->devices; pcidev; pcidev = pcidev->next) {
-        type = none;
+    for (pcidev = pciacc->devices; pcidev; pcidev = pcidev->next) {
+        type = MT_NONE;
         pci_fill_info(pcidev, PCI_FILL_IDENT | PCI_FILL_BASES | PCI_FILL_CLASS);
 
         strcpy(vendor, "");
@@ -453,13 +459,12 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
 
         switch((pcidev->device_class >> 8) & 0xFF) {
         case PCI_BASE_CLASS_STORAGE:        // 0x01
-            if (install_setup) {
-                type = specialmodule;
-            }
+            if (install_setup)
+                type = MT_SPECIAL_MODULE;
             break;
 
         case PCI_BASE_CLASS_NETWORK:        // 0x02
-            type = network;
+            type = MT_NETWORK;
             break;
 
         case PCI_BASE_CLASS_BRIDGE:         // 0x06
@@ -467,24 +472,24 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
              *  At least device ID 0x00df and 0x03ef, maybe more.
              *  Filter out true bridge devices below, after searching for the module.
              */
-            if ((pcidev->device_class == PCI_CLASS_BRIDGE_OTHER) && (pcidev->vendor_id == 0x10de)) {
-                type = network;
-            }
+            if ((pcidev->device_class == PCI_CLASS_BRIDGE_OTHER) && (pcidev->vendor_id == 0x10de))
+                type = MT_NETWORK;
         
             if (install_setup && !nopcmcia 
-                    && ((pcidev->device_class == PCI_CLASS_BRIDGE_PCMCIA) || (pcidev->device_class == PCI_CLASS_BRIDGE_CARDBUS))) {
-                type = specialmodule;
+                    && ((pcidev->device_class == PCI_CLASS_BRIDGE_PCMCIA) ||
+					(pcidev->device_class == PCI_CLASS_BRIDGE_CARDBUS))) {
+                type = MT_SPECIAL_MODULE;
             }
             break;            
 
         case PCI_BASE_CLASS_SERIAL:         // 0x0c
-            if (install_setup && !nousb && (pcidev->device_class == PCI_CLASS_SERIAL_USB)) {
-                type = specialmodule;
-            }
+            if (install_setup && !nousb && (pcidev->device_class == PCI_CLASS_SERIAL_USB))
+                type = MT_SPECIAL_MODULE;
+
             break;
         }
 
-        if (type == none) {
+        if (type == MT_NONE) {
             snprintf(logline, STRING_SIZE, "  Skip %04x %04x:%04x, %s\n",
                     pcidev->device_class, pcidev->vendor_id, pcidev->device_id, description);
             fprintf(flog, "%s", logline);
@@ -496,7 +501,11 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
             module = find_modulename("pci", pcidev->vendor_id, pcidev->device_id);
 
             if (module != NULL) {
-                if ((type == network) && (pcidev->device_class == PCI_CLASS_BRIDGE_OTHER) && (pcidev->vendor_id == 0x10de) && strcmp(module, "forcedeth")) {
+                snprintf(command, STRING_SIZE, "/sbin/modprobe %s", module);
+                mysystem(command);
+
+                if ((type == MT_NETWORK) && (pcidev->device_class == PCI_CLASS_BRIDGE_OTHER) &&
+						(pcidev->vendor_id == 0x10de) && strcmp(module, "forcedeth")) {
                     /* Special case, nVidia PCI bridge_other not using forcedeth driver */
                     snprintf(logline, STRING_SIZE, "  Skip (bridge_other) %04x %04x:%04x\n",
                             pcidev->device_class, pcidev->vendor_id, pcidev->device_id);
@@ -522,14 +531,19 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
         }
 
         /* Some special handling for special devices */
-        if (install_setup && (type == specialmodule)) {
+        if (install_setup && (type == MT_SPECIAL_MODULE)) {
 
+fprintf(fhwdetect, "special module scsidisk %d device class 0x%x(%d) scsi 0x%x(%d) sata 0x%x(%d)\n", have_scsidisk, pcidev->device_class, pcidev->device_class, PCI_CLASS_STORAGE_SCSI, PCI_CLASS_STORAGE_SCSI, PCI_CLASS_STORAGE_SATA, PCI_CLASS_STORAGE_SATA);
             /* SCSI, SATA, add some modules */
-            if (!have_scsidisk && ((pcidev->device_class == PCI_CLASS_STORAGE_SCSI) || (pcidev->device_class == PCI_CLASS_STORAGE_SATA))) {
+            if (!have_scsidisk &&
+					((pcidev->device_class == PCI_CLASS_STORAGE_SCSI) ||
+					(pcidev->device_class == PCI_CLASS_STORAGE_SATA)))
+			{
+fprintf(fhwdetect, "scsidisk\n");
                 have_scsidisk = 1;
                 snprintf(command, STRING_SIZE, "/sbin/modprobe %s", "sd_mod");
                 mysystem(command);
-                hardwareadd(specialmodule, "sd_mod", NULL, NULL, NULL, 0, 0);
+                hardwareadd(MT_SPECIAL_MODULE, "sd_mod", NULL, NULL, NULL, 0, 0);
 
                 snprintf(command, STRING_SIZE, "/sbin/modprobe %s", "sr_mod");
                 mysystem(command);
@@ -539,34 +553,36 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
             /* IDE, add some modules */
             if (!have_idedisk && (pcidev->device_class == PCI_CLASS_STORAGE_IDE)) {
                 have_idedisk = 1;
+fprintf(fhwdetect, "idedisk IDE class 0x%x(%d)\n", PCI_CLASS_STORAGE_IDE, PCI_CLASS_STORAGE_IDE);
                 // snprintf(command, STRING_SIZE, "/sbin/modprobe %s", "ide-generic");
                 // mysystem(command);
-                // hardwareadd(specialmodule, "ide-generic", NULL, NULL, NULL, 0, 0);
+                // hardwareadd(MT_SPECIAL_MODULE, "ide-generic", NULL, NULL, NULL, 0, 0);
                 /* Kernel >= 2.6.28 have ide-gd_mod instead of ide-disk */
                 ////snprintf(command, STRING_SIZE, "/sbin/modprobe %s", "ide-gd_mod");
-                ////hardwareadd(specialmodule, "ide-gd_mod", NULL, NULL, NULL, 0, 0);
+                ////hardwareadd(MT_SPECIAL_MODULE, "ide-gd_mod", NULL, NULL, NULL, 0, 0);
             }
 
             /* USB, probe */
             if (!have_usbdisk && (pcidev->device_class == PCI_CLASS_SERIAL_USB)) {
                 have_usbdisk = 1;
+fprintf(fhwdetect, "usbdisk USB class 0x%x(%d)\n", PCI_CLASS_SERIAL_USB, PCI_CLASS_SERIAL_USB);
                 /* 
                    Dependancies will load sd_mod, but sd_mod will not be in initramfs .
                    Not sure if installing onto USB stick is a good idea though.
                  */
                 snprintf(command, STRING_SIZE, "/sbin/modprobe %s", "sd_mod");
                 mysystem(command);
-                hardwareadd(specialmodule, "sd_mod", NULL, NULL, NULL, 0, 0);
+                hardwareadd(MT_SPECIAL_MODULE, "sd_mod", NULL, NULL, NULL, 0, 0);
                 snprintf(command, STRING_SIZE, "/sbin/modprobe %s", "usb-storage");
                 mysystem(command);
-                hardwareadd(specialmodule, "usb-storage", NULL, NULL, NULL, 0, 0);
+                hardwareadd(MT_SPECIAL_MODULE, "usb-storage", NULL, NULL, NULL, 0, 0);
 
                 /* need sr_mod when installing from USB CDROM */
                 snprintf(command, STRING_SIZE, "/sbin/modprobe %s", "sr_mod");
                 mysystem(command);
                 /* no need to put in hardware list */
             }
-        } // if (install_setup && (type == specialmodule))
+        } // if (install_setup && (type == MT_SPECIAL_MODULE))
     } // for (pcidev=pciacc->devices; pcidev; pcidev = pcidev->next)
 
     pci_cleanup(pciacc);                  /* Close PCI */
@@ -576,13 +592,10 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
 
     /*
      *  USB scanning by using libusb, pci.ids.gz and modules.alias
-     *
-     *
      */
 
-    if (nousb) {
+    if (nousb)
         goto skipusb;
-    }
 
     fprintf(flog, "Scan USB\n");
 
@@ -597,9 +610,9 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
     names_init("/usr/share/usb.ids.gz");
     libusb_device **usbdevs;
     ssize_t cnt = 0;
-    if (libusb_init(NULL) >= 0) {
+
+    if (libusb_init(NULL) >= 0)
         cnt = libusb_get_device_list(NULL, &usbdevs);
-    }
 
     for (i = 0; (i < cnt) && (usbdevs[i] != NULL); i++) {
         struct libusb_device_descriptor descriptor;
@@ -610,7 +623,7 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
             continue;
         }
 
-        type = none;
+        type = MT_NONE;
         strcpy(vendor, "");
         strcpy(line, "");
         get_vendor_string(vendor, sizeof(vendor), descriptor.idVendor);
@@ -620,23 +633,23 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
         /* TODO: find a better way to differentiate network devices from other USB devices */
         switch (descriptor.bDeviceClass) {
         case LIBUSB_CLASS_PER_INTERFACE:
-            type = network;
+            type = MT_NETWORK;
             break;
 
         case LIBUSB_CLASS_COMM:
-            type = network;
+            type = MT_NETWORK;
             break;
 
         case LIBUSB_CLASS_WIRELESS:
-            type = network;
+            type = MT_NETWORK;
             break;
 
         case LIBUSB_CLASS_VENDOR_SPEC:
-            type = network;
+            type = MT_NETWORK;
             break;
         }
 
-        if (type == none) {
+        if (type == MT_NONE) {
             snprintf(logline, STRING_SIZE, "  Skip %02x %04x:%04x, %s\n",
                     descriptor.bDeviceClass, descriptor.idVendor, descriptor.idProduct, description);
             fprintf(flog, "%s", logline);
@@ -648,12 +661,15 @@ void scan_hardware(int flag_i_s, int nopcmcia, int nousb, int manualmodule)
             module = find_modulename("usb", descriptor.idVendor, descriptor.idProduct);
 
             if (module != NULL) {
+                snprintf(command, STRING_SIZE, "/sbin/modprobe %s", module);
+                mysystem(command);
+
                 snprintf(logline, STRING_SIZE, "  Add  %02x %04x:%04x, %s\n",
                         descriptor.bDeviceClass, descriptor.idVendor, descriptor.idProduct, description);
                 fprintf(flog, "%s", logline);
                 fprintf(fhwdetect, "%s", logline);
 
-                hardwareadd(network, module, NULL, NULL, description, descriptor.idVendor, descriptor.idProduct);
+                hardwareadd(MT_NETWORK, module, NULL, NULL, description, descriptor.idVendor, descriptor.idProduct);
             }
             else {
                 /* There is little to add if there is no module */
@@ -680,9 +696,8 @@ skipusb:
      *
      */
 
-    if (nopcmcia) {
+    if (nopcmcia)
         goto skippcmcia;
-    }
 
     fprintf(flog, "Scan PCMCIA\n");
 
@@ -738,7 +753,7 @@ skippcmcia:
         if (exitstruct.u.co == button_add) {
             snprintf(command, STRING_SIZE, "/sbin/modprobe %s", modulename);
             if (!mysystem(command)) {
-                hardwareadd(specialmodule, (char *) modulename, NULL, NULL, NULL, 0, 0);
+                hardwareadd(MT_SPECIAL_MODULE, (char *) modulename, NULL, NULL, NULL, 0, 0);
             }
             else {
                 /* owes: show errorbox here */
@@ -748,9 +763,8 @@ skippcmcia:
         newtFormDestroy(form);
         newtPopWindow();
 
-        if (exitstruct.u.co == button_done) {
+        if (exitstruct.u.co == button_done)
             break;
-        }
     }
 
     firstscan = TRUE;
@@ -802,7 +816,7 @@ skippcmcia:
             if (exitstruct.u.co == button_modprobe) {
                 snprintf(command, STRING_SIZE, "/sbin/modprobe %s", modulename);
                 if (!mysystem(command)) {
-                    hardwareadd(specialmodule, (char *) modulename, NULL, NULL, NULL, 0, 0);
+                    hardwareadd(MT_SPECIAL_MODULE, (char *) modulename, NULL, NULL, NULL, 0, 0);
                 }
                 else {
                     /* owes: show errorbox here */
@@ -812,14 +826,13 @@ skippcmcia:
             newtFormDestroy(form);
             newtPopWindow();
 
-            if (exitstruct.u.co == button_cancel) {
+            if (exitstruct.u.co == button_cancel)
                 return;
-            }
         }
     }
 
-    snprintf(logline, STRING_SIZE, "Scan complete. Hardware %d, Harddisk %d, CDROM %d, Network %d\n", numhardwares, numharddisk,
-            numcdrom, numnetwork);
+    snprintf(logline, STRING_SIZE, "Scan complete. Hardware %d, Harddisk %d, CDROM %d, Network %d\n",
+			numhardwares, numharddisk, numcdrom, numnetwork);
     fprintf(flog, "%s", logline);
     fprintf(fhwdetect, "%s", logline);
     fclose(fhwdetect);

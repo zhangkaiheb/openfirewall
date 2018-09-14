@@ -41,8 +41,8 @@
 
 
 NODEKV *kv = NULL;              // contains a list key=value pairs
-installer_setup_t flag_is_state = setup;
-supported_media_t medium_console = console;
+installer_setup_t flag_is_state = INST_SETUP;
+supported_media_t medium_console = MT_CONSOLE;
 char selected_locale[STRING_SIZE];
 
 
@@ -62,19 +62,17 @@ int main(int argc, char **argv)
 
     /* check cmd line */
     for (i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "--install")) {
-            flag_is_state = setupchroot;
-        }
-        if (!strcmp(argv[i], "--serial")) {
-            medium_console = serial;
-        }
+        if (!strcmp(argv[i], "--install"))
+            flag_is_state = INST_SETUPCHROOT;
+        if (!strcmp(argv[i], "--serial"))
+            medium_console = MT_SERIAL;
     }
 
-    if (medium_console == serial) {
+    if (medium_console == MT_SERIAL) {
         flog = fopen("/tmp/flog", "w");
         fstderr = freopen("/tmp/fstderr", "w", stderr);
     }
-    else if (flag_is_state == setupchroot) {
+    else if (flag_is_state == INST_SETUPCHROOT) {
         if (!(flog = fopen("/dev/tty2", "w+"))) {
             printf("Failed to open /dev/tty2 for logging\n");
             exit(0);
@@ -129,7 +127,7 @@ int main(int argc, char **argv)
     newtDrawRootText(18, 0, get_title());
     newtPushHelpLine(gettext("TR_HELPLINE"));
 
-    if (flag_is_state == setupchroot) {
+    if (flag_is_state == INST_SETUPCHROOT) {
         /* all settings in a row, no main menu */
         handlekeymap();
         handlehostname();

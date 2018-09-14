@@ -76,17 +76,17 @@
 
 typedef enum
 {
-    none = 0,
-    floppy,                     /* bootable, restore */
-    cdrom,                      /* bootable and sources available */
-    usb,                        /* bootable, sources available and restore */
-    harddisk,                   /* possible installation target */
-    flash,                      /* target */
-    network,                    /* bootable (PXE), sources available (http/ftp server) and restore (http/ftp server) */
-    console,                    /* console: standard */
-    serial,                     /* console: serial */
-    specialmodule = 100,        /* for module list only */
-    unknown,
+    MT_NONE = 0,
+    MT_FLOPPY,                     /* bootable, restore */
+    MT_CDROM,                      /* bootable and sources available */
+    MT_USB,                        /* bootable, sources available and restore */
+    MT_HARDDISK,                   /* possible installation target */
+    MT_FLASH,                      /* target */
+    MT_NETWORK,                    /* bootable (PXE), sources available (http/ftp server) and restore (http/ftp server) */
+    MT_CONSOLE,                    /* console: standard */
+    MT_SERIAL,                     /* console: serial */
+    MT_SPECIAL_MODULE = 100,        /* for module list only */
+    MT_UNKNOWN,
 } supported_media_t;
 
 
@@ -105,10 +105,14 @@ struct hardware_s
     char *modelid;
 };
 
-extern unsigned int numhardwares;
-extern unsigned int numharddisk;
-extern unsigned int numcdrom;
-extern unsigned int numnetwork;
+//extern unsigned int numhardwares;
+extern int get_hardwares_num(void);
+//extern unsigned int numharddisk;
+extern int get_harddisk_num(void);
+//extern unsigned int numcdrom;
+//extern unsigned int numnetwork;
+extern int get_network_num(void);
+extern void set_network_num(int num);
 extern struct hardware_s *hardwares;
 
 extern char network_source[STRING_SIZE];        /* something like http://ip/path */

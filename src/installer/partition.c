@@ -107,32 +107,30 @@ int make_partitions(char *dev, char *dev2, long int disk_size, int part_options,
         wrong disk size informations from /sys/block/DEVICE/size.
         Also alignment 'modifications' might lead to difficulty.
     */
-    if (!(part_options & PART_OPTIONS_USER_SIZE)) {
+    if (!(part_options & PART_OPTIONS_USER_SIZE))
         disk_size -= 5;
-    }
 
     /*
        someday offer semi-manual partition here
        keep /, /var/log but allow user to set different sizes (> MINIMUM) or leave free space
      */
 
-    if (medium_target == flash) {
+    if (medium_target == MT_FLASH) {
         /* flash install is easy */
         *swap_file = 0;
         log_partition = LOGCOMPRESSED;
         root_partition = disk_size - log_partition;
-        if (raid) {
+        if (raid)
             strcpy(install_type,"flashraid");
-        } else {
+        else
             strcpy(install_type,"flash");
-        }
     }
     else {
-        if (raid) {
+        if (raid)
             strcpy(install_type,"raid");
-        } else {
+        else
             strcpy(install_type,"onedisk");
-        }
+
         /* set the minimum size(s) */
         root_partition = ROOT_MINIMUM;
 
@@ -161,9 +159,9 @@ int make_partitions(char *dev, char *dev2, long int disk_size, int part_options,
         /* 25% of remaining space goes to root partition */
         root_partition += current_free / 4;
         /* and maximize root */
-        if (root_partition > ROOT_MAXIMUM) {
+        if (root_partition > ROOT_MAXIMUM)
             root_partition = ROOT_MAXIMUM;
-        }
+
         /* swap is just a file in root partition */
         root_partition = root_partition + *swap_file;
     }
@@ -230,7 +228,7 @@ int make_partitions(char *dev, char *dev2, long int disk_size, int part_options,
         return FAILURE;         /* exit immediately */
     }
 
-    if (medium_target == flash) {
+    if (medium_target == MT_FLASH) {
         strcpy(partition_label[partition_index[PART_INDEX_VARLOG]], "varlog_comp");
         strcpy(partition_mount[partition_index[PART_INDEX_VARLOG]], "/var/log_compressed");
     }
@@ -286,9 +284,8 @@ PARTITION_EXIT:
 
     fprintf(flog, "Make partitions done ...\n");
 
-    if (!raid) {
+    if (!raid)
         return SUCCESS;
-    }
 
     /* Create RAID and wait for the drives to be synchronised */
 
@@ -505,10 +502,10 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
 
     /* populate files on the partitions */
     switch (medium_sources) {
-    case cdrom:
+    case MT_CDROM:
         strcpy(tarball_location, "/cdrom");
         break;
-    case network:
+    case MT_NETWORK:
         /* download needed files */
         statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_DOWNLOADING_IMAGE"));
         mysystem("mkdir -p /harddisk/tmp");
@@ -537,7 +534,7 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
                                                 ofw_gettext("TR_INSTALLING_FILES"));
     snprintf(command, STRING_SIZE, "/bin/tar -C /harddisk -vxpzf %s/" TARBALL_OFW, tarball_location);
     retcode = mysystem_progress(command, f, 1, 3, 70, 5250, 0);
-    if (medium_sources == network) {
+    if (medium_sources == MT_NETWORK) {
         mysystem("rm -f /harddisk/tmp/" TARBALL_OFW);
     }
 
@@ -632,10 +629,9 @@ static int create_initramfs(void)
     fprintf(handle, "ehci-hcd\nohci-hcd\nuhci-hcd\nhid\nusbhid\n");
 
     //add each module to module-list
-    for (i = 0; i < numhardwares; i++) {
-        if ((hardwares[i].type == specialmodule) && hardwares[i].module[0]) {
+    for (i = 0; i < get_hardwares_num(); i++) {
+        if ((hardwares[i].type == MT_SPECIAL_MODULE) && hardwares[i].module[0])
             fprintf(handle, "%s\n", hardwares[i].module);
-        }
     }
 
 #if defined(__sparc__) || defined(__sparc64__)
@@ -644,9 +640,9 @@ static int create_initramfs(void)
     fprintf(handle, "pcspkr\n");
 #endif
 
-    if (raid) {
+    if (raid)
         fprintf(handle, "md-mod\nraid1\n");
-    }
+
     fclose(handle);
 
     strcat(bigstring, " --with-kernel=");
@@ -702,7 +698,7 @@ static int make_bootable(char *dev, char *dev2, int part_options)
         strcat(bigstring, command);
     }
 
-    if (medium_console == serial) {
+    if (medium_console == MT_SERIAL) {
         snprintf(command, STRING_SIZE, "-i -e 's+SERIAL_CONSOLE+SERIAL %u %u\\nCONSOLE 0+' ",
                 serial_console, serial_bitrate);
         strcat(bigstring, command);
@@ -730,24 +726,22 @@ static int make_bootable(char *dev, char *dev2, int part_options)
     mysystem("/bin/sync");
 
     /* Install extlinux and MBR */
-    if (mysystem("chroot /harddisk /sbin/extlinux --install /boot")) {
+    if (mysystem("chroot /harddisk /sbin/extlinux --install /boot"))
          return FAILURE;
-    }
+
     if (part_options & PART_OPTIONS_NO_MBR) {
         fprintf(flog, "Skipping MBR\n");
     }
     else {
         fprintf(flog, "Writing MBR\n");
         snprintf(command, STRING_SIZE, "/bin/cat /harddisk/boot/mbr.bin > %s", device);
-        if (system(command)) {
+        if (system(command))
             return FAILURE;
-        }
 
         if (raid) {
             snprintf(command, STRING_SIZE, "/bin/cat /harddisk/boot/mbr.bin > %s", device2);
-            if (system(command)) {
+            if (system(command))
                 return FAILURE;
-            }
         }
     }
 #endif
@@ -765,12 +759,10 @@ static int make_bootable(char *dev, char *dev2, int part_options)
     else {
         while (fgets(line, STRING_SIZE, cpufile)) {
             if (sscanf(line, "pmac-generation : %s", string)) {
-                if (strcmp(string, "NewWorld") == 0) {
+                if (strcmp(string, "NewWorld") == 0)
                     newworld = 1;
-                }
-                else if (strcmp(string, "OldWorld") == 0) {
+                else if (strcmp(string, "OldWorld") == 0)
                     newworld = 0;
-                }
             }
         }
 
@@ -802,16 +794,14 @@ static int make_bootable(char *dev, char *dev2, int part_options)
 
         fprintf(flog, "Running ybin\n");
         snprintf(command, STRING_SIZE, "chroot /harddisk /usr/sbin/ybin");
-        if (mysystem(command)) {
+        if (mysystem(command))
              return FAILURE;
-        }
     }
     else {
         fprintf(flog, "Configuring Open Firmware (OldWorld)\n");
         snprintf(command, STRING_SIZE, "chroot /harddisk /usr/local/bin/install-quik.sh %s3 %s4", device, device);
-        if (mysystem(command)) {
+        if (mysystem(command))
              return FAILURE;
-        }
     }
 #endif
 
@@ -848,9 +838,8 @@ static int make_bootable(char *dev, char *dev2, int part_options)
 
     /* raid need -t flag to work, does not hurt in non raid case */
     snprintf(command, STRING_SIZE, "chroot /harddisk /sbin/silo -t");
-    if (mysystem(command)) {
+    if (mysystem(command))
          return FAILURE;
-    }
 
     /* set boot-device once calculated the number from the letter hda=>disk0 hdc=>disk2 */
     /* TODO make that work too with device name lenght different of 3 (hardware raid cciss and )? */
@@ -880,9 +869,7 @@ static int make_bootable(char *dev, char *dev2, int part_options)
 
 #endif
 
-        fprintf(flog, "Writing MBR 2\n");
     newtPopWindow();
-        fprintf(flog, "Writing MBR 3\n");
     return SUCCESS;
 }
 
@@ -920,6 +907,5 @@ int make_ofw_disk(char *dev, char *dev2, long int disk_size, long int swap_file,
          return FAILURE;
     }
 
-        fprintf(flog, "Writing MBR 20\n");
     return SUCCESS;
 }

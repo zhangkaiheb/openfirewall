@@ -254,6 +254,9 @@ endif
 
 	# Copy some additional modules and remove those not required by nics and blocks drivers
 	cp -af /lib/modules/$(KVER)/kernel/lib 			$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel
+	cp -af /lib/modules/$(KVER)/kernel/drivers/scsi $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+	cp -af /lib/modules/$(KVER)/kernel/drivers/message	$(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/drivers
+
 ###	rm -f $(INITRAMFS_DIR)/lib/modules/$(KVER)/kernel/lib/{crc-itu-t,ts_*}.ko.gz
 
 	# Raid

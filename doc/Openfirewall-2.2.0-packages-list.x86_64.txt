@@ -60,14 +60,6 @@ List of software packages used to build Openfirewall Version: 2.2.0 for x86_64
  * iana-etc-2.30
  * ibod
  * iftop-1.0pre3
- * ipcop
- * ipcop-gui
- * ipcop-gui_missing_rootfile
- * ipcop-lang
- * ipcop-lang_missing_rootfile
- * ipcop_missing_rootfile
- * ipcop-progs
- * ipcop-progs_missing_rootfile
  * iperf-3.5
  * iproute2-4.15.0
  * iptables-1.4.21
@@ -123,9 +115,12 @@ List of software packages used to build Openfirewall Version: 2.2.0 for x86_64
  * ntp-4.2.8p11
  * openfirewall
  * openfirewall-gui
+ * openfirewall-gui_missing_rootfile
  * openfirewall-lang
+ * openfirewall-lang_missing_rootfile
  * openfirewall_missing_rootfile
  * openfirewall-progs
+ * openfirewall-progs_missing_rootfile
  * openldap-2.4.40
  * openssh-7.7p1
  * openssl-1.1.0g

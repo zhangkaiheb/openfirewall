@@ -329,14 +329,14 @@ static void restorecallback(newtComponent cm, void *data)
         newtEntrySetFlags(entrypassword, NEWT_FLAG_DISABLED, NEWT_FLAGS_RESET);
     }
     else if (selected == radiousb) {
-        if (medium_sources == network) {
+        if (medium_sources == MT_NETWORK) {
             newtEntrySetFlags(entryurl, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
         }
         newtEntrySetFlags(entryhostname, NEWT_FLAG_DISABLED, NEWT_FLAGS_RESET);
         newtEntrySetFlags(entrypassword, NEWT_FLAG_DISABLED, NEWT_FLAGS_RESET);
     }
     else {
-        if (medium_sources == network) {
+        if (medium_sources == MT_NETWORK) {
             newtEntrySetFlags(entryurl, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
         }
         newtEntrySetFlags(entryhostname, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
@@ -371,7 +371,7 @@ int handlerestore(void)
     strcpy(typevalue, "floppy");
 
     httpLines = 0;
-    if (medium_sources == network) {
+    if (medium_sources == MT_NETWORK) {
         /* Increase height this many lines if http/ftp restore is an option */
         httpLines = 2;
         strcpy(urlinitvalue, network_source);
@@ -393,7 +393,7 @@ int handlerestore(void)
         newtComponentAddCallback(radiofloppy, restorecallback, NULL);
         newtComponentAddCallback(radiousb, restorecallback, NULL);
 
-        if (medium_sources == network) {
+        if (medium_sources == MT_NETWORK) {
             radionetwork = newtRadiobutton(12, 4 + numLines, "http/ftp", !strcmp(typevalue, "http"), radiousb);
             newtComponentAddCallback(radionetwork, restorecallback, NULL);
             newtFormAddComponents(restoreform, radiofloppy, radiousb, radionetwork, NULL);
@@ -426,7 +426,7 @@ int handlerestore(void)
 
         if (!strcmp(typevalue, "floppy")) {
             /* disabled for default selection */
-            if (medium_sources == network) {
+            if (medium_sources == MT_NETWORK) {
                 newtEntrySetFlags(entryurl, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
             }
             newtEntrySetFlags(entryhostname, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
@@ -444,7 +444,7 @@ int handlerestore(void)
         userskip = 0;
         newtFormRun(restoreform, &exitstruct);
         newtPopWindow();
-        if (medium_sources == network) {
+        if (medium_sources == MT_NETWORK) {
             strcpy(urlinitvalue, (char *)urlvalue);
         }
         strcpy(hostnameinitvalue, (char *)hostnamevalue);

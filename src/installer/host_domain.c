@@ -46,15 +46,14 @@ static int writehostsfiles(char *hostname, char *domainname)
     char commandstring[STRING_SIZE];
 
     /* set defaults if not defined yet */
-    if (hostname == NULL) {
+    if (hostname == NULL)
         hostname = default_hostname;
-    }
-    if (domainname == NULL) {
+
+    if (domainname == NULL)
         domainname = default_domainname;
-    }
 
     /* rebuildhosts will take main/settings and main/hosts to rebuild /etc/hosts */
-    if (flag_is_state == setupchroot) {
+    if (flag_is_state == INST_SETUPCHROOT) {
         /* rebuildhosts will send SIGHUP to dnsmasq, not a problem as dnsmasq is not there (yet) */
         mysystem("/usr/local/bin/rebuildhosts");
     }
@@ -106,7 +105,7 @@ int handlehostname(void)
     find_kv_default(kv, "HOSTNAME", hostname);
     find_kv_default(kv, "DOMAINNAME", domainname);
 
-    if (flag_is_state == setupchroot) {
+    if (flag_is_state == INST_SETUPCHROOT) {
         NODEKV *kv_dhcp_params = NULL;
 
         read_kv_from_file(&kv_dhcp_params, "/tmp/dhcp.params");
@@ -116,8 +115,9 @@ int handlehostname(void)
     }
 
     for (;;) {
-        rc = newtWinEntries(gettext("TR_HOSTNAME"), gettext("TR_ENTER_HOSTNAME"), 65, 5, 5, 40, entries, 
-                            gettext("TR_OK"), (flag_is_state == setupchroot) ? gettext("TR_SKIP") : gettext("TR_GO_BACK"), NULL);
+        rc = newtWinEntries(gettext("TR_HOSTNAME"),
+					gettext("TR_ENTER_HOSTNAME"), 65, 5, 5, 40, entries, gettext("TR_OK"),
+					(flag_is_state == INST_SETUPCHROOT) ? gettext("TR_SKIP") : gettext("TR_GO_BACK"), NULL);
 
         if (rc == 1) {
             strcpy(hostname, values[0]);
@@ -131,7 +131,7 @@ int handlehostname(void)
             else {
                 update_kv(&kv, "HOSTNAME", hostname);
                 write_kv_to_file(&kv, "/var/ofw/main/settings");
-                if (flag_is_state == setup) {
+                if (flag_is_state == INST_SETUP) {
                     /* In case of installation we will simply rewrite the files after setting the domainname */
                     writehostsfiles(hostname, domainname);
                 }
@@ -175,7 +175,7 @@ int handledomainname(void)
     find_kv_default(kv, "HOSTNAME", hostname);
     find_kv_default(kv, "DOMAINNAME", domainname);
 
-    if (flag_is_state == setupchroot) {
+    if (flag_is_state == INST_SETUPCHROOT) {
         NODEKV *kv_dhcp_params = NULL;
 
         read_kv_from_file(&kv_dhcp_params, "/tmp/dhcp.params");
@@ -185,8 +185,9 @@ int handledomainname(void)
     }
 
     for (;;) {
-        rc = newtWinEntries(gettext("TR_DOMAINNAME"), gettext("TR_ENTER_DOMAINNAME"), 65, 5, 5, 40, entries, 
-                            gettext("TR_OK"), (flag_is_state == setupchroot) ? gettext("TR_SKIP") : gettext("TR_GO_BACK"), NULL);
+        rc = newtWinEntries(gettext("TR_DOMAINNAME"),
+					gettext("TR_ENTER_DOMAINNAME"), 65, 5, 5, 40, entries, gettext("TR_OK"),
+					(flag_is_state == INST_SETUPCHROOT) ? gettext("TR_SKIP") : gettext("TR_GO_BACK"), NULL);
 
         if (rc == 1) {
             strcpy(domainname, values[0]);
@@ -218,7 +219,7 @@ int handledomainname(void)
         }
         else {
             result = FAILURE;
-            if (flag_is_state == setupchroot) {
+            if (flag_is_state == INST_SETUPCHROOT) {
                 /* In case of installation always write the files, so they exist afterwards */
                 writehostsfiles(hostname, domainname);
             }

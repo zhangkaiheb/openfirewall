@@ -121,14 +121,14 @@ int handlekeymap(void)
     displaynames[c] = NULL;
 
     strcpy(keymap_setting, KEYMAPROOT "qwerty/us.map.gz");
-    if (flag_is_state != installer) {
+    if (flag_is_state != INST_INSTALLER) {
         if (read_kv_from_file(&kv, "/var/ofw/main/settings") != SUCCESS) {
             free_kv(&kv);
             errorbox(ofw_gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
             return FAILURE;
         }
 
-        if (flag_is_state == setupchroot) {
+        if (flag_is_state == INST_SETUPCHROOT) {
             if (find_kv(kv, "KEYMAP") != NULL) {
                 /* Keymap already set */
                 result = SUCCESS;
@@ -146,14 +146,16 @@ int handlekeymap(void)
     }
 
     /* In case of serial console we can skip this question, and simply use our default */
-    if (! ((flag_is_state != setup) && (medium_console == serial))) {
-        rc = newtWinMenu(ofw_gettext("TR_KEYBOARD_MAPPING"), ofw_gettext("TR_KEYBOARD_MAPPING_LONG"), 50, 5, 5, 6, displaynames,
-                     &choice, ofw_gettext("TR_OK"), (flag_is_state != setup) ? ofw_gettext("TR_SKIP") : ofw_gettext("TR_GO_BACK"), NULL);
+    if (! ((flag_is_state != INST_SETUP) && (medium_console == MT_SERIAL))) {
+        rc = newtWinMenu(ofw_gettext("TR_KEYBOARD_MAPPING"),
+				ofw_gettext("TR_KEYBOARD_MAPPING_LONG"), 50, 5, 5, 6, displaynames, &choice,
+				ofw_gettext("TR_OK"),
+				(flag_is_state != INST_SETUP) ? ofw_gettext("TR_SKIP") : ofw_gettext("TR_GO_BACK"), NULL);
     }
     strcpy(keymap_setting, filenames[choice]);
 
     if (rc != 2) {
-        if (flag_is_state != installer) {
+        if (flag_is_state != INST_INSTALLER) {
             update_kv(&kv, "KEYMAP", keymap_setting);
             write_kv_to_file(&kv, "/var/ofw/main/settings");
         }
@@ -170,7 +172,7 @@ KEYMAP_END:
         free(displaynames[c]);
     }
 
-    if (flag_is_state != installer) {
+    if (flag_is_state != INST_INSTALLER) {
         free_kv(&kv);
     }
 

@@ -50,7 +50,8 @@ static int getpassword(char *password, char *text)
     do {
         done = 1;
         rc = newtWinEntries(gettext("TR_TITLE_PASSWORD"), text,
-                            68, 5, 5, 40, entries, gettext("TR_OK"), (flag_is_state == setup) ? gettext("TR_GO_BACK") : NULL, NULL);
+					68, 5, 5, 40, entries, gettext("TR_OK"),
+					(flag_is_state == INST_SETUP) ? gettext("TR_GO_BACK") : NULL, NULL);
 
         if (rc == 2) {
             return FAILURE;

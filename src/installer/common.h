@@ -19,8 +19,6 @@
  *
  * (c) 2007-2011, the Openfirewall Team
  *
- * $Id: common.h 7846 2015-02-01 18:35:46Z owes $
- *
  */
 
 #ifndef __COMMON_H
@@ -46,9 +44,10 @@ extern FILE *fstderr;
 /* Global variable used to indicate our environment */
 typedef enum
 {
-    installer,          /* directly in installer */
+    INST_INSTALLER,          /* directly in installer */
     setupchroot,        /* setup called from installer, in chroot */
-    setup,              /* 'normal' setup */
+    INST_SETUPCHROOT,        /* setup called from installer, in chroot */
+    INST_SETUP,              /* 'normal' setup */
 } installer_setup_t;
 
 extern installer_setup_t flag_is_state;

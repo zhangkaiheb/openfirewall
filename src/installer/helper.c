@@ -129,7 +129,7 @@ unsigned int getofwversion(void)
     fclose(f_version);
         
     stripnl(buffer);
-    if (!buffer[0] || strncmp(buffer, "IPCop v", 7)) {
+    if (!buffer[0] || strncmp(buffer, "Openfirewall v", 14)) {
         return 0;
     }
 
