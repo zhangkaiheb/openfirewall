@@ -2,15 +2,15 @@
 
 building the first time, get the packets required:
 
-make prefetch
+``make prefetch``
 
 
 and to save time, download a prebuilt toolchain
 
-make gettoolchain
+``make gettoolchain``
 
 
 build the openfirewall
 
-make build
+``make build``
 
