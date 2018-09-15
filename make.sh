@@ -50,18 +50,18 @@ NAME="Openfirewall"
 SNAME="openfirewall"
 
 # This is the Openfirewall version number for the release.
-VERSION=2.2.0
+VERSION=0.0.1
 
 # VERSIONSTEP is only used when the update is split into 2 versions/packages.
 #VERSIONSTEP=2.1.0
 
 # This is the last official Openfirewall version number. Needed for ./make.sh newupdate.
-PREVIOUSVERSION=2.1.9
+PREVIOUSVERSION=0.0.0
 # This is the SVN revision number for the last Openfirewall version. Needed for ChangeLog.
 PREVIOUSSVNREV=7814
 
 # Just an arbitrary name for the downloadable, prebuilt toolchain (if you want to save time compiling).
-TOOLCHAINVERSION=2.1.4
+TOOLCHAINVERSION=1.0.0
 
 # A collection of all the external software needed to build, install, and run openfirewall.  This is for GPL compliance.
 OTHERSRC=${SNAME}-${VERSION}-othersrc.tar.bz2
@@ -140,38 +140,22 @@ IGNORE_PREREQUISITES=no
 # The benefit (size and compile time) of increasing kernel compatiblity is small.
 # A glibc compiled with --enable-kernel=2.6.5 is very unlikely to run on a system with kernel < 2.6.5
 # If you have a kernel that is older than REQUIRED_KERNEL below, upgrade now!
-##REQUIRED_BASH=2.05a
 REQUIRED_BASH=3.2
-##REQUIRED_BINUTILS=2.12
 REQUIRED_BINUTILS=2.17
-##REQUIRED_BISON=1.875
 REQUIRED_BISON=2.3
-##REQUIRED_BZIP2=1.0.2
 REQUIRED_BZIP2=1.0.4
-##REQUIRED_COREUTILS=5.0
 REQUIRED_COREUTILS=6.9
-##REQUIRED_DIFFUTILS=2.8
 REQUIRED_DIFFUTILS=2.8.1
-##REQUIRED_FINDUTILS=4.1.20
 REQUIRED_FINDUTILS=4.2.31
-##REQUIRED_GAWK=3.1.5
 REQUIRED_GAWK=4.0.1
-##REQUIRED_GCC=3.0.1
 REQUIRED_GCC=4.7
-##REQUIRED_GLIBC=2.2.5
 REQUIRED_GLIBC=2.11
-##REQUIRED_GREP=2.5
 REQUIRED_GREP=2.5.1a
-##REQUIRED_GZIP=1.2.4
 REQUIRED_GZIP=1.3.12
-#REQUIRED_KERNEL=2.6.5
 REQUIRED_KERNEL=3.2
-##REQUIRED_MAKE=3.79.1
 REQUIRED_MAKE=3.81
 REQUIRED_PATCH=2.5.4
-##REQUIRED_SED=3.0.2
 REQUIRED_SED=4.1.5
-##REQUIRED_TAR=1.14
 REQUIRED_TAR=1.22
 REQUIRED_TEXINFO=4.8
 # END OF HOST SYSTEM REQUIREMENTS
