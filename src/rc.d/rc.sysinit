@@ -119,17 +119,6 @@ if ! /bin/mountpoint -q /proc; then
     test_ok
 fi
 
-# Start udev
-echo -ne "Starting udev ... "
-
-# Start the udev daemon to continually watch for, and act on, uevents
-/sbin/udevd --daemon
-# Now traverse /sys in order to "coldplug" devices that have already been discovered
-/sbin/udevadm trigger
-# Now wait for udevd to process the uevents we triggered
-/sbin/udevadm settle --timeout=15
-test_ok
-
 if [ "$KEYMAP" != "" ]; then
     echo -ne "Loading keymap $(basename $KEYMAP) ... "
     /usr/bin/loadkeys -q $KEYMAP
@@ -161,6 +150,17 @@ rm -f /rebootrequired
 
 # why i donot have this dir
 /bin/mkdir -pv /run/lock
+
+# Start udev, udev needs a rw system!!
+echo -ne "Starting udev ... "
+
+# Start the udev daemon to continually watch for, and act on, uevents
+/sbin/udevd --daemon
+# Now traverse /sys in order to "coldplug" devices that have already been discovered
+/sbin/udevadm trigger
+# Now wait for udevd to process the uevents we triggered
+/sbin/udevadm settle --timeout=15
+test_ok
 
 # Copy the udev rules generated before root was mounted read/write
 # Multiple rulefiles can exist, but we only care for 70-persistent-net

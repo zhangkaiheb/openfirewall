@@ -106,6 +106,7 @@ $(TARGET) :
 	cp -a /lib/udev						$(INITRAMFS_DIR)/lib/
 	# Remove persistent net generator rule
 	rm -f $(INITRAMFS_DIR)/lib/udev/rules.d/75-persistent-net-generator.rules
+	rm -f $(INITRAMFS_DIR)/lib/udev/rules.d/80-net-name-slot.rules
 	# Copy our own additional udev rules
 	mkdir -p						$(INITRAMFS_DIR)/etc/udev/rules.d/
 	cp -a $(DIR_SRC)/config/udev/rules.d/*			$(INITRAMFS_DIR)/etc/udev/rules.d/
