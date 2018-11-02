@@ -1941,6 +1941,7 @@ openfirewall_build()
 	chroot_make usbutils
 	chroot_make acpid
 	chroot_make apache
+	chroot_make mod_perl
 	chroot_make beep
 ##	chroot_make bind
 ##	chroot_make capi4k-utils
