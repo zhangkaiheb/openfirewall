@@ -311,11 +311,11 @@ test_ok
 /bin/chgrp utmp /var/run/utmp /var/log/wtmp
 /bin/chmod 0664 /var/run/utmp /var/log/wtmp
 
-if [ ! -e /etc/ssh/ssh_host_key ]; then
-    echo -ne "Generating SSH RSA1 key.  This may take several minutes ... "
-    /usr/bin/ssh-keygen -q -t rsa1 -f /etc/ssh/ssh_host_key -N ""
-    test_ok
-fi
+#if [ ! -e /etc/ssh/ssh_host_key ]; then
+#    echo -ne "Generating SSH RSA1 key.  This may take several minutes ... "
+#    /usr/bin/ssh-keygen -q -t rsa1 -f /etc/ssh/ssh_host_key -N ""
+#    test_ok
+#fi
 if [ ! -e /etc/ssh/ssh_host_rsa_key ]; then
     echo -ne "Generating SSH RSA key.  This may take several minutes ... "
     /usr/bin/ssh-keygen -q -t rsa -f /etc/ssh/ssh_host_rsa_key -N ""
@@ -324,6 +324,11 @@ fi
 if [ ! -e /etc/ssh/ssh_host_dsa_key ]; then
     echo -ne "Generating SSH DSA key.  This may take several minutes ... "
     /usr/bin/ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_dsa_key -N ""
+    test_ok
+fi
+if [ ! -e /etc/ssh/ssh_host_ecdsa_key ]; then
+    echo -ne "Generating SSH ECDSA key.  This may take several minutes ... "
+    /usr/bin/ssh-keygen -q -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ""
     test_ok
 fi
 if [ ! -e /etc/ssh/ssh_host_ed25519_key ]; then
