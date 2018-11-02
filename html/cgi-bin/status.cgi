@@ -127,7 +127,7 @@ my $swap_free=0;
 
 my $percent=0;
 
-open(FREE,'/usr/bin/free |');
+open(FREE,'/bin/free |');
 while (<FREE>) {
     if ($_ =~ m/^Mem:\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/) {
         ($mem_size,$mem_used,$mem_free,$mem_shared,$mem_buffers,$mem_cached) = ($1,$2,$3,$4,$5,$6);
