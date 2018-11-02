@@ -34,7 +34,8 @@ include Config
 
 PKG_NAME   = openssh
 ##VER        = 7.2p2
-VER        = 7.7p1
+#VER        = 7.7p1
+VER        = 7.9p1
 HOST_ARCH  = all
 OTHER_SRC  = yes
 
@@ -56,7 +57,8 @@ $(DL_FILE) = $(DL_FROM)/$(DL_FILE)
 
 ##$(DL_FILE)_MD5 = 13009a9156510d8f27e752659075cced
 ##$(DL_FILE)_MD5 = 06a88699018e5fef13d4655abfed1f63
-$(DL_FILE)_MD5 = 68ba883aff6958297432e5877e9a0fe2
+#$(DL_FILE)_MD5 = 68ba883aff6958297432e5877e9a0fe2
+$(DL_FILE)_MD5 = c6af50b7a474d04726a5aa747a5dce8f
 
 install : $(TARGET)
 
@@ -87,7 +89,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 	@$(PREBUILD)
 	@rm -rf $(DIR_APP) && cd $(DIR_SRC) && tar zxf $(DIR_DL)/$(DL_FILE)
 
-	cd $(DIR_APP) && patch -p0 < $(DIR_PATCHES)/$(PKG_NAME)-$(VER)-openssl-version-check.patch
+#	cd $(DIR_APP) && patch -p0 < $(DIR_PATCHES)/$(PKG_NAME)-$(VER)-openssl-version-check.patch
 
 	cd $(DIR_APP) && ./configure	--prefix=/usr \
 					--sysconfdir=/etc/ssh \
@@ -95,7 +97,8 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 					--with-privsep-path=/var/empty \
 					--with-default-path=/bin:/usr/bin \
 					--with-superuser-path=/sbin:/usr/sbin:/bin:/usr/bin  \
-					--without-openssl
+
+#					--without-openssl
 
 ##					--with-md5-passwords \
 
