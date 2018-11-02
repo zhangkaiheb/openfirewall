@@ -181,6 +181,12 @@ touch /etc/mtab
 test_ok
 
 echo -ne "Mounting other filesystems ... "
+if [ ! -e /dev/pts ]; then
+	mkdir /dev/pts
+fi
+if [ ! -e /dev/shm ]; then
+	mkdir /dev/shm
+fi
 mount -a -t noproc
 test_ok
 

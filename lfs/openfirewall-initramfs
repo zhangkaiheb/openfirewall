@@ -74,6 +74,8 @@ $(TARGET) :
 	mkdir -p						$(INITRAMFS_DIR)/bin
 	mkdir -p						$(INITRAMFS_DIR)/cdrom
 	mkdir -p						$(INITRAMFS_DIR)/dev
+	mkdir -p						$(INITRAMFS_DIR)/dev/pts
+	mkdir -p						$(INITRAMFS_DIR)/dev/shm
 	mkdir -p						$(INITRAMFS_DIR)/etc/modprobe.d
 	mkdir -p						$(INITRAMFS_DIR)/etc/pcmcia
 	mkdir -p						$(INITRAMFS_DIR)/harddisk

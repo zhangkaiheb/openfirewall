@@ -104,20 +104,20 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 
 	cd $(DIR_APP) && make -j $(PARALLELISM)
 	cd $(DIR_APP) && make install
-##	sed -i -e 's/^#\?Port .*$$/Port 8022/' \
-##		-e 's/^#\?Protocol .*$$/Protocol 2/' \
-##		-e 's/^#\?AddressFamily .*$$/AddressFamily inet/' \
-##		-e 's/^#\?LoginGraceTime .*$$/LoginGraceTime 30s/' \
-##		-e 's/^#\?PermitRootLogin .*$$/PermitRootLogin yes/' \
-##		-e 's/^#\?RSAAuthentication .*$$/RSAAuthentication yes/' \
-##		-e 's/^#\?PubkeyAuthentication .*$$/PubkeyAuthentication yes\nPubkeyAcceptedKeyTypes +ssh-dss/' \
-##		-e 's/^#\?PasswordAuthentication .*$$/PasswordAuthentication yes/' \
-##		-e 's/^#\?MaxStartups .*$$/MaxStartups 5/' \
-##		-e 's/^#\?IgnoreUserKnownHosts .*$$/IgnoreUserKnownHosts yes/' \
-##		-e 's/^#\?UsePAM .*$$//' \
-##		-e 's/^#\?X11Forwarding .*$$/X11Forwarding no/' \
-##		-e 's/^#\?AllowTcpForwarding .*$$/AllowTcpForwarding no/' \
-##		/etc/ssh/sshd_config
+	sed -i -e 's/^#\?Port .*$$/Port 8022/' \
+		-e 's/^#\?Protocol .*$$/Protocol 2/' \
+		-e 's/^#\?AddressFamily .*$$/AddressFamily inet/' \
+		-e 's/^#\?LoginGraceTime .*$$/LoginGraceTime 30s/' \
+		-e 's/^#\?PermitRootLogin .*$$/PermitRootLogin yes/' \
+		-e 's/^#\?RSAAuthentication .*$$/RSAAuthentication yes/' \
+		-e 's/^#\?PubkeyAuthentication .*$$/PubkeyAuthentication yes\nPubkeyAcceptedKeyTypes +ssh-dss/' \
+		-e 's/^#\?PasswordAuthentication .*$$/PasswordAuthentication yes/' \
+		-e 's/^#\?MaxStartups .*$$/MaxStartups 5/' \
+		-e 's/^#\?IgnoreUserKnownHosts .*$$/IgnoreUserKnownHosts yes/' \
+		-e 's/^#\?UsePAM .*$$//' \
+		-e 's/^#\?X11Forwarding .*$$/X11Forwarding no/' \
+		-e 's/^#\?AllowTcpForwarding .*$$/AllowTcpForwarding no/' \
+		/etc/ssh/sshd_config
 
 ifeq "$(RUNNING_TEST)" "yes"
 	# most tests could be made before install
