@@ -212,6 +212,7 @@ usr/libexec/mod_buffer.so
 usr/libexec/mod_cache_disk.so
 usr/libexec/mod_cache.so
 usr/libexec/mod_cache_socache.so
+usr/libexec/mod_cgi.so
 usr/libexec/mod_cgid.so
 usr/libexec/mod_dav_fs.so
 usr/libexec/mod_dav.so
@@ -235,6 +236,7 @@ usr/libexec/mod_log_debug.so
 usr/libexec/mod_logio.so
 usr/libexec/mod_macro.so
 usr/libexec/mod_mime.so
+usr/libexec/mod_perl.so
 usr/libexec/mod_proxy_ajp.so
 usr/libexec/mod_proxy_balancer.so
 usr/libexec/mod_proxy_connect.so

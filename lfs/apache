@@ -18,11 +18,6 @@
 # Makefiles are based on LFSMake, which is                                    #
 # Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
 #                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: apache 7704 2014-11-24 14:44:55Z owes $
 #                                                                             #
 ###############################################################################
 
@@ -59,7 +54,7 @@ DL_APR-UTIL = $(APP_APR-UTIL).tar.bz2
 
 # Used to include same timestamp for all
 # This is httpd tar file date
-TIMESTAMP = "2014-09-02 06:57"
+TIMESTAMP = "2017-09-02 06:57"
 
 CFLAGS += -Wall
 
@@ -120,6 +115,8 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects)) $
 	# use our customized layout
 	cp $(DIR_SRC)/config/httpd/config.layout $(DIR_APP)/config.layout
 
+#		--disable-userdir \
+
 	# --with-z does nothing unless we enable a feature that use compression like --enable-deflate
 	# apr_cv value are needed on old host (centos-5.5 kernel 2.6.18) to build same as more recent
 	# epoll_create1, dup3 were added on 2.6.27, accept4 to 2.6.28
@@ -133,10 +130,10 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects)) $
 		--disable-negotiation \
 		--disable-static \
 		--disable-status \
-		--disable-userdir \
 		--enable-pie \
 		--enable-rewrite \
 		--enable-ssl \
+		--enable-cgi  \
 		--with-included-apr \
 		--with-pcre \
 		--with-z \
@@ -150,7 +147,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects)) $
 
 ####	cp -f $(DIR_SRC)/config/httpd/{httpd,port81,portgui}.conf    /etc/httpd/conf/
 	mkdir -pv /usr/local/apache/conf.ofw
-	cp -f $(DIR_SRC)/config/httpd/{port81,portgui}.conf    /usr/local/apache/conf/
+	cp -f $(DIR_SRC)/config/httpd/{httpd,port81,portgui}.conf    /usr/local/apache/conf/
 	cp -f $(DIR_SRC)/config/httpd/{httpd,port81,portgui}.conf    /usr/local/apache/conf.ofw/
 	cp -f $(DIR_SRC)/config/httpd/hostname.conf /var/ofw/main/hostname.conf
 ####	ln -sf /var/ofw/main/hostname.conf        /etc/httpd/conf/
