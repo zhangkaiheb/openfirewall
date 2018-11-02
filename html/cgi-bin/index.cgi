@@ -151,7 +151,7 @@ if (-e '/rebootrequired') {
     $warnmessage .= "<li><b>$Lang::tr{'reboot required'}</b></li>\n";
 }
 # Memory usage warning
-my @free = `/usr/bin/free`;
+my @free = `/bin/free`;
 $free[1] =~ m/(\d+)/;
 my $mem = $1;
 $free[2] =~ m/(\d+)/;
