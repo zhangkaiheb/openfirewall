@@ -70,7 +70,7 @@
 /usr/sbin/acpid
 ##
 ## apache httpd-2.2.19
-/usr/sbin/htpasswd
+/usr/bin/htpasswd
 /usr/sbin/httpd
 /usr/lib/libapr-1.so
 /usr/lib/libapr-1.so.0.4.5

@@ -3276,7 +3276,7 @@ sub adduser
         close(FILE);
     } else {
         &deluser($str_user);
-        system("/usr/sbin/htpasswd -b $userdb $str_user $str_pass");
+        system("/usr/bin/htpasswd -b $userdb $str_user $str_pass");
     }
 
     if ($str_group eq 'standard') { open(FILE, ">>$stdgrp");

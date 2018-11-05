@@ -140,7 +140,7 @@
 /usr/lib/libaprutil-1.so
 /usr/lib/libaprutil-1.so.0
 /usr/lib/libaprutil-1.so.0.3.10
-/usr/sbin/htpasswd
+/usr/bin/htpasswd
 /usr/sbin/httpd
 ##
 ## bash-4.1.9

@@ -28,7 +28,7 @@
 /usr/lib/libaprutil-1.so
 /usr/lib/libaprutil-1.so.0
 /usr/lib/libaprutil-1.so.0.3.9
-/usr/sbin/htpasswd
+/usr/bin/htpasswd
 /usr/sbin/httpd
 ## bash-4.0 patch level 37
 /bin/bash
