@@ -20,16 +20,6 @@
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 ################################################################################
-#
-# Based on Openfirewall http://www.openfirewall.cn, hddgraph (C) by weizen_42
-# 2007-02-13 modified by wintermute for SysInfo
-# Copyright (C) 2007-2008 Tom 'wintermute' Eichstaedt <wintermute@tom-e.de>
-#
-# $Id: sysinfo.cgi 7717 2014-12-01 18:20:17Z owes $
-#
-
-# Add entry in menu
-# MENUENTRY status 020 "system info" "system info"
 
 use strict;
 
@@ -101,12 +91,18 @@ foreach my $line (@lines) {
 
     my $left = $1;
     my $right = $2;
+    my $slen = 0;
     $outputcpuleft .= "$left\n";
     $outputcpumid .= " : \n";
     if (length($right) > 100) {
-        $outputcpuleft .= "\n";
-        $outputcpumid .= "\n";
-        $outputcpuright .= substr($right, 0, rindex($right, ' ', 100)) . "\n" . substr($right, rindex($right, ' ', 100)) . "\n";
+        for ($i = 0; $i+100 < length($right); $i += 1) {
+            $outputcpuleft .= "\n";
+            $outputcpumid .= "\n";
+            $slen = index($right, ' ', $i+100) - $i;
+            $outputcpuright .= substr($right, $i, $slen) . "\n";
+            $i += $slen;
+        }
+        $outputcpuright .=  substr($right, $i) . "\n";
     }
     else {
         $outputcpuright .= "$right\n";
