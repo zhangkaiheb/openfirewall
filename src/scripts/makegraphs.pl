@@ -15,10 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2004-01-19 Mark Wormgoor <mark@wormgoor.com>.
-# (c) 2007-2014, the Openfirewall Team
-#
-# $Id: makegraphs.pl 7496 2014-04-22 16:41:58Z owes $
+# (c) 2007-2018, the Openfirewall Team
 #
 
 use strict;

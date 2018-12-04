@@ -15,16 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# firewall-lib.pl was created for the BlockOutTraffic Addon.
-# Copyright (C) 2004 Achim Weber <dotzball@users.sourceforge.net>
-#
-# 6 May 2006 Achim Weber:
-#       Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
-#       from "BOT" to "FW".
-#
-# (c) 2007-2014, the Openfirewall Team
-#
-# $Id: firewall-lib.pl 7340 2014-03-17 06:57:10Z owes $
+# (c) 2007-2018, the Openfirewall Team
 #
 
 package FW;

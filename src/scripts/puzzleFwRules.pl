@@ -15,21 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-#
-# puzzleFwRules.pl from the BlockOutTraffic Addon
-# Copyright (C) 2004 Achim Weber <dotzball@users.sourceforge.net>
-#
-# 23 April 2006 Achim Weber:
-#		Added a check (-c) option to re-create iptables rules only when
-#		there is a timeframe change
-#
-# 6 May 2006 Achim Weber:
-#		Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
-#		from "BOT" to "FW".
-#
-# (c) 2008-2014, the Openfirewall Team
-#
-# $Id: puzzleFwRules.pl 7534 2014-05-14 14:34:12Z owes $
+# (c) 2008-2018, the Openfirewall Team
 #
 
 use strict;

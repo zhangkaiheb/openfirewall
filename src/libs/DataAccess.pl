@@ -15,14 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2005 Achim Weber <dotzball@users.sourceforge.net>
-# (c) 2007-2014, the Openfirewall Team
+# (c) 2007-2018, the Openfirewall Team
 #
-# $Id: DataAccess.pl 7534 2014-05-14 14:34:12Z owes $
-#
-# 6 May 2006 Achim Weber:
-#       Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
-#       from "BOT" to "FW".
 
 package DATA;
 

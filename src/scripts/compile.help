@@ -2,13 +2,13 @@
 #
 # $Id: compile.help 1174 2008-03-09 12:56:59Z eoberlander $
 
-echo "You really should read the documentation available on www.openfirewall.org!"
+echo "You really should read the documentation available on www.openfirewall.cn!"
 echo
 echo "To compile, first read the Building How-to:"
-echo "http://www.openfirewall.org/docs/buildinghowto.html"
+echo "http://www.openfirewall.cn/docs/buildinghowto.html"
 echo
 echo "You can ask for a driver to be included in Openfirewall."
-echo "Preferably post a 'Request For Enhancement' in Openfirewall's Sourceforge Tracker menu including a patch against recent source tree:"
+echo "Preferably post a 'Request For Enhancement' in Openfirewall's Tracker menu including a patch against recent source tree:"
 echo "https://sourceforge.net/svn/?group_id=40604"
 
 # return an error to the caller

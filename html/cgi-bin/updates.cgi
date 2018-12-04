@@ -15,17 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# updates.cgi is based on Smoothwall updates.cgi which is
-# (c) The SmoothWall Team
-#
-# With many, many changes since 2001,
-# (c) 2001-2015, the Openfirewall Team
-#
-# $Id: updates.cgi 7832 2015-01-27 20:36:40Z owes $
+# (c) 2001-2018, the Openfirewall Team
 #
 
 # Add entry in menu
 # MENUENTRY system 030 "updates" "updates"
+
 
 use LWP::UserAgent;
 use File::Copy;

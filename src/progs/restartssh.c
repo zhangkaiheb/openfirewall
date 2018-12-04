@@ -18,11 +18,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- *
- * restartssh originally from the Smoothwall project
- * (c) Mark Wormgoor, 2001
- *
- * $Id: restartssh.c 2265 2009-01-01 18:34:06Z owes $
+ * $Id: restartssh.c 2265 2018-09-01 18:34:06Z $
  *
  */
 

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2015, the Openfirewall Team
+ * (c) 2007-2018, the Openfirewall Team
  *
  * $Id: helper.c 7846 2015-02-01 18:35:46Z owes $
  * 

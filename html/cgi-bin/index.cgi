@@ -120,7 +120,7 @@ if (   ($pppsettings{'VALID'} eq 'yes' && $modemsettings{'VALID'} eq 'yes')
             $host_name = $fetch_ip;
         }
         print
-"<br />$Lang::tr{'ip address'} ($Lang::tr{'internet'}): $fetch_ip <br /> $Lang::tr{'ipcops hostname'} ($Lang::tr{'internet'}): $host_name";
+"<br />$Lang::tr{'ip address'} ($Lang::tr{'internet'}): $fetch_ip <br /> $Lang::tr{'openfirewalls hostname'} ($Lang::tr{'internet'}): $host_name";
 
         # and also the the real red IP if it is different from public IP
         if (open(IPADDR, "/var/ofw/red/local-ipaddress")) {
@@ -131,7 +131,7 @@ if (   ($pppsettings{'VALID'} eq 'yes' && $modemsettings{'VALID'} eq 'yes')
                 my $host_name = (gethostbyaddr(pack("C4", split(/\./, $ipaddr)), 2))[0];
                 $host_name = $ipaddr if ($host_name eq '');
                 print
-"<br />$Lang::tr{'ip address'} ($Lang::tr{'red'}): $ipaddr <br /> $Lang::tr{'ipcops hostname'} ($Lang::tr{'red'}): $host_name";
+"<br />$Lang::tr{'ip address'} ($Lang::tr{'red'}): $ipaddr <br /> $Lang::tr{'openfirewalls hostname'} ($Lang::tr{'red'}): $host_name";
             }
         }
     }

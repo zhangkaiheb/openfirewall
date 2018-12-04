@@ -41,7 +41,7 @@ form {
 td.ofw_menuLocationMain {
     color: #FFFFFF;
     font-family: Verdana, Tahoma, Arial, Sans-serif;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     text-align: left;
     vertical-align: bottom;
@@ -96,12 +96,12 @@ div.ofw_subMenuBar {
 div.ofw_menuElement, div.ofw_subMenuElement {
     border: 0;
     color: #CCCCCC;
-    font-size: 11px;
-    font-weight: bold;
+    font-size: 14px;
 }
 
 div.ofw_menuElement {
     width: 70px;
+    font-weight: bold;
     margin: 4px 10px 4px 10px;
 }
 
@@ -110,12 +110,12 @@ div.ofw_menuElementHover {
 }
 
 div.ofw_subMenuElement {
-    padding: 3px;
+    padding: 6px 15px 6px 15px;
     color: #CCCCCC;
 }
 
 div.ofw_subMenuElementHover {
-    padding: 3px;
+    padding: 6px 15px 6px 15px;
     color: #FFFFFF;
     background-color: #999999;
 }

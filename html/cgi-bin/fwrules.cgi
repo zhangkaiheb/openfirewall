@@ -553,11 +553,11 @@ END
     }
     elsif ($type eq 'INPUT') {
         $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
-        print "<b>$Lang::tr{'ipcop access'}:</b>";
+        print "<b>$Lang::tr{'openfirewall access'}:</b>";
     }
     elsif ($type eq 'EXTERNAL') {
         $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
-        print "<b>$Lang::tr{'external ipcop access'}:</b>";
+        print "<b>$Lang::tr{'external openfirewall access'}:</b>";
     }
     elsif ($type eq 'PINHOLES') {
         print "<b>$Lang::tr{'internal traffic'}:</b>";
@@ -888,7 +888,7 @@ END
                print <<END;
     <td colspan='2' class='boldbase' />
     <td colspan='13' class='boldbase' align='left'>
-        $Lang::tr{'pfw ipcop destination'}:&nbsp;
+        $Lang::tr{'pfw openfirewall destination'}:&nbsp;
         $extAddr
     </td>
 </tr>
@@ -1713,7 +1713,7 @@ END
     </td>
     <td align='left'>
         <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-           <input type='submit' name='ACTION' value='$Lang::tr{'ipcop access'}' />
+           <input type='submit' name='ACTION' value='$Lang::tr{'openfirewall access'}' />
            <input type='hidden' name='RULETYPE' value='INPUT'  />
 END
     &printHiddenFormParams('addNewRule');
@@ -1746,7 +1746,7 @@ END
     </td>
     <td align='left'>
         <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-            <input type='submit' name='ACTION' value='$Lang::tr{'external ipcop access'}' />
+            <input type='submit' name='ACTION' value='$Lang::tr{'external openfirewall access'}' />
             <input type='hidden' name='RULETYPE' value='EXTERNAL'  />
 END
     &printHiddenFormParams('addNewRule');
@@ -1790,7 +1790,7 @@ sub openEnterBox
 {
     my $title = '';
     if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $title = $Lang::tr{'ipcop access'};
+        $title = $Lang::tr{'openfirewall access'};
     }
     elsif ($cgiparams{'RULETYPE'} eq 'OUTGOING') {
         $title = $Lang::tr{'outgoing traffic'};
@@ -1799,7 +1799,7 @@ sub openEnterBox
         $title = $Lang::tr{'internal traffic'};
     }
     elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $title = $Lang::tr{'external ipcop access'};
+        $title = $Lang::tr{'external openfirewall access'};
     }
     elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
         $title = $Lang::tr{'ssport forwarding'};
@@ -2203,7 +2203,7 @@ END
         print <<END;
 <table width='100%'>
 <tr>
-    <td class='boldbase'>$Lang::tr{'pfw ipcop destination'}</td>
+    <td class='boldbase'>$Lang::tr{'pfw openfirewall destination'}</td>
 </tr>
 </table>
 
@@ -2325,7 +2325,7 @@ END
     # Destination
 ############################################################################################
 
-    my $ruletype_text = $Lang::tr{'ipcop access'};
+    my $ruletype_text = $Lang::tr{'openfirewall access'};
     my $destination_text = $Lang::tr{'destination'};
     if ($cgiparams{'RULETYPE'} eq 'OUTGOING') {
         $ruletype_text = $Lang::tr{'outgoing traffic'};
@@ -2342,7 +2342,7 @@ END
         $cgiparams{'DEFAULT_DST_NET'} = 'Orange' if (&FW::haveOrangeNet() && ($cgiparams{'DEFAULT_DST_NET'} eq 'Red'));
     }
     elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype_text = $Lang::tr{'external ipcop access'};
+        $ruletype_text = $Lang::tr{'external openfirewall access'};
     }
 
     $radio{'RULETYPE'}{'INPUT'}                = '';
@@ -3684,10 +3684,10 @@ sub printOverviewBox
     my $ruleTypeTxt = $Lang::tr{'outgoing traffic'};
     my  $destination_text = $Lang::tr{'destination'};
     if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruleTypeTxt = $Lang::tr{'ipcop access'};
+        $ruleTypeTxt = $Lang::tr{'openfirewall access'};
     }
     elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruleTypeTxt = $Lang::tr{'external ipcop access'};
+        $ruleTypeTxt = $Lang::tr{'external openfirewall access'};
     }
     elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
         $destination_text = $Lang::tr{'pfw internal destination'};
@@ -3769,7 +3769,7 @@ END
 </tr>
 <tr>
     <td colspan='3' class='base'>
-        <font class='boldbase'>$Lang::tr{'pfw ipcop destination'}:</font>
+        <font class='boldbase'>$Lang::tr{'pfw openfirewall destination'}:</font>
     </td>
 </tr>
 <tr>

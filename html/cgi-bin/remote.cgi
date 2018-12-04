@@ -15,13 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# remote.cgi originally (2001) from the Smoothwall project
-# (c) The SmoothWall Team
-#
-# Changes since 2001
-# (c) 2001-2015, the Openfirewall Team
-#
-# $Id: remote.cgi 7986 2015-07-08 05:43:52Z owes $
+# (c) 2001-2018, the Openfirewall Team
 #
 
 # Add entry in menu

@@ -798,7 +798,7 @@ END
     <td width='40%' class='base'>$Lang::tr{'organization name'}:</td>
     <td width='60%' class='base' nowrap='nowrap'><input type='text' name='ROOTCERT_ORGANIZATION' value='$cgiparams{'ROOTCERT_ORGANIZATION'}' size='32' /></td>
 </tr><tr>
-    <td class='base'>$Lang::tr{'ipcops hostname'}:</td>
+    <td class='base'>$Lang::tr{'openfirewalls hostname'}:</td>
     <td class='base' nowrap='nowrap'><input type='text' name='ROOTCERT_HOSTNAME' value='$cgiparams{'ROOTCERT_HOSTNAME'}' size='32' /></td>
 </tr><tr>
     <td class='base'>$Lang::tr{'your e-mail'}:&nbsp;<img src='/blob.gif' alt='*' /></td>

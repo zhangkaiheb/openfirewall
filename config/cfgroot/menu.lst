@@ -1,8 +1,6 @@
 #
 # The top-level menu headings
 #
-# $Id: menu.lst 3121 2009-06-25 10:53:43Z owes $
-#
 
 MENUTOP 010 system    "alt system"
 MENUTOP 020 status    "status"

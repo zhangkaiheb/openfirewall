@@ -16,8 +16,6 @@
 # along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 #
-# $Id: updatemenu.pl 3857 2009-11-21 23:30:27Z owes $
-#
 
 #
 # Lines in menu.lst match this for top-level menus:

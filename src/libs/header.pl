@@ -16,14 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2002 Alex Hudson - getcgihash() rewrite
-# Copyright (C) 2002 Bob Grant <bob@cache.ucr.edu> - validmac()
-# Copyright (c) 2002/04/13 Steve Bootes - add alias section, helper functions
-# Copyright (c) 2002/08/23 Mark Wormgoor <mark@wormgoor.com> validfqdn()
-# Copyright (c) 2003/09/11 Darren Critchley <darrenc@telus.net> srtarray()
-# Copyright (c) 2004-2016 The Openfirewall Team - way to many changes to specify here
-#
-# $Id: header.pl 8063 2016-01-10 09:17:41Z owes $
+# Copyright (c) 2004-2018 The Openfirewall Team
 #
 
 package Header;
@@ -324,7 +317,6 @@ END
 <!-- OPENFIREWALL HEADER -->
 <table width='100%' border='0' cellpadding='0' cellspacing='0'>
 <col width='719' /><col /><col width='32' />
-<tr><td align='center' colspan='3'><img src='/images/header_top.png' width='310' height='14' alt='' /></td></tr>
 <tr><td style='background: url(/images/header_left.png); background-repeat:no-repeat;'>
     <table width='100%' border='0' cellpadding='0' cellspacing='0' style='table-layout:fixed;'>
     <col width='75' /><col width='182' /><col />
@@ -371,9 +363,7 @@ sub closepage
     print <<END
 <!-- OPENFIREWALL FOOTER -->
     <table width='100%' border='0'><tr>
-    <td width='175' align='left'><img src='/images/null.gif' width='15' height='12' alt='' /><a href='http://sourceforge.net/projects/openfirewall' target='_blank'><img src='/images/sflogo.gif' width='153' height='30' alt='Get Openfirewall at SourceForge.net. Fast, secure and Free Open Source software downloads' /></a></td>
     <td align='center' valign='middle'>$status</td>
-    <td width='175' align='right' valign='bottom'><a href='http://www.openfirewall.org/' target='_blank'><img src='/images/shieldedtux.png' width='113' height='82' alt='Openfirewall Tux' /></a><img src='/images/null.gif' width='15' height='12' alt='' /></td>
     </tr></table>
 </body></html>
 END
