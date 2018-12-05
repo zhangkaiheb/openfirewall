@@ -15,9 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2008-2014, the Openfirewall Team
-#
-# $Id: trafficadm.cgi 7240 2014-02-18 22:08:00Z owes $
+# (c) 2008-2018, the Openfirewall Team
 #
 
 use strict;

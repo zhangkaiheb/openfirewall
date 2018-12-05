@@ -22,7 +22,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 100 "credits" "credits"
+# MENU-delete-ENTRY system 100 "credits" "credits"
 
 use strict;
 

@@ -16,8 +16,6 @@
 # along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 #
-# $Id: traffic.cgi 5433 2011-02-09 18:56:59Z eoberlander $
-#
 
 # Add entry in menu
 # MENUENTRY status 060 "sstraffic" "sstraffic"
