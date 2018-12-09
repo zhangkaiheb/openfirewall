@@ -10,7 +10,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 090 "shutdown" "shutdown"
+# MENUENTRY system 080 "shutdown" "shutdown"
 
 use strict;
 

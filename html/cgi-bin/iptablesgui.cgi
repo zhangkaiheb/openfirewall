@@ -22,7 +22,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY status 080 "IPtables" "IPTables"
+# MENUENTRY status 090 "IPtables" "IPTables"
 #
 # Do not translate IPTables
 

@@ -24,7 +24,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 080 "backup" "backup"
+# MENUENTRY system 070 "backup" "backup"
 
 use strict;
 

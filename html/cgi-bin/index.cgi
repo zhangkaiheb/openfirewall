@@ -22,7 +22,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 010 "alt home" "alt home"
+# MENUENTRY status 010 "alt home" "alt home"
 #
 # Make sure translation exists $Lang::tr{'alt home'}
 

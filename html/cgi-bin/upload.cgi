@@ -23,7 +23,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY network 020 "upload" "firmware upload"
+# MENU-delete-ENTRY network 020 "upload" "firmware upload"
 #
 # Make sure translation exists $Lang::tr{'firmware upload'}
 

@@ -19,7 +19,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY status 035 "proxy" "proxy"
+# MENUENTRY status 045 "proxy" "proxy"
 #
 # Make sure translation exists $Lang::tr{'proxy'}
 

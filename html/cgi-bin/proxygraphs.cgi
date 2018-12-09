@@ -6,7 +6,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY status 050 "ssproxy graphs" "proxy access graphs" haveProxy
+# MENUENTRY status 060 "ssproxy graphs" "proxy access graphs" haveProxy
 #
 # Make sure translation exists $Lang::tr{'ssproxy graphs'}
 

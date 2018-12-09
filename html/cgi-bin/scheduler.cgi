@@ -20,7 +20,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 020 "scheduler" "scheduler"
+# MENUENTRY system 010 "scheduler" "scheduler"
 
 use strict;
 

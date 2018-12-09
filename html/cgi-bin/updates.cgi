@@ -19,7 +19,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 030 "updates" "updates"
+# MENUENTRY system 020 "updates" "updates"
 
 
 use LWP::UserAgent;

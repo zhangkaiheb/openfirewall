@@ -18,7 +18,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY status 060 "sstraffic" "sstraffic"
+# MENUENTRY status 070 "sstraffic" "sstraffic"
 
 use strict;
 

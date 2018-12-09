@@ -22,8 +22,8 @@
 #
 
 # Add entries in menu
-# MENUENTRY status 040 "system graphs" "system graphs"
-# MENUENTRY status 050 "sstraffic graphs" "network traffic graphs" "?graph=network"
+# MENUENTRY status 050 "system graphs" "system graphs"
+# MENUENTRY status 060 "sstraffic graphs" "network traffic graphs" "?graph=network"
 #
 # Make sure translation exists $Lang::tr{'sstraffic graphs'}
 

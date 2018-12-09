@@ -10,7 +10,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY network 030 "modem" "modem configuration"
+# MENU-delete-ENTRY network 030 "modem" "modem configuration"
 #
 # Make sure translation exists $Lang::tr{'modem'}
 

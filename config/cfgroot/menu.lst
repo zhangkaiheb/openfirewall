@@ -2,8 +2,8 @@
 # The top-level menu headings
 #
 
-MENUTOP 010 system    "alt system"
-MENUTOP 020 status    "status"
+MENUTOP 010 status    "status"
+MENUTOP 020 system    "alt system"
 MENUTOP 030 network   "network"
 MENUTOP 040 services  "services"
 MENUTOP 050 firewall  "firewall"

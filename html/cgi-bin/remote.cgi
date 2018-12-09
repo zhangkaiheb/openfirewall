@@ -19,7 +19,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 050 "ssh access" "ssh access"
+# MENUENTRY system 040 "ssh access" "ssh access"
 
 use strict;
 

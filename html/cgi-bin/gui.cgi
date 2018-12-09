@@ -10,7 +10,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 060 "gui settings" "gui settings"
+# MENUENTRY system 050 "gui settings" "gui settings"
 
 use strict;
 

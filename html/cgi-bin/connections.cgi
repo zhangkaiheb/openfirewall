@@ -28,7 +28,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY status 070 "connections" "connections"
+# MENUENTRY status 080 "connections" "connections"
 
 use strict;
 

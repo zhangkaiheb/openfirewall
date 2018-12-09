@@ -39,12 +39,11 @@ form {
 }
 
 td.ofw_menuLocationMain {
-    color: #FFFFFF;
+    color: #000;
     font-family: Verdana, Tahoma, Arial, Sans-serif;
     font-size: 14px;
-    font-weight: bold;
-    text-align: left;
-    vertical-align: bottom;
+    text-align: middle;
+    vertical-align: middle;
 }
 
 td.ofw_Version {
@@ -90,34 +89,35 @@ div.ofw_menuBar {
 
 div.ofw_subMenuBar {
     border: 0;
-    background-color: #000000;
+    margin-top: 10px;
+    background-color: #FFF;
 }
 
 div.ofw_menuElement, div.ofw_subMenuElement {
     border: 0;
-    color: #CCCCCC;
-    font-size: 14px;
+    color: #FFF;
+    font-size: 15px;
 }
 
 div.ofw_menuElement {
-    width: 80px;
+    width: 90px;
     font-weight: bold;
     margin: 4px 10px 4px 10px;
 }
 
 div.ofw_menuElementHover {
-    color: #FFFFFF;
+    color: #FFF;
 }
 
 div.ofw_subMenuElement {
     padding: 6px 15px 6px 15px;
-    color: #CCCCCC;
+    color: #000;
 }
 
 div.ofw_subMenuElementHover {
     padding: 6px 15px 6px 15px;
-    color: #FFFFFF;
-    background-color: #999999;
+/*    color: #FFFFFF; */
+    background-color: #E0E0E0;
 }
 
 /* Connection Status */

@@ -25,7 +25,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY status 010 "sssystem status" "system status information"
+# MENUENTRY status 020 "sssystem status" "system status information"
 #
 # Make sure translation exists $Lang::tr{'sssystem status'} $Lang::tr{'system status information'}
 

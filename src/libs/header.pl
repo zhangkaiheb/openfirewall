@@ -190,7 +190,7 @@ sub showsubsection
 
     if ($javascript) { print "<noscript>"; }
     print "<table width='100%' cellspacing='0' cellpadding='5' border='0'>\n";
-    print "<tr><td width='64'><img src='/images/null.gif' width='54' height='1' alt='' /></td>\n";
+    print "<tr><td width='64'><img src='/images/null.gif' width='45' height='1' alt='' /></td>\n";
     print "<td align='left' width='100%'>";
     my @URI = split('\?', $ENV{'REQUEST_URI'});
     $URI[1] = '' unless (defined($URI[1]));
@@ -317,15 +317,11 @@ END
 <!-- OPENFIREWALL HEADER -->
 <table width='100%' border='0' cellpadding='0' cellspacing='0'>
 <col width='719' /><col /><col width='32' />
-<tr><td style='background: url(/images/header_left.png); background-repeat:no-repeat;'>
+<tr><td style='background-color: #000;'>
     <table width='100%' border='0' cellpadding='0' cellspacing='0' style='table-layout:fixed;'>
     <col width='75' /><col width='182' /><col />
-    <tr valign='bottom'><td></td>
-        <td class='ofw_menuLocationMain' colspan='2' height='25'><img src='/images/null.gif' width='8' height='1' alt='' />$location
-        <img src='/images/null.gif' width='16' height='1' alt='' /><img src='/images/header_arrow.gif' width='20' height='12' alt='' /><img src='/images/null.gif' width='24' height='1' alt='' /><font style='font-size: 12px;'>$sublocation</font></td>
-    </tr>
-    <tr valign='bottom'><td colspan='3' height='3'></td></tr>
-    <tr valign='bottom'><td height='27'></td>
+    <tr valign='middle'><td colspan='3' height='3'></td></tr>
+    <tr valign='middle'><td height='45'></td>
         <td colspan='2'>
 END
         ;
@@ -335,12 +331,18 @@ END
         }
         &showmenu();
     }
-    print "    </td></tr></table>\n";
+    print "    </td></tr>";
+print <<END
+    <tr valign='middle' style='background-color: $Header::boxcolour;'><td></td>
+    <td class='ofw_menuLocationMain' colspan='2' height='32'><img src='/images/null.gif' width='10' height='1' alt='' /><font style='font-size: 12px; color: #696969'>$location</font>
+    <img src='/images/null.gif' width='10' height='1' alt='' /><font style='font-size: 12px; color: #696969'>/</font><img src='/images/null.gif' width='12' height='1' alt='' /><font style='font-size: 12px; color: #696969'>$sublocation</font></td>
+    </tr>
+END
+;
+    print "</table>\n";
     &showsubsection($location);
     print <<END
 </td>
-<td valign='top' style='background: url(/images/header_dyn.png);background-repeat:repeat-x;'>&nbsp;</td>
-<td style='background: url(/images/header_right.png); background-repeat:no-repeat;'>&nbsp;</td>
 </tr>
 </table>
 <!-- OPENFIREWALL CONTENT -->
@@ -411,30 +413,29 @@ sub openbox
     else {
         $tablewidth = "";
     }
-    my $tdwidth = $width - 18 - 12 - 145 - 18;
+    my $tdwidth = $width - 12 - 145;
 
     print <<END
-<table cellspacing='0' cellpadding='0' $tablewidth border='0'>
+<div style='margin-top:15px'>
+<table cellspacing='0' cellpadding='0' $tablewidth border='0' frame='box'>
     <tr>
-        <td style='width:18px' ><img src='/images/null.gif' width='18'  height='1' alt='' /></td>
-        <td style='width:12px' ><img src='/images/null.gif' width='12'  height='1' alt='' /></td>
-        <td><img src='/images/null.gif' width='$tdwidth' height='1' alt='' /></td>
-        <td style='width:145px' ><img src='/images/null.gif' width='145' height='1' alt='' /></td>
-        <td style='width:18px' ><img src='/images/null.gif' width='18'  height='1' alt='' /></td>
-    </tr><tr>
-        <td colspan='2' ><img src='/images/${Header::boxframe}boxtop1.png' width='30' height='53' alt='' /></td>
-        <td style='background: url(/images/${Header::boxframe}boxtop2.png);'>
+        <td style='width:12px' ></td>
+        <td></td>
+        <td style='width:145px' ></td>
+    </tr>
+    <tr style='background-color: $Header::boxcolour;'>
+        <td colspan='1' width='15' height='33'></td>
+        <td>
 END
         ;
-    if   ($caption) { print "<b>$caption</b>\n"; }
+    if   ($caption) { print "$caption\n"; }
     else            { print "&nbsp;"; }
     print <<END
         </td>
-        <td colspan='2'><img src='/images/${Header::boxframe}boxtop3.png' width='163' height='53' alt='' /></td>
+        <td></td>
     </tr>
     <tr>
-        <td style='background: url(/images/${Header::boxframe}boxleft.png);'><img src='/images/null.gif' width='18' height='1' alt='' /></td>
-        <td colspan='3' style='background-color: $Header::boxcolour;'>
+        <td colspan='3'>
             <table width='100%' cellpadding='5'><tr><td align='$align' valign='top'>
 END
         ;
@@ -453,15 +454,11 @@ sub closebox
     print <<END
             </td></tr></table>
         </td>
-        <td style='background: url(/images/${Header::boxframe}boxright.png);'><img src='/images/null.gif' width='18' height='1' alt='' /></td>
     </tr><tr>
-        <td style='background: url(/images/${Header::boxframe}boxbottom1.png);background-repeat:no-repeat;'><img src='/images/null.gif' width='18' height='18' alt='' /></td>
-        <td style='background: url(/images/${Header::boxframe}boxbottom2.png);background-repeat:repeat-x;' colspan='3'><img src='/images/null.gif' width='1' height='18' alt='' /></td>
-        <td style='background: url(/images/${Header::boxframe}boxbottom3.png);background-repeat:no-repeat;'><img src='/images/null.gif' width='18' height='18' alt='' /></td>
-    </tr><tr>
-        <td colspan='5'><img src='/images/null.gif' width='1' height='5' alt='' /></td>
+        <td colspan='5'></td>
     </tr>
 </table>
+</div>
 END
         ;
 }

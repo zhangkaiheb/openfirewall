@@ -10,7 +10,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY status 030 "ssnetwork status" "network status information"
+# MENUENTRY status 040 "ssnetwork status" "network status information"
 #
 # Make sure translation exists $Lang::tr{'ssnetwork status'}
 

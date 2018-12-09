@@ -21,7 +21,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 070 "email settings" "email settings"
+# MENUENTRY system 060 "email settings" "email settings"
 
 use strict;
 
