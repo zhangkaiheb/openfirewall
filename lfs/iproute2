@@ -35,6 +35,7 @@ include Config
 PKG_NAME   = iproute2
 #VER        = 4.4.0
 VER        = 4.15.0
+#VER        = 4.18.0
 HOST_ARCH  = all
 OTHER_SRC  = yes
 
@@ -53,6 +54,7 @@ $(DL_FILE) = $(DL_FROM)/$(DL_FILE)
 
 #$(DL_FILE)_MD5 = d762653ec3e1ab0d4a9689e169ca184f
 $(DL_FILE)_MD5 = 0681bf4664b2649ad4e12551a3a7a1f9
+#$(DL_FILE)_MD5 = 8b8680e91390c57cab788fbf8e929479
 
 install : $(TARGET)
 
@@ -108,6 +110,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 
 	cd $(DIR_APP) && make
 	cd $(DIR_APP) && make DOCDIR=/usr/share/doc/iproute2-4.15.0 install
+#	cd $(DIR_APP) && make DOCDIR=/usr/share/doc/iproute2-4.18.0 install
 
 	@rm -rf $(DIR_APP)
 	@$(POSTBUILD)

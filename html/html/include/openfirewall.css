@@ -106,7 +106,7 @@ div.ofw_menuElement {
 }
 
 div.ofw_menuElementHover {
-    color: #FFF;
+    color: #98FB98;
 }
 
 div.ofw_subMenuElement {
@@ -117,7 +117,8 @@ div.ofw_subMenuElement {
 div.ofw_subMenuElementHover {
     padding: 6px 15px 6px 15px;
 /*    color: #FFFFFF; */
-    background-color: #E0E0E0;
+/*    background-color: #E0E0E0; */
+    background-color: #98FB98;
 }
 
 /* Connection Status */

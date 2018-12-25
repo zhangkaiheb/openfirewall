@@ -54,7 +54,7 @@
 #       from "BOT" to "FW".
 
 # Add entry in menu
-# MENUENTRY firewall 080 "firewall rules" "firewall rules"
+# MENUENTRY firewall 070 "firewall rules" "firewall rules"
 #
 # Make sure translation exists $Lang::tr{'firewall rules'}
 
@@ -544,9 +544,9 @@ sub printCurrentRules
 END
 
     my $dst_text = $Lang::tr{'destination'};
-    my $widthAdr = '24';
-    my $widthRemark = '37';
-    my $colHeaderDestIface = $Lang::tr{'net br iface'};
+    my $widthAdr = '23';
+    my $widthRemark = '26';
+    my $colHeaderDestIface = $Lang::tr{'net dst br iface'};
 
     if ($type eq 'OUTGOING') {
         print "<b>$Lang::tr{'outgoing traffic'}:</b>";
@@ -572,11 +572,11 @@ END
     </td>
 </tr>
 <tr>
-    <td width='1%' class='boldbase' align='center'>#</td>
-    <td width='4%' class='boldbase' align='center'>$Lang::tr{'net br iface'}</td>
+    <td width='2%' class='boldbase' align='center'>#</td>
+    <td width='10%' class='boldbase' align='center'>$Lang::tr{'net br iface'}</td>
     <td width='$widthAdr%' class='boldbase' align='center'>$Lang::tr{'source'}</td>
-    <td width='2%' class='boldbase' align='center'>&nbsp;</td>
-    <td width='5%' class='boldbase' align='center'>$colHeaderDestIface</td>
+    <td width='3%' class='boldbase' align='center'>&nbsp;</td>
+    <td width='10%' class='boldbase' align='center'>$colHeaderDestIface</td>
     <td width='$widthAdr%' class='boldbase' align='center'>$dst_text</td>
     <td width='$widthRemark%' class='boldbase' align='center'>$Lang::tr{'remark'}</td>
 END
@@ -676,7 +676,7 @@ END
         }
         elsif (($type eq 'INPUT') || ($type eq 'EXTERNAL')) {
             $destNetColor = 'ofw_iface_bg_fw';
-            $destNet = 'IPCop';
+            $destNet = 'OFW';
         }
 
         # Darren Critchley highlight the row we are editing
@@ -765,7 +765,7 @@ END
             }
         }
         else {
-            $dstaddr = "IPCop";
+            $dstaddr = "OFW";
         }
 
         if ($rule->{'SERVICE_TYPE'} ne '-') {

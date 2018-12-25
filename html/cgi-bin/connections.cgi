@@ -409,30 +409,30 @@ END
 
 if ($mainsettings{'DISPLAY_CONNECTIONS'} eq 'TRAFFIC') {
     print <<END
-<table cellpadding='2'>
-<tr><td align='center'><b>$Lang::tr{'protocol'}</b></td>
-    <td align='center'><b>$Lang::tr{'original'}<br />$Lang::tr{'source ip and port'}</b></td>
-    <td align='center'><b>$Lang::tr{'original'}<br />$Lang::tr{'dest ip and port'}</b></td>
-    <td align='center'><b>$Lang::tr{'packets'} / $Lang::tr{'bytes'}</b></td>
-    <td align='center'><b>$Lang::tr{'reply'}<br />$Lang::tr{'source ip and port'}</b></td>
-    <td align='center'><b>$Lang::tr{'reply'}<br />$Lang::tr{'dest ip and port'}</b></td>
-    <td align='center'><b>$Lang::tr{'packets'} / $Lang::tr{'bytes'}</b></td>
+<table width='100%' cellpadding='2'>
+<tr><td width='4%' align='center'><b>$Lang::tr{'protocol'}</b></td>
+    <td width='18%' align='center'><b>$Lang::tr{'original'} $Lang::tr{'source ip and port'}</b></td>
+    <td width='18%' align='center'><b>$Lang::tr{'original'} $Lang::tr{'dest ip and port'}</b></td>
+    <td width='12%' align='center'><b>$Lang::tr{'packets'} / $Lang::tr{'bytes'}</b></td>
+    <td width='18%' align='center'><b>$Lang::tr{'reply'} $Lang::tr{'source ip and port'}</b></td>
+    <td width='18%' align='center'><b>$Lang::tr{'reply'} $Lang::tr{'dest ip and port'}</b></td>
+    <td width='12%' align='center'><b>$Lang::tr{'packets'} / $Lang::tr{'bytes'}</b></td>
 </tr>
 END
     ;
 }
 else {
     print <<END
-<table cellpadding='2'>
-<tr><td align='center'><b>$Lang::tr{'protocol'}</b></td>
-    <td align='center'><b>$Lang::tr{'original'}<br />$Lang::tr{'source ip and port'}</b></td>
-    <td align='center'><b>$Lang::tr{'original'}<br />$Lang::tr{'dest ip and port'}</b></td>
-    <td align='center'><b>$Lang::tr{'reply'}<br />$Lang::tr{'source ip and port'}</b></td>
-    <td align='center'><b>$Lang::tr{'reply'}<br />$Lang::tr{'dest ip and port'}</b></td>
-    <td align='center'><b>$Lang::tr{'expires'}<br />($Lang::tr{'seconds'})</b></td>
-    <td align='center' colspan='2'><b>$Lang::tr{'connection'}<br />$Lang::tr{'status'}</b></td>
-    <td align='center'><b>$Lang::tr{'marked'}</b></td>
-    <td align='center'><b>$Lang::tr{'use'}</b></td>
+<table width='100%' cellpadding='2'>
+<tr><td width='4%'  align='center'><b>$Lang::tr{'protocol'}</b></td>
+    <td width='19%' align='center'><b>$Lang::tr{'original'} $Lang::tr{'source ip and port'}</b></td>
+    <td width='19%' align='center'><b>$Lang::tr{'original'} $Lang::tr{'dest ip and port'}</b></td>
+    <td width='19%' align='center'><b>$Lang::tr{'reply'} $Lang::tr{'source ip and port'}</b></td>
+    <td width='19%' align='center'><b>$Lang::tr{'reply'} $Lang::tr{'dest ip and port'}</b></td>
+    <td width='6%' align='center'><b>$Lang::tr{'expires'} ($Lang::tr{'seconds'})</b></td>
+    <td width='6%' align='center' colspan='2'><b>$Lang::tr{'connection'} $Lang::tr{'status'}</b></td>
+    <td width='4%' align='center'><b>$Lang::tr{'marked'}</b></td>
+    <td width='4%' align='center'><b>$Lang::tr{'use'}</b></td>
 </tr>
 END
     ;

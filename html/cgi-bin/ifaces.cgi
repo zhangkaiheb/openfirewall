@@ -37,7 +37,7 @@
 #         adresses, adress grouping and interfaces
 
 # Add entry in menu
-# MENUENTRY firewall 070 "interfaces" "interfaces"
+# MENUENTRY network 050 "interfaces" "interfaces"
 #
 # Make sure translation exists $Lang::tr{'interfaces'}
 
