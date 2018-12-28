@@ -151,7 +151,7 @@ var domMenu_pointerStyle = domLib_isIE ? 'hand' : 'pointer';
 // }}}
 // {{{ domMenu_activate()
 
-function domMenu_activate(in_containerId, in_disableWarning)
+function domMenu_activate(in_containerId, in_location, in_disableWarning)
 {
 	var container;
 	var data;
@@ -303,6 +303,10 @@ function domMenu_activate(in_containerId, in_disableWarning)
 		}
 
 		rootMenuTableCell.oncontextmenu = makeFalse; 
+		if (spanElement.innerHTML == in_location) {
+			//domMenu_activeElement.set(rootMenuTableCell, true);
+			domMenu_toggleHighlight(rootMenuTableCell, true);
+		}
 	}
 	
 	// add the menu rootMenu to the zero level element

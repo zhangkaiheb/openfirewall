@@ -51,6 +51,7 @@ $Header::boxframe     = '';           # retain frametype for closebox
 # $Lang::tr{'alt vpn'}
 # $Lang::tr{'alt logs'}
 
+my $menuidx = 0;
 my %menu = ();
 our $javascript = 1;
 our $httpheaders = 0;
@@ -150,7 +151,7 @@ sub showjsmenu
     'menuBarClass', 'ofw_menuBar',
     'menuElementClass', 'ofw_menuElement',
     'menuElementHoverClass', 'ofw_menuElementHover',
-    'menuElementActiveClass', 'ofw_menuElementHover',
+    'menuElementActiveClass', 'ofw_menuElementActive',
     'subMenuBarClass', 'ofw_subMenuBar',
     'subMenuElementClass', 'ofw_subMenuElement',
     'subMenuElementHoverClass', 'ofw_subMenuElementHover',
@@ -244,8 +245,6 @@ sub openpage
         $full_title = "Openfirewall - $title";
     }
 
-    $onload_menu = "onload=\"domMenu_activate('domMenu_main');\"" if ($menu == 1);
-
     print <<END
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -279,6 +278,7 @@ END
             }
         }
     }
+    $onload_menu = "onload=\"domMenu_activate('domMenu_main', '$location');\"" if ($menu == 1);
 
     my @cgigraphs = split(/graph=/, $ENV{'QUERY_STRING'});
     if (defined($cgigraphs[1])) {
@@ -321,7 +321,7 @@ END
     <table width='100%' border='0' cellpadding='0' cellspacing='0' style='table-layout:fixed;'>
     <col width='75' /><col width='182' /><col />
     <tr valign='middle'><td colspan='3' height='3'></td></tr>
-    <tr valign='middle'><td height='45' align='center'><font style='font-size: 20px; color: #98FB98'>OFW</font></td>
+    <tr valign='middle'><td height='45' align='center'><font style='font-size: 24px; color: #88DB78'>OFW</font></td>
         <td colspan='2'>
 END
         ;
