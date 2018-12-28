@@ -16,9 +16,7 @@
 # along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 #
-# Copyright (c) 2009 The Openfirewall Team
-#
-# $Id: library.sh 6400 2012-02-21 21:06:36Z dotzball $
+# Copyright (c) 2018 The Openfirewall Team
 #
 
 
