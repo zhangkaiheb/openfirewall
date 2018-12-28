@@ -15,26 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2003-09-22 Darren Critchley <darrenc@telus.net>
-# (c) 2008-2014, the Openfirewall Team
-#
-# $Id: ifaces.cgi 7240 2014-02-18 22:08:00Z owes $
-#
-#  November 2004:
-#       Achim Weber <dotzball@users.sourceforge.net>
-#       I modified this file to work with BlockOutTraffic addon.
-#       This is the advanced config-page.
-#       You can define (IP-)networks, interfaces, and services.
-#
-#  Summer 2005:
-#       Achim Weber <dotzball@users.sourceforge.net>
-#       Added service grouping
-#
-# 6 May 2006 Achim Weber:
-#       - Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
-#         from "BOT" to "FW".
-#       - Splited big fwadvconf.cgi to single pages for service, service grouping,
-#         adresses, adress grouping and interfaces
 
 # Add entry in menu
 # MENUENTRY network 050 "interfaces" "interfaces"

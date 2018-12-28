@@ -15,10 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) The SmoothWall Team
-# (c) 2001-2014, the Openfirewall Team
-#
-# $Id: index.cgi 7455 2014-04-11 08:11:40Z owes $
 #
 
 # Add entry in menu
@@ -73,7 +69,9 @@ elsif ($mainsettings{'REFRESHINDEX'} eq 'on') {
 
 &Header::openpage($Lang::tr{'main page'}, 1, $refresh);
 &Header::openbigbox('', 'center');
-&Header::openbox('500', 'center', &Header::cleanhtml(`/bin/uname -n`, "y"));
+
+print "<div align='center'>";
+&Header::openbox('50%', 'center', &Header::cleanhtml(`/bin/uname -n`, "y"));
 
 # hide buttons only when pppsettings mandatory used and not valid
 if (   ($pppsettings{'VALID'} eq 'yes')
@@ -313,12 +311,167 @@ END
 
 }
 
+&Header::closebox();
+
+print "</div>";
+print "<div style='float:left; margin-right:5px'>";
+
+print "<a name='memory'/>\n";
+&Header::openbox('50%', 'left', "$Lang::tr{'memory'}:");
+print "<table>";
+my $mem_size=0;
+my $mem_used=0;
+my $mem_free=0;
+my $mem_shared=0;
+my $mem_buffers=0;
+my $mem_cached=0;
+my $buffers_used=0;
+my $buffers_free=0;
+my $swap_size=0;
+my $swap_used=0;
+my $swap_free=0;
+
+my $percent=0;
+
+open(FREE,'/bin/free |');
+while (<FREE>) {
+    if ($_ =~ m/^Mem:\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/) {
+        ($mem_size,$mem_used,$mem_free,$mem_shared,$mem_buffers,$mem_cached) = ($1,$2,$3,$4,$5,$6);
+    }
+    elsif ($_ =~ m/^Swap:\s+(\d+)\s+(\d+)\s+(\d+)$/) {
+        ($swap_size,$swap_used,$swap_free) = ($1,$2,$3);
+    }
+    elsif ($_ =~ m/^-\/\+ buffers\/cache:\s+(\d+)\s+(\d+)$/ ) {
+        ($buffers_used,$buffers_free) = ($1,$2);
+    }
+}
+close FREE;
+
+print <<END
+<tr>
+    <td>&nbsp;</td>
+    <td align='center' class='boldbase'>$Lang::tr{'size'}</td>
+    <td align='center' class='boldbase'>$Lang::tr{'used'}</td>
+    <td align='center' class='boldbase'>$Lang::tr{'free'}</td>
+    <td align='left' class='boldbase' colspan='2'>$Lang::tr{'percentage'}</td>
+</tr><tr>
+    <td class='boldbase'>$Lang::tr{'ram'}</td>
+    <td align='right'>$mem_size</td>
+    <td align='right'>$mem_used</td>
+    <td align='right'>$mem_free</td>
+    <td>
+END
+;
+($percent = ($mem_used/$mem_size)*100) =~ s/^(\d+)(\.\d+)?$/$1%/;
+&Header::percentbar($percent);
+print <<END
+    </td>
+    <td align='right'>$percent</td>
+</tr>
+END
+;
+print "<tr><td colspan='2' class='boldbase'>$Lang::tr{'buffers'}</td><td align='right'>$mem_buffers</td><td>&nbsp;</td><td>";
+($percent = ($mem_buffers/$mem_size)*100) =~ s/^(\d+)(\.\d+)?$/$1%/;
+&Header::percentbar($percent);
+print "</td><td align='right'>$percent</td></tr>";
+print "<tr><td colspan='2' class='boldbase'>$Lang::tr{'cached'}</td><td align='right'>$mem_cached</td><td>&nbsp;</td><td>";
+($percent = ($mem_cached/$mem_size)*100) =~ s/^(\d+)(\.\d+)?$/$1%/;
+&Header::percentbar($percent);
+print "</td><td align='right'>$percent</td></tr>";
+print "<tr><td colspan='2' class='boldbase'>$Lang::tr{'excluding buffers and cache'}</td><td align='right'>$buffers_used</td><td>&nbsp;</td><td>";
+($percent = ($buffers_used/$mem_size)*100) =~ s/^(\d+)(\.\d+)?$/$1%/;
+&Header::percentbar($percent);
+print "</td><td align='right'>$percent</td></tr>";
+print "<tr><td class='boldbase'>$Lang::tr{'swap'}</td><td align='right'>$swap_size</td><td align='right'>$swap_used</td><td align='right'>$swap_free</td><td>";
+if ($swap_size != 0) {
+    ($percent = ($swap_used/$swap_size)*100) =~ s/^(\d+)(\.\d+)?$/$1%/;
+}
+else {
+    $percent = '';
+}
+&Header::percentbar($percent);
+print "</td><td align='right'>$percent</td></tr>";
+print "</table>";
+&Header::closebox();
+print "</div>";
+#print "<div align='left'>";
+
+
+print "<div style='float:right; margin-left:5px'>";
+
+print "<a name='disk'/>\n";
+&Header::openbox('50%', 'left', "$Lang::tr{'disk usage'}:");
+print "<table>\n";
+
+print <<END
+<tr>
+<td align='left' class='boldbase'>$Lang::tr{'device'}</td>
+<td align='left' class='boldbase'>$Lang::tr{'mounted on'}</td>
+<td align='center' class='boldbase'>$Lang::tr{'size'}</td>
+<td align='center' class='boldbase'>$Lang::tr{'used'}</td>
+<td align='center' class='boldbase'>$Lang::tr{'free'}</td>
+<td align='left' class='boldbase' colspan='2'>$Lang::tr{'percentage'}</td>
+</tr>
+END
+;
+
+open(DF,'/bin/df -h -x rootfs|');
+my @df = <DF>;
+close DF;
+
+# skip first line:
+# Filesystem            Size  Used Avail Use% Mounted on
+shift(@df);
+chomp(@df);
+# merge all lines to one single line separated by spaces
+my $all_inOneLine=join(' ',@df);
+
+# now get all entries in an array
+my @all_entries=split(' ',$all_inOneLine);
+
+# loop over all entries. Six entries belong together.
+while (@all_entries > 0) {
+    my $device=shift(@all_entries);
+    if ($device eq "/dev/disk/by-label/root") {
+        $device = `/bin/readlink -f /dev/disk/by-label/root`;
+    }
+    my $size=shift(@all_entries);
+    my $used=shift(@all_entries);
+    my $free=shift(@all_entries);
+    my $percent=shift(@all_entries);
+    my $mount=shift(@all_entries);
+    next if ($mount eq "/dev");
+    print <<END
+<tr>
+<td>$device</td>
+<td>$mount</td>
+<td align='right'>$size</td>
+<td align='right'>$used</td>
+<td align='right'>$free</td>
+<td>
+END
+;
+    &Header::percentbar($percent);
+    print <<END
+</td>
+<td align='right'>$percent</td>
+</tr>
+END
+;
+
+}
+print "<tr><td>1</td></tr>";
+print "</table>\n";
+&Header::closebox();
+
+print "</div>";
+
 # If an AddOn wants to insert information, than this is the spot to do it.
 # Add code and html below this line.
 # Markerinfobox
 
 
-&Header::closebox();
+#&Header::closebox();
 
 
 # If an AddOn wants to insert own box, than this is the spot to do it.
