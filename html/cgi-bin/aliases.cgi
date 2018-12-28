@@ -15,10 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) Steve Bootes 2002/04/13 - Manage IP Aliases
-# Copyright (c) 2002-2012 The Openfirewall Team
-#
-# $Id: aliases.cgi 6535 2012-04-09 12:56:26Z owes $
 
 # Add entry in menu
 # MENUENTRY network 040 "aliases" "dialup settings"

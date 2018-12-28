@@ -15,43 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: fwrules.cgi 7066 2013-06-09 12:50:18Z dotzball $
-#
-#
-# Darren Critchley February 2003 - I added the multiple external access rules for each port forward
-# A couple of things to remember when reading the code
-#   There are two kinds of records in the config file, those with a number in the first field, and then 0,
-#       these are port forward rules, these records will have a 0 or 0.0.0.0 in position 9 (ORIG_ADR)
-#       If there is a 0, it means that there are external access rules, otherwise the port is open to ALL.
-#   The second type of record is a number followed by a number which indicates that it is an external access
-#   rule. The first number indicates which Portfw rule it belongs to, and the second is just a unique key.
-#
-# Darren Critchley - March 5, 2003 - if you come along after me and work on this page, please comment your
-#       work. Put your name, and date and then your comment - it helps the person that comes along after you
-#       to figure out why and how things have changed, and it is considered good coding practice
-# Thanks . . .
-#
-# Achim Weber November - December 2003
-#       I modified this file to work with BlockOutTraffic addon.
-#       This is the rule-creator-page
-#
-# Achim Weber January 2004
-#       When BOT is disabled your are able to edit rules now,
-#       settings are checked for validation everytime now,
-#       if settings invalid, you can't edit rules and get message+Edit-button,
-#
-# Achim Weber Autumn 2004
-#       There are many changes for BlockOutTraffic 2.2.
-#
-# Achim Weber April 2005
-#       Remove rule wizard again
-#
-# Achim Weber Summer 2005
-#       Implement data layer
-#
-# 6 May 2006 Achim Weber:
-#       Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
-#       from "BOT" to "FW".
 
 # Add entry in menu
 # MENUENTRY firewall 070 "firewall rules" "firewall rules"
@@ -135,13 +98,14 @@ if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'}) {
     my $newRule = &buildRuleObject();
 
     my $ruletype = 'OUTGOING';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruletype = 'INPUT';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype = 'EXTERNAL';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
+##    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
+##        $ruletype = 'INPUT';
+##    }
+##    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        $ruletype = 'EXTERNAL';
+##    }
+##    els
+    if ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
         $ruletype = 'PINHOLES';
     }
     elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
@@ -235,13 +199,14 @@ if (   $cgiparams{'ACTION'} eq $Lang::tr{'toggle enable disable'}
     || $cgiparams{'ACTION'} eq "$Lang::tr{'toggle enable disable'}log")
 {
     my $ruletype = 'OUTGOING';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruletype = 'INPUT';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype = 'EXTERNAL';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
+##    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
+##        $ruletype = 'INPUT';
+##    }
+##    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        $ruletype = 'EXTERNAL';
+##    }
+##    els
+    if ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
         $ruletype = 'PINHOLES';
     }
     elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
@@ -271,13 +236,14 @@ if (($cgiparams{'ACTION'} eq $Lang::tr{'edit'} || $cgiparams{'ACTION'} eq $Lang:
     && $cgiparams{'BOX_ACTION'} eq '')
 {
     my $ruletype = 'OUTGOING';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruletype = 'INPUT';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype = 'EXTERNAL';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
+##    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
+##        $ruletype = 'INPUT';
+##    }
+##    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        $ruletype = 'EXTERNAL';
+##    }
+##    els
+    if ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
         $ruletype = 'PINHOLES';
     }
     elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
@@ -308,13 +274,14 @@ if (($cgiparams{'ACTION'} eq $Lang::tr{'edit'} || $cgiparams{'ACTION'} eq $Lang:
 # Darren Critchley - broke out Remove routine as the logic is getting too complex to be combined with the Edit
 if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
     my $ruletype = 'OUTGOING';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruletype = 'INPUT';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype = 'EXTERNAL';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
+##    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
+##        $ruletype = 'INPUT';
+##    }
+##    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        $ruletype = 'EXTERNAL';
+##    }
+##    els
+    if ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
         $ruletype = 'PINHOLES';
     }
     elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
@@ -346,13 +313,14 @@ if (   $cgiparams{'ACTION'} eq $Lang::tr{'up'}
     || $cgiparams{'ACTION'} eq $Lang::tr{'down'})
 {
     my $ruletype = 'OUTGOING';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruletype = 'INPUT';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype = 'EXTERNAL';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
+##    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
+##        $ruletype = 'INPUT';
+##    }
+##    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        $ruletype = 'EXTERNAL';
+##    }
+##    els
+    if ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
         $ruletype = 'PINHOLES';
     }
     elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
@@ -458,15 +426,15 @@ sub printCurrentRulesBox
         print "<br />";
     }
 
-    if ($printMode eq 'all' || $cgiparams{'RULETYPE'} eq 'INPUT') {
-        &printCurrentRules('INPUT', $printMode);
-#### DEBUG:
-        #       foreach $line (@inputRules) {
-        #           print "$line<br />\n";
-        #       }
-#### end DEBUG
-        print "<br />";
-    }
+##    if ($printMode eq 'all' || $cgiparams{'RULETYPE'} eq 'INPUT') {
+##        &printCurrentRules('INPUT', $printMode);
+###### DEBUG:
+##        #       foreach $line (@inputRules) {
+##        #           print "$line<br />\n";
+##        #       }
+###### end DEBUG
+##        print "<br />";
+##    }
 
     if ($printMode eq 'all' || $cgiparams{'RULETYPE'} eq 'PINHOLES') {
         if (&FW::haveInternalNet()) {
@@ -480,10 +448,10 @@ sub printCurrentRulesBox
         print "<br />";
     }
 
-    if ($printMode eq 'all' || $cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        &printCurrentRules('EXTERNAL', $printMode);
-        print "<br />";
-    }
+##    if ($printMode eq 'all' || $cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        &printCurrentRules('EXTERNAL', $printMode);
+##        print "<br />";
+##    }
 
     print <<END;
 <table>
@@ -551,14 +519,14 @@ END
     if ($type eq 'OUTGOING') {
         print "<b>$Lang::tr{'outgoing traffic'}:</b>";
     }
-    elsif ($type eq 'INPUT') {
-        $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
-        print "<b>$Lang::tr{'openfirewall access'}:</b>";
-    }
-    elsif ($type eq 'EXTERNAL') {
-        $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
-        print "<b>$Lang::tr{'external openfirewall access'}:</b>";
-    }
+##    elsif ($type eq 'INPUT') {
+##        $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
+##        print "<b>$Lang::tr{'openfirewall access'}:</b>";
+##    }
+##    elsif ($type eq 'EXTERNAL') {
+##        $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
+##        print "<b>$Lang::tr{'external openfirewall access'}:</b>";
+##    }
     elsif ($type eq 'PINHOLES') {
         print "<b>$Lang::tr{'internal traffic'}:</b>";
     }
@@ -674,10 +642,10 @@ END
             # Always display interface name (there are more than one interface per color possible)
             $destNet = &General::translateinterface($rule->{'DST_NET'});
         }
-        elsif (($type eq 'INPUT') || ($type eq 'EXTERNAL')) {
-            $destNetColor = 'ofw_iface_bg_fw';
-            $destNet = 'OFW';
-        }
+##        elsif (($type eq 'INPUT') || ($type eq 'EXTERNAL')) {
+##            $destNetColor = 'ofw_iface_bg_fw';
+##            $destNet = 'OFW';
+##        }
 
         # Darren Critchley highlight the row we are editing
         if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'RULE_POSITION'} eq $id) {
@@ -1095,7 +1063,7 @@ sub validateSrcParams
 
 sub validateDestParams
 {
-    unless ($cgiparams{'RULETYPE'} =~ /^(INPUT|OUTGOING|EXTERNAL|PINHOLES|PORTFW)$/) {
+    unless ($cgiparams{'RULETYPE'} =~ /^(OUTGOING|PINHOLES|PORTFW)$/) {
         $errormessage .= "$Lang::tr{'invalid dest'}<br />";
     }
 
@@ -1357,39 +1325,40 @@ sub checkBetweenParams
     # Check if this is an advanced rule
     if ($cgiparams{'RULEACTION'} eq 'accept') {
 
-        if ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-
-            # External Openfirewall access
-            $warnOpenFwMessage .= "$Lang::tr{'rule opens your Firewall'}<br />";
-        }
-        elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
+##        if ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##
+##            # External Openfirewall access
+##            $warnOpenFwMessage .= "$Lang::tr{'rule opens your Firewall'}<br />";
+##        }
+##        els
+        if ($cgiparams{'RULETYPE'} eq 'PORTFW') {
 
             # Port forwording
             $warnOpenFwMessage .= "$Lang::tr{'rule opens your Firewall'}<br />";
         }
-        elsif ($cgiparams{'RULETYPE'} eq 'INPUT') {
-
-            # Openfirewall access
-            if ($FW::fwSettings{'ADV_MODE_ENABLE'} ne 'on') {
-
-                # only allow Openfirewall access from Green, Blue or VPN
-                if (($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') && ($FW::interfaces{$cgiparams{'DEFAULT_SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR')) {
-                    $errormessage .= "$Lang::tr{'openfirewall access only from green blue and vpn'}<br />";
-                }
-            }
-            else {
-                if ($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') {
-
-                    # only allow Openfirewall access from Green, Blue or VPN
-                    if ($FW::interfaces{$cgiparams{'DEFAULT_SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR') {
-                        $errormessage .= "$Lang::tr{'openfirewall access only from green blue and vpn'}<br />";
-                    }
-                }
-                else {    # we don't know if the custom source interface opens the Firewall
-                    $warnOpenFwMessage .= "$Lang::tr{'rule can open your Firewall'}<br />";
-                }
-            }
-        }
+##        elsif ($cgiparams{'RULETYPE'} eq 'INPUT') {
+##
+##            # Openfirewall access
+##            if ($FW::fwSettings{'ADV_MODE_ENABLE'} ne 'on') {
+##
+##                # only allow Openfirewall access from Green, Blue or VPN
+##                if (($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') && ($FW::interfaces{$cgiparams{'DEFAULT_SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR')) {
+##                    $errormessage .= "$Lang::tr{'openfirewall access only from green blue and vpn'}<br />";
+##                }
+##            }
+##            else {
+##                if ($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') {
+##
+##                    # only allow Openfirewall access from Green, Blue or VPN
+##                    if ($FW::interfaces{$cgiparams{'DEFAULT_SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR') {
+##                        $errormessage .= "$Lang::tr{'openfirewall access only from green blue and vpn'}<br />";
+##                    }
+##                }
+##                else {    # we don't know if the custom source interface opens the Firewall
+##                    $warnOpenFwMessage .= "$Lang::tr{'rule can open your Firewall'}<br />";
+##                }
+##            }
+##        }
         elsif ($cgiparams{'RULETYPE'} eq 'OUTGOING' || $cgiparams{'RULETYPE'} eq 'PINHOLES') {
 
             # Internal traffic or outgoing traffic
@@ -1708,16 +1677,6 @@ sub printSelectNewRuleBox
 END
         &printHiddenFormParams('addNewRule');
 
-    print <<END;
-        </form>
-    </td>
-    <td align='left'>
-        <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-           <input type='submit' name='ACTION' value='$Lang::tr{'openfirewall access'}' />
-           <input type='hidden' name='RULETYPE' value='INPUT'  />
-END
-    &printHiddenFormParams('addNewRule');
-
     if (&FW::haveInternalNet()) {
         print <<END;
         </form>
@@ -1740,16 +1699,6 @@ END
 END
     &printHiddenFormParams('addNewRule');
 
-
-    print <<END;
-        </form>
-    </td>
-    <td align='left'>
-        <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-            <input type='submit' name='ACTION' value='$Lang::tr{'external openfirewall access'}' />
-            <input type='hidden' name='RULETYPE' value='EXTERNAL'  />
-END
-    &printHiddenFormParams('addNewRule');
 
     print <<END;
         </form>
@@ -1789,18 +1738,19 @@ END
 sub openEnterBox
 {
     my $title = '';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $title = $Lang::tr{'openfirewall access'};
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'OUTGOING') {
+##    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
+##        $title = $Lang::tr{'openfirewall access'};
+##    }
+##    els
+    if ($cgiparams{'RULETYPE'} eq 'OUTGOING') {
         $title = $Lang::tr{'outgoing traffic'};
     }
     elsif ($cgiparams{'RULETYPE'} eq 'PINHOLES') {
         $title = $Lang::tr{'internal traffic'};
     }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $title = $Lang::tr{'external openfirewall access'};
-    }
+##    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        $title = $Lang::tr{'external openfirewall access'};
+##    }
     elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
         $title = $Lang::tr{'ssport forwarding'};
     }
@@ -2341,13 +2291,13 @@ END
         # Change default destination interface to orange if it exists
         $cgiparams{'DEFAULT_DST_NET'} = 'Orange' if (&FW::haveOrangeNet() && ($cgiparams{'DEFAULT_DST_NET'} eq 'Red'));
     }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype_text = $Lang::tr{'external openfirewall access'};
-    }
+##    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        $ruletype_text = $Lang::tr{'external openfirewall access'};
+##    }
 
-    $radio{'RULETYPE'}{'INPUT'}                = '';
+##    $radio{'RULETYPE'}{'INPUT'}                = '';
     $radio{'RULETYPE'}{'OUTGOING'}              = '';
-    $radio{'RULETYPE'}{'EXTERNAL'}             = '';
+##    $radio{'RULETYPE'}{'EXTERNAL'}             = '';
     $radio{'RULETYPE'}{'PINHOLES'}             = '';
     $radio{'RULETYPE'}{$cgiparams{'RULETYPE'}} = "checked='checked'";
 
@@ -2837,17 +2787,17 @@ END
     print "selected='selected'" if ($cgiparams{'DEFAULT_SERVICE'} eq '');
     print ">-- $Lang::tr{'default services'} --</option>";
 
-    if($cgiparams{'RULETYPE'} eq 'EXTERNAL' || $cgiparams{'RULETYPE'} eq 'INPUT'){
-        my %ofwServices = ();
-        &DATA::readOfwServices(\%ofwServices);
-        foreach my $defService (sort keys %ofwServices) {
-            print "<option value='$defService'";
-            print " selected='selected'" if ($cgiparams{'DEFAULT_SERVICE'} eq $defService);
-            print ">$defService ($ofwServices{$defService}{'PORT_NR'})</option>";
-
-        }
-        print "<option value='BLANK'> --- </option>";
-    }
+##    if($cgiparams{'RULETYPE'} eq 'EXTERNAL' || $cgiparams{'RULETYPE'} eq 'INPUT'){
+##        my %ofwServices = ();
+##        &DATA::readOfwServices(\%ofwServices);
+##        foreach my $defService (sort keys %ofwServices) {
+##            print "<option value='$defService'";
+##            print " selected='selected'" if ($cgiparams{'DEFAULT_SERVICE'} eq $defService);
+##            print ">$defService ($ofwServices{$defService}{'PORT_NR'})</option>";
+##
+##        }
+##        print "<option value='BLANK'> --- </option>";
+##    }
 
     foreach my $defService (sort keys %defaultServices) {
         print "<option value='$defService'";
@@ -3686,9 +3636,9 @@ sub printOverviewBox
     if ($cgiparams{'RULETYPE'} eq 'INPUT') {
         $ruleTypeTxt = $Lang::tr{'openfirewall access'};
     }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruleTypeTxt = $Lang::tr{'external openfirewall access'};
-    }
+##    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        $ruleTypeTxt = $Lang::tr{'external openfirewall access'};
+##    }
     elsif ($cgiparams{'RULETYPE'} eq 'PORTFW') {
         $destination_text = $Lang::tr{'pfw internal destination'};
         $ruleTypeTxt = $Lang::tr{'internal network'};
@@ -3915,15 +3865,16 @@ END
 END
 
     my $ruleCount = 0;
-    if (defined($ruleConfig{'INPUT'}) && $cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruleCount = @{$ruleConfig{'INPUT'}};
-    }
-    elsif (defined($ruleConfig{'OUTGOING'}) && $cgiparams{'RULETYPE'} eq 'OUTGOING') {
+##    if (defined($ruleConfig{'INPUT'}) && $cgiparams{'RULETYPE'} eq 'INPUT') {
+##        $ruleCount = @{$ruleConfig{'INPUT'}};
+##    }
+##    els
+    if (defined($ruleConfig{'OUTGOING'}) && $cgiparams{'RULETYPE'} eq 'OUTGOING') {
         $ruleCount = @{$ruleConfig{'OUTGOING'}};
     }
-    elsif (defined($ruleConfig{'EXTERNAL'}) && $cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruleCount = @{$ruleConfig{'EXTERNAL'}};
-    }
+##    elsif (defined($ruleConfig{'EXTERNAL'}) && $cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        $ruleCount = @{$ruleConfig{'EXTERNAL'}};
+##    }
     elsif (defined($ruleConfig{'PINHOLES'}) && $cgiparams{'RULETYPE'} eq 'PINHOLES') {
         $ruleCount = @{$ruleConfig{'PINHOLES'}};
     }
