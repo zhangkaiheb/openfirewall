@@ -84,13 +84,21 @@ td.ofw_Version {
 }
 
 div.ofw_menuBar {
+    margin-left: 20px;
     margin-bottom: 1px;
 }
 
 div.ofw_subMenuBar {
-    border: 0;
-    margin-top: 10px;
+    border: 1;
+    margin-top: 3px;
     background-color: #FFF;
+    border-style: solid;
+    border-width: 1px;
+    border-left-color: #E0E0E0;
+    border-right-color: #E0E0E0;
+    border-bottom-color: #E0E0E0;
+    border-bottom-left-radius: 0.3em;
+    border-bottom-right-radius: 0.3em;
 }
 
 div.ofw_menuElement, div.ofw_subMenuElement {
@@ -100,13 +108,22 @@ div.ofw_menuElement, div.ofw_subMenuElement {
 }
 
 div.ofw_menuElement {
-    width: 90px;
+    width: 100px;
     font-weight: bold;
-    margin: 4px 10px 4px 10px;
+/*    margin: 4px 10px 4px 10px; */
+    text-align: center;
+    padding: 15px 0px 15px 0px;
+}
+
+div.ofw_menuElementActive {
+    border-style: solid;
+    border-bottom-width:3px;
+    border-bottom-color: #ffffff;
 }
 
 div.ofw_menuElementHover {
-    color: #98FB98;
+/*    color: #98FB98; */
+    background-color: #88DB78;
 }
 
 div.ofw_subMenuElement {
@@ -115,10 +132,10 @@ div.ofw_subMenuElement {
 }
 
 div.ofw_subMenuElementHover {
-    padding: 6px 15px 6px 15px;
+/*    padding: 6px 15px 6px 15px; */
 /*    color: #FFFFFF; */
 /*    background-color: #E0E0E0; */
-    background-color: #98FB98;
+    background-color: #88DB78;
 }
 
 /* Connection Status */
