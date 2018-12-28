@@ -60,10 +60,10 @@ if ($dhcpserver > 0) {
     print "<a href='#leases'>$Lang::tr{'current dynamic leases'}</a> |\n";
 }
 if ($pppsettings{'TYPE'} =~ /^(bewanadsl|alcatelusb|conexantpciadsl|eagleusbadsl|wanpipe)$/) {
-    print "<a href='#adsl'>$Lang::tr{'adsl settings'}</a> |\n";
+    print "<a href='#adsl'>$Lang::tr{'adsl settings'}</a>\n";
 }
-print "<a href='#routing'>$Lang::tr{'routing table entries'}</a> |\n";
-print "<a href='#arp'> $Lang::tr{'arp table entries'}</a>\n";
+##print "<a href='#routing'>$Lang::tr{'routing table entries'}</a> |\n";
+##print "<a href='#arp'> $Lang::tr{'arp table entries'}</a>\n";
 print "</td></tr></table>\n";
 
 print "<a name='interfaces'/>\n";
@@ -228,79 +228,79 @@ if ( ($netsettings{'RED_COUNT'} == 0)  && (exists($pppsettings{'TYPE'})) ) {
     }
 }
 
-print "<a name='routing'/>\n";
-&Header::openbox('100%', 'left', "$Lang::tr{'routing table entries'}:");
-$output = `/sbin/ip route list`;
-$output = &Header::cleanhtml($output,"y");
-print <<END
-<table width='100%'>
-<tr>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'destination ip or net'}</td>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'gateway ip'}</td>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'interface'}</td>
-    <td width='25%' class='boldbase'>$Lang::tr{'remark'}</td>
-</tr>
-END
-;
-my $count = 0;
-foreach my $line (split(/\n/, $output))
-{
-    print "<tr class='table".int(($count % 2) + 1)."colour'>";
-    if ($line =~ m/^(.*) dev ([^ ]+) (.*) src (.*)$/) {
-        print "<td align='center'>$1</td><td align='center'>$4</td>";
-        print "<td align='center'>".&General::color_devices($2)."</td><td>$3</td></tr>";
-    }
-    elsif ($line =~ m/^(.*) via (.*) dev (.*)$/) {
-        print "<td align='center'>$1</td><td align='center'>$2</td>";
-        print "<td align='center'>".&General::color_devices($3)."</td><td>&nbsp;</td></tr>";
-    }
-    elsif ($line =~ m/^(.*) dev ipsec(\d*)  (.*)$/) {
-        print "<td align='center'>$1</td><td align='center'>&nbsp;</td>";
-        print "<td align='center'>".&General::color_devices("ipsec$2")."</td><td>$3</td></tr>";
-    }
-    else {
-        print "<td colspan='4'>$line</td></tr>";
-    }
-    
-    $count++;
-}
-print "</table>";
-&Header::closebox();
-
-print "<a name='arp'/>\n";
-&Header::openbox('100%', 'left', "$Lang::tr{'arp table entries'}:");
-$output = `/sbin/ip neigh list`;
-$output = &Header::cleanhtml($output,"y");
-print <<END
-<table width='100%'>
-<tr>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'ip address'}</td>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'interface'}</td>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'mac address'}</td>
-    <td width='25%' class='boldbase'>$Lang::tr{'status'}</td>
-</tr>
-END
-;
-my $count = 0;
-foreach my $line (split(/\n/, $output))
-{
-    print "<tr class='table".int(($count % 2) + 1)."colour'>";
-    if ($line =~ m/^(.*) dev ([^ ]+) lladdr ([0-9a-f:]*) (.*)$/) {
-        print "<td align='center'>$1</td><td align='center'>".&General::color_devices($2)."</td>";
-        print "<td align='center'>$3</td><td>$4</td></tr>";
-    }
-    elsif ($line =~ m/^(.*) dev ([^ ]+)  (.*)$/) {
-        print "<td align='center'>$1</td><td align='center'>".&General::color_devices($2)."</td>";
-        print "<td align='center'>-</td><td>$3</td></tr>";
-    }
-    else {
-        print "<td colspan='4'>$line</td></tr>";
-    }
-    
-    $count++;
-}
-print "</table>";
-&Header::closebox();
+##print "<a name='routing'/>\n";
+##&Header::openbox('100%', 'left', "$Lang::tr{'routing table entries'}:");
+##$output = `/sbin/ip route list`;
+##$output = &Header::cleanhtml($output,"y");
+##print <<END
+##<table width='100%'>
+##<tr>
+##    <td width='25%' align='center' class='boldbase'>$Lang::tr{'destination ip or net'}</td>
+##    <td width='25%' align='center' class='boldbase'>$Lang::tr{'gateway ip'}</td>
+##    <td width='25%' align='center' class='boldbase'>$Lang::tr{'interface'}</td>
+##    <td width='25%' class='boldbase'>$Lang::tr{'remark'}</td>
+##</tr>
+##END
+##;
+##my $count = 0;
+##foreach my $line (split(/\n/, $output))
+##{
+##    print "<tr class='table".int(($count % 2) + 1)."colour'>";
+##    if ($line =~ m/^(.*) dev ([^ ]+) (.*) src (.*)$/) {
+##        print "<td align='center'>$1</td><td align='center'>$4</td>";
+##        print "<td align='center'>".&General::color_devices($2)."</td><td>$3</td></tr>";
+##    }
+##    elsif ($line =~ m/^(.*) via (.*) dev (.*)$/) {
+##        print "<td align='center'>$1</td><td align='center'>$2</td>";
+##        print "<td align='center'>".&General::color_devices($3)."</td><td>&nbsp;</td></tr>";
+##    }
+##    elsif ($line =~ m/^(.*) dev ipsec(\d*)  (.*)$/) {
+##        print "<td align='center'>$1</td><td align='center'>&nbsp;</td>";
+##        print "<td align='center'>".&General::color_devices("ipsec$2")."</td><td>$3</td></tr>";
+##    }
+##    else {
+##        print "<td colspan='4'>$line</td></tr>";
+##    }
+##    
+##    $count++;
+##}
+##print "</table>";
+##&Header::closebox();
+##
+##print "<a name='arp'/>\n";
+##&Header::openbox('100%', 'left', "$Lang::tr{'arp table entries'}:");
+##$output = `/sbin/ip neigh list`;
+##$output = &Header::cleanhtml($output,"y");
+##print <<END
+##<table width='100%'>
+##<tr>
+##    <td width='25%' align='center' class='boldbase'>$Lang::tr{'ip address'}</td>
+##    <td width='25%' align='center' class='boldbase'>$Lang::tr{'interface'}</td>
+##    <td width='25%' align='center' class='boldbase'>$Lang::tr{'mac address'}</td>
+##    <td width='25%' class='boldbase'>$Lang::tr{'status'}</td>
+##</tr>
+##END
+##;
+##my $count = 0;
+##foreach my $line (split(/\n/, $output))
+##{
+##    print "<tr class='table".int(($count % 2) + 1)."colour'>";
+##    if ($line =~ m/^(.*) dev ([^ ]+) lladdr ([0-9a-f:]*) (.*)$/) {
+##        print "<td align='center'>$1</td><td align='center'>".&General::color_devices($2)."</td>";
+##        print "<td align='center'>$3</td><td>$4</td></tr>";
+##    }
+##    elsif ($line =~ m/^(.*) dev ([^ ]+)  (.*)$/) {
+##        print "<td align='center'>$1</td><td align='center'>".&General::color_devices($2)."</td>";
+##        print "<td align='center'>-</td><td>$3</td></tr>";
+##    }
+##    else {
+##        print "<td colspan='4'>$line</td></tr>";
+##    }
+##    
+##    $count++;
+##}
+##print "</table>";
+##&Header::closebox();
 
 &Header::closebigbox();
 
