@@ -1,14 +1,14 @@
 body {
-    margin: 5px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
     padding: 0px;
     background-color: #ffffff;
     color: #000000;
     font-family: Verdana, Tahoma, Arial, Sans-serif;
-    font-size: 11px;
+    font-size: 14px;
 }
 
 td {
-    font-size: 11px;
+    font-size: 14px;
 }
 
 .boldbase {
@@ -119,6 +119,7 @@ div.ofw_menuElementActive {
     border-style: solid;
     border-bottom-width:3px;
     border-bottom-color: #ffffff;
+    padding-bottom: 12px;
 }
 
 div.ofw_menuElementHover {
