@@ -194,7 +194,7 @@ if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'}) {
     }    # end unless($errormessage)
 }
 
-# Darren Critchley - Allows rules to be enabled and disabled
+# Allows rules to be enabled and disabled
 if (   $cgiparams{'ACTION'} eq $Lang::tr{'toggle enable disable'}
     || $cgiparams{'ACTION'} eq "$Lang::tr{'toggle enable disable'}log")
 {
@@ -271,7 +271,7 @@ if (($cgiparams{'ACTION'} eq $Lang::tr{'edit'} || $cgiparams{'ACTION'} eq $Lang:
     }
 }    # end if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'})
 
-# Darren Critchley - broke out Remove routine as the logic is getting too complex to be combined with the Edit
+# broke out Remove routine as the logic is getting too complex to be combined with the Edit
 if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
     my $ruletype = 'OUTGOING';
 ##    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
@@ -647,7 +647,7 @@ END
 ##            $destNet = 'OFW';
 ##        }
 
-        # Darren Critchley highlight the row we are editing
+        # highlight the row we are editing
         if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'RULE_POSITION'} eq $id) {
             print "<tr class='selectcolour'>";
             $srcNetColor = '';
@@ -846,7 +846,7 @@ END
                 my $extAddr = $rule->{'PORTFW_EXT_ADR'};
                 $extAddr .= "&nbsp;:&nbsp;$rule->{'PORTFW_SERVICE'}";
 
-                 # Darren Critchley highlight the row we are editing
+                 # highlight the row we are editing
                 if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'RULE_POSITION'} eq $id) {
                     print "<tr class='selectcolour'>";
                 }
@@ -876,7 +876,7 @@ END
             )
         {
 
-            # Darren Critchley highlight the row we are editing
+            # highlight the row we are editing
             if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'RULE_POSITION'} eq $id) {
                 print "<tr class='selectcolour'>";
                 $srcNetColor = '';
@@ -941,7 +941,7 @@ END
             my $endHour     = $rule->{'END_HOUR'} < 10     ? "0" . $rule->{'END_HOUR'}     : $rule->{'END_HOUR'};
             my $endMinute   = $rule->{'END_MINUTE'} < 10   ? "0" . $rule->{'END_MINUTE'}   : $rule->{'END_MINUTE'};
 
-            # Darren Critchley highlight the row we are editing
+            # highlight the row we are editing
             if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'RULE_POSITION'} eq $id) {
                 print "<tr class='selectcolour'>";
             }
@@ -1430,7 +1430,7 @@ sub validateAdditionalParams
         $cgiparams{'TIMEFRAME_ENABLED'} = 'off';
     }
 
-    # Darren Critchley - Remove commas from remarks
+    # Remove commas from remarks
     $cgiparams{'REMARK'} = &stripcommas($cgiparams{'REMARK'});
 
     if ($cgiparams{'RULE_POSITION'} eq '') {
@@ -1562,7 +1562,7 @@ sub validateTimeParams
     return;
 }
 
-# Darren Critchey - Replaces commas with spaces - stops users from messing up the config files
+# Replaces commas with spaces - stops users from messing up the config files
 sub stripcommas
 {
     my $outstring = $_[0];

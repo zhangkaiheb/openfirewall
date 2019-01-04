@@ -15,11 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) The SmoothWall Team
-# (c) 2002 Josh Grubman <jg@false.net> - Multiple registry IP lookup code
-# (c) 2014, the Openfirewall Team
-#
-# $Id: ipinfo.cgi 7386 2014-03-31 04:35:39Z owes $
+# (c) 2018, the Openfirewall Team
 #
 
 use IO::Socket;

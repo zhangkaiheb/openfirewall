@@ -15,27 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2003-09-22 Darren Critchley <darrenc@telus.net>
 # (c) 2008-2014, the Openfirewall Team
 #
-# $Id: services.cgi 7240 2014-02-18 22:08:00Z owes $
-#
-#  November 2004:
-#       Achim Weber <dotzball@users.sourceforge.net>
-#       I modified this file to work with BlockOutTraffic addon.
-#       This is the advanced config-page.
-#       You can define (IP-)networks, interfaces, and services.
-#
-#  Summer 2005:
-#       Achim Weber <dotzball@users.sourceforge.net>
-#       Added service grouping
-#
-# 6 May 2006 Achim Weber:
-#       - Re-worked code to use it in openfirewall 1.5, renamed all variables, keys, etc.
-#         from "BOT" to "FW".
-#       - Splited big fwadvconf.cgi to single pages for service, service grouping,
-#         adresses, adress grouping and interfaces
-
 # Add entry in menu
 # MENUENTRY firewall 030 "alt services" "alt services"
 #
@@ -62,7 +43,7 @@ $cgiparams{'ACTION'}     = '';
 $cgiparams{'USED_COUNT'} = 0;
 &General::getcgihash(\%cgiparams);
 
-# Darren Critchley - vars for setting up sort order
+# vars for setting up sort order
 my $sort_col  = '1';
 my $sort_type = 'a';
 my $sort_dir  = 'asc';
@@ -196,10 +177,10 @@ if ($cgiparams{'ACTION'} eq '') {
     $cgiparams{'ICMP_TYPE'}       = 'BLANK';
 }
 
-# Darren Critchley - Bring in the protocols file built from /etc/protocols into hash %protocol
+# Bring in the protocols file built from /etc/protocols into hash %protocol
 require '/usr/lib/ofw/protocols.pl';
 
-# Darren Critchley - figure out which protocol is selected
+# figure out which protocol is selected
 $selected{'PROTOCOL'}{'tcp'}    = '';
 $selected{'PROTOCOL'}{'udp'}    = '';
 $selected{'PROTOCOL'}{'tcpudp'} = '';
@@ -212,7 +193,7 @@ foreach my $line (keys %Protocols::protocols) {
 }
 $selected{'PROTOCOL'}{$cgiparams{'PROTOCOL'}} = "selected='selected'";
 
-# Darren Critchley - figure out which icmptype is selected
+# figure out which icmptype is selected
 $selected{'ICMP_TYPE'}{'BLANK'}                 = '';
 $selected{'ICMP_TYPE'}{'ALL'}                   = '';
 $selected{'ICMP_TYPE'}{$cgiparams{'ICMP_TYPE'}} = "selected='selected'";
@@ -259,7 +240,7 @@ else {
     &Header::openbox('100%', 'left', "$Lang::tr{'add service'}:", $error);
 }
 
-# Darren Critchley - Show protocols with TCP, UDP, etc at the top of the list.
+# Show protocols with TCP, UDP, etc at the top of the list.
 print <<END;
 <form method='post' action='$ENV{'SCRIPT_NAME'}'>
 <table width='100%'>
@@ -286,7 +267,7 @@ END
 
 foreach my $line (sort keys %Protocols::protocols) {
 
-    # Darren Critchley - do not have duplicates in the list
+    # do not have duplicates in the list
     if (   $Protocols::protocols{$line} ne '6'
         && $Protocols::protocols{$line} ne '17'
         && $Protocols::protocols{$line} ne '1'
@@ -480,7 +461,7 @@ sub display_custom_services {
         my $icmp_inv      = '';
         my $icmp_inv_tail = '';
 
-        # Darren Critchley highlight the row we are editing
+        # highlight the row we are editing
         if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'SERVICE_NAME'} eq $serviceName) {
             print "<tr class='selectcolour'>";
         }
@@ -614,7 +595,7 @@ sub cleanport {
     my $prt = $_[0];
     chomp($prt);
 
-    # Darren Critchley - Format the ports
+    # Format the ports
     $prt =~ s/-/ - /;
     $prt =~ s/:/ - /;
     return $prt;
@@ -637,10 +618,10 @@ sub validateServiceParams {
         || $cgiparams{'PROTOCOL'} eq 'tcpudp')
     {
 
-        # Darren Critchley - Get rid of dashes in port ranges
+        # Get rid of dashes in port ranges
         $cgiparams{'PORTS'} =~ tr/-/:/;
 
-        # Darren Critchley - code to substitue wildcards
+        # code to substitue wildcards
         if ($cgiparams{'PORTS'} eq "*") {
             $cgiparams{'PORTS'} = "1:65535";
         }
@@ -651,7 +632,7 @@ sub validateServiceParams {
             $cgiparams{'PORTS'} = "$1:65535";
         }
 
-        # Darren Critchley - watch the order here, the validportrange sets errormessage=''
+        # watch the order here, the validportrange sets errormessage=''
         $errormessage = &General::validportrange($cgiparams{'PORTS'}, 'src');
         if ($errormessage) { return; }
     }

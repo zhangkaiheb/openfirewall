@@ -15,10 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) Darren Critchley June 2003 - added real time clock setting, etc
-# (c) The Openfirewall Team January 2008 - redesigned for ntp-4.2.4
-#
-# $Id: time.cgi 7762 2014-12-29 08:13:26Z owes $
+# (c) 2014-2018 The Openfirewall Team
 #
 
 # Add entry in menu

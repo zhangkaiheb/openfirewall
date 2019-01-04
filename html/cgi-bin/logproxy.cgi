@@ -15,10 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# (c) The SmoothWall Team
-# Copyright (c) 2001-2016 The Openfirewall Team
-#
-# $Id: logproxy.cgi 8036 2016-01-04 08:03:32Z owes $
+# Copyright (c) 2014-2018 The Openfirewall Team
 #
 
 # Add entry in menu

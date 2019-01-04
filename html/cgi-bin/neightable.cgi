@@ -24,261 +24,249 @@
 use strict;
 
 # enable only the following on debugging purpose
-#use warnings;
-#use CGI::Carp 'fatalsToBrowser';
+use warnings;
+use CGI::Carp 'fatalsToBrowser';
 
 require '/usr/lib/ofw/general-functions.pl';
 require '/usr/lib/ofw/lang.pl';
 require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/firewall-lib.pl';
 
-##my %dhcpsettings=();
-##my %netsettings=();
-##my %dhcpinfo=();
-##my %pppsettings=();
 my $output='';
-##$dhcpinfo{'DOMAIN'}=''; # because it may not be defined in the answer
-##my $dhcpserver = 0;
-##
-##&General::readhash('/var/ofw/dhcp/settings', \%dhcpsettings);
-##&General::readhash('/var/ofw/ethernet/settings', \%netsettings);
-##&General::readhash('/var/ofw/ppp/settings', \%pppsettings);
 &Header::showhttpheaders();
-&Header::openpage($Lang::tr{'network status information'}, 1, '');
 
-##my @DHCPINTERFACEs=('GREEN','BLUE');
-##foreach my $interface (@DHCPINTERFACEs) {
-##    for (my $counter = 1; $counter <= $netsettings{"${interface}_COUNT"}; $counter++) {
-##        if ( $dhcpsettings{"ENABLED_${interface}_${counter}"} eq 'on' ) {
-##            $dhcpserver++;
-##        }
-##    }
-##}
+my %cgiparams    = ();
+my $errormessage = '';
+my $error        = '';
+$cgiparams{'ACTION'}     = '';
+$cgiparams{'USED_COUNT'} = 0;
+&General::getcgihash(\%cgiparams);
+
+# vars for setting up sort order
+my $sort_col  = '1';
+my $sort_type = 'a';
+my $sort_dir  = 'asc';
+my $junk;
+
+if ($ENV{'QUERY_STRING'} ne '') {
+    my ($item1, $item2, $item3) = split(/\&/, $ENV{'QUERY_STRING'});
+    if ($item1 ne '') {
+        ($junk, $sort_col) = split(/\=/, $item1);
+    }
+    if ($item2 ne '') {
+        ($junk, $sort_type) = split(/\=/, $item2);
+    }
+    if ($item3 ne '') {
+        ($junk, $sort_dir) = split(/\=/, $item3);
+    }
+}
+
+my %custIfaces = ();
+&DATA::readCustIfaces(\%custIfaces);
+
+$cgiparams{'KEY'}            = '';
+$cgiparams{'IFACE'}          = '';
+$cgiparams{'IFACE_NAME'}     = '';
+$cgiparams{'EXTERNAL'}     = 'off';
+$cgiparams{'OLD_IFACE_NAME'} = '';
+&General::getcgihash(\%cgiparams);
+
+$cgiparams{'IFACE_NAME'} = &Header::cleanConfNames($cgiparams{'IFACE_NAME'});
+
+if ($cgiparams{'ACTION'} eq $Lang::tr{'add'}) {
+    &validateIFaceParams(\%custIfaces);
+
+    unless ($errormessage) {
+        $custIfaces{$cgiparams{'IFACE_NAME'}}{'IFACE'}      = $cgiparams{'IFACE'};
+        $custIfaces{$cgiparams{'IFACE_NAME'}}{'EXTERNAL'}      = $cgiparams{'EXTERNAL'};
+        $custIfaces{$cgiparams{'IFACE_NAME'}}{'USED_COUNT'} = 0;
+
+        &DATA::saveCustIfaces(\%custIfaces);
+
+        &General::log("$Lang::tr{'iface added'}: $cgiparams{'IFACE_NAME'}");
+        undef %cgiparams;
+        $cgiparams{'ACTION'} = '';
+        `/usr/local/bin/setfwrules --ofw < /dev/null > /dev/null 2>&1 &`;
+    }
+}
+
+if ($cgiparams{'ACTION'} eq $Lang::tr{'update'}) {
+    &validateIFaceParams(\%custIfaces);
+    if ($errormessage) {
+        $cgiparams{'ACTION'} = $Lang::tr{'edit'};
+    }
+    else {
+        my $ifaceName    = $cgiparams{'IFACE_NAME'};
+        my $ifaceNameOld = $cgiparams{'OLD_IFACE_NAME'};
+        $custIfaces{$ifaceNameOld}{'IFACE'} = $cgiparams{'IFACE'};
+
+        # if the name (==Key) has changed, we have to copy/move the old data to new key
+        if ($ifaceName ne $ifaceNameOld) {
+            $custIfaces{$ifaceName}{'IFACE'}      = $custIfaces{$ifaceNameOld}{'IFACE'};
+            $custIfaces{$ifaceName}{'EXTERNAL'}      = $custIfaces{$ifaceNameOld}{'EXTERNAL'};
+            $custIfaces{$ifaceName}{'USED_COUNT'} = $custIfaces{$ifaceNameOld}{'USED_COUNT'};
+
+            delete($custIfaces{$ifaceNameOld});
+        }
+        &DATA::saveCustIfaces(\%custIfaces);
+
+        &General::log("$Lang::tr{'iface updated'}: $cgiparams{'IFACE_NAME'}");
+        undef %cgiparams;
+        $cgiparams{'ACTION'} = '';
+        `/usr/local/bin/setfwrules --all < /dev/null > /dev/null 2>&1 &`;
+    }
+}
+
+if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
+
+    # on an update error we use the entered data, we do not re-read from stored config
+    unless ($errormessage) {
+        if (defined($custIfaces{$cgiparams{'IFACE_NAME'}}{'IFACE'})) {
+            $cgiparams{'IFACE'} = $custIfaces{$cgiparams{'IFACE_NAME'}}{'IFACE'};
+        }
+    }
+}
+
+if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
+    delete($custIfaces{$cgiparams{'IFACE_NAME'}});
+
+    &DATA::saveCustIfaces(\%custIfaces);
+
+    &General::log("$Lang::tr{'iface removed'}: $cgiparams{'IFACE_NAME'}");
+    undef %cgiparams;
+    $cgiparams{'ACTION'} = '';
+    `/usr/local/bin/setfwrules --ofw < /dev/null > /dev/null 2>&1 &`;
+}
+
+if ($cgiparams{'ACTION'} eq $Lang::tr{'reset'}) {
+    undef %cgiparams;
+    $cgiparams{'ACTION'} = '';
+}
+
+
+
+
+
+&Header::openpage($Lang::tr{'network status information'}, 1, '');
 
 &Header::openbigbox('100%', 'left');
 
-###print "<table width='100%' cellspacing='0' cellpadding='5' border='0'>\n";
-###print "<tr><td style='background-color: #FFFFFF;' align='left'>\n";
-##print "<a href='#interfaces'>$Lang::tr{'interfaces'}</a> |\n";
-##print "<a href='#reddns'>$Lang::tr{'red'} $Lang::tr{'dns configuration'}</a> |\n";
-##if ( ($netsettings{'RED_COUNT'} >= 1) && $netsettings{'RED_1_TYPE'} eq "DHCP") {
-##    print "<a href='#reddhcp'>$Lang::tr{'red'} $Lang::tr{'dhcp configuration'}</a> |\n";
-##}
-##if ($dhcpserver > 0) {
-##    print "<a href='#leases'>$Lang::tr{'current dynamic leases'}</a> |\n";
-##}
-##if ($pppsettings{'TYPE'} =~ /^(bewanadsl|alcatelusb|conexantpciadsl|eagleusbadsl|wanpipe)$/) {
-##    print "<a href='#adsl'>$Lang::tr{'adsl settings'}</a> |\n";
-##}
-###print "<a href='#routing'>$Lang::tr{'routing table entries'}</a> |\n";
-###print "<a href='#arp'> $Lang::tr{'arp table entries'}</a>\n";
-###print "</td></tr></table>\n";
+if ($cgiparams{'ACTION'} eq '') {
+    $cgiparams{'KEY'}            = '';
+    $cgiparams{'IFACE'}          = 'ip';
+    $cgiparams{'IFACE_NAME'}     = '';
+    $cgiparams{'EXTERNAL'}     = 'off';
+    $cgiparams{'OLD_IFACE_NAME'} = '';
+}
 
-##print "<a name='interfaces'/>\n";
-##&Header::openbox('100%', 'left', "$Lang::tr{'interfaces'}:");
-##
-##my %addrs = {};
-##my $intid = "";
-##
-##$output = `/sbin/ip addr list`;
-##$output = &Header::cleanhtml($output,"y");
-##foreach my $line (split(/\n/, $output))
-##{
-##  if ($line =~ m/^([0-9]+): ([^ ]+): (.*)$/) {
-##    $intid = "$1: $2:";
-##    $addrs{$intid}  = " <tr class='table1colour'><td colspan='2'>".&General::color_devices($2)."</td></tr><tr><td width='5%'>&nbsp;</td><td>".$3."</td></tr>\n";
-##  } else {
-##    $addrs{$intid} .= " <tr><td>&nbsp;</td><td>$line</td></tr>\n"
-##  }
-##}
-##
-##$output = `/sbin/ip -s link list`;
-##$output = &Header::cleanhtml($output,"y");
-##$intid = "";
-##print "<table width='100%'>\n";
-##foreach my $line (split(/\n/, $output))
-##{
-##  if ($line =~ m/^([0-9]+): ([^ ]+): (.*)$/) {
-##    print " </table></td></tr><tr><td colspan='2'>&nbsp;</td></tr>\n" unless ($intid eq "");
-##    $intid = "$1: $2:";
-##    print $addrs{$intid};
-##    print " <tr><td>&nbsp;</td><td><table width='90%'>\n";
-##  } elsif ($line =~ m/^\s+([TR]X:)\s+([^ ]+)\s+([^ ]+)\s+([^ ]+)\s+([^ ]+)\s+([^ ]+)\s+([^ ]+)/) {
-##    print "  <tr class='table1colour'><td><b>$1</b></td><td>$2</td><td>$3</td><td>$4</td><td>$5</td><td>$6</td><td>$7</td></tr>\n";
-##  } elsif ($line =~ m/^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/) {
-##    print "  <tr><td>&nbsp;</td><td>$1</td><td>$2</td><td>$3</td><td>$4</td><td>$5</td><td>$6</td></tr>\n";
-##  }
-##}
-##print "</table></td></tr></table>\n";
-##
-##&Header::closebox();
-##
-##print "<a name='reddns'/>\n";
-##&Header::openbox('100%', 'left', "$Lang::tr{'red'} $Lang::tr{'dns configuration'}:");
-##if (-e "/var/ofw/red/active") {
-##    my $dns1 = `/bin/cat /var/ofw/red/dns1`;
-##    chomp($dns1);
-##    my $dns2 = `/bin/cat /var/ofw/red/dns2`;
-##    chomp($dns2);
-##
-##    print <<END
-##<table width='100%'>
-##    <tr><td width='30%'>$Lang::tr{'primary dns'}:</td><td>$dns1</td></tr>
-##    <tr><td width='30%'>$Lang::tr{'secondary dns'}:</td><td>$dns2</td></tr>
-##</table>
-##END
-##    ;
-##}
-##else {
-##    print "$Lang::tr{'connection is down'}";
-##}    
-##&Header::closebox();
-##
-##if ( ($netsettings{'RED_COUNT'} >= 1)  && $netsettings{'RED_1_TYPE'} eq "DHCP") {
-##
-##    print "<a name='reddhcp'/>\n";
-##    &Header::openbox('100%', 'left', "$Lang::tr{'red'} $Lang::tr{'dhcp configuration'}:");
-##    if (-s "/var/log/dhcpclient.info") {
-##
-##        &General::readhash("/var/log/dhcpclient.info", \%dhcpinfo);
-##
-##        my $lsetme=0;
-##        my $leasetime="";
-##        if ($dhcpinfo{'DHCLIENT_LEASETIME'} ne "") {
-##            $lsetme=$dhcpinfo{'DHCLIENT_LEASETIME'};
-##            $lsetme=($lsetme/60);
-##            if ($lsetme > 59) {
-##                $lsetme=($lsetme/60); $leasetime=$lsetme." Hour";
-##            } 
-##            else {
-##                $leasetime=$lsetme." Minute";
-##            }
-##            if ($lsetme > 1) {
-##                $leasetime=$leasetime."s";
-##            }
-##        }
-##        my $leaseexpires = localtime($dhcpinfo{'DHCLIENT_EXPIRY'});
-##
-##        print "<table width='100%'>";
-##        if ($dhcpinfo{'DHCLIENT_HOSTNAME'}) {
-##            print "<tr><td width='30%'>$Lang::tr{'hostname'}:</td><td>$dhcpinfo{'DHCLIENT_HOSTNAME'}.$dhcpinfo{'DHCLIENT_DOMAIN'}</td></tr>\n";
-##        } 
-##        else {
-##            print "<tr><td width='30%'>$Lang::tr{'domain'}:</td><td>$dhcpinfo{'DHCLIENT_DOMAIN'}</td></tr>\n";
-##        }
-##        print <<END
-##    <tr><td>$Lang::tr{'gateway'}:</td><td>$dhcpinfo{'DHCLIENT_GATEWAY'}</td></tr>
-##    <tr><td>$Lang::tr{'primary dns'}:</td><td>$dhcpinfo{'DHCLIENT_DNS1'}</td></tr>
-##    <tr><td>$Lang::tr{'secondary dns'}:</td><td>$dhcpinfo{'DHCLIENT_DNS2'}</td></tr>
-##    <tr><td>$Lang::tr{'dhcp server'}:</td><td>$dhcpinfo{'DHCLIENT_SIADDR'}</td></tr>
-##    <tr><td>$Lang::tr{'def lease time'}:</td><td>$leasetime</td></tr>
-##    <tr><td>$Lang::tr{'lease expires'}:</td><td>$leaseexpires</td></tr>
-##</table>
-##END
-##    ;
-##    }
-##    else {
-##        print "$Lang::tr{'no dhcp lease'}";
-##    }
-##    &Header::closebox();
-##}
-##
-##if ($dhcpserver > 0) {
-##    print "<a name='leases'/>";
-##    &General::CheckSortOrder;
-##    &General::PrintActualLeases;
-##}
-##
-##if ( ($netsettings{'RED_COUNT'} == 0)  && (exists($pppsettings{'TYPE'})) ) {
-##    my $output1='';
-##    my $output2='';
-##    if ($pppsettings{'TYPE'} eq 'bewanadsl') {
-##        print "<a name='adsl'/>\n";
-##        &Header::openbox('100%', 'left', "$Lang::tr{'adsl settings'}:");
-##        $output1 = `/usr/bin/unicorn_status`;
-##        $output1 = &Header::cleanhtml($output1,"y");
-##        $output2 = `/bin/cat /proc/net/atm/UNICORN:*`;
-##        $output2 = &Header::cleanhtml($output2,"y");
-##        print "<pre>$output1$output2</pre>\n";
-##        &Header::closebox();
-##    }
-##    if ($pppsettings{'TYPE'} eq 'alcatelusb') {
-##        print "<a name='adsl'/>\n";
-##        &Header::openbox('100%', 'left', "$Lang::tr{'adsl settings'}:");
-##        $output = `/bin/cat /proc/net/atm/speedtch:*`;
-##        $output = &Header::cleanhtml($output,"y");
-##        print "<pre>$output</pre>\n";
-##        &Header::closebox();
-##    }
-##    if ($pppsettings{'TYPE'} eq 'conexantpciadsl') {
-##        print "<a name='adsl'/>\n";
-##        &Header::openbox('100%', 'left', "$Lang::tr{'adsl settings'}:");
-##        $output = `/bin/cat /proc/net/atm/CnxAdsl:*`;
-##        $output = &Header::cleanhtml($output,"y");
-##        print "<pre>$output</pre>\n";
-##        &Header::closebox();
-##    }
-##    if ($pppsettings{'TYPE'} eq 'eagleusbadsl') {
-##        print "<a name='adsl'/>\n";
-##        &Header::openbox('100%', 'left', "$Lang::tr{'adsl settings'}:");
-##        $output = `/usr/sbin/eaglestat`;
-##        $output = &Header::cleanhtml($output,"y");
-##        print "<pre>$output</pre>\n";
-##        &Header::closebox();
-##    }
-##    if ($pppsettings{'TYPE'} eq 'wanpipe') {
-##        print "<a name='adsl'/>\n";
-##        &Header::openbox('100%', 'left', "$Lang::tr{'adsl settings'}:");
-##        $output = `/bin/cat /proc/net/wanrouter/config | /usr/bin/sort`;
-##        $output = &Header::cleanhtml($output,"y");
-##        print "<pre>$output</pre>\n";
-##        &Header::closebox();
-##    }
-##}
+if ($errormessage) {
+    &Header::openbox('100%', 'left', "$Lang::tr{'error messages'}:", 'error');
+    print "<font class='base'>$errormessage&nbsp;</font>";
+    &Header::closebox();
 
-###print "<a name='routing'/>\n";
-###&Header::openbox('100%', 'left', "$Lang::tr{'routing table entries'}:");
-###$output = `/sbin/ip route list`;
-###$output = &Header::cleanhtml($output,"y");
-###print <<END
-###<table width='100%'>
-###<tr>
-###    <td width='25%' align='center' class='boldbase'>$Lang::tr{'destination ip or net'}</td>
-###    <td width='25%' align='center' class='boldbase'>$Lang::tr{'gateway ip'}</td>
-###    <td width='25%' align='center' class='boldbase'>$Lang::tr{'interface'}</td>
-###    <td width='25%' class='boldbase'>$Lang::tr{'remark'}</td>
-###</tr>
-###END
-###;
-###my $count = 0;
-###foreach my $line (split(/\n/, $output))
-###{
-###    print "<tr class='table".int(($count % 2) + 1)."colour'>";
-###    if ($line =~ m/^(.*) dev ([^ ]+) (.*) src (.*)$/) {
-###        print "<td align='center'>$1</td><td align='center'>$4</td>";
-###        print "<td align='center'>".&General::color_devices($2)."</td><td>$3</td></tr>";
-###    }
-###    elsif ($line =~ m/^(.*) via (.*) dev (.*)$/) {
-###        print "<td align='center'>$1</td><td align='center'>$2</td>";
-###        print "<td align='center'>".&General::color_devices($3)."</td><td>&nbsp;</td></tr>";
-###    }
-###    elsif ($line =~ m/^(.*) dev ipsec(\d*)  (.*)$/) {
-###        print "<td align='center'>$1</td><td align='center'>&nbsp;</td>";
-###        print "<td align='center'>".&General::color_devices("ipsec$2")."</td><td>$3</td></tr>";
-###    }
-###    else {
-###        print "<td colspan='4'>$line</td></tr>";
-###    }
-###    
-###    $count++;
-###}
-###print "</table>";
-###&Header::closebox();
+    $error = 'error';
+}
+
+my %selected = ();
+
+    my $disabled        = '';
+    my $hiddenIfaceName = '';
+    if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
+        &Header::openbox('100%', 'left', "$Lang::tr{'edit interface'}:", $error);
+        if ($cgiparams{'USED_COUNT'} > 0) {
+            $disabled        = "disabled='disabled'";
+            $hiddenIfaceName = "<input type='hidden' name='IFACE_NAME' value='$cgiparams{'IFACE_NAME'}' />";
+        }
+    }
+    else {
+        &Header::openbox('100%', 'left', "$Lang::tr{'add interface'}:", $error);
+    }
+    print <<END;
+<form method='post' action='$ENV{'SCRIPT_NAME'}'>
+<div align='center'>
+<table width='100%'>
+<tr>
+    <td width='25%'>$Lang::tr{'name'}:</td>
+    <td width='25%'>
+        <input type='text' name='IFACE_NAME' value='$cgiparams{'IFACE_NAME'}' size='20' maxlength='20' $disabled />
+        $hiddenIfaceName
+    </td>
+    <td width='25%'>$Lang::tr{'interface'}:</td>
+    <td width='25%'>
+        <select name='IFACE'>
+END
+
+foreach my $iface (sort keys %FW::interfaces) {
+##    print "<option value='ip' $selected{'IFACE'}{$iface}>$iface</option>";
+    print "<option value=$FW::interfaces{$iface}{'IFACE'} $selected{'IFACE'}{$FW::interfaces{$iface}{'IFACE'}}>$FW::interfaces{$iface}{'IFACE'}</option>";
+}
+print <<END;
+        </select>
+        <input type='hidden' name='EXTERNAL' value='$cgiparams{'EXTERNAL'}' />
+    </td>
+</tr>
+</table>
+<hr />
+<table width='100%' cellpadding='0' cellspacing='5' border='0'>
+<tr>
+<td class='comment2button'>&nbsp;</td>
+END
+
+    if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
+        print "<td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'update'}' />\n";
+        print "<input type='hidden' name='OLD_IFACE_NAME' value='$cgiparams{'IFACE_NAME'}' /></td>\n";
+    }
+    else {
+        print "<td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'add'}' /></td>\n";
+    }
+    print <<END;
+    <td class='button2buttons'>
+        <input type='submit' name='ACTION' value='$Lang::tr{'reset'}' />
+    </td>
+    <td  class='onlinehelp'>
+        <a href='${General::adminmanualurl}/firewall-interfaces.html#section' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
+    </td>
+</tr>
+</table>
+</div>
+</form>
+END
+
+    &Header::closebox();
+
+    &Header::openbox('100%', 'left', "$Lang::tr{'custom interfaces'}:");
+    print <<END;
+<div align='center'>
+<table width='100%' align='center'>
+<tr align="center">
+    <td width='40%'><strong>$Lang::tr{'name'}</strong></td>
+    <td width='40%'><strong>$Lang::tr{'interface'}</strong></td>
+    <td width='20%'><strong>$Lang::tr{'used'}</strong></td>
+    <td width='5%'>&nbsp;</td>
+    <td width='5%'>&nbsp;</td>
+</tr>
+END
+
+    &display_custom_interfaces(\%custIfaces);
+    print <<END;
+</table>
+</div>
+END
+
+    &Header::closebox();
+
+
+
+
+
+
 
 print "<a name='arp'/>\n";
 &Header::openbox('100%', 'left', "$Lang::tr{'arp table entries'}:");
 $output = `/sbin/ip neigh list`;
 $output = &Header::cleanhtml($output,"y");
 print <<END
+<div align='center'>
 <table width='100%'>
 <tr>
     <td width='25%' align='center' class='boldbase'>$Lang::tr{'ip address'}</td>
@@ -306,7 +294,7 @@ foreach my $line (split(/\n/, $output))
     
     $count++;
 }
-print "</table>";
+print "</table> </div>";
 &Header::closebox();
 
 &Header::closebigbox();

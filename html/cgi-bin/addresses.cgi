@@ -44,7 +44,7 @@ $cgiparams{'ACTION'}     = '';
 $cgiparams{'USED_COUNT'} = 0;
 &General::getcgihash(\%cgiparams);
 
-# Darren Critchley - vars for setting up sort order
+# vars for setting up sort order
 my $sort_col  = '1';
 my $sort_type = 'a';
 my $sort_dir  = 'asc';
@@ -240,14 +240,14 @@ END
 
 if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
 
-    #   Darren Critchley - put in next release - author has authorized GPL inclusion
+    #   put in next release - author has authorized GPL inclusion
     #   print "<td align='center'><a href='ipcalc.cgi' target='_blank'>IP Calculator</a></td>\n";
     print "<td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'update'}' />\n";
     print "<input type='hidden' name='OLD_ADR_NAME' value='$cgiparams{'ADR_NAME'}' /></td>\n";
 }
 else {
 
-    #   Darren Critchley - put in next release - author has authorized GPL inclusion
+    #   put in next release - author has authorized GPL inclusion
     #   print "<td align='center'><a href='ipcalc.cgi' target='_blank'>IP Calculator</a></td>\n";
     print "<td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'add'}' /></td>\n";
 }
@@ -320,7 +320,7 @@ sub display_custom_addresses {
     my $id = 0;
     foreach my $adrName (sort keys %$addressesRef) {
 
-        # Darren Critchley highlight the row we are editing
+        # highlight the row we are editing
         if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'ADR_NAME'} eq $adrName) {
             print "<tr class='selectcolour'>\n";
         }
