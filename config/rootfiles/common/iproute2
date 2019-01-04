@@ -7,7 +7,7 @@
 #etc/iproute2/rt_realms
 #etc/iproute2/rt_scopes
 #etc/iproute2/rt_tables
-#sbin/bridge
+sbin/bridge
 #sbin/ctstat
 #sbin/genl
 #sbin/ifcfg
