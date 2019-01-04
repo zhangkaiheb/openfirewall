@@ -193,6 +193,17 @@ msgid "add interface"
 msgstr "Add interface"
 msgid "add new alias"
 msgstr "Add a new alias"
+
+#### static route:
+msgid "add static route"
+msgstr "Add a new static route"
+msgid "edit static route"
+msgstr "Edit an existing static route"
+msgid "destination ip or subnet"
+msgstr "Destination IP/Subnet"
+msgid "static route table"
+msgstr "Static route table"
+
 msgid "add new lease"
 msgstr "Add a new fixed lease"
 msgid "add new time constraint rule"
