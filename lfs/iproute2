@@ -1,28 +1,20 @@
 ###############################################################################
-# This file is part of the Openfirewall.                                    #
+# This file is part of the Openfirewall.                                      #
 #                                                                             #
-# Openfirewall is free software; you can redistribute it and/or modify               #
+# Openfirewall is free software; you can redistribute it and/or modify        #
 # it under the terms of the GNU General Public License as published by        #
 # the Free Software Foundation; either version 2 of the License, or           #
 # (at your option) any later version.                                         #
 #                                                                             #
-# Openfirewall is distributed in the hope that it will be useful,                    #
+# Openfirewall is distributed in the hope that it will be useful,             #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of              #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
 # GNU General Public License for more details.                                #
 #                                                                             #
 # You should have received a copy of the GNU General Public License           #
-# along with Openfirewall; if not, write to the Free Software                        #
+# along with Openfirewall; if not, write to the Free Software                 #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: iproute2 8076 2016-01-18 21:08:33Z owes $
 #                                                                             #
 ###############################################################################
 
@@ -109,6 +101,10 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 ##	cd $(DIR_APP) && make DESTDIR= DOCDIR=/usr/share/doc/iproute2 MANDIR=/usr/share/man install
 
 	cd $(DIR_APP) && make
+	# let it used by the perl CGI
+	cd $(DIR_APP) && chown root:nobody ip/ip
+	cd $(DIR_APP) && chmod 4750 ip/ip
+
 	cd $(DIR_APP) && make DOCDIR=/usr/share/doc/iproute2-4.15.0 install
 #	cd $(DIR_APP) && make DOCDIR=/usr/share/doc/iproute2-4.18.0 install
 
