@@ -17,11 +17,6 @@
 #
 # (c) 2001-2012 The Openfirewall Team
 #
-# Over the years many people have changed and contributed to this file.
-# Check CVS and SVN for specifics.
-#
-# $Id: dhcp.cgi 6354 2012-02-17 13:03:11Z dotzball $
-#
 
 # Add entry in menu
 # MENUENTRY services 030 "dhcp server" "dhcp configuration"

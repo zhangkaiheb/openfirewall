@@ -15,49 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) The SmoothWall Team
-# Copyright (c) 2002/04/13 Steve Bootes - Add source IP support
-# (c) 2007-2014, the Openfirewall Team
+# (c) 2014-2018, the Openfirewall Team
 #
-# $Id: fwrulesadm.cgi 7534 2014-05-14 14:34:12Z owes $
-#
-#
-# Darren Critchley February 2003 - I added the multiple external access rules for each port forward
-# A couple of things to remember when reading the code
-#   There are two kinds of records in the config file, those with a number in the first field, and then 0,
-#       these are port forward rules, these records will have a 0 or 0.0.0.0 in position 9 (ORIG_ADR)
-#       If there is a 0, it means that there are external access rules, otherwise the port is open to ALL.
-#   The second type of record is a number followed by a number which indicates that it is an external access
-#   rule. The first number indicates which Portfw rule it belongs to, and the second is just a unique key.
-#
-# Darren Critchley - March 5, 2003 - if you come along after me and work on this page, please comment your
-#       work. Put your name, and date and then your comment - it helps the person that comes along after you
-#       to figure out why and how things have changed, and it is considered good coding practice
-# Thanks . . .
-#
-# Achim Weber November - December 2003
-#       I modified this file to work with BlockOutTraffic addon.
-#       This is the configuration-page
-#
-# Achim Weber January 2004
-#       Added more settings options,
-#       some cosmetical changes on GUI,
-#       settings are checked for validation everytime now
-#
-# Achim Weber Autumn 2004
-#       Settings are stored in "hash-format" (&writehash, &readhash) now.
-#       Added option to select position of "native" rules:
-#           Append: behind BOT rules
-#           Insert: before BOT rules
-#       Dropped OrangeAsGreen because you can use Blue in openfirewall 1.4 now.
-#
-# Achim Weber Autumn 2005
-#       Dropped "native" rules. BOT uses its own chains and people can use
-#       the CUSTOM* chains now.
-#
-# 6 May 2006 Achim Weber:
-#       Re-worked code to use it in Openfirewall 1.5, renamed all variables, keys, etc.
-#       from "BOT" to "FW".
 
 # Add entry in menu
 # MENUENTRY firewall 010 "firewall settings" "firewall settings"

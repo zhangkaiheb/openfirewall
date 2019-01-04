@@ -15,12 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) Alan Hourihane <alanh@fairlite.demon.co.uk>
-#
-# $Id: hosts.cgi 6354 2012-02-17 13:03:11Z dotzball $
-#
-# Franck
-#         use dhcp.cgi model to rewrite this code
 
 # Add entry in menu
 # MENUENTRY services 050 "edit hosts" "host configuration"

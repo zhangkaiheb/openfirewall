@@ -15,17 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2001 Jack Beglinger <jackb_guppy@yahoo.com>
-#
-# (c) 2003 Dave Roberts <countzerouk@hotmail.com> - colour coded netfilter/iptables rewrite for 1.3
-#
-# (c) 2006 Franck - add sorting+filtering capability
-#
-# (c) 2008 Olaf for the Openfirewall Team - use conntrack with XML output from conntrack-tools
-# (c) 2008 - 2011, the Openfirewall Team
-#
-# $Id: connections.cgi 7065 2013-06-08 20:21:14Z dotzball $
-#
 
 # Add entry in menu
 # MENUENTRY status 080 "connections" "connections"

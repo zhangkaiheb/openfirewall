@@ -303,7 +303,7 @@ if (   $cgiparams{'ACTION'} eq $Lang::tr{'up'}
     &resetCgiParams();
 }
 
-&Header::openpage($Lang::tr{'firewall configuration'}, 1, '');
+&Header::openpage($Lang::tr{'firewall access rules'}, 1, '');
 &Header::openbigbox('100%', 'left');
 
 ###############
