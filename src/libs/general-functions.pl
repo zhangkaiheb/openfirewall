@@ -16,16 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) The SmoothWall Team
-# Copyright (C) 2002 Alex Hudson - getcgihash() rewrite
-# Copyright (C) 2002 Bob Grant <bob@cache.ucr.edu> - validmac()
-# Copyright (c) 2002/04/13 Steve Bootes - add alias section, helper functions
-# Copyright (c) 2002/08/23 Mark Wormgoor <mark@wormgoor.com> validfqdn()
-# Copyright (c) 2003/09/11 Darren Critchley <darrenc@telus.net> srtarray()
-# Copyright (c) 2004-2014 The Openfirewall Team
-#
-# $Id: general-functions.pl 8065 2016-01-10 09:26:44Z owes $
-#
 
 package General;
 

@@ -3,18 +3,6 @@
  * This program is distributed under the terms of the GNU General Public
  * Licence.  See the file COPYING for details.
  *
- * Copyright (c) Achim Weber - Completly rewritten, see comment below
- *
- * 12/16/04 Achim Weber:	This Helper programm only does SUID stuff and
- *							calls new Perl script "puzzleFwRules.pl".
- *							Puzzle of firewall rules is moved from this file to
- *							the new Perl script because it is much easier to
- *							manage all the structures in Perl(Hashes) as it is in C.
- *
- * 04/23/2005 Achim Weber:	Add -c option for check if the timeframe rules need an update
- *
- * $Id: setfwrules.c 5269 2010-12-23 07:35:04Z owes $
- *
  */
 
 

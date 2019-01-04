@@ -334,8 +334,8 @@ END
     print "    </td></tr>";
 print <<END
     <tr valign='middle' style='background-color: $Header::boxcolour;'><td></td>
-    <td class='ofw_menuLocationMain' colspan='2' height='32'><img src='/images/null.gif' width='10' height='1' alt='' /><font style='font-size: 12px; color: #696969'>$location</font>
-    <img src='/images/null.gif' width='10' height='1' alt='' /><font style='font-size: 12px; color: #696969'>/</font><img src='/images/null.gif' width='12' height='1' alt='' /><font style='font-size: 12px; color: #696969'>$sublocation</font></td>
+    <td class='ofw_menuLocationMain' colspan='2' height='32'><img src='/images/null.gif' width='10' height='1' alt='' /><font style='font-size: 14px; color: #696969'>$location</font>
+    <img src='/images/null.gif' width='10' height='1' alt='' /><font style='font-size: 14px; color: #696969'>/</font><img src='/images/null.gif' width='12' height='1' alt='' /><font style='font-size: 14px; color: #696969'>$sublocation</font></td>
     </tr>
 END
 ;

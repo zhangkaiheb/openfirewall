@@ -18,13 +18,10 @@
 #
 # (c) The Openfirewall Team
 #
-# $Id: protocols.pl 2747 2009-04-27 20:20:52Z owes $
-#
 # Generated from /etc/protocols using:
 # cat /etc/protocols | grep -ve "^#" | grep -v "^$" | \
 #    awk '{ print "\""  $1  "\" => \"" $2 "\","}'
 #
-# Code supplied by Mark Wormgroor
 #
 
 package Protocols;

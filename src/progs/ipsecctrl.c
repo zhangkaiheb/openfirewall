@@ -14,9 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2001-2012, the Openfirewall Team
- *
- * $Id: ipsecctrl.c 6445 2012-03-02 13:59:08Z owes $
+ * (c) 2014-2018, the Openfirewall Team
  *
  */
 
