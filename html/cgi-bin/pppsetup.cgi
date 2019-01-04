@@ -15,16 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall. If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) The SmoothWall Team
-#
-# Copyright (C) 03-Apr-2002 Guy Ellis <guy@traverse.com.au>
-#              - ISDN DOV support
-#              - ibod now an option
-#              - PCI ADSL support added
-#
-# Copyright (c) 2002-2012 The Openfirewall Team
-#
-# $Id: pppsetup.cgi 6824 2012-11-02 17:52:29Z owes $
+# Copyright (c) 2014-2018 The Openfirewall Team
 #
 
 # Add entry in menu
@@ -97,7 +88,7 @@ elsif ($pppsettings{'ACTION'} ne ''
 }
 elsif ($pppsettings{'ACTION'} eq $Lang::tr{'refresh'}) {
     unless ($pppsettings{'TYPE'} =~
-/^(modem|serial|isdn|pppoe|pptp|alcatelusb|amedynusbadsl|conexantusbadsl|conexantpciadsl|3cp4218usbadsl|pulsardsl|solosdsl|eciadsl|fritzdsl|bewanadsl|eagleusbadsl|wanpipe-adsl|wanpipe-serial)$/
+/^(modem|serial|pppoe|pptp)$/
         )
     {
         $errormessage = $Lang::tr{'invalid input'};
@@ -111,10 +102,9 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'save'}) {
 
     # TODO: do we need to check everything here, or do we simply trust the dropdownlists?
 
-    if ($pppsettings{'TYPE'} =~ /^(modem|serial|isdn)$/) {
+    if ($pppsettings{'TYPE'} =~ /^(modem|serial)$/) {
         my $ttyOK = 0;
 
-        $ttyOK = 1 if (($pppsettings{'COMPORT'} eq 'isdn1') || ($pppsettings{'COMPORT'} eq 'isdn2'));
         for $c (0 .. $#list_ttys) {
             $ttyOK = 1 if ($pppsettings{'COMPORT'} eq $list_ttys[$c]);
         }
@@ -140,19 +130,12 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'save'}) {
         goto ERROR;
     }
 
-    if ($pppsettings{'TYPE'} =~ /^(wanpipe-serial)$/) {
-        if ($pppsettings{'COMPORT'} !~ /^(ttyWP0|ttyWP1|ttyWP2|ttyWP3|ttyWP4|ttyWP5|ttyWP6|ttyWP7)$/) {
-            $errormessage = $Lang::tr{'invalid input'};
-            goto ERROR;
-        }
-    }
-
     if ($pppsettings{'PROFILENAME'} eq '') {
         $errormessage = $Lang::tr{'profile name not given'};
         $pppsettings{'PROFILENAME'} = '';
         goto ERROR;
     }
-    if ($pppsettings{'TYPE'} =~ /^(modem|isdn)$/) {
+    if ($pppsettings{'TYPE'} =~ /^(modem)$/) {
         if ($pppsettings{'TELEPHONE'} eq '') {
             $errormessage = $Lang::tr{'telephone not set'};
             goto ERROR;
@@ -214,43 +197,6 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'save'}) {
         goto ERROR;
     }
 
-    if ($pppsettings{'TYPE'} =~ /^(alcatelusb)$/) {
-        my $modem      = '';
-        my $speedtouch = &General::speedtouchversion;
-        if ($speedtouch >= 0 && $speedtouch <= 4) {
-            if   ($speedtouch == 4) { $modem = 'v4_b'; }
-            else                    { $modem = 'v0123'; }
-            $pppsettings{'MODEM'} = $modem;
-        }
-        else {
-            $modem        = 'v0123';
-            $errormessage = "$Lang::tr{'unknown'} Rev $speedtouch";
-            goto ERROR;
-        }
-        if (!-e "/var/ofw/alcatelusb/firmware.$modem.bin") {
-            $errormessage = $Lang::tr{'no alcatelusb firmware'};
-            $drivererror  = 1;
-            goto ERROR;
-        }
-    }
-
-    if ($pppsettings{'TYPE'} eq 'eciadsl' && (!(-e "/var/ofw/eciadsl/synch.bin"))) {
-        $errormessage = $Lang::tr{'no eciadsl synch.bin file'};
-        $drivererror  = 1;
-        goto ERROR;
-    }
-
-    if ($pppsettings{'TYPE'} eq 'fritzdsl' && (!(-e "/lib/modules/$kernel/extra/fcdsl.ko.gz"))) {
-        $errormessage = $Lang::tr{'no fritzdsl driver'};
-        $drivererror  = 1;
-        goto ERROR;
-    }
-
-    if ($pppsettings{'USEIBOD'} eq 'on' && $pppsettings{'COMPORT'} eq 'isdn1') {
-        $errormessage = $Lang::tr{'ibod for dual isdn only'};
-        goto ERROR;
-    }
-
     if ($pppsettings{'TYPE'} eq 'pptp') {
         $errormessage = '';
         if ($pppsettings{'METHOD'} eq 'STATIC') {
@@ -268,31 +214,8 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'save'}) {
         }
     }
 
-    if ($pppsettings{'TYPE'} =~
-/^(alcatelusb|amedynusbadsl|conexantusbadsl|conexantpciadsl|3cp4218usbadsl|pulsardsl|solosdsl|eciadsl|fritzdsl|bewanadsl|eagleusbadsl|wanpipe-adsl)$/
-        )
-    {
-        if (($pppsettings{'VPI'} eq '') || ($pppsettings{'VCI'} eq '')) {
-            $errormessage = $Lang::tr{'invalid vpi vpci'};
-            goto ERROR;
-        }
-        if ((!($pppsettings{'VPI'} =~ /^\d+$/)) || (!($pppsettings{'VCI'} =~ /^\d+$/))) {
-            $errormessage = $Lang::tr{'invalid vpi vpci'};
-            goto ERROR;
-        }
-        if (($pppsettings{'VPI'} eq '0') && ($pppsettings{'VCI'} eq '0')) {
-            $errormessage = $Lang::tr{'invalid vpi vpci'};
-            goto ERROR;
-        }
-        if ($pppsettings{'PROTOCOL'} eq '') {
-            $errormessage = $Lang::tr{'invalid input'};
-            goto ERROR;
-        }
-    }
-
     if (   ($pppsettings{'PROTOCOL'} eq 'RFC1483')
-        && ($pppsettings{'METHOD'} eq '')
-        && \($pppsettings{'TYPE'} !~ /^(fritzdsl)$/))
+        && ($pppsettings{'METHOD'} eq ''))
     {
         $errormessage = $Lang::tr{'invalid input'};
         goto ERROR;
@@ -340,11 +263,6 @@ elsif ($pppsettings{'ACTION'} eq $Lang::tr{'save'}) {
 
     if ($pppsettings{'RECONNECTION'} eq 'dialondemand' && `/bin/cat /var/ofw/ddns/config` =~ /,on$/m) {
         $errormessage = $Lang::tr{'dod not compatible with ddns'};
-        goto ERROR;
-    }
-
-    if (($pppsettings{'TYPE'} =~ /^(bewanadsl)$/) && $pppsettings{'MODEM'} eq '') {
-        $errormessage = $Lang::tr{'no modem selected'};
         goto ERROR;
     }
 
@@ -435,22 +353,8 @@ $selected{'BACKUPPROFILE'}{$pppsettings{'BACKUPPROFILE'}} = "selected='selected'
 
 $selected{'TYPE'}{'modem'}              = '';
 $selected{'TYPE'}{'serial'}             = '';
-$selected{'TYPE'}{'isdn'}               = '';
 $selected{'TYPE'}{'pppoe'}              = '';
 $selected{'TYPE'}{'pptp'}               = '';
-$selected{'TYPE'}{'alcatelusb'}         = '';
-$selected{'TYPE'}{'pulsardsl'}          = '';
-$selected{'TYPE'}{'solosdsl'}           = '';
-$selected{'TYPE'}{'eciadsl'}            = '';
-$selected{'TYPE'}{'fritzdsl'}           = '';
-$selected{'TYPE'}{'bewanadsl'}          = '';
-$selected{'TYPE'}{'eagleusbadsl'}       = '';
-$selected{'TYPE'}{'conexantusbadsl'}    = '';
-$selected{'TYPE'}{'conexantpciadsl'}    = '';
-$selected{'TYPE'}{'amedynusbadsl'}      = '';
-$selected{'TYPE'}{'3cp4218usbadsl'}     = '';
-$selected{'TYPE'}{'wanpipe-adsl'}       = '';
-$selected{'TYPE'}{'wanpipe-serial'}     = '';
 $selected{'TYPE'}{$pppsettings{'TYPE'}} = "selected='selected'";
 
 $checked{'DEBUG'}{'off'}                 = '';
@@ -461,8 +365,6 @@ $checked{'DEBUG'}{$pppsettings{'DEBUG'}} = "checked='checked'";
 for $c (0 .. $#list_ttys) {
     $selected{'COMPORT'}{"$list_ttys[$c]"} = '';
 }
-$selected{'COMPORT'}{'isdn1'}                 = '';
-$selected{'COMPORT'}{'isdn2'}                 = '';
 $selected{'COMPORT'}{'ttyWP0'}                = '';
 $selected{'COMPORT'}{'ttyWP1'}                = '';
 $selected{'COMPORT'}{'ttyWP2'}                = '';
@@ -636,37 +538,14 @@ print <<END
     <option value='serial' $selected{'TYPE'}{'serial'}>$Lang::tr{'serial'}</option>
 END
     ;
-if ($netsettings{'RED_1_TYPE'} eq 'ISDN') {
-    print "\t<option value='isdn' $selected{'TYPE'}{'isdn'}>$Lang::tr{'isdn'}</option>\n";
-}
 if ($netsettings{'RED_1_TYPE'} eq 'PPPOE') {
     print "\t<option value='pppoe' $selected{'TYPE'}{'pppoe'}>PPPoE</option>\n";
 }
 if ($netsettings{'RED_1_TYPE'} eq 'PPTP') {
     print "\t<option value='pptp' $selected{'TYPE'}{'pptp'}>PPTP</option>\n";
 }
-if (-e "/sys/bus/usb/devices/usb1") {
-    print <<END
-    <option value='eciadsl' $selected{'TYPE'}{'eciadsl'}>ECI USB ADSL</option>
-    <option value='eagleusbadsl' $selected{'TYPE'}{'eagleusbadsl'}>Eagle USB ADSL (Acer Allied-Telesyn Comtrend D-Link Sagem USR)</option>
-    <option value='conexantusbadsl' $selected{'TYPE'}{'conexantusbadsl'}>Conexant USB(Aetra Amigo Draytek Etec Mac Olitec Vitelcom Zoom)</option>
-    <option value='amedynusbadsl' $selected{'TYPE'}{'amedynusbadsl'}>Zyxel 630-11 / Asus AAM6000UG USB ADSL</option>
-    <option value='3cp4218usbadsl' $selected{'TYPE'}{'3cp4218usbadsl'}>3Com USB AccessRunner</option>
-    <option value='alcatelusb' $selected{'TYPE'}{'alcatelusb'}>Speedtouch USB ADSL</option>
-END
-    ;
 
-    my $usbmodules = `/bin/lsmod | /usr/bin/cut -d ' ' -f1 | /bin/grep -E '_hcd'`;
-    $usb = $usbmodules if ($usbmodules ne '');
-}
 print <<END
-    <option value='fritzdsl' $selected{'TYPE'}{'fritzdsl'}>Fritz!DSL</option>
-    <option value='pulsardsl' $selected{'TYPE'}{'pulsardsl'}>Pulsar ADSL</option>
-    <option value='solosdsl' $selected{'TYPE'}{'solosdsl'}>Solos PCI ADSL2+</option>
-    <option value='bewanadsl' $selected{'TYPE'}{'bewanadsl'}>Bewan ADSL PCI st/USB st</option>
-    <option value='conexantpciadsl' $selected{'TYPE'}{'conexantpciadsl'}>Conexant PCI ADSL</option>
-    <option value='wanpipe-adsl' $selected{'TYPE'}{'wanpipe-adsl'}>Sangoma S518 adsl</option>
-    <option value='wanpipe-serial' $selected{'TYPE'}{'wanpipe-serial'}>Sangoma S514 serial</option>
     </select>
     &nbsp;<input type='submit' name='ACTION' value='$Lang::tr{'refresh'}' /></td>
 </tr><tr>
@@ -687,7 +566,7 @@ END
 # TODO: How can TYPE not be set? Do we not do initprofile to avoid that, and also set TYPE for DHCP/STATIC?
 #   If TYPE is not set can we not simply close box/page with an error message and bail out?
 if ($pppsettings{'TYPE'}) {
-    if ($pppsettings{'TYPE'} =~ /^(modem|serial|isdn|wanpipe-serial)$/) {
+    if ($pppsettings{'TYPE'} =~ /^(modem|serial)$/) {
         print <<END
 <tr>
     <td>$Lang::tr{'interface'}:</td>
@@ -710,29 +589,10 @@ END
                 }
             }
         }
-        elsif ($pppsettings{'TYPE'} eq 'isdn') {
-            print <<END
-        <option value='isdn1' $selected{'COMPORT'}{'isdn1'}>$Lang::tr{'isdn1'}</option>
-        <option value='isdn2' $selected{'COMPORT'}{'isdn2'}>$Lang::tr{'isdn2'}</option>
-END
-            ;
-        }
-        elsif ($pppsettings{'TYPE'} eq 'wanpipe-serial') {
-            print <<END
-        <option value='ttyWP0' $selected{'COMPORT'}{'ttyWP0'}>ttyWP0</option>
-        <option value='ttyWP1' $selected{'COMPORT'}{'ttyWP1'}>ttyWP1</option>
-        <option value='ttyWP2' $selected{'COMPORT'}{'ttyWP2'}>ttyWP2</option>
-        <option value='ttyWP3' $selected{'COMPORT'}{'ttyWP3'}>ttyWP3</option>
-        <option value='ttyWP4' $selected{'COMPORT'}{'ttyWP4'}>ttyWP4</option>
-        <option value='ttyWP5' $selected{'COMPORT'}{'ttyWP5'}>ttyWP5</option>
-        <option value='ttyWP6' $selected{'COMPORT'}{'ttyWP6'}>ttyWP6</option>
-        <option value='ttyWP7' $selected{'COMPORT'}{'ttyWP7'}>ttyWP7</option>
-END
-            ;
-        }
+
         print "    </select></td>\n";
 
-        if ($pppsettings{'TYPE'} =~ /^(modem|serial|wanpipe-serial)$/) {
+        if ($pppsettings{'TYPE'} =~ /^(modem|serial)$/) {
             print <<END
     <td>$Lang::tr{'computer to modem rate'}:</td>
     <td><select name='DTERATE'>
@@ -747,16 +607,13 @@ END
 END
             ;
 
-            if ($pppsettings{'TYPE'} eq 'wanpipe-serial') {
-                print "<option value='sync' $selected{'DTERATE'}{'sync'}>sync</option>";
-            }
             print "</select></td></tr>";
         }
         else {
             print "<td colspan='2'>&nbsp;</td></tr>\n";
         }
 
-        if ($pppsettings{'TYPE'} =~ /^(modem|isdn)$/) {
+        if ($pppsettings{'TYPE'} =~ /^(modem)$/) {
             print "<tr><td>$Lang::tr{'number'}:</td>\n";
             print "<td><input type='text' name='TELEPHONE' value='$pppsettings{'TELEPHONE'}' /></td>\n";
             if ($pppsettings{'TYPE'} eq 'modem') {
@@ -837,22 +694,6 @@ END
 END
         ;
 
-    if ($pppsettings{'TYPE'} eq 'isdn') {
-        print <<END
-<tr>
-    <td colspan='4'><hr /></td>
-</tr><tr>
-    <td colspan='4' class='boldbase'>$Lang::tr{'isdn settings'}:</td>
-</tr><tr>
-    <td>$Lang::tr{'use ibod'}:</td>
-    <td><input type='checkbox' name='USEIBOD' $checked{'USEIBOD'}{'on'} /></td>
-    <td>$Lang::tr{'use dov'}:</td>
-    <td><input type='checkbox' name='USEDOV' $checked{'USEDOV'}{'on'} /></td>
-</tr>
-END
-        ;
-    }
-
     if ($pppsettings{'TYPE'} eq 'pptp') {
         print <<END
 </tr><tr>
@@ -893,199 +734,7 @@ END
         ;
     }
 
-    if ($pppsettings{'TYPE'} =~
-/^(alcatelusb|amedynusbadsl|conexantusbadsl|conexantpciadsl|3cp4218usbadsl|pulsardsl|solosdsl|eciadsl|fritzdsl|bewanadsl|eagleusbadsl|wanpipe-adsl)$/
-        )
-    {
-        print <<END
-<tr>
-    <td colspan='4'><hr /></td>
-</tr><tr>
-    <td colspan='4' class='boldbase'>$Lang::tr{'adsl settings'}:</td>
-</tr><tr>
-    <td nowrap='nowrap'>$Lang::tr{'vpi number'}:</td>
-    <td><input type='text' size='5' name='VPI' value='$pppsettings{'VPI'}' /></td>
-    <td>$Lang::tr{'vci number'}:</td>
-    <td><input type='text' size='5' name='VCI' value='$pppsettings{'VCI'}' /></td>
-</tr><tr>
-    <td colspan='4'><hr /></td>
-</tr>
-END
-            ;
-    }
-
-    if ($pppsettings{'TYPE'} eq 'bewanadsl') {
-        print <<END
-<tr>
-    <td colspan='4'>$Lang::tr{'modem'}:</td>
-</tr><tr>
-    <td colspan='2'><input type='radio' name='MODEM' value='PCIST' $checked{'MODEM'}{'PCIST'} />Bewan ADSL PCI st</td>
-    <td colspan='2'><input type='radio' name='MODEM' value='USB' $checked{'MODEM'}{'USB'} />Bewan ADSL USB st</td>
-</tr><tr>
-    <td colspan='4'><hr /></td>
-</tr>
-END
-        ;
-    }
-
-    if ($pppsettings{'TYPE'} =~ /^(3cp4218usbadsl|bewanadsl)$/) {
-        print <<END
-<tr>
-    <td colspan='4'>$Lang::tr{'modulation'}:</td>
-</tr><tr>
-    <td><input type='radio' name='MODULATION' value='AUTO' $checked{'MODULATION'}{'AUTO'} />$Lang::tr{'automatic'}</td>
-    <td><input type='radio' name='MODULATION' value='ANSI' $checked{'MODULATION'}{'ANSI'} />ANSI T1.483</td>
-    <td><input type='radio' name='MODULATION' value='GDMT' $checked{'MODULATION'}{'GDMT'} />G.DMT</td>
-    <td><input type='radio' name='MODULATION' value='GLITE' $checked{'MODULATION'}{'GLITE'} />G.Lite</td>
-</tr>
-<tr>
-    <td colspan='4'><hr /></td>
-</tr>
-END
-        ;
-    }
-
-    if ($pppsettings{'TYPE'} eq 'eagleusbadsl') {
-        print <<END
-<tr>
-    <td>$Lang::tr{'country'}:</td>
-    <td>
-    <select name='LINE'>
-    <option value='WO' $selected{'LINE'}{'WO'}>$Lang::tr{'other countries'}</option>
-    <option value='ES' $selected{'LINE'}{'ES'}>ESPANA</option>
-    <option value='ES03' $selected{'LINE'}{'ES03'}>ESPANA03</option>
-    <option value='FR' $selected{'LINE'}{'FR'}>FRANCE</option>
-    <option value='FR04' $selected{'LINE'}{'FR04'}>FRANCE04</option>
-    <option value='FR10' $selected{'LINE'}{'FR04'}>FRANCE10</option>
-    <option value='IT' $selected{'LINE'}{'IT'}>ITALIA</option>
-    </select></td>
-    <td colspan='2'>&nbsp;</td>
-</tr><tr>
-    <td colspan='4'><hr /></td>
-</tr>
-END
-        ;
-    }
-
-    if ($pppsettings{'TYPE'} eq 'eciadsl') {
-        print <<END
-<tr>
-    <td>$Lang::tr{'modem'}:</td>
-    <td colspan='3'>
-        <select name='MODEM'>
-END
-            ;
-        open(MODEMS, "/etc/eciadsl/modems.db") or die 'Unable to open modems database.';
-        while (my $line = <MODEMS>) {
-            $line =~ /^([\S\ ]+).*$/;
-            my $modem = $1;
-            $modem =~ s/^\s*(.*?)\s*$/$1/;
-            print "<option value='$modem'";
-            if ($pppsettings{'MODEM'} =~ /$modem/) {
-                print " selected";
-            }
-            print ">$modem</option>\n";
-        }
-        close(MODEMS);
-
-        print <<END
-        </select>
-    </td>
-</tr><tr>
-    <td colspan='4'><hr /></td>
-</tr>
-END
-        ;
-    }
-
-    if ($pppsettings{'TYPE'} =~
-/^(alcatelusb|amedynusbadsl|conexantusbadsl|conexantpciadsl|3cp4218usbadsl|pulsardsl|solosdsl|eciadsl|fritzdsl|bewanadsl|eagleusbadsl|wanpipe-adsl)$/
-        )
-    {
-        print <<END
-<tr>
-    <td colspan='4'>$Lang::tr{'protocol'}:</td>
-</tr><tr>
-    <td valign='top' nowrap='nowrap'>
-        <input type='radio' name='PROTOCOL' value='RFC2364' $checked{'PROTOCOL'}{'RFC2364'} />RFC2364 PPPoA</td>
-END
-            ;
-    }
-
-    if ($pppsettings{'TYPE'} eq 'alcatelusb') {
-        print "<td colspan='3'>&nbsp;</td></tr>";
-    }
-
-    if ($pppsettings{'TYPE'} =~
-/^(alcatelusb|amedynusbadsl|conexantusbadsl|conexantpciadsl|3cp4218usbadsl|pulsardsl|solosdsl|eciadsl|bewanadsl|eagleusbadsl|fritzdsl|wanpipe-adsl)$/
-        )
-    {
-        print <<END
-    <td>$Lang::tr{'encapsulation'}:</td>
-    <td colspan='2'>
-        <select name='ENCAP_RFC2364'>
-        <option value='0' $selected{'ENCAP'}{'0'}>VCmux</option>
-        <option value='1' $selected{'ENCAP'}{'1'}>LLC</option>
-        </select>
-    </td>
-</tr>
-END
-        ;
-    }
-
-    if ($pppsettings{'TYPE'} =~
-/^(alcatelusb|amedynusbadsl|conexantusbadsl|conexantpciadsl|3cp4218usbadsl|pulsardsl|solosdsl|eciadsl|fritzdsl|bewanadsl|eagleusbadsl|wanpipe-adsl)$/
-        )
-    {
-        print <<END
-<tr>
-    <td>&nbsp;</td>
-    <td colspan='3'><hr /></td>
-</tr><tr>
-    <td valign='top'>
-        <input type='radio' name='PROTOCOL' value='RFC1483' $checked{'PROTOCOL'}{'RFC1483'} />RFC 1483 / 2684</td>
-END
-        ;
-    }
-
-    if ($pppsettings{'TYPE'} eq 'alcatelusb') {
-        print "<td colspan='3'>&nbsp;</td></tr>";
-    }
-
-    if ($pppsettings{'TYPE'} =~
-/^(alcatelusb|amedynusbadsl|conexantusbadsl|conexantpciadsl|3cp4218usbadsl|pulsardsl|eciadsl|bewanadsl|eagleusbadsl|fritzdsl|wanpipe-adsl)$/
-        )
-    {
-        if ($pppsettings{'TYPE'} ne 'fritzdsl') {
-            print <<END
-    <td>$Lang::tr{'encapsulation'}:</td>
-    <td colspan='3'>
-        <select name='ENCAP_RFC1483'>
-        <option value='0' $selected{'ENCAP'}{'0'}>BRIDGED_ETH_LLC</option>
-        <option value='1' $selected{'ENCAP'}{'1'}>BRIDGED_ETH_VC</option>
-        <option value='2' $selected{'ENCAP'}{'2'}>ROUTED_IP_LLC</option>
-        <option value='3' $selected{'ENCAP'}{'3'}>ROUTED_IP_VC</option>
-        </select>
-    </td>
-</tr><tr>
-    <td colspan='2'>&nbsp;</td>
-    <td colspan='2'><hr /></td>
-</tr>
-END
-            ;
-        }
-        else {
-            print <<END
-    <td colspan='4'>PPPoE</td>
-</tr>
-END
-                ;
-        }
-    }
-
-    if ($pppsettings{'TYPE'} =~
-/^(pppoe|alcatelusb|amedynusbadsl|conexantusbadsl|conexantpciadsl|3cp4218usbadsl|pulsardsl|solosdsl|eciadsl|bewanadsl|eagleusbadsl|wanpipe-adsl)$/
-        )
+    if ($pppsettings{'TYPE'} =~ /^(pppoe)$/)
     {
         print <<END
 <tr>
@@ -1107,95 +756,6 @@ END
 
 END
         ;
-    }
-
-    if ($pppsettings{'TYPE'} =~
-/^(alcatelusb|amedynusbadsl|conexantusbadsl|conexantpciadsl|3cp4218usbadsl|pulsardsl|eciadsl|bewanadsl|eagleusbadsl|wanpipe-adsl|wanpipe-serial)$/
-        )
-    {
-        print <<END
-<tr>
-    <td colspan='2'>&nbsp;</td>
-    <td colspan='2'><hr /></td>
-</tr>
-<tr>
-    <td rowspan='4'>&nbsp;</td>
-    <td valign='top' rowspan='4'><input type='radio' name='METHOD' value='STATIC' $checked{'METHOD'}{'STATIC'} />$Lang::tr{'static ip'}</td>
-    <td>$Lang::tr{'static ip'}:</td>
-    <td><input type='text' size='16' name='IP' value='$pppsettings{'IP'}' /></td>
-</tr><tr>
-    <td>$Lang::tr{'gateway ip'}:</td>
-    <td><input type='text' size='16' name='GATEWAY' value='$pppsettings{'GATEWAY'}' /></td>
-</tr><tr>
-    <td>$Lang::tr{'netmask'}:</td>
-    <td><input type='text' size='16' name='NETMASK' value='$pppsettings{'NETMASK'}' /></td>
-</tr><tr>
-    <td nowrap='nowrap'>$Lang::tr{'broadcast'}:&nbsp;<img src='/blob.gif' alt='*' /></td>
-    <td><input type='text' size='16' name='BROADCAST' value='$pppsettings{'BROADCAST'}' /></td>
-</tr>
-END
-        ;
-
-        if ($pppsettings{'TYPE'} =~ /^(eciadsl|eagleusbadsl)$/) {
-            print <<END
-<tr>
-    <td colspan='2'>&nbsp;</td>
-    <td colspan='2'><hr /></td>
-</tr>
-<tr>
-    <td>&nbsp;</td>
-    <td><input type='radio' name='METHOD' value='DHCP' $checked{'METHOD'}{'DHCP'} />$Lang::tr{'dhcp mode'}</td>
-    <td>$Lang::tr{'hostname'}:&nbsp;<img src='/blob.gif' alt='*' /></td>
-    <td><input type='text' name='DHCP_HOSTNAME' value='$pppsettings{'DHCP_HOSTNAME'}' /></td>
-</tr>
-END
-            ;
-        }
-    }
-
-    #drivers that need a file upload
-    if ($pppsettings{'TYPE'} =~ /^(alcatelusb|eciadsl|fritzdsl)$/) {
-        print "<tr><td colspan='4'><hr /></td></tr>";
-    }
-    if ($pppsettings{'TYPE'} =~ /^(alcatelusb)$/) {
-        my $speedtouch = &General::speedtouchversion;
-        if (($speedtouch >= 0) && ($speedtouch <= 4)) {
-            my $modem;
-            if ($speedtouch == 4) {
-                $modem = 'v4_b';
-            }
-            else {
-                $modem = 'v0123';
-            }
-            print "<tr><td>$Lang::tr{'firmware'}:</td>";
-            if (-e "/var/ofw/alcatelusb/firmware.$modem.bin") {
-                print "<td>$Lang::tr{'present'}</td><td colspan='2'>&nbsp;</td></tr>\n";
-            }
-            else {
-                print "<td>$Lang::tr{'not present'}</td><td colspan='2'>&nbsp;</td></tr>\n";
-            }
-        }
-        else {
-            print "<tr><td colspan='4'>$Lang::tr{'unknown'} Rev $speedtouch</td></tr>";
-        }
-    }
-    elsif ($pppsettings{'TYPE'} eq 'eciadsl') {
-        print "<tr><td>$Lang::tr{'driver'}:</td>";
-        if (-e "/var/ofw/eciadsl/synch.bin") {
-            print "<td>$Lang::tr{'present'}</td><td colspan='2'>&nbsp;</td></tr>\n";
-        }
-        else {
-            print "<td>$Lang::tr{'not present'}</td><td colspan='2'>&nbsp;</td></tr>\n";
-        }
-    }
-    elsif ($pppsettings{'TYPE'} eq 'fritzdsl') {
-        print "<tr><td>$Lang::tr{'driver'}:</td>";
-        if (-e "/lib/modules/$kernel/extra/fcdsl.ko.gz") {
-            print "<td>$Lang::tr{'present'}</td><td colspan='2'>&nbsp;</td></tr>\n";
-        }
-        else {
-            print "<td>$Lang::tr{'not present'}</td><td colspan='2'>&nbsp;</td></tr>\n";
-        }
     }
 
     print <<END
@@ -1331,9 +891,6 @@ sub initprofile {
     # empty profile partial pre-initialization
     if ($netsettings{'RED_COUNT'} >= 1) {
         $pppsettings{'TYPE'} = lc($netsettings{'RED_1_TYPE'});
-    }
-    elsif ($netsettings{'RED_1_TYPE'} eq 'ISDN') {
-        $pppsettings{'TYPE'} = 'isdn';
     }
     else {
         $pppsettings{'TYPE'} = 'modem';
