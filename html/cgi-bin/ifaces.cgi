@@ -41,7 +41,7 @@ $cgiparams{'ACTION'}     = '';
 $cgiparams{'USED_COUNT'} = 0;
 &General::getcgihash(\%cgiparams);
 
-# Darren Critchley - vars for setting up sort order
+# vars for setting up sort order
 my $sort_col  = '1';
 my $sort_type = 'a';
 my $sort_dir  = 'asc';
@@ -147,7 +147,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'reset'}) {
 
 if ($cgiparams{'ACTION'} eq '') {
     $cgiparams{'KEY'}            = '';
-    $cgiparams{'IFACE'}          = '';
+    $cgiparams{'IFACE'}          = 'ip';
     $cgiparams{'IFACE_NAME'}     = '';
     $cgiparams{'EXTERNAL'}     = 'off';
     $cgiparams{'OLD_IFACE_NAME'} = '';
@@ -170,13 +170,17 @@ if ($errormessage) {
     $error = 'error';
 }
 
-&FW::readValidSettings();
-if ($FW::fwSettings{'ADV_MODE_ENABLE'} ne 'on') {
-    &Header::openbox('100%', 'left', "$Lang::tr{'information messages'}:", 'warning');
-    print "<font class='base'>$Lang::tr{'custom interfaces only in adv mode'}&nbsp;<font>";
-    &Header::closebox();
-}
-else {
+##&FW::readValidSettings();
+##if ($FW::fwSettings{'ADV_MODE_ENABLE'} ne 'on') {
+##    &Header::openbox('100%', 'left', "$Lang::tr{'information messages'}:", 'warning');
+##    print "<font class='base'>$Lang::tr{'custom interfaces only in adv mode'}&nbsp;<font>";
+##    &Header::closebox();
+##}
+##else {
+
+my %selected = ();
+$selected{'IFACE'}{$cgiparams{'IFACE'}} = "selected='selected'";
+
     ##
     # We are in advanced mode, show custom interfaces
     ##
@@ -205,6 +209,15 @@ else {
     <td width='25%'>$Lang::tr{'interface'}:</td>
     <td width='25%'>
         <input type='text' name='IFACE' value='$cgiparams{'IFACE'}' size='15' maxlength='15' />
+        <select name='IFACE'>
+END
+
+foreach my $iface (sort keys %FW::interfaces) {
+##    print "<option value='ip' $selected{'IFACE'}{$iface}>$iface</option>";
+    print "<option value=$FW::interfaces{$iface}{'IFACE'} $selected{'IFACE'}{$FW::interfaces{$iface}{'IFACE'}}>$FW::interfaces{$iface}{'IFACE'}</option>";
+}
+print <<END;
+        </select>
         <input type='hidden' name='EXTERNAL' value='$cgiparams{'EXTERNAL'}' />
     </td>
 </tr>
@@ -257,7 +270,7 @@ END
 END
 
     &Header::closebox();
-}
+##}
 
 &Header::openbox('100%', 'left', "$Lang::tr{'default interfaces'}:");
 print <<END;
@@ -290,7 +303,7 @@ sub display_custom_interfaces {
     my $id = 0;
     foreach my $ifaceName (@sortedKeys) {
 
-        # Darren Critchley highlight the row we are editing
+        # highlight the row we are editing
         if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'IFACE_NAME'} eq $ifaceName) {
             print "<tr class='selectcolour'>\n";
         }
