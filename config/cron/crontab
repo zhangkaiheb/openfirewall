@@ -1,5 +1,4 @@
 #
-# $Id: crontab 7339 2014-03-17 06:33:16Z owes $
 #
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
