@@ -32,7 +32,7 @@ require '/usr/lib/ofw/lang.pl';
 require '/usr/lib/ofw/header.pl';
 require '/usr/lib/ofw/firewall-lib.pl';
 
-our $staticRoutesFile = "/var/ofw/firewall/staticRoutes";
+our $staticRoutesFile = "/var/ofw/ethernet/staticRoutes";
 
 my $output='';
 
@@ -363,7 +363,7 @@ sub readStaticRoutes
 {
     my $staticRoutesRef = shift;
     open(ROUTES, "$staticRoutesFile") or die 'Unable to open static routes file.';
-    @$staticRoutesRef = <routes>;
+    @$staticRoutesRef = <ROUTES>;
     close(ROUTES);
 }
 
