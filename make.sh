@@ -18,15 +18,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2001 Mark Wormgoor <mark@wormgoor.com>.
-#
-# (c) 2001 Eric S. Johansson <esj@harvee.billerica.ma.us> Check for Bash
-# (c) 2002 Thorsten Fischer <frosch@cs.tu-berlin.de> MD5Sum checking
+# Copyright (C) 2019 the Openfirewall Team
 #
 #########################################################################################################
-#
-# $Id: make.sh 8084 2016-01-22 08:05:55Z owes $
-#
 #########################################################################################################
 
 
@@ -2030,7 +2024,7 @@ openfirewall_build()
 	chroot_make wireless_tools
 	chroot_make libnl
 	chroot_make iw
-	chroot_make 3c5x9setup
+#	chroot_make 3c5x9setup
 } # End of openfirewall_build()
 
 
