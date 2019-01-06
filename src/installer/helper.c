@@ -39,7 +39,7 @@
 char *ofw_colours_text[CFG_COLOURS_COUNT] = { "GREEN", "RED", "BLUE", "ORANGE", "----" };
 char *ofw_aliases_text[CFG_COLOURS_COUNT] = { "lan", "wan", "wlan", "dmz", "unused" };
 
-char *ofw_red_text[CFG_RED_COUNT] = { "ANALOG", "GSM3G", "ISDN", "PPPOE", "PPTP", "STATIC", "DHCP" };
+char *ofw_red_text[CFG_RED_COUNT] = { "PPPOE", "PPTP", "STATIC", "DHCP" };
 
 /* Global structure with everything from ethernet/settings config file */
 struct ethernet_s ofw_ethernet;

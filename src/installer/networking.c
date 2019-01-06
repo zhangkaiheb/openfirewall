@@ -16,10 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2014, the Openfirewall Team
+ * (c) 2014-2018, the Openfirewall Team
  *
- * $Id: networking.c 7593 2014-06-09 07:49:51Z owes $
- * 
  */
 
 
@@ -433,7 +431,7 @@ static void redconfigtype(void)
 
     /* No point in translating all */
     char *radio_text[CFG_RED_COUNT] =
-        { gettext("TR_ANALOG_MODEM"), gettext("TR_GSM3G_MODEM"), "ISDN", "PPPoE", "PPTP", gettext("TR_STATIC"), "DHCP" };
+        { "PPPoE", "PPTP", gettext("TR_STATIC"), "DHCP" };
     newtComponent radio[CFG_RED_COUNT];
 
     /* default value is PPPoE if nothing found in cfg file */
@@ -473,13 +471,8 @@ static void redconfigtype(void)
                 update_kv(&eth_kv, "RED_1_TYPE", ofw_red_text[i]);
                 strcpy(kv_red_type, ofw_red_text[i]);
 
-                if (!strcmp(ofw_red_text[i], "ANALOG") || !strcmp(ofw_red_text[i], "GSM3G") || !strcmp(ofw_red_text[i], "ISDN")) {
-                    update_kv(&eth_kv, "RED_1_DEV", "");
-                    update_kv(&eth_kv, "RED_COUNT", "0");
-                }
-                else {
-                    update_kv(&eth_kv, "RED_COUNT", "1");
-                }
+                update_kv(&eth_kv, "RED_COUNT", "1");
+
                 changed_config = 1;
                 changed_type = 1;
                 break;
@@ -543,12 +536,6 @@ static void cardconfig(int n)
 
     for (choice = 0, i = 0; i < CFG_COLOURS_COUNT - 1; i++) {
         int used = 0;
-
-        /* skip RED if type is Modem or ISDN */
-        if ((i == RED) && (!strcmp(kv_red_type, "ANALOG") ||
-				!strcmp(kv_red_type, "GSM3G") || !strcmp(kv_red_type, "ISDN"))) {
-            continue;
-        }
 
         /* test for already used colours here */
         for (j = 0; j < get_network_num() && !used; j++) {
@@ -796,7 +783,6 @@ static void cardlist(void)
                 break;
             }
 
-            if (strcmp(kv_red_type, "ANALOG") && strcmp(kv_red_type, "GSM3G") && strcmp(kv_red_type, "ISDN")) {
                 /* Do we have RED ? */
                 for (i = 0, count = 0, notused = 0; i < get_network_num(); i++) {
                     if (networks[i].colour == RED)
@@ -829,7 +815,6 @@ static void cardlist(void)
                         break;
                     }
                 }
-            }
 
             if (changed_config)
                 udevconfig();
@@ -1188,19 +1173,18 @@ int handlenetworking(void)
             break;
 
         switch (choice) {
-        case 0:
+        case 0: {
+            int i, count;
             redconfigtype();
-            if (strcmp(kv_red_type, "ANALOG") && strcmp(kv_red_type, "GSM3G") && strcmp(kv_red_type, "ISDN")) {
-                int i, count;
-                /* Do we have RED ? */
-                for (i = 0, count = 0; i < get_network_num() && !count; i++) {
-                    if (networks[i].colour == RED)
-                        count++;
-                }
-                if (!count)
-                    cardlist();
+            /* Do we have RED ? */
+            for (i = 0, count = 0; i < get_network_num() && !count; i++) {
+                if (networks[i].colour == RED)
+                    count++;
             }
+            if (!count)
+                cardlist();
             break;
+        }
         case 1:
             cardlist();
             break;

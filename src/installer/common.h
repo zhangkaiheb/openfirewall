@@ -116,7 +116,7 @@ int write_kv_to_file(NODEKV ** p, char *filename);
 /* This is not what it appears, do not change (yet) it will break many things */
 #define MAX_NETWORK_COLOUR  1
 /* Length of list with types for red */
-#define CFG_RED_COUNT       7
+#define CFG_RED_COUNT       4
 
 /*  Exits immediately on error with message when exitonerror is 1.
     Return  0 if no error reading ethernet/settings

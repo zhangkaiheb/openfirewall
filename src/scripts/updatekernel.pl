@@ -15,9 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2009-2012, the Openfirewall Team
-#
-# $Id: updatekernel.pl 6815 2012-10-31 10:50:55Z owes $
+# (c) 2014-2019 the Openfirewall Team
 #
 
 use strict;
