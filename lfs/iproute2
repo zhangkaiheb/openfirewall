@@ -101,12 +101,14 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 ##	cd $(DIR_APP) && make DESTDIR= DOCDIR=/usr/share/doc/iproute2 MANDIR=/usr/share/man install
 
 	cd $(DIR_APP) && make
-	# let it used by the perl CGI
-	cd $(DIR_APP) && chown root:nobody ip/ip
-	cd $(DIR_APP) && chmod 4750 ip/ip
-
 	cd $(DIR_APP) && make DOCDIR=/usr/share/doc/iproute2-4.15.0 install
 #	cd $(DIR_APP) && make DOCDIR=/usr/share/doc/iproute2-4.18.0 install
 
+	# let it used by the perl CGI
+	chown root:nobody /sbin/ip
+	chmod 4750 /sbin/ip
+
+	mkdir $(DIR_APP)
+	mkdir $(DIR_APP)
 	@rm -rf $(DIR_APP)
 	@$(POSTBUILD)
