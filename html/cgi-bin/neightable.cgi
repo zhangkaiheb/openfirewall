@@ -300,3 +300,50 @@ print "</table> </div>";
 &Header::closebigbox();
 
 &Header::closepage();
+
+sub display_custom_interfaces {
+    my $custIfaceRef = shift;
+
+    my @sortedKeys = &General::sortHashArray($sort_col, $sort_type, $sort_dir, $custIfaceRef);
+
+    my $id = 0;
+    foreach my $ifaceName (@sortedKeys) {
+
+        # highlight the row we are editing
+        if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'IFACE_NAME'} eq $ifaceName) {
+            print "<tr class='selectcolour'>\n";
+        }
+        else {
+            print "<tr class='table".int(($id % 2) + 1)."colour'>";
+        }
+        print <<END;
+    <td>$ifaceName</td>
+    <td align='center'>$custIfaceRef->{$ifaceName}{'IFACE'}</td>
+    <td align='center'>$custIfaceRef->{$ifaceName}{'USED_COUNT'}x</td>
+    <td align='center'>
+    <form method='post' name='frm$id' action='$ENV{'SCRIPT_NAME'}'>
+        <input type='hidden' name='ACTION' value='$Lang::tr{'edit'}' />
+        <input type='image' name='$Lang::tr{'edit'}' src='/images/edit.gif' alt='$Lang::tr{'edit'}' title='$Lang::tr{'edit'}' />
+        <input type='hidden' name='IFACE_NAME' value='$ifaceName' />
+        <input type='hidden' name='USED_COUNT' value='$custIfaceRef->{$ifaceName}{'USED_COUNT'}' />
+    </form>
+    </td>
+END
+        if ($custIfaceRef->{$ifaceName}{'USED_COUNT'} > 0) {
+            print "<td align='center'></td>";
+        }
+        else {
+            print <<END;
+    <td align='center'>
+    <form method='post' name='frmb$id' action='$ENV{'SCRIPT_NAME'}'>
+        <input type='hidden' name='ACTION' value='$Lang::tr{'remove'}' />
+        <input type='image' name='$Lang::tr{'remove'}' src='/images/delete.gif' alt='$Lang::tr{'remove'}' title='$Lang::tr{'remove'}' />
+        <input type='hidden' name='IFACE_NAME' value='$ifaceName' />
+    </form>
+    </td>
+END
+        }
+        print "</tr>\n";
+        $id++;
+    }
+}
