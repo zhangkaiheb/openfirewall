@@ -18,8 +18,6 @@
 #
 # (c) The Openfirewall Team
 #
-# $Id: icmptypes 2 2007-04-07 18:46:27Z mark $
-#
 # Valid ICMP types obtained through the following command
 #	iptables -p icmp -h
 #

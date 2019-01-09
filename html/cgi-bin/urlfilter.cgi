@@ -15,10 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2004-2008 marco.s - http://www.urlfilter.net
-# (c) 2011-2014 The Openfirewall Team
+# (c) 2018-2019 The Openfirewall Team
 #
-# $Id: urlfilter.cgi 7748 2014-12-15 07:04:32Z owes $
 #
 
 # Add entry in menu

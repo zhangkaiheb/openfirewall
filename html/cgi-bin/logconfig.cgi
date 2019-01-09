@@ -15,12 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) -2011 The Openfirewall Team
-#
-# Over the years many people have changed and contributed to this file.
-# Check CVS and SVN for specifics.
-#
-# $Id: logconfig.cgi 7797 2015-01-08 08:45:27Z owes $
+# (c) -2019 The Openfirewall Team
 #
 
 # Add entry in menu

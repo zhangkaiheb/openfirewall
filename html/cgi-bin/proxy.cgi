@@ -16,9 +16,8 @@
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2004-2009 marco.s - http://www.advproxy.net
-# (c) 2009-2015 The Openfirewall Team
+# (c) 2018-2019 The Openfirewall Team
 #
-# $Id: proxy.cgi 7770 2015-01-06 09:08:19Z owes $
 #
 
 # Add entry in menu

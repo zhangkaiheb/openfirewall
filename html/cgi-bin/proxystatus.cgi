@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: proxystatus.cgi 7418 2014-04-05 19:57:44Z owes $
 #
 
 # Add entry in menu

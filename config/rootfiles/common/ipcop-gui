@@ -33,6 +33,9 @@ usr/local/apache/cgi-bin/neightable.cgi
 usr/local/apache/cgi-bin/netstatus.cgi
 usr/local/apache/cgi-bin/openvpn.cgi
 usr/local/apache/cgi-bin/pppsetup.cgi
+usr/local/apache/cgi-bin/proxyaccess.cgi
+usr/local/apache/cgi-bin/proxybrowser.cgi
+usr/local/apache/cgi-bin/proxycache.cgi
 usr/local/apache/cgi-bin/proxy.cgi
 usr/local/apache/cgi-bin/proxygraphs.cgi
 usr/local/apache/cgi-bin/proxystatus.cgi
@@ -48,11 +51,17 @@ usr/local/apache/cgi-bin/sysinfo.cgi
 usr/local/apache/cgi-bin/time.cgi
 usr/local/apache/cgi-bin/traffic.cgi
 usr/local/apache/cgi-bin/trafficadm.cgi
+usr/local/apache/cgi-bin/ufblacklist.cgi
+usr/local/apache/cgi-bin/ufblackwhite.cgi
+usr/local/apache/cgi-bin/ufcommon.cgi
+usr/local/apache/cgi-bin/uftimecontrol.cgi
+usr/local/apache/cgi-bin/uftimeduration.cgi
 usr/local/apache/cgi-bin/updates.cgi
 usr/local/apache/cgi-bin/upload.cgi
 usr/local/apache/cgi-bin/urlfilter.cgi
 usr/local/apache/cgi-bin/vpnca.cgi
 usr/local/apache/cgi-bin/webaccess.cgi
+usr/local/apache/cgi-bin/webproxy.cgi
 usr/local/apache/cgi-bin/wireless.cgi
 usr/local/apache/html/backup
 usr/local/apache/html/blob.gif
@@ -63,6 +72,7 @@ usr/local/apache/html/images/add.gif
 usr/local/apache/html/images/addblue.gif
 usr/local/apache/html/images/addfaint.gif
 usr/local/apache/html/images/addgreen.gif
+usr/local/apache/html/images/arrow.gif
 usr/local/apache/html/images/back.png
 usr/local/apache/html/images/blacklogo.png
 usr/local/apache/html/images/bounceback.png
