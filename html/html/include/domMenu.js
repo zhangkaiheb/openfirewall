@@ -1,4 +1,3 @@
-/** $Id: domMenu.js 2354 2009-01-18 14:03:30Z owes $ */
 // {{{ license
 
 /*
@@ -99,7 +98,7 @@ domMenu_settings.set('global', new Hash(
 	'axis', 'horizontal',
 	'verticalExpand', 'south',
 	'horizontalExpand', 'east',
-	'expandMenuArrowUrl', 'arrow.gif',
+	'expandMenuArrowUrl', '/images/arrow.gif',
 	'subMenuWidthCorrection', 0,
 	'verticalSubMenuOffsetY', 0,
 	'verticalSubMenuOffsetX', 0,
@@ -407,11 +406,11 @@ function domMenu_activateSubMenu(in_parentElement)
 			element.style.backgroundRepeat = 'no-repeat';
 			if (settings.get('horizontalExpand') == 'east') {
 				element.style.backgroundPosition = 'right center';
-				element.style.paddingRight = '12px';
+				element.style.paddingRight = '16px';
 			}
 			else {
 				element.style.backgroundPosition = 'left center';
-				element.style.paddingLeft = '12px';
+				element.style.paddingLeft = '16px';
 			}
 		}
 
