@@ -53,6 +53,7 @@ $Header::boxframe     = '';           # retain frametype for closebox
 
 my $menuidx = 0;
 my %menu = ();
+my %l3menu = ();
 our $javascript = 1;
 our $httpheaders = 0;
 
@@ -84,6 +85,7 @@ sub genmenu
 
     &Menu::buildmenu(\%menuconfig);
     %menu = %Menu::menu;
+    %l3menu = %Menu::l3menu;
 }
 
 sub showhttpheaders
@@ -127,11 +129,29 @@ sub showjsmenu
         $menu{$k1}{'statusText'} =~ s/'/\\\'/g;
         print "\t'statusText', '$menu{$k1}{'statusText'}',\n";
         foreach my $k2 (@{$menu{$k1}{'subMenu'}}) {
+            my $c3 = 1;
             print "\t    $c2, new Hash(\n";
             print "\t\t'contents', '" . &cleanhtml(@{$k2}[0]) . "',\n";
             print "\t\t'uri', '@{$k2}[1]',\n";
             @{$k2}[2] =~ s/'/\\\'/g;
-            print "\t\t'statusText', '@{$k2}[2]'\n";
+            print "\t\t'statusText', '@{$k2}[2]',\n";
+
+            foreach my $k3 (@{$l3menu{@{$k2}[0]}{'subMenu'}}) {
+                print "\t    $c3, new Hash(\n";
+                print "\t\t'contents', '" . &cleanhtml(@{$k3}[0]) . "',\n";
+                print "\t\t'uri', '@{$k3}[1]',\n";
+                @{$k3}[2] =~ s/'/\\\'/g;
+                print "\t\t'statusText', '@{$k3}[2]',\n";
+
+                if ($c3 <= $#{$l3menu{@{$k2}[0]}{'subMenu'}}) {
+                    print "\t    ),\n";
+                }
+                else {
+                    print "\t    )\n";
+                }
+                $c3++;
+            }
+
             if ($c2 <= $#{$menu{$k1}{'subMenu'}}) {
                 print "\t    ),\n";
             }
