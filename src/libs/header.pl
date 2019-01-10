@@ -288,6 +288,7 @@ END
 
     my $location    = '';
     my $sublocation = '';
+    my $l3location = '';
     my @URI         = split('\?', $ENV{'REQUEST_URI'});
     foreach my $k1 (keys %menu) {
         my $temp = $menu{$k1}{'contents'};
@@ -295,6 +296,14 @@ END
             if (@{$k2}[1] eq $URI[0]) {
                 $location    = $temp;
                 $sublocation = @{$k2}[0];
+            }
+
+            foreach my $k3 (@{$l3menu{@{$k2}[0]}{'subMenu'}}) {
+                if (@{$k3}[1] eq $URI[0]) {
+                    $location    = $temp;
+                    $sublocation = @{$k2}[0];
+                    $l3location = @{$k3}[0];
+                }
             }
         }
     }
@@ -354,8 +363,18 @@ END
     print "    </td></tr>";
 print <<END
     <tr valign='middle' style='background-color: $Header::boxcolour;'><td></td>
-    <td class='ofw_menuLocationMain' colspan='2' height='32'><img src='/images/null.gif' width='10' height='1' alt='' /><font style='font-size: 14px; color: #696969'>$location</font>
-    <img src='/images/null.gif' width='10' height='1' alt='' /><font style='font-size: 14px; color: #696969'>/</font><img src='/images/null.gif' width='12' height='1' alt='' /><font style='font-size: 14px; color: #696969'>$sublocation</font></td>
+    <td class='ofw_menuLocationMain' colspan='2' height='32'><img src='/images/null.gif' width='8' height='1' alt='' /><font style='font-size: 14px; color: #696969'>$location</font>
+    <img src='/images/null.gif' width='8' height='1' alt='' /><font style='font-size: 14px; color: #696969'>/</font><img src='/images/null.gif' width='12' height='1' alt='' /><font style='font-size: 14px; color: #696969'>$sublocation</font>
+END
+;
+    if ($l3location ne '') {
+        print <<END
+<img src='/images/null.gif' width='8' height='1' alt='' /><font style='font-size: 14px; color: #696969'>/</font><img src='/images/null.gif' width='12' height='1' alt='' /><font style='font-size: 14px; color: #696969'>$l3location</font>
+END
+        ;
+    }
+print <<END
+</td>
     </tr>
 END
 ;
@@ -375,18 +394,18 @@ END
 #
 sub closepage
 {
-    my $connected = shift;
-    my $extraversion = '';
-    $extraversion = '| ' . `cat /etc/svn-install` . ' ' if (! -e '/var/log/updates/update.check');
-    my $status = "<small>Openfirewall v${General::version} $extraversion &copy; 2001-2016 The Openfirewall Team</small>";
+#    my $connected = shift;
+#    my $extraversion = '';
+#    $extraversion = '| ' . `cat /etc/svn-install` . ' ' if (! -e '/var/log/updates/update.check');
+#    my $status = "<small>Openfirewall v${General::version} $extraversion &copy; 2001-2016 The Openfirewall Team</small>";
 
-    $status = &General::connectionstatus() . "<br />" . `/bin/date "+%Y-%m-%d %H:%M:%S"`. "<br /><br />$status" if ($connected ne 'skip_connected');
+#    $status = &General::connectionstatus() . "<br />" . `/bin/date "+%Y-%m-%d %H:%M:%S"`. "<br /><br />$status" if ($connected ne 'skip_connected');
 
     print <<END
 <!-- OPENFIREWALL FOOTER -->
-    <table width='100%' border='0'><tr>
-    <td align='center' valign='middle'>$status</td>
-    </tr></table>
+<!--    <table width='100%' border='0'><tr>  -->
+<!--    <td align='center' valign='middle'>$status</td> -->
+<!--    </tr></table> -->
 </body></html>
 END
         ;
