@@ -191,6 +191,8 @@ msgid "add device"
 msgstr "Add device"
 msgid "add interface"
 msgstr "Add interface"
+msgid "vlan id"
+msgstr "VLAN ID"
 msgid "add new alias"
 msgstr "Add a new alias"
 

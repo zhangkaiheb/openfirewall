@@ -243,6 +243,8 @@ msgid "add device"
 msgstr "新增设备"
 msgid "add interface"
 msgstr "新增接口"
+msgid "vlan id"
+msgstr "VLAN ID"
 msgid "add new alias"
 msgstr "新增別名"
 
