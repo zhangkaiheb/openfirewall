@@ -1,0 +1,125 @@
+@charset "utf-8";
+
+
+/************************************************
+    common css for ofw-menu-bar and ofw-menu
+************************************************/
+.ofwmenubar .ofwmenu, .ofwmenu .ofwmenu {position: absolute;}
+.ofwmenubar ul, .ofwmenu ul, .ofwmenubar li, .ofwmenu li {margin: 0; border: 0; padding: 0; list-style: none; outline: none;}
+.ofwmenubar h6, .ofwmenu h6 {margin: 0; padding: 0;}
+.ofwmenubaritemlabel, .ofwmenuitemlabel {display: block; border: 0 none; text-align: left; white-space: nowrap;}
+.ofwmenubaritemlabel:visited, .ofwmenuitemlabel:visited {border: 0 none; color: #000;}
+.ofwmenubaritemlabel:hover, .ofwmenuitemlabel:hover,
+.ofwmenubaritemlabel:active, .ofwmenuitemlabel:active,
+ .ofwmenubaritemlabel:focus, .ofwmenuitemlabel:focus {border: 0 none; text-decoration: none;outline: none;}
+.hide-scrollbars * {overflow: hidden;}
+.hide-scrollbars select {display: none;}
+
+
+/************************************************
+    yui-menu-bar
+************************************************/
+.ofwmenubar {position: static;}
+.ofwmenubar>.bd>ul:after {
+        content: ".";
+        display: block;
+        clear: both;
+        visibility: hidden;
+        height: 0;
+        line-height: 0;
+}
+
+.ofwmenubaritem {float: left;}
+.ofwmenubaritemlabel {
+        border: 0 none;
+        padding: 8px 10px;
+        line-height: 20px;
+        color: #000;
+        font-size: 14px;
+        text-decoration: none;
+        cursor: pointer;
+}
+
+.ofwmenubaritemlabel .fa, .ofwmenuitemlabel .fa {margin-right: 5px;}
+
+.ofwmenubaritemlabel-disabled,
+.ofwmenubaritemlabel-disabled:hover,
+.ofwmenubaritemlabel-disabled:visited,
+.ofwmenuitemlabel-disabled,
+.ofwmenuitemlabel-disabled:hover,
+.ofwmenuitemlabel-disabled:visited {
+    cursor: not-allowed !important;
+    color: #a6a6a6 !important;
+    text-decoration: none;
+    outline: none;
+}
+
+.ofwmenubaritemlabel.ofwmenubaritemlabel-hassubmenu {
+        margin: -1px 0 0 -4px;
+        padding-left: 0;
+        padding-right: 0;
+}
+
+.page-system-status .ofwmenubaritemlabel.ofwmenubaritemlabel-hassubmenu {
+        margin: 0;
+        padding-left: 10px;
+        padding-right: 10px;
+}
+
+
+/************************************************
+    yui-menu
+************************************************/
+.ofwmenu {
+        top: -999em;
+        left: -999em;
+}
+
+.ofwmenu .bd {
+        border: 1px solid #ddd;
+        background-color: #fff;
+}
+
+.ofwmenu ul {
+        border: 0 none;
+        border-top: 1px solid #eee;
+        padding: 2px 0;
+}
+
+.ofwmenu ul.first-of-type {
+        border-width: 0;
+}
+
+.ofwmenu h6 {
+        border: 0 none;
+        border-top: 1px solid #eee;
+        padding: 3px 10px;
+        color: #777;
+        font-weight: bold;
+        background: #f5f5f5;
+}
+
+.ofwmenu ul.hastitle,
+.ofwmenu h6.first-of-type {
+        border-width: 0;
+}
+
+.ofwmenuitemlabel {
+        border: 0 none;
+        padding: 4px 10px;
+        color: #000;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: normal;
+}
+
+.ofwmenuitemlabel.ofwmenuitemlabel-selected {
+        border: 0 none;
+        color: #fff;
+        background-color: #286090;
+}
+
+.ofwmenuitemlabel.ofwmenuitemlabel-selected .fa {
+        color: #fff;
+}
+
