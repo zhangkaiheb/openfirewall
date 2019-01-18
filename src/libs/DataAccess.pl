@@ -37,12 +37,12 @@ $DATA::configfile          = "/var/ofw/firewall/config";
 $DATA::policyFile          = "/var/ofw/firewall/policy";
 
 @DATA::ruleKeys_unique = (
-    'SRC_NET_TYPE', 'SRC_NET',      'SRC_ADR_TYPE', 'SRC_ADR',      'INV_SRC_ADR',  'SRC_PORT',     'INV_SRC_PORT', 
+    'SRC_NET_TYPE', 'SRC_NET',      'SRC_ADR_TYPE', 'SRC_ADR',      'INV_SRC_ADR',  'SRC_PORT',     'INV_SRC_PORT',
     'PORTFW_EXT_ADR', 'PORTFW_SERVICE_TYPE','PORTFW_SERVICE',
-    'DST_NET_TYPE', 'DST_NET',      'DST_IP_TYPE',  'DST_IP',       'INV_DST_IP',   
-    'SERVICE_TYPE', 'SERVICE',      
-    'LOG_ENABLED',  'LIMIT_FOR',    'LIMIT_TYPE',   
-    'MATCH_LIMIT',  'MATCH_STRING_ON', 'MATCH_STRING', 'INV_MATCH_STRING', 
+    'DST_NET_TYPE', 'DST_NET',      'DST_IP_TYPE',  'DST_IP',       'INV_DST_IP',
+    'SERVICE_TYPE', 'SERVICE',
+    'LOG_ENABLED',  'LIMIT_FOR',    'LIMIT_TYPE',
+    'MATCH_LIMIT',  'MATCH_STRING_ON', 'MATCH_STRING', 'INV_MATCH_STRING',
     'RULEACTION'
 );
 @DATA::ruleKeys_all = ('ENABLED', 'RULEMODE', @DATA::ruleKeys_unique, 'TIMEFRAME_ENABLED', 'REMARK');
@@ -399,14 +399,28 @@ sub readCustIfaces
     foreach $tmpline (@iface) {
         chomp($tmpline);
         my @tmp = split(/\,/, $tmpline);
-        $ifaces->{$tmp[0]}{'IFACE'}      = $tmp[1];
-        $ifaces->{$tmp[0]}{'EXTERNAL'} = $tmp[2];
-        $ifaces->{$tmp[0]}{'USED_COUNT'} = $tmp[3];
+        $ifaces->{$tmp[0]}{'TYPE'}         = $tmp[1];
+        $ifaces->{$tmp[0]}{'IFACE'}        = $tmp[2];
+        $ifaces->{$tmp[0]}{'BR_MEMBERS'}   = $tmp[3];
+        $ifaces->{$tmp[0]}{'BOND_MEMBERS'} = $tmp[4];
+        $ifaces->{$tmp[0]}{'ADDRESSING_MODE'}    = $tmp[5];
+        $ifaces->{$tmp[0]}{'IPADDRESS'}    = $tmp[6];
+        $ifaces->{$tmp[0]}{'NETMASK'}      = $tmp[7];
+        $ifaces->{$tmp[0]}{'MTU'}          = $tmp[8];
+        $ifaces->{$tmp[0]}{'ACCESSMODE'}   = $tmp[9];
+        $ifaces->{$tmp[0]}{'VLANID'}       = $tmp[10];
+        $ifaces->{$tmp[0]}{'DESCRIPTION'}  = $tmp[11];
+        $ifaces->{$tmp[0]}{'USED_BR'}      = $tmp[12];
+        $ifaces->{$tmp[0]}{'USED_BOND'}    = $tmp[13];
+        $ifaces->{$tmp[0]}{'USED_EOUTE'}   = $tmp[14];
+        $ifaces->{$tmp[0]}{'USED_RULE'}    = $tmp[15];
+        $ifaces->{$tmp[0]}{'EXTERNAL'}     = $tmp[16];
+        $ifaces->{$tmp[0]}{'USED_COUNT'}   = $tmp[17];
 
         if($ifaces->{$tmp[0]}{'EXTERNAL'} eq 'on') {
             $ifacesCount{'NUM_EXTERNAL'}++;
         }
-       else {
+        else {
             $ifacesCount{'NUM_INTERNAL'}++;
         }
     }
@@ -421,7 +435,45 @@ sub saveCustIfaces
     open(FILE, ">$DATA::customIFaceFile") or die 'Unable to open custom iface file.';
     flock FILE, 2;
     foreach my $ifaceName (sort keys %$ifaces) {
-        print FILE "$ifaceName,$ifaces->{$ifaceName}{'IFACE'},$ifaces->{$ifaceName}{'EXTERNAL'},$ifaces->{$ifaceName}{'USED_COUNT'}\n";
+        print FILE "$ifaceName,";
+        print FILE "$ifaces->{$ifaceName}{'TYPE'},";
+        print FILE "$ifaces->{$ifaceName}{'iface'},";
+
+        # for bridge members, use plus sign as seprates.
+        print FILE "$ifaces->{$ifaceName}{'BR_MEMBERS'},";
+#        for (my $i; $i < $ifaces->{$ifaceName}{'BR_MBR_CNT'}; $i++) {
+#            my $key = 'MEMBER'.'$i';
+#            print FILE "$ifaces->{$ifaceName}{'key'}";
+#            if ($i+1 < $ifaces->{$ifaceName}{'BR_MBR_CNT'}) {
+#                print FILE "+";
+#            }
+#        }
+#        print FILE ",";
+
+        # for bond members, use plus sign as seprates.
+        print FILE "$ifaces->{$ifaceName}{'BOND_MEMBER'},";
+#        for (my $i; $i < $ifaces->{$ifaceName}{'BOND_MBR_CNT'}; $i++) {
+#            my $key = 'MEMBER'.'$i';
+#            print FILE "$ifaces->{$ifaceName}{'key'}";
+#            if ($i+1 < $ifaces->{$ifaceName}{'BOND_MBR_CNT'}) {
+#                print FILE "+";
+#            }
+#        }
+#        print FILE ",";
+
+        print FILE "$ifaces->{$ifaceName}{'ADDRESSING_MODE'},";
+        print FILE "$ifaces->{$ifaceName}{'IPADDRESS'},";
+        print FILE "$ifaces->{$ifaceName}{'NETMASK'},";
+        print FILE "$ifaces->{$ifaceName}{'MTU'},";
+        print FILE "$ifaces->{$ifaceName}{'ACCESSMODE'},";
+        print FILE "$ifaces->{$ifaceName}{'VLANID'},";
+        print FILE "$ifaces->{$ifaceName}{'DESCRIPTION'},";
+        print FILE "$ifaces->{$ifaceName}{'USED_BR'},";
+        print FILE "$ifaces->{$ifaceName}{'USED_BOND'},";
+        print FILE "$ifaces->{$ifaceName}{'USED_ROUTE'},";
+        print FILE "$ifaces->{$ifaceName}{'USED_RULE'},";
+        print FILE "$ifaces->{$ifaceName}{'EXTERNAL'},";
+        print FILE "$ifaces->{$ifaceName}{'USED_COUNT'}\n";
     }
     close(FILE);
 }
@@ -1197,5 +1249,6 @@ sub isUsedInPortfwOk
 }
 
 #EOF
+
 
 
