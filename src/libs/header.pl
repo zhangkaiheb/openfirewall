@@ -26,10 +26,11 @@ use strict;
 use Time::Local;
 
 # enable only the following on debugging purpose
-#use warnings;
-#use CGI::Carp 'fatalsToBrowser';
+use warnings;
+use CGI::Carp 'fatalsToBrowser';
 
-$Header::boxcolour    = '#E0E0E0';    # used in makegraphs, use css whereever possible
+#$Header::boxcolour    = '#E0E0E0';    # used in makegraphs, use css whereever possible
+$Header::boxcolour    = '#F2F2F2';    # used in makegraphs, use css whereever possible
 $Header::boxframe     = '';           # retain frametype for closebox
 
 # Make sure these make it into translations even though some of them may not be in use.
@@ -127,21 +128,27 @@ sub showjsmenu
         print "\t'contents', '" . &cleanhtml($menu{$k1}{'contents'}) . "',\n";
         print "\t'uri', '$menu{$k1}{'uri'}',\n";
         $menu{$k1}{'statusText'} =~ s/'/\\\'/g;
-        print "\t'statusText', '$menu{$k1}{'statusText'}',\n";
+        print "\t'statusText', '$menu{$k1}{'statusText'}'\n";
         foreach my $k2 (@{$menu{$k1}{'subMenu'}}) {
             my $c3 = 1;
+            if ($c2 == 1) {
+                 print "    ,\n";
+            }
             print "\t    $c2, new Hash(\n";
             print "\t\t'contents', '" . &cleanhtml(@{$k2}[0]) . "',\n";
             print "\t\t'uri', '@{$k2}[1]',\n";
             @{$k2}[2] =~ s/'/\\\'/g;
-            print "\t\t'statusText', '@{$k2}[2]',\n";
+            print "\t\t'statusText', '@{$k2}[2]'\n";
 
             foreach my $k3 (@{$l3menu{@{$k2}[0]}{'subMenu'}}) {
+                if ($c3 == 1) {
+                    print "    ,\n";
+                }
                 print "\t    $c3, new Hash(\n";
                 print "\t\t'contents', '" . &cleanhtml(@{$k3}[0]) . "',\n";
                 print "\t\t'uri', '@{$k3}[1]',\n";
                 @{$k3}[2] =~ s/'/\\\'/g;
-                print "\t\t'statusText', '@{$k3}[2]',\n";
+                print "\t\t'statusText', '@{$k3}[2]'\n";
 
                 if ($c3 <= $#{$l3menu{@{$k2}[0]}{'subMenu'}}) {
                     print "\t    ),\n";
@@ -274,11 +281,13 @@ sub openpage
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <style type="text/css">\@import url(/include/openfirewall.css);</style>
+    <style type="text/css">\@import url(/include/fontawesome.css);</style>
 END
     ;
     if ($javascript) {
         print "<script type='text/javascript' src='/include/domLib.js'></script>\n";
         print "<script type='text/javascript' src='/include/domMenu.js'></script>\n";
+        print "<script type='text/javascript' src='/include/ofwsys.js'></script>\n";
         &genmenu();
         &showjsmenu();
     }
@@ -306,6 +315,9 @@ END
                 }
             }
         }
+    }
+    if ($location eq '') {
+       $location = $menu{'010'}{'contents'};
     }
     $onload_menu = "onload=\"domMenu_activate('domMenu_main', '$location');\"" if ($menu == 1);
 
@@ -350,7 +362,7 @@ END
     <table width='100%' border='0' cellpadding='0' cellspacing='0' style='table-layout:fixed;'>
     <col width='75' /><col width='182' /><col />
     <tr valign='middle'><td colspan='3' height='3'></td></tr>
-    <tr valign='middle'><td height='45' align='center'><font style='font-size: 24px; color: #88DB78'>OFW</font></td>
+    <tr valign='middle'><td height='45' align='center'><font style='font-size: 24px; color: #69C'>OFW</font></td>
         <td colspan='2'>
 END
         ;
@@ -400,7 +412,7 @@ sub closepage
 #    my $status = "<small>Openfirewall v${General::version} $extraversion &copy; 2001-2016 The Openfirewall Team</small>";
 
 #    $status = &General::connectionstatus() . "<br />" . `/bin/date "+%Y-%m-%d %H:%M:%S"`. "<br /><br />$status" if ($connected ne 'skip_connected');
-
+    my $status = '';
     print <<END
 <!-- OPENFIREWALL FOOTER -->
 <!--    <table width='100%' border='0'><tr>  -->
@@ -462,12 +474,12 @@ sub openbox
         <td></td>
         <td style='width:145px' ></td>
     </tr>
-    <tr style='background-color: $Header::boxcolour;'>
+    <tr style='background-color: "#88DB78";'>
         <td colspan='1' width='15' height='33'></td>
         <td>
 END
         ;
-    if   ($caption) { print "$caption\n"; }
+    if   ($caption) { print "<b>$caption</b>\n"; }
     else            { print "&nbsp;"; }
     print <<END
         </td>
@@ -475,7 +487,7 @@ END
     </tr>
     <tr>
         <td colspan='3'>
-            <table width='100%' cellpadding='5'><tr><td align='$align' valign='top'>
+            <table width='100%'><tr><td align='$align' valign='top'>
 END
         ;
 }
@@ -588,3 +600,4 @@ END
 }
 
 1;
+
