@@ -10,6 +10,9 @@ body {
 td {
     font-size: 14px;
 }
+td.splitline {
+    height: 35px;
+}
 
 .boldbase {
     font-size: 11px;
@@ -18,9 +21,9 @@ td {
 
 img {
     border: 0;
-    border-width : 0; 
-    border-style : none; 
-    border-color : inherit; 
+    border-width : 0;
+    border-style : none;
+    border-color : inherit;
 }
 
 pre {
@@ -125,7 +128,8 @@ div.ofw_menuElementActive {
 
 div.ofw_menuElementHover {
 /*    color: #98FB98; */
-    background-color: #88DB78;
+/*    background-color: #88DB78; */
+    background-color: #69C;
 }
 
 div.ofw_subMenuElement {
@@ -137,7 +141,8 @@ div.ofw_subMenuElementHover {
 /*    padding: 6px 15px 6px 15px; */
 /*    color: #FFFFFF; */
 /*    background-color: #E0E0E0; */
-    background-color: #88DB78;
+/*    background-color: #88DB78; */
+    background-color: #69C;
 }
 
 /* Connection Status */
@@ -239,15 +244,25 @@ div.ofw_subMenuElementHover {
 }
 
 tr.table1colour {
-    background-color: #C0C0C0;
+    height: 30px;
+    background-color: #F2F2F2;
 }
 
 tr.table2colour {
+    height: 30px;
+    background-color: #FFFFFF;
+}
+tr.table2colour:hover {
     background-color: #F2F2F2;
 }
 
 tr.selectcolour {
     background-color: #FFFF00;
+}
+tr.headbar {
+    height: 30px;
+/*    background-color: #88DB78; */
+    background-color: #69C;
 }
 
 table.percentbar {
@@ -299,3 +314,57 @@ td.button2buttons {
     width: 30%;
     text-align: center;
 }
+
+.commonbuttons,.buttons,.footbutton {
+    display: inline-block;
+    text-align: center;
+    border-radius: 3px;
+    margin-bottom: 0;
+    cursor: pointer;
+    background-image: none;
+    line-height: 1.42857143;
+}
+
+.commonbuttons,.footbutton {
+    color: #FFFFFF;
+    font-weight: bold;
+    min-width: 100px;
+/*    border: 1px solid #58DB78; */
+/*    background-color: #88DB78; */
+    border: 1px solid #69C;
+    background-color: #69C;
+}
+.commonbuttons:hover {
+    background-color: #58DB78;
+}
+
+.footbutton:hover {
+    background-color: #58DB78;
+}
+
+.buttons {
+    border: 0px;
+    min-width: 100px;
+    background-color: #FFFFFF;
+}
+
+div {
+    display: block;
+}
+
+div.input {
+    padding: 15px;
+}
+
+td.label {
+    width:0;
+    white-space:nowrap;
+    padding-right:30px
+}
+
+.footerbuttons {
+    padding: 15px 0;
+    width: 100%;
+    text-align: center;
+}
+
