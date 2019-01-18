@@ -15,10 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) The SmoothWall Team
-# (c) 2001-2014, the Openfirewall Team
-#
-# $Id: changepw.cgi 7558 2014-05-22 13:03:59Z owes $
+# (c) 2018-2019, the Openfirewall Team
 #
 
 # Add entry in menu
@@ -138,7 +135,7 @@ print <<END
 <table width='100%'>
 <tr>
     <td class='comment1button'> &nbsp; </td>
-    <td class='button1button'><input type='submit' name='ACTION_ADMIN' value='$Lang::tr{'save'}' /></td>
+    <td class='button1button'><input type='submit' name='ACTION_ADMIN' class='commonbuttons' value='$Lang::tr{'save'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/system-passwords.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>
@@ -165,7 +162,7 @@ print <<END
 <table width='100%'>
 <tr>
     <td class='comment1button'> &nbsp; </td>
-    <td class='button1button'><input type='submit' name='ACTION_DIAL' value='$Lang::tr{'save'}' /></td>
+    <td class='button1button'><input type='submit' name='ACTION_DIAL' class='commonbuttons' value='$Lang::tr{'save'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/system-passwords.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>

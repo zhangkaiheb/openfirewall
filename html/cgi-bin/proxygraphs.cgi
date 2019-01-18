@@ -1,9 +1,5 @@
 #!/usr/bin/perl
 #
-# (c) 2002 Robert Wood <rob@empathymp3.co.uk>
-#
-# $Id: proxygraphs.cgi 7496 2014-04-22 16:41:58Z owes $
-#
 
 # Add entry in menu
 # MENUENTRY status 060 "ssproxy graphs" "proxy access graphs" haveProxy

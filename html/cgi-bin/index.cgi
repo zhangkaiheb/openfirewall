@@ -466,14 +466,6 @@ print "</table>\n";
 
 print "</div>";
 
-# If an AddOn wants to insert information, than this is the spot to do it.
-# Add code and html below this line.
-# Markerinfobox
-
-
-#&Header::closebox();
-
-
 # If an AddOn wants to insert own box, than this is the spot to do it.
 # Add code and html below this line.
 # Markeraddonbox

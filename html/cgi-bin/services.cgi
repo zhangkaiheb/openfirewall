@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2008-2014, the Openfirewall Team
+# (c) 2014-2018, the Openfirewall Team
 #
 # Add entry in menu
 # MENUENTRY firewall 030 "alt services" "alt services"
@@ -321,16 +321,16 @@ END
 if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
     print <<END;
     <td class='button2buttons'>
-        <input type='submit' name='ACTION' value='$Lang::tr{'update'}' />
+        <input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'update'}' />
         <input type='hidden' name='OLD_SERVICE_NAME' value='$cgiparams{'OLD_SERVICE_NAME'}' />
     </td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'reset'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' /></td>
 END
 }
 else {
     print <<END;
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'add'}' /></td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'reset'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' /></td>
 END
 }
 print <<END;

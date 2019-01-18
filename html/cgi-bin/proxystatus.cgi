@@ -52,7 +52,7 @@ print <<END
 <table width='100%'>
 <tr>
     <td class='comment1button'>&nbsp;</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'refresh'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'refresh'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/status-proxy.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>

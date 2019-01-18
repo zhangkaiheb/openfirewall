@@ -15,10 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2007 Olaf (weizen_42) Westrik
-# (c) 2008-2014, the Openfirewall Team
-#
-# $Id: iptablesgui.cgi 7452 2014-04-11 06:08:12Z owes $
+# (c) 2018-2019, the Openfirewall Team
 #
 
 # Add entry in menu
@@ -105,7 +102,7 @@ print <<END
 <table width='100%'>
 <tr>
     <td class='comment1button'><img src='/blob.gif' alt='*' />&nbsp;$Lang::tr{'this field may be blank'}</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'refresh'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'refresh'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/status-iptables.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>

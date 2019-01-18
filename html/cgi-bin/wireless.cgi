@@ -15,11 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2003 Alan Hourihane <alanh@fairlite.demon.co.uk>
-# (c) 2005 Eric Oberlander, Robert Kerr - Inline editing & DHCP leases
-# (c) 2008-2014, the Openfirewall Team
+# (c) 2018-2019, the Openfirewall Team
 #
-# $Id: wireless.cgi 7240 2014-02-18 22:08:00Z owes $
 #
 
 # Add entry in menu
@@ -269,8 +266,8 @@ print <<END
       <img src='/blob.gif' alt='*' />
       $Lang::tr{'this field may be blank'}</td>
     <td class='button1button'>
-      <input type='hidden' name='ACTION' value='add' />
-      <input type='submit' name='SUBMIT' value='$buttontext' />
+      <input type='hidden' class='commonbuttons' name='ACTION' value='add' />
+      <input type='submit' class='commonbuttons' name='SUBMIT' value='$buttontext' />
     </td>
     <td class='onlinehelp'>
     <a href='${General::adminmanualurl}/firewall-blue-access.html' target='_blank'>

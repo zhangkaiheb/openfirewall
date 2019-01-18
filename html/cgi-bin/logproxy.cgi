@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# Copyright (c) 2014-2018 The Openfirewall Team
+# Copyright (c) 2014-2019 The Openfirewall Team
 #
 
 # Add entry in menu

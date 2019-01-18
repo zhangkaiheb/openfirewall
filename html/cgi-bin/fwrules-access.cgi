@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-#
 
 # Add entry in menu
 # MENUENTRY firewall 080 "firewall access rules" "firewall access rules"

@@ -386,7 +386,7 @@ print <<END
     <td width='25%'>&nbsp;</td>
 </tr></table><table width='100%'><tr>
     <td class='comment1button'>&nbsp;</td>
-    <td class='button1button'><input type='hidden' name='ACTION' value='SAVE' /><input type='submit' name='SUBMIT' value='$Lang::tr{'save'}' /></td>
+    <td class='button1button'><input type='hidden' class='commonbuttons' name='ACTION' value='SAVE' /><input type='submit' name='SUBMIT' value='$Lang::tr{'save'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/status-connections.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a></td>
@@ -490,7 +490,7 @@ print <<END
         <td align='center' class='ofw_iface_bg_ipsec'><b>IPsec</b></td>
         <td align='center' class='ofw_iface_bg_ovpn'><b>OpenVPN</b></td>
     </tr></table></td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'refresh'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'refresh'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/status-connections.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a></td>

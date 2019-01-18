@@ -1563,8 +1563,8 @@ END
     <td class='comment2buttons'><img src='/blob.gif' align='top' alt='*' />&nbsp;
     <font class='base'>$Lang::tr{'this field may be blank'}</font>
     </td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'save and restart'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save and restart'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-urlfilter.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
@@ -1656,11 +1656,11 @@ END
 END
     ;
     if (defined($updatesettings{'UPDATE_SOURCE'}) && $updatesettings{'UPDATE_SOURCE'} ne "") {
-        print "<input type='submit' name='ACTION' value='$Lang::tr{'instant update'}' />";
+        print "<input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'instant update'}' />";
     }
     print <<END
     </td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /><input type='hidden' name='MODE' value='blacklist update' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /><input type='hidden' name='MODE' value='blacklist update' /></td>
     <td class='onlinehelp'>&nbsp;</td>
 </tr>
 </table>
@@ -1938,12 +1938,12 @@ END
         <img src='/blob.gif' alt='*' /><img src='/blob.gif' alt='*' />&nbsp;$Lang::tr{'ctrl select multiple'}
     </td>
     <td class='button2buttons'>
-        <input type='hidden' name='ACTION' value='$Lang::tr{'add'}' />
-        <input type='hidden' name='MODE' value='TIMECONSTRAINT' />
-        <input type='submit' name='SUBMIT' value='$buttontext' />
+        <input type='hidden' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' />
+        <input type='hidden' class='commonbuttons' name='MODE' value='TIMECONSTRAINT' />
+        <input type='submit' class='commonbuttons' name='SUBMIT' value='$buttontext' />
     </td>
     <td class='button2buttons'>
-        <input type='reset' name='ACTION' value='$Lang::tr{'reset'}' />
+        <input type='reset' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' />
     </td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-urlfilter.html' target='_blank'>
@@ -2296,12 +2296,12 @@ END
       -->
     </td>
     <td class='button2buttons'>
-        <input type='hidden' name='ACTION' value='$Lang::tr{'add'}' />
-        <input type='hidden' name='MODE' value='USERQUOTA' />
-        <input type='submit' name='SUBMIT' value='$buttontext' />
+        <input type='hidden' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' />
+        <input type='hidden' class='commonbuttons' name='MODE' value='USERQUOTA' />
+        <input type='submit' class='commonbuttons' name='SUBMIT' value='$buttontext' />
     </td>
     <td class='button2buttons'>
-        <input type='reset' name='ACTION' value='$Lang::tr{'reset'}' />
+        <input type='reset' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' />
     </td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-urlfilter.html' target='_blank'>
@@ -2610,7 +2610,7 @@ END
 <table width='100%'>
 <tr>
     <td class='comment1button'>&nbsp;</td>
-    <td class='button1button'><input type='reset' name='ACTION' value='$Lang::tr{'reset'}' /></td>
+    <td class='button1button'><input type='reset' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-urlfilter.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>

@@ -722,12 +722,12 @@ END
       -->
     </td>
     <td class='button2buttons'>
-        <input type='hidden' name='ACTION' value='$Lang::tr{'add'}' />
-        <input type='hidden' name='MODE' value='USERQUOTA' />
-        <input type='submit' name='SUBMIT' value='$buttontext' />
+        <input type='hidden' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' />
+        <input type='hidden' class='commonbuttons' name='MODE' value='USERQUOTA' />
+        <input type='submit' class='commonbuttons' name='SUBMIT' value='$buttontext' />
     </td>
     <td class='button2buttons'>
-        <input type='reset' name='ACTION' value='$Lang::tr{'reset'}' />
+        <input type='reset' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' />
     </td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-urlfilter.html' target='_blank'>

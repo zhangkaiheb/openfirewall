@@ -15,10 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (C) 2003-05-25 Mark Wormgoor <mark@wormgoor.com>
-# (c) 2003-2016 The Openfirewall Team
+# (c) 2018-2019 The Openfirewall Team
 #
-# $Id: ipsec.cgi 8039 2016-01-04 09:06:48Z owes $
 #
 
 # Add entry in menu
@@ -372,7 +370,7 @@ elsif ($cgiparams{'ACTION'} eq $Lang::tr{'add'} && $cgiparams{'TYPE'} eq '') {
 <table width='100%'>
 <tr>
     <td class='comment1button'>&nbsp;</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'add'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/vpns-ipsec.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>
@@ -1226,7 +1224,7 @@ END
         print "<tr><td colspan='4'><input type='checkbox' name='EDIT_ADVANCED' $checked{'EDIT_ADVANCED'}{'on'} /> $Lang::tr{'edit advanced settings when done'}</td></tr>";
     }
     else {
-        $advancedbutton = "<input type='submit' name='ACTION' value='$Lang::tr{'advanced'}' />";
+        $advancedbutton = "<input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'advanced'}' />";
     }
     print "</table>";
     print <<END
@@ -1380,8 +1378,8 @@ END
 <table width='100%'>
 <tr>
     <td class='comment2button'>$commentblob</td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'cancel'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'cancel'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/vpns-ipsec.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>
@@ -1756,8 +1754,8 @@ END
 <table width='100%'>
 <tr>
     <td class='comment2button'>&nbsp;</td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'cancel'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'cancel'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/vpns-ipsec.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>
@@ -1893,7 +1891,7 @@ nat-t:<input type='checkbox' name='DBG_NATT' $checked{'DBG_NATT'} />
     <td colspan='2'>&nbsp;</td>
 </tr><tr>
     <td class='comment1button'><img src='/blob.gif' alt='*' /><img src='/blob.gif' alt='*' />&nbsp;$Lang::tr{'vpn delayed start help'}</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/vpns-ipsec.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>
@@ -2096,7 +2094,7 @@ print <<END
 <form method='post' action='$ENV{'SCRIPT_NAME'}'><table width='100%'>
 <tr>
     <td class='comment1button'>&nbsp;</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'add'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/vpns-ipsec.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>

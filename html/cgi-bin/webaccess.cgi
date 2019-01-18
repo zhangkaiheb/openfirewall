@@ -16,9 +16,8 @@
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 # (c) 2004-2008 marco.s - http://www.advproxy.net
-# (c) 2010-2011 The Openfirewall Team
+# (c) 2018-2019 The Openfirewall Team
 #
-# $Id: webaccess.cgi 6013 2011-10-31 08:19:13Z owes $
 #
 
 use strict;

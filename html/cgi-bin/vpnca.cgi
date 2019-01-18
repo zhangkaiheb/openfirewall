@@ -15,9 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2001-2016 The Openfirewall Team
+# (c) 2018-2019 The Openfirewall Team
 #
-# $Id: vpnca.cgi 8074 2016-01-18 21:01:51Z owes $
 #
 
 # Add entry in menu

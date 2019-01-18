@@ -15,11 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall. If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) The SmoothWall Team
 #
-# Copyright (c) 2004-2014 The Openfirewall Team
+# Copyright (c) 2018-2019 The Openfirewall Team
 #
-# $Id: upload.cgi 7453 2014-04-11 07:28:44Z owes $
 #
 
 # Add entry in menu

@@ -15,9 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) The SmoothWall Team
-# Copyright (c) 2001-2011 The IPCop Team
-# Copyright (c) 2017-2019 The Openfirewall Team
+# Copyright (c) 2018-2019 The Openfirewall Team
 #
 #
 

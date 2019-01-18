@@ -1,12 +1,8 @@
 #!/usr/bin/perl
 #
-# SmoothWall CGIs
 #
 # This code is distributed under the terms of the GPL
 #
-# (c) The SmoothWall Team
-#
-# $Id: netstatus.cgi 4476 2010-04-15 18:33:40Z eoberlander $
 #
 
 # Add entry in menu

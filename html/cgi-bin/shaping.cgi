@@ -15,9 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-#  Copyright 2003-04-06 David Kilpatrick <dave@thunder.com.au>
+#  Copyright 2018-2019 The Openfirewall Team
 #
-# $Id: shaping.cgi 6356 2012-02-17 13:08:32Z dotzball $
 #
 
 # Add entry in menu
@@ -239,7 +238,7 @@ print <<END
 <table width='100%'>
 <tr>
     <td class='comment1button'><img src='/blob.gif' align='top' alt='*' />&nbsp;$Lang::tr{'this field may be blank'}</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-shaping.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>
@@ -286,7 +285,7 @@ print <<END
 <table width='100%'>
 <tr>
     <td class='comment1button'>&nbsp;</td>
-    <td class='button1button'><input type='submit' name='SUBMIT' value='$buttontext' /><input type='hidden' name='ACTION' value='$Lang::tr{'add'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='SUBMIT' value='$buttontext' /><input type='hidden' name='ACTION' value='$Lang::tr{'add'}' /></td>
     <td class='onlinehelp'>&nbsp;</td>
 </tr>
 </table>

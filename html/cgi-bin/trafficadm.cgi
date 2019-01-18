@@ -412,7 +412,7 @@ print <<END;
     <!--
         <img src='/blob.gif' alt ='*' align='top' />&nbsp;$Lang::tr{'this field may be blank'}
      --></td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
     <td class='button2buttons'>
 END
 

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2001-2012 The Openfirewall Team
+# (c) 2018-2019 The Openfirewall Team
 #
 
 # Add entry in menu
@@ -622,7 +622,7 @@ else {
 <table width='100%'>
 <tr>
     <td class='comment1button'><img src='/blob.gif' align='top' alt='*' />&nbsp;$Lang::tr{'this field may be blank'}</td>
-    <td class='button1button'><input type='hidden' name='ACTION' value='SAVE_MAIN' /><input type='submit' name='SUBMIT' value='$Lang::tr{'save'}' /></td>
+    <td class='button1button'><input type='hidden' class='commonbuttons' name='ACTION' value='SAVE_MAIN' /><input type='submit' name='SUBMIT' value='$Lang::tr{'save'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-dhcp.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a></td>
@@ -693,8 +693,8 @@ if ($disable_fixed == 0) {
     <td class='comment1button'><img src='/blob.gif' align='top' alt='*' />&nbsp;$Lang::tr{'this field may be blank'}
         &nbsp;&nbsp;$Lang::tr{'dhcp fixed lease help1'}</td>
     <td class='button1button'><input type='hidden' name='ACTION' value='SAVE_FIXED_LEASE' />
-        <input type='hidden' name='KEY_FIXED' value='$dhcpsettings{'KEY_FIXED'}' />
-        <input type='submit' name='SUBMIT' value='$buttontext' /></td>
+        <input type='hidden' class='commonbuttons' name='KEY_FIXED' value='$dhcpsettings{'KEY_FIXED'}' />
+        <input type='submit' class='commonbuttons' name='SUBMIT' value='$buttontext' /></td>
     <td class='onlinehelp'>&nbsp;</td>
 </tr>
 </table>
@@ -712,8 +712,8 @@ else {
     <td class='comment1button'>&nbsp;</td>
     <td class='button1button'>
         <img src='/images/null.gif' width='21' height='1' alt='' />
-        <input type='hidden' name='ACTION' value='ADD_FIXED_LEASE' />
-        <input type='submit' name='SUBMIT' value='$Lang::tr{'add new lease'}' />
+        <input type='hidden' class='commonbuttons' name='ACTION' value='ADD_FIXED_LEASE' />
+        <input type='submit' class='commonbuttons' name='SUBMIT' value='$Lang::tr{'add new lease'}' />
     </td>
     <td class='onlinehelp'>&nbsp;</td>
 </tr>

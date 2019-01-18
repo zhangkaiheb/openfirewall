@@ -223,12 +223,12 @@ print <<END
 <hr />
 <table width='100%'>
 <tr>
-    <td class='comment2buttons'>&nbsp;</td>
+<!--    <td class='comment2buttons'>&nbsp;</td> -->
     <td class='button2buttons'>
-        <input type='submit' name='ACTION' value='$Lang::tr{'restore defaults'}' />
+        <input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'restore defaults'}' />
     </td>
     <td class='button2buttons'>
-        <input type='submit' name='ACTION' value='$Lang::tr{'save'}' />
+        <input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'save'}' />
     </td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/system-gui-settings.html' target='_blank'>

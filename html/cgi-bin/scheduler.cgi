@@ -16,7 +16,6 @@
 # along with Openfirewall; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 # 
-# $Id: scheduler.cgi 5120 2010-11-13 12:51:33Z eoberlander $
 #
 
 # Add entry in menu
@@ -321,9 +320,9 @@ print <<END
 <table width='100%'>
 <tr>
     <td class='comment1button'><img src='/blob.gif' align='top' alt='*' />&nbsp;$Lang::tr{'this field may be blank'}</td>
-    <td class='button1button'><input type='hidden' name='ACTION' value='$hiddentext' />
-        <input type='submit' name='SUBMIT' value='$buttontext' />
-        <input type='hidden' name='ID' value='$cgiparams{'ID'}' /></td>
+    <td class='button1button'><input type='hidden' class='commonbuttons' name='ACTION' value='$hiddentext' />
+        <input type='submit' class='commonbuttons' name='SUBMIT' value='$buttontext' />
+        <input type='hidden' class='commonbuttons' name='ID' value='$cgiparams{'ID'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/system-scheduler.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>

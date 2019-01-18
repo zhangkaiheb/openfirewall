@@ -15,9 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2011-2014 The Openfirewall Team
-#
-# $Id: email.cgi 7240 2014-02-18 22:08:00Z owes $
+# (c) 2018-2019 The Openfirewall Team
 #
 
 # Add entry in menu
@@ -279,7 +277,7 @@ print <<END;
         <img src='/blob.gif' alt='*' /><img src='/blob.gif' alt='*' />&nbsp;$Lang::tr{'email to help'}
     </td>
     <td class='button2buttons'>
-        <input type='submit' name='ACTION' value='$Lang::tr{'save'}' />
+        <input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' />
     </td>
     <td class='button2buttons'>
 END

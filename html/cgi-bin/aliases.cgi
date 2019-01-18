@@ -294,7 +294,7 @@ print <<END
 <table width='100%'><tr>
     <td class='comment1button'><img src='/blob.gif' align='top' alt='*' />&nbsp;$Lang::tr{'this field may be blank'}</td>
     <td class='button1button'><input type='hidden' name='ACTION' value='$Lang::tr{'add'}' />
-        <input type='submit' name='SUBMIT' value='$buttontext' /></td>
+        <input type='submit' name='SUBMIT' class='commonbuttons' value='$buttontext' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/network-extalias.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a></td>

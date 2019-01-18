@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall. If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (c) 2014-2018 The Openfirewall Team
+# Copyright (c) 2014-2019 The Openfirewall Team
 #
 
 # Add entry in menu
@@ -814,7 +814,7 @@ END
 <table width='100%'>
 <tr>
     <td class='comment1button'><img src='/blob.gif' align='top' alt='*' />&nbsp;$Lang::tr{'this field may be blank'}</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/network-ppp-settings.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>

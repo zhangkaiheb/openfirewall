@@ -242,18 +242,18 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
 
     #   put in next release - author has authorized GPL inclusion
     #   print "<td align='center'><a href='ipcalc.cgi' target='_blank'>IP Calculator</a></td>\n";
-    print "<td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'update'}' />\n";
+    print "<td class='button2buttons'><input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'update'}' />\n";
     print "<input type='hidden' name='OLD_ADR_NAME' value='$cgiparams{'ADR_NAME'}' /></td>\n";
 }
 else {
 
     #   put in next release - author has authorized GPL inclusion
     #   print "<td align='center'><a href='ipcalc.cgi' target='_blank'>IP Calculator</a></td>\n";
-    print "<td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'add'}' /></td>\n";
+    print "<td class='button2buttons'><input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'add'}' /></td>\n";
 }
 print <<END;
     <td class='button2buttons'>
-        <input type='submit' name='ACTION' value='$Lang::tr{'reset'}' />
+        <input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'reset'}' />
     </td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/firewall-addresses.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>

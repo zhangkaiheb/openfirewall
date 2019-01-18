@@ -16,10 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# 2005  Franck Bourdonnec, major rewrite
-# (c) 200x-2016 The Openfirewall Team
-#
-# $Id: backup.cgi 8074 2016-01-18 21:01:51Z owes $
+# (c) 2018-2019 The Openfirewall Team
 #
 #
 
@@ -450,7 +447,7 @@ print <<END
 <table width='100%' border='0'>
 <tr>
     <td class='comment1button'>$Lang::tr{'insert floppy'}</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'backup to floppy'}' /></td>
+    <td class='button1button'><input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'backup to floppy'}' /></td>
     <td class='onlinehelp'><a href='${General::adminmanualurl}/system-backup.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a></td>
 </tr>
 </table>

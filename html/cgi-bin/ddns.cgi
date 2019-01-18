@@ -15,12 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2001-2014 The Openfirewall Team
+# (c) 2018-2019 The Openfirewall Team
 #
-# Over the years many people have changed and contributed to this file.
-# Check CVS and SVN for specifics.
-#
-# $Id: ddns.cgi 7456 2014-04-11 08:32:54Z owes $
 #
 
 # Add entry in menu
@@ -245,7 +241,7 @@ END
 <table width='100%'>
 <tr>
     <td class='comment1button'><img src='/blob.gif' align='top' alt='*' />&nbsp;$Lang::tr{'avoid dod'}</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-dyndns.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>
@@ -340,8 +336,8 @@ $fhelp
 <tr>
     <td class='comment1button'>$fblobhelp</td>
     <td class='button1button'>
-    <input type='hidden' name='ACTION' value='$Lang::tr{'add'}' />
-    <input type='submit' name='SUBMIT' value='$buttontext' /></td>
+    <input type='hidden' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' />
+    <input type='submit' class='commonbuttons' name='SUBMIT' value='$buttontext' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-dyndns.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>
@@ -365,8 +361,8 @@ else {
 <tr>
     <td class='comment1button'>&nbsp;</td>
     <td class='button1button'>
-        <input type='hidden' name='ACTION' value='ADD_HOST' />
-        <input type='submit' name='SUBMIT' value='$Lang::tr{'add'}' />
+        <input type='hidden' name='ACTION' class='commonbuttons'  value='ADD_HOST' />
+        <input type='submit' name='SUBMIT' class='commonbuttons' value='$Lang::tr{'add'}' />
     </td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-dyndns.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>

@@ -1,12 +1,8 @@
 #!/usr/bin/perl
 #
-# SmoothWall CGIs
 #
 # This code is distributed under the terms of the GPL
 #
-# (c) The SmoothWall Team
-#
-# $Id: shutdown.cgi 5417 2011-02-09 06:42:26Z dotzball $
 #
 
 # Add entry in menu

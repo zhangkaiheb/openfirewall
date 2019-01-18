@@ -15,15 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Main idea from zeroconcept
-# ZERNINA-VERSION:0.9.5b
-# (c) 2007 Ufuk Altinkaynak
 #
-# Openfirewall and OpenVPN eas as one two three..
+# (c) 2018-2019 The Openfirewall Team
 #
-# (c) 2007-2016 The Openfirewall Team
-#
-# $Id: openvpn.cgi 8074 2016-01-18 21:01:51Z owes $
 #
 
 # Add entry in menu
@@ -830,8 +824,8 @@ END
 <table width='100%'>
 <tr>
     <td class='comment2buttons'><img src='/blob.gif' alt='*' />&nbsp;$Lang::tr{'this field may be blank'}</td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'save-adv-options'}' /></td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'cancel'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save-adv-options'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'cancel'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/vpns-openvpn.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
@@ -987,7 +981,7 @@ END
 <table width='100%'>
 <tr>
     <td class='comment1button'>&nbsp;</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'add'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/vpns-openvpn.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
     </td>
@@ -1652,8 +1646,8 @@ END
 <table width='100%'>
 <tr>
     <td class='comment2buttons'><img src='/blob.gif' alt='*' />&nbsp;$Lang::tr{'this field may be blank'}</td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'cancel'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'cancel'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/vpns-openvpn.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
@@ -2048,8 +2042,8 @@ END
 <form method='post' action='$ENV{'SCRIPT_NAME'}'><table width='100%'>
 <tr>
     <td class='comment2buttons'>&nbsp;</td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'add'}' $addclient /></td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'openvpn con stat'}' $activeonrun /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' $addclient /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'openvpn con stat'}' $activeonrun /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/vpns-openvpn.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>

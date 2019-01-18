@@ -1,12 +1,8 @@
 #!/usr/bin/perl
 #
-# SmoothWall CGIs
 #
 # This code is distributed under the terms of the GPL
 #
-# (c) The SmoothWall Team
-#
-# $Id: dial.cgi 4273 2010-02-21 21:38:20Z owes $
 #
 
 use strict;

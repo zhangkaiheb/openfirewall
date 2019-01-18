@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2014-2018, the Openfirewall Team
+# (c) 2018-2019, the Openfirewall Team
 #
 
 # Add entry in menu
@@ -293,18 +293,18 @@ END
         $blueblob
     </td>
     <td class='button2buttons'>
-        <input type='hidden' name='EDIT_FORM' value='policy' />
-        <input type='submit' name='ACTION' value='$Lang::tr{'save'}' />
+        <input type='hidden' class='commonbuttons' name='EDIT_FORM' value='policy' />
+        <input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' />
     </td>
     <td class='button2buttons'>
 END
     # if user input cause an error
     # and user want a reset, we re-read settings from settingsfile
     if ($errormessage ne '') {
-        print "<input type='submit' name='ACTION' value='$Lang::tr{'reset'}' />";
+        print "<input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' />";
     }
     else {
-        print "<input type='reset' name='ACTION' value='$Lang::tr{'reset'}' />";
+        print "<input type='reset' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' />";
     }
 
     print <<END;
@@ -391,8 +391,8 @@ END
         &nbsp;<font class='base'>$Lang::tr{'if this is not your mac'}</font>
     </td>
     <td class='button2buttons'>
-        <input type='hidden' name='EDIT_FORM' value='settings' />
-        <input type='submit' name='ACTION' value='$Lang::tr{'save'}' />
+        <input type='hidden' class='commonbuttons' name='EDIT_FORM' value='settings' />
+        <input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' />
     </td>
     <td class='button2buttons'>
 END

@@ -126,7 +126,7 @@ print <<END
 <table width='100%'>
 <tr>
     <td class='comment1button'><img src='/blob.gif' alt='*' /> $Lang::tr{'ssh access tip'}</td>
-    <td class='button1button'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button1button'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/system-ssh.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>

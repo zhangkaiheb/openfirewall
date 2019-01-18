@@ -1023,7 +1023,7 @@ END
     <td class='comment1button'><img src='/blob.gif' align='top' alt='*' />&nbsp;
     <font class='base'>$Lang::tr{'this field may be blank'}</font>
     </td>
-    <td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'save'}' /></td>
+    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'save'}' /></td>
     <td class='onlinehelp'>
         <a href='${General::adminmanualurl}/services-webproxy.html' target='_blank'>
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
