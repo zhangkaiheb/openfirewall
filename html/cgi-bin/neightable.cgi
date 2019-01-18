@@ -213,15 +213,15 @@ print <<END;
 END
 
     if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-        print "<td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'update'}' />\n";
-        print "<input type='hidden' name='OLD_IFACE_NAME' value='$cgiparams{'IFACE_NAME'}' /></td>\n";
+        print "<td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'update'}' />\n";
+        print "<input type='hidden' class='commonbuttons' name='OLD_IFACE_NAME' value='$cgiparams{'IFACE_NAME'}' /></td>\n";
     }
     else {
-        print "<td class='button2buttons'><input type='submit' name='ACTION' value='$Lang::tr{'add'}' /></td>\n";
+        print "<td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' /></td>\n";
     }
     print <<END;
     <td class='button2buttons'>
-        <input type='submit' name='ACTION' value='$Lang::tr{'reset'}' />
+        <input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' />
     </td>
     <td  class='onlinehelp'>
         <a href='${General::adminmanualurl}/firewall-interfaces.html#section' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
