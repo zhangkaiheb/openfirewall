@@ -143,6 +143,11 @@ usr/local/apache/html/images/web-support.png
 usr/local/apache/html/include
 usr/local/apache/html/include/domLib.js
 usr/local/apache/html/include/domMenu.js
+usr/local/apache/html/include/fontawesome.css
+usr/local/apache/html/include/fontawesome-webfont.ttf
+usr/local/apache/html/include/fontawesome-webfont.woff
+usr/local/apache/html/include/fontawesome-webfont.woff2
+usr/local/apache/html/include/ofwsys.js
 usr/local/apache/html/include/openfirewall.css
 usr/local/apache/html/index.cgi
 usr/local/apache/html/openfirewall_big.gif
