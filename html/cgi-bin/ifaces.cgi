@@ -74,8 +74,6 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'add'}) {
     &validateIFaceParams(\%custIfaces);
     &ip_link_add_cmd();
 
-print "br member $cgiparams{'BR_MEMBERS'}";
-print "bond member $cgiparams{'BOND_MEMBERS'}";
     unless ($errormessage) {
         $custIfaces{$cgiparams{'IF_NAME'}}{'TYPE'}        = $cgiparams{'TYPE'};
         $custIfaces{$cgiparams{'IF_NAME'}}{'DESCRIPTION'} = $cgiparams{'DESCRIPTION'};
@@ -199,23 +197,19 @@ my $hiddenIfaceName = '';
 #############################################################
 
 if ($cgiparams{'ACTION'} eq '') {
-    &Header::openbigbox('100%', 'left');
+#    &Header::openbigbox('100%', 'left');
 #    &Header::openbox('100%', 'left', "$Lang::tr{'custom interfaces'}:");
     print <<END;
-<div align='center' style='margin-top:15px'>
+<div align='center' style='margin-top:0px'>
 <div align='left' tyle='margin-top:5px'>
 <table width='100%' height='33px' align='center'>
-<tr>
-    <td><strong>$Lang::tr{'custom interfaces'}</strong></td>
-    <td></td>
-    <td>
+<tr style='background-color: #F2F2F2;'>
+    <td align='right'>
        <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-       <input class='buttons' type='submit' name='ACTION' value='$Lang::tr{'add interface'}' />
+       <input style='background-color: #F2F2F2;' class='buttons' type='submit' name='ACTION' value='$Lang::tr{'add interface'}' />
        </form>
     </td>
-    <td></td>
 </tr>
-<tr><td colspan='2' class='base'><hr /></td></tr>
 </table>
 <table width='100%' height='33px' align='center'>
 <tr class='headbar' align="center">
@@ -231,13 +225,13 @@ END
 
     &display_custom_interfaces(\%custIfaces);
 
-    &display_default_interfaces();
+#    &display_default_interfaces();
     print <<END;
 </table>
 </div>
 END
 
-    &Header::closebigbox();
+#    &Header::closebigbox();
 }
 
 
@@ -634,6 +628,9 @@ sub display_custom_interfaces {
     foreach my $ifaceName (@sortedKeys) {
 
     my $type = '';
+    if ($custIfaceRef->{$ifaceName}{'TYPE'} eq '0') {
+        $type = 'PHYSICAL';
+    }
     if ($custIfaceRef->{$ifaceName}{'TYPE'} eq '1') {
         $type = 'VLAN';
     }
@@ -644,8 +641,15 @@ sub display_custom_interfaces {
         $type = 'BOND';
     }
 
+    if ($custIfaceRef->{$ifaceName}{'IPADDRESS'} eq '') {
+        $custIfaceRef->{$ifaceName}{'IPADDRESS'} = '0.0.0.0';
+    }
+    if ($custIfaceRef->{$ifaceName}{'NETMASK'} eq '') {
+        $custIfaceRef->{$ifaceName}{'NETMASK'} = '0.0.0.0';
+    }
+
+    print "<tr class='table".int(($id % 2) + 1)."colour'>";
     print <<END;
-    <tr class='table".int(($id % 2) + 1)."colour'>
     <td><strong>$ifaceName</strong></td>
     <td align='center'>$custIfaceRef->{$ifaceName}{'DESCRIPTION'}</td>
     <td align='center'>$custIfaceRef->{$ifaceName}{'IPADDRESS'}/$custIfaceRef->{$ifaceName}{'NETMASK'}</td>

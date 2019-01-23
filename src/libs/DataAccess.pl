@@ -392,6 +392,11 @@ sub readCustIfaces
     $ifacesCount{'NUM_EXTERNAL'} = 0;
     $ifacesCount{'NUM_INTERNAL'} = 0;
 
+
+    if (-z "$DATA::customIFaceFile") {
+        &initCustomInterface();
+    }
+
     open(IFACE, "$DATA::customIFaceFile") or die 'Unable to open custom iface file.';
     my @iface = <IFACE>;
     close(IFACE);
@@ -403,19 +408,22 @@ sub readCustIfaces
         $ifaces->{$tmp[0]}{'IFACE'}        = $tmp[2];
         $ifaces->{$tmp[0]}{'BR_MEMBERS'}   = $tmp[3];
         $ifaces->{$tmp[0]}{'BOND_MEMBERS'} = $tmp[4];
-        $ifaces->{$tmp[0]}{'ADDRESSING_MODE'}    = $tmp[5];
+        $ifaces->{$tmp[0]}{'ADDRESSING_MODE'} = $tmp[5];
         $ifaces->{$tmp[0]}{'IPADDRESS'}    = $tmp[6];
         $ifaces->{$tmp[0]}{'NETMASK'}      = $tmp[7];
         $ifaces->{$tmp[0]}{'MTU'}          = $tmp[8];
         $ifaces->{$tmp[0]}{'ACCESSMODE'}   = $tmp[9];
         $ifaces->{$tmp[0]}{'VLANID'}       = $tmp[10];
-        $ifaces->{$tmp[0]}{'DESCRIPTION'}  = $tmp[11];
-        $ifaces->{$tmp[0]}{'USED_BR'}      = $tmp[12];
-        $ifaces->{$tmp[0]}{'USED_BOND'}    = $tmp[13];
-        $ifaces->{$tmp[0]}{'USED_EOUTE'}   = $tmp[14];
-        $ifaces->{$tmp[0]}{'USED_RULE'}    = $tmp[15];
-        $ifaces->{$tmp[0]}{'EXTERNAL'}     = $tmp[16];
-        $ifaces->{$tmp[0]}{'USED_COUNT'}   = $tmp[17];
+        $ifaces->{$tmp[0]}{'MAC'}          = $tmp[11];
+        $ifaces->{$tmp[0]}{'SPEED'}        = $tmp[12];
+        $ifaces->{$tmp[0]}{'DUPLEX'}       = $tmp[13];
+        $ifaces->{$tmp[0]}{'DESCRIPTION'}  = $tmp[14];
+        $ifaces->{$tmp[0]}{'USED_BR'}      = $tmp[15];
+        $ifaces->{$tmp[0]}{'USED_BOND'}    = $tmp[16];
+        $ifaces->{$tmp[0]}{'USED_ROUTE'}   = $tmp[17];
+        $ifaces->{$tmp[0]}{'USED_RULE'}    = $tmp[18];
+        $ifaces->{$tmp[0]}{'EXTERNAL'}     = $tmp[19];
+        $ifaces->{$tmp[0]}{'USED_COUNT'}   = $tmp[20];
 
         if($ifaces->{$tmp[0]}{'EXTERNAL'} eq 'on') {
             $ifacesCount{'NUM_EXTERNAL'}++;
@@ -441,14 +449,6 @@ sub saveCustIfaces
 
         # for bridge members, use plus sign as seprates.
         print FILE "$ifaces->{$ifaceName}{'BR_MEMBERS'},";
-#        for (my $i; $i < $ifaces->{$ifaceName}{'BR_MBR_CNT'}; $i++) {
-#            my $key = 'MEMBER'.'$i';
-#            print FILE "$ifaces->{$ifaceName}{'key'}";
-#            if ($i+1 < $ifaces->{$ifaceName}{'BR_MBR_CNT'}) {
-#                print FILE "+";
-#            }
-#        }
-#        print FILE ",";
 
         # for bond members, use plus sign as seprates.
         print FILE "$ifaces->{$ifaceName}{'BOND_MEMBER'},";
@@ -467,6 +467,9 @@ sub saveCustIfaces
         print FILE "$ifaces->{$ifaceName}{'MTU'},";
         print FILE "$ifaces->{$ifaceName}{'ACCESSMODE'},";
         print FILE "$ifaces->{$ifaceName}{'VLANID'},";
+        print FILE "$ifaces->{$ifaceName}{'MAC'},";
+        print FILE "$ifaces->{$ifaceName}{'SPEED'},";
+        print FILE "$ifaces->{$ifaceName}{'DUPLEX'},";
         print FILE "$ifaces->{$ifaceName}{'DESCRIPTION'},";
         print FILE "$ifaces->{$ifaceName}{'USED_BR'},";
         print FILE "$ifaces->{$ifaceName}{'USED_BOND'},";
@@ -476,6 +479,52 @@ sub saveCustIfaces
         print FILE "$ifaces->{$ifaceName}{'USED_COUNT'}\n";
     }
     close(FILE);
+}
+
+sub initCustomInterface
+{
+    my %intfaces = ();
+    my %netsettings = ();
+    &General::readhash("/var/ofw/ethernet/settings", \%netsettings);
+
+    my $ifname = "";
+
+    $ifname = $netsettings{'GREEN_1_DEV'};
+    if ($ifname eq '') {
+        return 0;
+    }
+    $intfaces{$ifname}{'TYPE'}        = "0";
+    $intfaces{$ifname}{'IFACE'}       = $netsettings{'GREEN_1_DEV'};
+    $intfaces{$ifname}{'ADDRESSING_MODE'} = "STATIC";
+    $intfaces{$ifname}{'IPADDRESS'} = $netsettings{'GREEN_1_ADDRESS'};
+    $intfaces{$ifname}{'NETMASK'} = $netsettings{'GREEN_1_NETMASK'};
+    $intfaces{$ifname}{'MAC'} = $netsettings{'GREEN_1_MAC'};
+
+
+    $ifname = $netsettings{'RED_1_DEV'};
+    if ($ifname eq '') {
+        &saveCustIfaces(\%intfaces);
+        return 0;
+    }
+    $intfaces{$ifname}{'TYPE'}        = "0";
+    $intfaces{$ifname}{'IFACE'}       = $netsettings{'RED_1_DEV'};
+    $intfaces{$ifname}{'ADDRESSING_MODE'} = $netsettings{'RED_1_TYPE'};
+    $intfaces{$ifname}{'IPADDRESS'} = $netsettings{'RED_1_ADDRESS'};
+    $intfaces{$ifname}{'NETMASK'} = $netsettings{'RED_1_NETMASK'};
+    $intfaces{$ifname}{'MAC'} = $netsettings{'RED_1_MAC'};
+
+
+    for (my $i = 0; $i < $netsettings{'IF_NONE_COUNT'}; $i++) {
+        $ifname = $netsettings{'IF_'.$i.'_DEV'};
+
+        $intfaces{$ifname}{'TYPE'}        = "0";
+        $intfaces{$ifname}{'IFACE'}       = $netsettings{'IF_'.$i.'_DEV'};
+        $intfaces{$ifname}{'MAC'} = $netsettings{'IF_'.$i.'_MAC'};
+    }
+
+    &saveCustIfaces(\%intfaces);
+
+	return 0;
 }
 
 #######################################################

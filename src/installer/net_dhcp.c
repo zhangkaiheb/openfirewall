@@ -17,10 +17,8 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2010, the Openfirewall Team
+ * (c) 2018-2020, the Openfirewall Team
  *
- * $Id: net_dhcp.c 5182 2010-11-28 15:56:41Z owes $
- * 
  */
 
 

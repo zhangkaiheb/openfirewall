@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2014-2018, the Openfirewall Team
+ * (c) 2014-2019, the Openfirewall Team
  *
  */
 
@@ -404,7 +404,7 @@ static void scancards(void)
 }
 
 
-/* Choose type of internet connection: analog modem, isdn, PPPoE, PPtP, dhcp (ethernet), static (ethernet) */
+/* Choose type of internet connection: PPPoE, PPtP, static (ethernet), dhcp (ethernet) */
 static void redconfigtype(void)
 {
     int i;
@@ -1102,6 +1102,7 @@ int handlenetworking(void)
     update_kv(&eth_kv, "RED_1_DEV", keyvalue);
 
     if (flag_is_state == INST_SETUPCHROOT) {
+        int i, n;
         /* When installing we run (some) configwindows in sequence */
         NODEKV *kv_dhcp_params = NULL;
 
@@ -1130,9 +1131,9 @@ int handlenetworking(void)
             changehostname();
             changednsgateway();
         }
-        else if (!strcmp(kv_red_type, "ISDN")) {
-            handleisdn();
-        }
+//        else if (!strcmp(kv_red_type, "ISDN")) {
+//            handleisdn();
+//        }
 
         find_kv_default(eth_kv, "BLUE_COUNT", keyvalue);
         if (keyvalue[0] != '0') {
@@ -1142,6 +1143,32 @@ int handlenetworking(void)
         find_kv_default(eth_kv, "ORANGE_COUNT", keyvalue);
         if (keyvalue[0] != '0') {
             changeaddress("ORANGE", &changed_orange);
+        }
+
+        /* For NONE colour interfaces */
+        for (i = 0, n = 0; i < get_network_num(); i++) {
+            char key[STRING_SIZE];
+            char prefix[32] = "IF";
+
+            if (networks[i].colour != NONE)
+                continue;
+
+			snprintf(key, STRING_SIZE, "%s_%d_DEV", prefix, n);
+			update_kv(&eth_kv, key, networks[i].device);
+
+			snprintf(key, STRING_SIZE, "%s_%d_DRIVER", prefix, n);
+			update_kv(&eth_kv, key, networks[i].module);
+
+			snprintf(key, STRING_SIZE, "%s_%d_MAC", prefix, n);
+			update_kv(&eth_kv, key, networks[i].address);
+
+            n++;
+        }
+        if (n) {
+            char val[STRING_SIZE];
+
+            snprintf(val, STRING_SIZE, "%d", n);
+            update_kv(&eth_kv, "IF_NONE_COUNT", val);
         }
 
         write_kv_to_file(&eth_kv, "/var/ofw/ethernet/settings");
@@ -1192,9 +1219,9 @@ int handlenetworking(void)
             if (access("/var/ofw/red/active", 0) != -1) {
                 errorbox(gettext("TR_RED_IN_USE"));
             }
-            else {
-                handleisdn();
-            }
+//            else {
+//                handleisdn();
+//            }
             break;
         case 3:
             selectchangeaddress();
