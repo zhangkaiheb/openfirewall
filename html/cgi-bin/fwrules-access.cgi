@@ -335,11 +335,11 @@ if (!$invalidSettings) {
         || $cgiparams{'BOX_ACTION'} eq "$Lang::tr{'cancel'}"
         || $cgiparams{'BOX_ACTION'} eq "$Lang::tr{'save'}")
     {
-        if ($warnOpenFwMessage) {
-            &Header::openbox('100%', 'left', $Lang::tr{'warning messages'}, 'warning');
-            print "<b>$Lang::tr{'note'}:</b><br />$warnOpenFwMessage\n";
-            &Header::closebox();
-        }
+##        if ($warnOpenFwMessage) {
+##            &Header::openbox('100%', 'left', $Lang::tr{'warning messages'}, 'warning');
+##            print "<b>$Lang::tr{'note'}:</b><br />$warnOpenFwMessage\n";
+##            &Header::closebox();
+##        }
         &printSelectNewRuleBox();
         &printCurrentRulesBox('all');
     }
@@ -983,7 +983,7 @@ sub validateDestParams
 sub checkBetweenParams
 {
     # Check if this is an advanced rule
-    if ($cgiparams{'RULEACTION'} eq 'accept') {
+    if ($cgiparams{'RULEACTION'} eq 'accept_XXX') {
 
         if ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
 
@@ -3313,18 +3313,18 @@ END
 END
         }
     }
-    if ($warnOpenFwMessage) {
-        print <<END;
-<tr>
-    <td colspan='3' class='base'>
-        <font color='RED'>
-            <b>$Lang::tr{'note'}:</b><br />
-            $warnOpenFwMessage
-        </font>
-    </td>
-</tr>
-END
-    }
+##    if ($warnOpenFwMessage) {
+##        print <<END;
+##<tr>
+##    <td colspan='3' class='base'>
+##        <font color='RED'>
+##            <b>$Lang::tr{'note'}:</b><br />
+##            $warnOpenFwMessage
+##        </font>
+##    </td>
+##</tr>
+##END
+##    }
 
     print <<END;
 </table>
