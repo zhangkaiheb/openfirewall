@@ -36,6 +36,7 @@ $DATA::blueAdressesFile    = "/var/ofw/firewall/wireless";
 $DATA::configfile          = "/var/ofw/firewall/config";
 $DATA::policyFile          = "/var/ofw/firewall/policy";
 
+
 @DATA::ruleKeys_unique = (
     'SRC_NET_TYPE', 'SRC_NET',      'SRC_ADR_TYPE', 'SRC_ADR',      'INV_SRC_ADR',  'SRC_PORT',     'INV_SRC_PORT',
     'PORTFW_EXT_ADR', 'PORTFW_SERVICE_TYPE','PORTFW_SERVICE',
@@ -512,6 +513,32 @@ sub initCustomInterface
     $intfaces{$ifname}{'IPADDRESS'} = $netsettings{'RED_1_ADDRESS'};
     $intfaces{$ifname}{'NETMASK'} = $netsettings{'RED_1_NETMASK'};
     $intfaces{$ifname}{'MAC'} = $netsettings{'RED_1_MAC'};
+
+    $ifname = $netsettings{'BLUE_1_DEV'};
+    if ($ifname eq '') {
+        &saveCustIfaces(\%intfaces);
+        return 0;
+    }
+    $intfaces{$ifname}{'TYPE'}        = "0";
+    $intfaces{$ifname}{'IFACE'}       = $netsettings{'BLUE_1_DEV'};
+    $intfaces{$ifname}{'ADDRESSING_MODE'} = $netsettings{'BLUE_1_TYPE'};
+    $intfaces{$ifname}{'IPADDRESS'} = $netsettings{'BLUE_1_ADDRESS'};
+    $intfaces{$ifname}{'NETMASK'} = $netsettings{'BLUE_1_NETMASK'};
+    $intfaces{$ifname}{'MAC'} = $netsettings{'BLUE_1_MAC'};
+
+
+    $ifname = $netsettings{'ORANGE_1_DEV'};
+    if ($ifname eq '') {
+        &saveCustIfaces(\%intfaces);
+        return 0;
+    }
+    $intfaces{$ifname}{'TYPE'}        = "0";
+    $intfaces{$ifname}{'IFACE'}       = $netsettings{'ORANGE_1_DEV'};
+    $intfaces{$ifname}{'ADDRESSING_MODE'} = $netsettings{'ORANGE_1_TYPE'};
+    $intfaces{$ifname}{'IPADDRESS'} = $netsettings{'ORANGE_1_ADDRESS'};
+    $intfaces{$ifname}{'NETMASK'} = $netsettings{'ORANGE_1_NETMASK'};
+    $intfaces{$ifname}{'MAC'} = $netsettings{'ORANGE_1_MAC'};
+
 
 
     for (my $i = 0; $i < $netsettings{'IF_NONE_COUNT'}; $i++) {

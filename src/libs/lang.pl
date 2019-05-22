@@ -17,11 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2007-2013, the Openfirewall Team
+# (c) 2018-2019, the Openfirewall Team
 #
-# Copyright (c) 2007-11-13 owes  This is almost a full cleanup, texts are now fetched from .MO files.
-#
-# $Id: lang.pl 7061 2013-06-08 09:51:01Z owes $
 #
 
 

@@ -15,8 +15,6 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * $Id: conntrack_helper.c 3839 2009-11-20 12:01:09Z owes $
- *
  */
 
 

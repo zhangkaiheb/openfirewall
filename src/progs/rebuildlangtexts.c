@@ -16,9 +16,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2009, the Openfirewall Team
- *
- *   $Id: rebuildlangtexts.c 3250 2009-07-16 19:13:07Z owes $
+ * (c) 2018-2019, the Openfirewall Team
  *
  */
 

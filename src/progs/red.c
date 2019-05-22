@@ -17,9 +17,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2009, the Openfirewall Team
- *
- * $Id: red.c 4022 2009-12-18 09:15:58Z owes $
+ * (c) 2018-2019, the Openfirewall Team
  *
  */
 
