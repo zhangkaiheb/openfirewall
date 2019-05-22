@@ -32,6 +32,8 @@ require '/usr/lib/ofw/lang.pl';
 require '/usr/lib/ofw/header.pl';
 require '/usr/lib/ofw/firewall-lib.pl';
 
+our $custNeighboursFile = "/var/ofw/ethernet/customNeighbours";
+
 my $output='';
 &Header::showhttpheaders();
 
@@ -39,7 +41,8 @@ my %cgiparams    = ();
 my $errormessage = '';
 my $error        = '';
 $cgiparams{'ACTION'}     = '';
-$cgiparams{'USED_COUNT'} = 0;
+$cgiparams{'NEIGH_ID'}     = 0;
+$cgiparams{'STATUS'} = 0;
 &General::getcgihash(\%cgiparams);
 
 # vars for setting up sort order
@@ -61,81 +64,73 @@ if ($ENV{'QUERY_STRING'} ne '') {
     }
 }
 
-my %custIfaces = ();
-&DATA::readCustIfaces(\%custIfaces);
+my @custNeighbours = ();
+&readCustNeighbours(\@custNeighbours);
 
-$cgiparams{'KEY'}            = '';
-$cgiparams{'IFACE'}          = '';
-$cgiparams{'IFACE_NAME'}     = '';
-$cgiparams{'EXTERNAL'}     = 'off';
-$cgiparams{'OLD_IFACE_NAME'} = '';
+$cgiparams{'NEIGH_ID'} = 0;
+$cgiparams{'STATUS'} = 0;
 &General::getcgihash(\%cgiparams);
 
-$cgiparams{'IFACE_NAME'} = &Header::cleanConfNames($cgiparams{'IFACE_NAME'});
-
 if ($cgiparams{'ACTION'} eq $Lang::tr{'add'}) {
-    &validateIFaceParams(\%custIfaces);
+    &validateNeighbourParams(\@custNeighbours);
 
     unless ($errormessage) {
-        $custIfaces{$cgiparams{'IFACE_NAME'}}{'IFACE'}      = $cgiparams{'IFACE'};
-        $custIfaces{$cgiparams{'IFACE_NAME'}}{'EXTERNAL'}      = $cgiparams{'EXTERNAL'};
-        $custIfaces{$cgiparams{'IFACE_NAME'}}{'USED_COUNT'} = 0;
+        my $neighbour = $cgiparams{'IP'}.",".$cgiparams{'IF_NAME'}.",".$cgiparams{'MAC_ADDRESS'}.",".$cgiparams{'STATUS'};
 
-        &DATA::saveCustIfaces(\%custIfaces);
+        push(@custNeighbours, $neighbour);
+        &saveCustNeighbours(\@custNeighbours);
 
-        &General::log("$Lang::tr{'iface added'}: $cgiparams{'IFACE_NAME'}");
+        &General::log("$Lang::tr{'neighbour added'}: $cgiparams{'IP'} $cgiparams{'MAC_ADDRESS'}");
         undef %cgiparams;
         $cgiparams{'ACTION'} = '';
-        `/usr/local/bin/setfwrules --ofw < /dev/null > /dev/null 2>&1 &`;
     }
 }
 
 if ($cgiparams{'ACTION'} eq $Lang::tr{'update'}) {
-    &validateIFaceParams(\%custIfaces);
+    &validateNeighbourParams(\@custNeighbours);
     if ($errormessage) {
         $cgiparams{'ACTION'} = $Lang::tr{'edit'};
-    }
-    else {
-        my $ifaceName    = $cgiparams{'IFACE_NAME'};
-        my $ifaceNameOld = $cgiparams{'OLD_IFACE_NAME'};
-        $custIfaces{$ifaceNameOld}{'IFACE'} = $cgiparams{'IFACE'};
+    } else {
+        my $neighbour = $cgiparams{'IP'}.",".$cgiparams{'IF_NAME'}.",".$cgiparams{'MAC_ADDRESS'}.",".$cgiparams{'STATUS'};
 
-        # if the name (==Key) has changed, we have to copy/move the old data to new key
-        if ($ifaceName ne $ifaceNameOld) {
-            $custIfaces{$ifaceName}{'IFACE'}      = $custIfaces{$ifaceNameOld}{'IFACE'};
-            $custIfaces{$ifaceName}{'EXTERNAL'}      = $custIfaces{$ifaceNameOld}{'EXTERNAL'};
-            $custIfaces{$ifaceName}{'USED_COUNT'} = $custIfaces{$ifaceNameOld}{'USED_COUNT'};
+        $custNeighbours[$cgiparams{NEIGH_ID}] = $neighbour;
+        &saveCustNeighbours(\@custNeighbours);
 
-            delete($custIfaces{$ifaceNameOld});
-        }
-        &DATA::saveCustIfaces(\%custIfaces);
-
-        &General::log("$Lang::tr{'iface updated'}: $cgiparams{'IFACE_NAME'}");
+        &General::log("$Lang::tr{'neighbour updated'}: $cgiparams{'IP'} $cgiparams{'MAC_ADDRESS'}");
         undef %cgiparams;
         $cgiparams{'ACTION'} = '';
-        `/usr/local/bin/setfwrules --all < /dev/null > /dev/null 2>&1 &`;
     }
 }
 
 if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-
     # on an update error we use the entered data, we do not re-read from stored config
     unless ($errormessage) {
-        if (defined($custIfaces{$cgiparams{'IFACE_NAME'}}{'IFACE'})) {
-            $cgiparams{'IFACE'} = $custIfaces{$cgiparams{'IFACE_NAME'}}{'IFACE'};
+        if (defined($custNeighbours[$cgiparams{'NEIGH_ID'}])) {
+            my $tmpline = $custNeighbours[$cgiparams{'NEIGH_ID'}];
+            chomp($tmpline);
+            my @tmp = split(/\,/, $tmpline);
+
+            $cgiparams{'IP'} = $tmp[0];
+            $cgiparams{'IF_NAME'} = $tmp[1];
+            $cgiparams{'MAC_ADDRESS'} = $tmp[2];
+            $cgiparams{'STATUS'} = $tmp[3];
         }
     }
 }
 
 if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
-    delete($custIfaces{$cgiparams{'IFACE_NAME'}});
+    my $tmpline = $custNeighbours[$cgiparams{'NEIGH_ID'}];
+    my @tmp = split(/\,/, $tmpline);
+    my $neighbour = $tmp[0].",".$tmp[1].",".$tmp[2].",".$tmp[3];
 
-    &DATA::saveCustIfaces(\%custIfaces);
+    if (1) {
+        @custNeighbours = grep { $_ ne "$neighbour" } @custNeighbours;
+        &saveCustNeighbours(\@custNeighbours);
+        &General::log("$Lang::tr{'neighbour removed'}: $neighbour");
+    }
 
-    &General::log("$Lang::tr{'iface removed'}: $cgiparams{'IFACE_NAME'}");
     undef %cgiparams;
     $cgiparams{'ACTION'} = '';
-    `/usr/local/bin/setfwrules --ofw < /dev/null > /dev/null 2>&1 &`;
 }
 
 if ($cgiparams{'ACTION'} eq $Lang::tr{'reset'}) {
@@ -149,14 +144,6 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'reset'}) {
 
 #&Header::openbigbox('100%', 'left');
 
-if ($cgiparams{'ACTION'} eq '') {
-    $cgiparams{'KEY'}            = '';
-    $cgiparams{'IFACE'}          = 'ip';
-    $cgiparams{'IFACE_NAME'}     = '';
-    $cgiparams{'EXTERNAL'}     = 'off';
-    $cgiparams{'OLD_IFACE_NAME'} = '';
-}
-
 if ($errormessage) {
     &Header::openbox('100%', 'left', "$Lang::tr{'error messages'}:", 'error');
     print "<font class='base'>$errormessage&nbsp;</font>";
@@ -167,31 +154,50 @@ if ($errormessage) {
 
 my %selected = ();
 
-    my $disabled        = '';
-    my $hiddenIfaceName = '';
+my $disabled        = '';
+my $hiddenIfaceName = '';
+
+if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} || $cgiparams{'ACTION'} eq $Lang::tr{'add interface'}) {
     if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-        &Header::openbox('100%', 'left', "$Lang::tr{'edit interface'}:", $error);
         if ($cgiparams{'USED_COUNT'} > 0) {
             $disabled        = "disabled='disabled'";
             $hiddenIfaceName = "<input type='hidden' name='IFACE_NAME' value='$cgiparams{'IFACE_NAME'}' />";
         }
     }
-    else {
-        &Header::openbox('100%', 'left', "$Lang::tr{'add interface'}:", $error);
-    }
+
+    print <<END;
+<table width='100%' height='33px' bgcolor='#69C'>
+<tr align='center'>
+    <td><strong>$cgiparams{'ACTION'}</strong></td>
+</tr>
+</table>
+END
+
     print <<END;
 <form method='post' action='$ENV{'SCRIPT_NAME'}'>
 <div align='center'>
 <table width='100%'>
 <tr>
-    <td width='25%'>$Lang::tr{'name'}:</td>
+    <td width='1%'></td>
+    <td width='25%'>$Lang::tr{'ip address'}</td>
     <td width='25%'>
-        <input type='text' name='IFACE_NAME' value='$cgiparams{'IFACE_NAME'}' size='20' maxlength='20' $disabled />
+        <input type='text' name='IP' value='$cgiparams{'IP'}' size='20' maxlength='20' $disabled />
         $hiddenIfaceName
     </td>
-    <td width='25%'>$Lang::tr{'interface'}:</td>
+    <td width='49%'></td>
+</tr><tr>
+    <td width='1%'></td>
+    <td width='25%'>$Lang::tr{'mac address'}</td>
     <td width='25%'>
-        <select name='IFACE'>
+        <input type='text' name='MAC_ADDRESS' value='$cgiparams{'MAC_ADDRESS'}' size='20' maxlength='20' $disabled />
+        $hiddenIfaceName
+    </td>
+    <td width='49%'></td>
+</tr><tr>
+    <td width='1%'></td>
+    <td width='25%'>$Lang::tr{'interface'}</td>
+    <td width='25%'>
+        <select name='IF_NAME'>
 END
 
 foreach my $iface (sort keys %FW::interfaces) {
@@ -200,106 +206,180 @@ foreach my $iface (sort keys %FW::interfaces) {
 }
 print <<END;
         </select>
-        <input type='hidden' name='EXTERNAL' value='$cgiparams{'EXTERNAL'}' />
     </td>
 </tr>
 </table>
 <hr />
-<table width='100%' cellpadding='0' cellspacing='5' border='0'>
-<tr>
-<td class='comment2button'>&nbsp;</td>
+<table width='100%'>
+<tr><td width='5%'></td>
+<td>
+<div class='footerbuttons'>
 END
-
     if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-        print "<td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'update'}' />\n";
-        print "<input type='hidden' class='commonbuttons' name='OLD_IFACE_NAME' value='$cgiparams{'IFACE_NAME'}' /></td>\n";
-    }
-    else {
-        print "<td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' /></td>\n";
+        print "<input type='submit' class='footbutton' name='ACTION' value='$Lang::tr{'update'}' />\n";
+        print "<input type='hidden' name='STATUS' value='$cgiparams{'STATUS'}' />\n";
+    } else {
+        print "<input type='submit' class='footbutton' name='ACTION' value='$Lang::tr{'add'}' />\n";
+        print "<input type='hidden' name='STATUS' value='$cgiparams{'STATUS'}' />\n";
     }
     print <<END;
-    <td class='button2buttons'>
-        <input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' />
-    </td>
+        &nbsp&nbsp
+        <input type='submit' class='footbutton' name='ACTION' value='$Lang::tr{'cancel'}' />
+</div>
+</td>
     <td  class='onlinehelp'>
-        <a href='${General::adminmanualurl}/firewall-interfaces.html#section' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
-    </td>
-</tr>
+        <a href='${General::adminmanualurl}/firewall-interfaces.html#section' target='_blank'><img src='/images/web-support.png    ' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
+</td>
 </table>
 </div>
 </form>
 END
 
-    &Header::closebox();
+#    &Header::closebox();
+} else {
 
-    &Header::openbox('100%', 'left', "$Lang::tr{'custom interfaces'}:");
+#######################################################################################
+#  static neigh list
+#######################################################################################
+
+#    &Header::openbox('100%', 'left', "$Lang::tr{'custom interfaces'}:");
+
+    print <<END;
+<div align='left' tyle='margin-top:0px'>
+<table width='100%' width='100%' height='33px' align='center'>
+<tr style='background-color: #F2F2F2;'>
+    <td align='left'>
+        <form method='post' action='$ENV{'SCRIPT_NAME'}'>
+            <input type='submit' name='ACTION' value='$Lang::tr{'add interface'}' />
+        </form>
+    </td>
+    <td align='left' width='90%'></td>
+</table>
+END
+
     print <<END;
 <div align='center'>
 <table width='100%' align='center'>
-<tr align="center">
-    <td width='40%'><strong>$Lang::tr{'name'}</strong></td>
-    <td width='40%'><strong>$Lang::tr{'interface'}</strong></td>
-    <td width='20%'><strong>$Lang::tr{'used'}</strong></td>
+<tr align="center" class='headbar'>
+    <td width='25%' align='center' class='boldbase'>$Lang::tr{'ip address'}</td>
+    <td width='25%' align='center' class='boldbase'>$Lang::tr{'interface'}</td>
+    <td width='25%' align='center' class='boldbase'>$Lang::tr{'mac address'}</td>
+    <td width='25%' class='boldbase'>$Lang::tr{'status'}</td>
     <td width='5%'>&nbsp;</td>
     <td width='5%'>&nbsp;</td>
 </tr>
 END
 
-    &display_custom_interfaces(\%custIfaces);
+    &display_custom_neighbours(\@custNeighbours);
     print <<END;
 </table>
 </div>
 END
 
-    &Header::closebox();
+    #&Header::closebox();
+}
 
 #&Header::closebigbox();
 
 &Header::closepage();
 
-sub display_custom_interfaces {
-    my $custIfaceRef = shift;
-
-    my @sortedKeys = &General::sortHashArray($sort_col, $sort_type, $sort_dir, $custIfaceRef);
+sub display_custom_neighbours {
+    my $custNeighbourRef = shift;
 
     my $id = 0;
-    foreach my $ifaceName (@sortedKeys) {
+    foreach my $tmpline (@$custNeighbourRef) {
+        chomp($tmpline);
+        my @tmp = split(/\,/, $tmpline);
 
         # highlight the row we are editing
-        if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'IFACE_NAME'} eq $ifaceName) {
+        if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'ROUTE_ID'} eq $id) {
             print "<tr class='selectcolour'>\n";
         } else {
             print "<tr class='table".int(($id % 2) + 1)."colour'>";
         }
         print <<END;
-    <td>$ifaceName</td>
-    <td align='center'>$custIfaceRef->{$ifaceName}{'IFACE'}</td>
-    <td align='center'>$custIfaceRef->{$ifaceName}{'USED_COUNT'}x</td>
+    <td>$tmp[0]</td>
+    <td align='center'>$tmp[1]</td>
+    <td align='center'>$tmp[2]</td>
+    <td align='center'>$tmp[3]</td>
     <td align='center'>
     <form method='post' name='frm$id' action='$ENV{'SCRIPT_NAME'}'>
         <input type='hidden' name='ACTION' value='$Lang::tr{'edit'}' />
+        <input type='hidden' name='NEIGH_ID' value='$id' />
         <input type='image' name='$Lang::tr{'edit'}' src='/images/edit.gif' alt='$Lang::tr{'edit'}' title='$Lang::tr{'edit'}' />
-        <input type='hidden' name='IFACE_NAME' value='$ifaceName' />
-        <input type='hidden' name='USED_COUNT' value='$custIfaceRef->{$ifaceName}{'USED_COUNT'}' />
     </form>
     </td>
 END
-        if ($custIfaceRef->{$ifaceName}{'USED_COUNT'} > 0) {
-            print "<td align='center'></td>";
-        }
-        else {
-            print <<END;
+       print <<END;
     <td align='center'>
     <form method='post' name='frmb$id' action='$ENV{'SCRIPT_NAME'}'>
         <input type='hidden' name='ACTION' value='$Lang::tr{'remove'}' />
+        <input type='hidden' name='NEIGH_ID' value='$id' />
         <input type='image' name='$Lang::tr{'remove'}' src='/images/delete.gif' alt='$Lang::tr{'remove'}' title='$Lang::tr{'remove'}' />
-        <input type='hidden' name='IFACE_NAME' value='$ifaceName' />
     </form>
     </td>
 END
-        }
         print "</tr>\n";
         $id++;
     }
+}
+
+
+#######################################################
+# custom neigbours
+#######################################################
+
+sub validateNeighbourParams
+{
+    my $custNeighboursRef = shift;
+
+    if ($cgiparams{'IP'} eq '') {
+        $errormessage = $Lang::tr{'noAddressNet'};
+        return;
+    } else {
+        if (!(&General::validip($cgiparams{'ADDRESS'}))) {
+            $errormessage = $Lang::tr{'invalid ip address'};
+            return;
+        }
+    }
+
+    if ($cgiparams{'IF_NAME'} eq '') {
+        $errormessage = $Lang::tr{'noIFace'};
+        return;
+    }
+    if ($cgiparams{'MAC_ADDRESS'} eq '') {
+        $errormessage = $Lang::tr{'noIFace'};
+        return;
+    }
+
+    my $new = $cgiparams{'IP'}.",".$cgiparams{'IF_NAME'}.",".$cgiparams{'MAC_ADDRESS'}.",".$cgiparams{'STATUS'};
+    foreach my $neighbour (@$custNeighboursRef) {
+        # strip the end space charactor
+        chomp($neighbour);
+        if ($neighbour eq $new) {
+            $errormessage = "duplicate neighbour";
+            return;
+        }
+    }
+}
+sub readCustNeighbours
+{
+    my $custNeighboursRef = shift;
+    open(NEIGHS, "$custNeighboursFile") or die 'Unable to open custom neighbour file.';
+    @$custNeighboursRef = <NEIGHS>;
+    close(NEIGHS);
+}
+
+sub saveCustNeighbours
+{
+    my $sNeighboursRef = shift;
+
+    open(FILE, ">$custNeighboursFile") or die 'Unable to open custom neighbour file.';
+    flock FILE, 2;
+    foreach my $neighbour (@$sNeighboursRef) {
+        chomp($neighbour);
+        print FILE "$neighbour\n";
+    }
+    close(FILE);
 }
 
