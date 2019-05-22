@@ -432,6 +432,9 @@ export PATH=${ORG_PATH}
 # include machine in TOOLCHAINNAME
 TOOLCHAINNAME=${SNAME}-${TOOLCHAINVERSION}-toolchain-${MACHINE_REAL}.tar.gz
 
+# include machine in BASESYSNAME
+BASESYSNAME=${SNAME}-${TOOLCHAINVERSION}-base-${MACHINE_REAL}.tar.gz
+
 #################################################################################
 # Make sure the log directory exists						#
 #################################################################################
@@ -1863,6 +1866,61 @@ base_build()
 ##	chroot_make udev
 	chroot_make eudev
 	chroot_make vim
+## new added
+	chroot_make libffi		# for Python, glib
+#####	chroot_make openssl
+	chroot_make Python		# glib require Python
+	chroot_make glib		# for cairo
+	chroot_make tcl			# for krb5 and db tests
+	chroot_make which
+	chroot_make libusb
+	chroot_make libpcap
+	chroot_make libtirpc
+	chroot_make rpcsvc-proto
+	chroot_make net-tools
+	chroot_make libxml2
+	chroot_make unzip           # only needed to unpack rawwrite in lfs/cdrom
+	chroot_make bc              # needed to run some openssl tests and compile kernel >= 3.10
+	chroot_make solos-pci
+	chroot_make cpio
+	chroot_make expat
+	chroot_make ca-certificates
+	chroot_make libgpg-error	# radiusplugin for OpenVPN
+	chroot_make libgcrypt		# radiusplugin for OpenVPN
+	chroot_make libnet
+	chroot_make libpng
+	chroot_make dejavu
+	chroot_make freetype
+	chroot_make harfbuzz
+	chroot_make fontconfig
+	chroot_make pixman
+	chroot_make cairo
+	chroot_make pango
+	chroot_make popt		# logrotate
+	chroot_make pciutils
+	chroot_make usbutils
+	chroot_make acpid
+	chroot_make beep
+	chroot_make db			# squidGuard
+	chroot_make ethtool
+	chroot_make ez-ipupdate
+	chroot_make gnupg
+	chroot_make hdparm
+	chroot_make iperf
+	chroot_make iputils
+	chroot_make lsof
+	chroot_make lzo			# OpenVPN
+	chroot_make mdadm       # RAID
+	chroot_make nano
+	chroot_make nasm		# only used in case we patch and fully compile syslinux
+	chroot_make tcpdump
+	chroot_make traceroute
+	chroot_make vnstat
+	chroot_make wget
+
+	chroot_make dosfstools
+
+	chroot_make strip
 } # End of base_build()
 
 
@@ -1878,24 +1936,24 @@ openfirewall_build()
 
 	# Build these first as some of the kernel packages below rely on
 	# these for some of their client program functionality
-	chroot_make libffi		# for Python, glib
+#	chroot_make libffi		# for Python, glib
 #####	chroot_make openssl
-	chroot_make Python		# glib require Python
-	chroot_make glib		# for cairo
-	chroot_make tcl			# for krb5 and db tests
+#	chroot_make Python		# glib require Python
+#	chroot_make glib		# for cairo
+#	chroot_make tcl			# for krb5 and db tests
 	chroot_make openfirewall
-	chroot_make which
-	chroot_make net-tools
-	chroot_make libusb
-	chroot_make libpcap
-	chroot_make libtirpc
-	chroot_make rpcsvc-proto
-	chroot_make libxml2
+#	chroot_make which
+#	chroot_make net-tools
+#	chroot_make libusb
+#	chroot_make libpcap
+#	chroot_make libtirpc
+#	chroot_make rpcsvc-proto
+#	chroot_make libxml2
 	chroot_make linux-atm
 	chroot_make ppp
 	chroot_make rp-pppoe
-	chroot_make unzip           # only needed to unpack rawwrite in lfs/cdrom
-	chroot_make bc              # needed to run some openssl tests and compile kernel >= 3.10
+#	chroot_make unzip           # only needed to unpack rawwrite in lfs/cdrom
+#	chroot_make bc              # needed to run some openssl tests and compile kernel >= 3.10
 	chroot_make linux
 	#chroot_make CnxADSL        # compilation broken with 3.10 kernel
 	chroot_make e1000e          # supply newer kernel driver
@@ -1907,46 +1965,46 @@ openfirewall_build()
 	chroot_make firmware-extractor
 ##	chroot_make igb             # supply newer kernel driver
 	#chroot_make pulsar         # compilation broken with 3.10 kernel
-	chroot_make solos-pci
+#	chroot_make solos-pci
 	#chroot_make wanpipe        # compilation broken with 3.4 kernel
 ##	chroot_make pcmciautils
 ##	chroot_make eciadsl-usermode
 	# end of linux kernel and drivers
 	chroot_make linux-firmware
-	chroot_make cpio
-	chroot_make expat
+#	chroot_make cpio
+#	chroot_make expat
 ##	chroot_make openssl
-	chroot_make ca-certificates
-	chroot_make libgpg-error	# radiusplugin for OpenVPN
-	chroot_make libgcrypt		# radiusplugin for OpenVPN
-	chroot_make libnet
-	chroot_make libpng
-	chroot_make dejavu
-	chroot_make freetype
-	chroot_make harfbuzz
+#	chroot_make ca-certificates
+#	chroot_make libgpg-error	# radiusplugin for OpenVPN
+#	chroot_make libgcrypt		# radiusplugin for OpenVPN
+#	chroot_make libnet
+#	chroot_make libpng
+#	chroot_make dejavu
+#	chroot_make freetype
+#	chroot_make harfbuzz
 ##	chroot_make gperf
-	chroot_make fontconfig
-	chroot_make pixman
-	chroot_make cairo
-	chroot_make pango
-	chroot_make popt		# logrotate
+#	chroot_make fontconfig
+#	chroot_make pixman
+#	chroot_make cairo
+#	chroot_make pango
+#	chroot_make popt		# logrotate
 ##	chroot_make libcap
-	chroot_make pciutils
-	chroot_make usbutils
-	chroot_make acpid
+#	chroot_make pciutils
+#	chroot_make usbutils
+#	chroot_make acpid
 	chroot_make apache
 	chroot_make mod_perl
-	chroot_make beep
+#	chroot_make beep
 ##	chroot_make bind
 ##	chroot_make capi4k-utils
-	chroot_make db			# squidGuard
+#	chroot_make db			# squidGuard
 	chroot_make dnsmasq
-	chroot_make ethtool
-	chroot_make ez-ipupdate
+#	chroot_make ethtool
+#	chroot_make ez-ipupdate
 	chroot_make fcron
-	chroot_make gnupg
-	chroot_make hdparm
-	chroot_make ibod
+#	chroot_make gnupg
+#	chroot_make hdparm
+	chroot_make ibod    #ISDN MPPP
 	chroot_make libmnl                  # iptables/conntrack
 	chroot_make libnfnetlink            # iptables/conntrack
 	chroot_make libnetfilter_acct       # iptables/conntrack
@@ -1961,17 +2019,17 @@ openfirewall_build()
 	chroot_make iftop
 	chroot_make openfirewall-gui
 	chroot_make openfirewall-progs
-	chroot_make iperf
-	chroot_make iputils
+#	chroot_make iperf
+#	chroot_make iputils
 ##	chroot_make isdn4k-utils
 	chroot_make krb5
 	chroot_make logrotate
 	chroot_make logwatch
-	chroot_make lsof
-	chroot_make lzo			# OpenVPN
-	chroot_make mdadm
-	chroot_make nano
-	chroot_make nasm		# only used in case we patch and fully compile syslinux
+#	chroot_make lsof
+#	chroot_make lzo			# OpenVPN
+#	chroot_make mdadm
+#	chroot_make nano
+#	chroot_make nasm		# only used in case we patch and fully compile syslinux
 	chroot_make sqlite		# before DBD-SQLite and ulogd that depend on it
 	# PERL CPAN packages
 	chroot_make perl-archive-zip        # OpenVPN
@@ -2014,13 +2072,13 @@ openfirewall_build()
 	chroot_make squid
 	chroot_make squid-langpack
 	chroot_make squidGuard
-	chroot_make tcpdump
-	chroot_make traceroute
+#	chroot_make tcpdump
+#	chroot_make traceroute
 	chroot_make ulogd
 	chroot_make usb-modeswitch
 	chroot_make usb-modeswitch-data
-	chroot_make vnstat
-	chroot_make wget
+#	chroot_make vnstat
+#	chroot_make wget
 	chroot_make wireless_tools
 	chroot_make libnl
 	chroot_make iw
@@ -2051,7 +2109,7 @@ misc_build()
 	chroot_make busybox
 	chroot_make openfirewall-lang
 	chroot_make mklibs
-	chroot_make dosfstools
+#	chroot_make dosfstools
 	if [ x"${SKIP_FLOPPY_IMAGES}" != x"yes" ]; then
 		chroot_make klibc
 		chroot_make xz-embedded
@@ -2286,45 +2344,13 @@ package_toolchain()
 
 } # End of package_toolchain()
 
-#########################################################################################################
-# Read build test result when we run them								#
-#########################################################################################################
-parse_tests()
+prepare_toolchain()
 {
-	beautify build_stage "Parsing build test"
-	${BASEDIR}/tools/error-parser ${BASEDIR}/test_${MACHINE}/${BUILDDATE}
-} # End of parse_tests
 
-#########################################################################################################
-#########################################################################################################
-# End of BLOCK 2 -- Functions										#
-#########################################################################################################
-#########################################################################################################
-
-
-
-
-#########################################################################################################
-#########################################################################################################
-# BLOCK 3 -- THIS IS WHERE EXECUTION STARTS								#
-#########################################################################################################
-#########################################################################################################
-
-# First check if we meet the build environment requirements
-check_build_env
-
-# See  what we're supposed to do
-ACTION=${1}
-case "${ACTION}" in
-build)
-	# On first build attempt, better prefetch everything first.
-	# This will allow to find packages URL that may have moved as soon as possible.
-	if [ ! -d ${BASEDIR}/cache ]; then
-		beautify message WARN "You should use './make.sh prefetch' to load all files before building"
-		loadsrc
+	if [ -f ${BASEDIR}/files_${MACHINE}/02_base/strip ]; then
+		beautify message DONE "Stage base(toolchain) already built (found files_${MACHINE}/02_base/strip)"
+		return 0
 	fi
-
-	echo -ne "Building ${BOLD}${NAME}-${VERSION}${NORMAL} for ${BOLD}${MACHINE} on ${MACHINE_REAL}${NORMAL}\n"
 
 	if [ -f ${BASEDIR}/files_${MACHINE}/01_toolchain/strip ]; then
 		beautify message DONE "Stage toolchain already built (found files_${MACHINE}/01_toolchain/strip)"
@@ -2368,8 +2394,148 @@ build)
 		# Now create the toolchain tar archive
 		package_toolchain
 	fi
+} # End of prepare_toolchain()
 
-	base_build
+#########################################################################################################
+# This is the function that will create the base tar archive					#
+#########################################################################################################
+package_base()
+{
+	# for packaging
+	sudo chmod 777 ${BASEDIR}/build_${MACHINE}/openfirewall/var/cache/ldconfig/aux-cache
+
+	# if base adjust-toolchain has run, we can't package
+#	if [ -f ${TOOLS_DIR}/bin/ld-old ]; then
+#		exiterror "Too late, toolchain has been altered"
+#	fi
+
+	BASESYSFILES="02_base.lst"
+	echo "*** Packaging the ${MACHINE} base system" >> ${PREPLOGFILE}
+	echo -ne "${BOLD}*** Packaging the ${MACHINE_REAL} base${NORMAL}\n"
+
+	# tag toolchain
+#	echo "${SVNREV}" >${BASEDIR}/log_${MACHINE}/toolchain-svn-rev
+
+ 	echo "Creating the ${MACHINE_REAL} base system tar archive" >> ${PREPLOGFILE}
+ 	echo  -ne "Creating the ${MACHINE_REAL} base tar archive"
+ 	cd ${BASEDIR} && tar --create --gzip --verbose \
+				--exclude="log_${MACHINE}/_build_0[0-6]_*.log" \
+ 				--exclude="log_${MACHINE}/_build_${BASESYSFILES}" \
+ 				--exclude="build_${MACHINE}/openfirewall/etc/passwd-" \
+ 				--exclude="build_${MACHINE}/openfirewall/etc/gshadow-" \
+ 				--exclude="build_${MACHINE}/openfirewall/dev" \
+ 				--exclude="build_${MACHINE}/openfirewall/proc" \
+ 				--exclude="build_${MACHINE}/openfirewall/sys" \
+ 				--exclude="build_${MACHINE}/openfirewall/tmp" \
+				--exclude="build_${MACHINE}/${INSTALLER_DIR}" \
+ 				--file=cache/${BASESYSNAME} \
+ 				build_${MACHINE}/${TOOLS_DIR} \
+ 				build_${MACHINE}/openfirewall \
+ 				log_${MACHINE} \
+				files_${MACHINE}/01_toolchain \
+				files_${MACHINE}/02_base \
+				> log_${MACHINE}/_build_${BASESYSFILES}
+
+	if [ $? -eq 0 ]; then
+		beautify message DONE
+	else
+		beautify message FAIL
+	fi
+
+	echo "Calculating the ${MACHINE_REAL} base system tar archive md5sum" >> ${PREPLOGFILE}
+	echo -ne "Calculating the ${MACHINE_REAL} base system tar archive md5sum"
+	md5sum cache/${BASESYSNAME} > cache/${BASESYSNAME}.md5
+
+	if [ $? -eq 0 ]; then
+		beautify message DONE
+	else
+		beautify message FAIL
+	fi
+
+} # End of package_base()
+
+checking_base()
+{
+	if [ -f ${BASEDIR}/files_${MACHINE}/02_base/strip ]; then
+		beautify message DONE "Stage base already built (found files_${MACHINE}/02_base/strip)"
+		check_running_test ${2}
+		prepareenv
+	elif [ -f ${BASEDIR}/cache/${BASESYSNAME} -a -f ${BASEDIR}/cache/${BASESYSNAME}.md5 ]; then
+		echo -ne "${BOLD}*** Restore from ${BASESYSNAME}${NORMAL}\n"
+		echo -ne "Checking md5sum"
+		BASESYS_MD5_FOUND=`md5sum ${BASEDIR}/cache/${BASESYSNAME} | awk '{print $1}'`
+		BASESYS_MD5_NEEDED=`cat ${BASEDIR}/cache/${BASESYSNAME}.md5 | awk '{print $1}'`
+
+		if [ x"${BASESYS_MD5_FOUND}" != x"${BASESYS_MD5_NEEDED}" ]; then
+			exiterror "${BASESYSNAME} md5 did not match. Check downloaded package"
+		fi
+		# toolchain look good, use it
+		beautify message DONE
+
+		echo -ne "md5sum matches : "
+		beautify message INFO "${BASESYS_MD5_FOUND}"
+
+		echo -ne "Unpacking base ${BASESYSNAME}"
+		tar --no-same-owner --group=${CURRENT_USER_GROUP} -zxf ${BASEDIR}/cache/${BASESYSNAME} -C ${BASEDIR}
+		[ ${?} -ne 0 ] && exiterror "${BASESYSNAME} could not be unpacked. Check downloaded package"
+
+		beautify message DONE
+
+		# Now prepare the environment
+		check_running_test ${2}
+		prepareenv
+	else
+		echo -ne "${BOLD}*** Full base compilation${NORMAL}\n"
+	fi
+} # End of checking_base()
+
+#########################################################################################################
+# Read build test result when we run them								#
+#########################################################################################################
+parse_tests()
+{
+	beautify build_stage "Parsing build test"
+	${BASEDIR}/tools/error-parser ${BASEDIR}/test_${MACHINE}/${BUILDDATE}
+} # End of parse_tests
+
+#########################################################################################################
+#########################################################################################################
+# End of BLOCK 2 -- Functions										#
+#########################################################################################################
+#########################################################################################################
+
+
+
+
+#########################################################################################################
+#########################################################################################################
+# BLOCK 3 -- THIS IS WHERE EXECUTION STARTS								#
+#########################################################################################################
+#########################################################################################################
+
+# First check if we meet the build environment requirements
+check_build_env
+
+# See  what we're supposed to do
+ACTION=${1}
+case "${ACTION}" in
+build)
+	# On first build attempt, better prefetch everything first.
+	# This will allow to find packages URL that may have moved as soon as possible.
+	if [ ! -d ${BASEDIR}/cache ]; then
+		beautify message WARN "You should use './make.sh prefetch' to load all files before building"
+		loadsrc
+	fi
+
+	echo -ne "Building ${BOLD}${NAME}-${VERSION}${NORMAL} for ${BOLD}${MACHINE} on ${MACHINE_REAL}${NORMAL}\n"
+
+	checking_base
+
+	prepare_toolchain
+
+	if [ ! -f ${BASEDIR}/files_${MACHINE}/02_base/strip ]; then
+		base_build
+	fi
 
 	openfirewall_build
 
@@ -2735,6 +2901,65 @@ gettoolchain)
 			mv -f ${TOOLCHAINNAME}.md5 ${TOOLCHAINNAME} ${BASEDIR}/cache
 		else
 			exiterror "${TOOLCHAINNAME}.md5 did not match, check downloaded package"
+		fi
+	fi
+	stdumount
+	;;
+base)
+	if [ -f ${BASEDIR}/files_${MACHINE}/03_openfirewall ]; then
+		beautify message DONE "Too late, base has been altered (found files_${MACHINE}/03_openfirewall)"
+		return 0
+	fi
+
+	if [ ! -f ${BASEDIR}/files_${MACHINE}/01_toolchain/strip ]; then
+		beautify message DONE "Stage toolchain has not built (not found files_${MACHINE}/01_toolchain/strip)"
+
+		prepare_toolchain
+	else
+		# Prepare the environment
+		check_running_test ${2}
+		prepareenv
+	fi
+
+	# Now build the toolchain
+	base_build
+
+	# Since we're stopping here, run stdumount
+	stdumount
+
+	# Now create the base tar archive
+	package_base
+
+	[ "${RUNNING_TEST}" == 'yes' ] && parse_tests
+
+	BUILDTIME=$[`date +"%s"` - ${BUILDSTART}]
+	BUILDMINUTES=$[${BUILDTIME} / 60]
+	BUILDSECONDS=$[${BUILDTIME} - ${BUILDMINUTES}*60]
+	echo "took: ${BUILDMINUTES} minutes and ${BUILDSECONDS} seconds"
+	;;
+getbase)
+	# Create cache and cache/tmp
+	prepareenv
+	URL_OFPKGS=`grep URL_OFPKGS lfs/Config | awk '{ print $3 }'`
+	echo "Loading ${BASESYSNAME}"
+
+	# load to temp directory and move only if md5 match
+	# that's the only way to support wget -c and load same base name
+	# wich may or may not have a different size when locally build
+	cd ${BASEDIR}/cache/tmp
+	wget -c ${URL_OFPKGS}/o/${BASESYSNAME} ${URL_OFPKGS}/o/${BASESYSNAME}.md5 -P ${BASEDIR}/cache/tmp
+
+	if [ ${?} -ne 0 ]; then
+		echo -ne "Error downloading base for ${MACHINE} machine"
+		beautify message FAIL
+		echo "Precompiled base not always available for every MACHINE"
+	else
+		if [ "`md5sum ${BASESYSNAME} | awk '{print $1}'`" = "`cat ${BASESYSNAME}.md5 | awk '{print $1}'`" ]; then
+			beautify message DONE
+			echo "Base md5 ok"
+			mv -f ${BASESYSNAME}.md5 ${BASESYSNAME} ${BASEDIR}/cache
+		else
+			exiterror "${BASESYSNAME}.md5 did not match, check downloaded package"
 		fi
 	fi
 	stdumount
