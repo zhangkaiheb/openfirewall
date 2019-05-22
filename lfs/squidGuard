@@ -47,7 +47,8 @@ CFLAGS += -Wall
 objects = $(DL_FILE) $(PATCH1)
 
 $(DL_FILE) = $(DL_FROM)/$(DL_FILE)
-$(PATCH1)  = $(URL_DEBIAN)/s/squidguard/$(PATCH1)
+#$(PATCH1)  = $(URL_DEBIAN)/s/squidguard/$(PATCH1)
+$(PATCH1)  = $(URL_OFPKGS)/s
 
 $(DL_FILE)_MD5 = 85216992d14acb29d6f345608f21f268
 $(PATCH1)_MD5  = 780576da1f75eebf752f60160d42c616

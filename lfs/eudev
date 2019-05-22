@@ -47,7 +47,8 @@ DL_UDEV_LFS = $(UDEV_LFS).tar.bz2
 objects = $(DL_FILE) $(DL_UDEV_LFS)
 
 $(DL_FILE)	= $(DL_FROM)/$(DL_FILE)
-$(DL_UDEV_LFS) = ftp://ftp.lfs-matrix.net/pub/lfs/lfs-packages/8.2/$(DL_UDEV_LFS)
+#$(DL_UDEV_LFS) = ftp://ftp.lfs-matrix.net/pub/lfs/lfs-packages/8.2/$(DL_UDEV_LFS)
+$(DL_UDEV_LFS) = $(URL_OFPKGS)/e/$(DL_UDEV_LFS)
 
 $(DL_FILE)_MD5	= 6ca08c0e14380f87df8e8aceac123671
 $(DL_UDEV_LFS)_MD5	= d92afb0c6e8e616792068ee4737b0d24
