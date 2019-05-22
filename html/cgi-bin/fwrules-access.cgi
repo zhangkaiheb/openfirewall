@@ -68,10 +68,8 @@ if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'cancel'}) {
     &resetCgiParams();
 }
 
-if (   $cgiparams{'BOX_ACTION'} eq $Lang::tr{'next'}
-    || $cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'})
+if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'})
 {
-
     # check dependency between the input / output interfaces
     &checkBetweenParams();
 
@@ -87,8 +85,7 @@ if (   $cgiparams{'BOX_ACTION'} eq $Lang::tr{'next'}
 
         if ($cgiparams{'BOX_NAME'} eq 'EnterParams') {
             $cgiparams{'BOX_ACTION'} = $Lang::tr{'back'};
-        }
-        else {
+        } else {
             $cgiparams{'BOX_ACTION'} = $Lang::tr{'next'};
         }
     }
@@ -96,16 +93,9 @@ if (   $cgiparams{'BOX_ACTION'} eq $Lang::tr{'next'}
 
 if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'}) {
     my $newRule = &buildRuleObject();
-
-    my $ruletype = 'OUTGOING';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruletype = 'INPUT';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype = 'EXTERNAL';
-    }
-
+    my $ruletype = 'INPUT';
     my $position = 0;
+
     foreach my $rule (@{$ruleConfig{$ruletype}}) {
 
         # we dont have to check the edited rule
@@ -123,12 +113,10 @@ if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'}) {
         }
 
         if ($sameRule) {
-
             # same rule, check timeframe
-            if (   $rule->{'TIMEFRAME_ENABLED'} eq 'on'
+            if ($rule->{'TIMEFRAME_ENABLED'} eq 'on'
                 && $newRule->{'TIMEFRAME_ENABLED'} eq 'on')
             {
-
                 #@DATA::timeKeys_all
 
                 my $sameTime = 1;
@@ -145,8 +133,7 @@ if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'}) {
 
             if ($cgiparams{'BOX_NAME'} eq 'EnterParams') {
                 $cgiparams{'BOX_ACTION'} = $Lang::tr{'back'};
-            }
-            else {
+            } else {
                 $cgiparams{'BOX_ACTION'} = $Lang::tr{'next'};
             }
             last;
@@ -156,7 +143,6 @@ if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'}) {
     unless ($errormessage) {
 
         if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-
             &FW::changeUsedCountInRule(@{$ruleConfig{$cgiparams{'OLD_RULETYPE'}}}[ $cgiparams{'OLD_POSITION'} ],
                 'remove');
             splice(@{$ruleConfig{$cgiparams{'OLD_RULETYPE'}}}, $cgiparams{'OLD_POSITION'}, 1);
@@ -165,8 +151,7 @@ if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'}) {
         &FW::changeUsedCountInRule($newRule, 'add');
         if ($cgiparams{'RULE_POSITION'} > -1) {
             splice(@{$ruleConfig{$ruletype}}, $cgiparams{'RULE_POSITION'}, 0, $newRule);
-        }
-        else {
+        } else {
             push(@{$ruleConfig{$ruletype}}, $newRule);
         }
 
@@ -176,8 +161,7 @@ if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'}) {
         &resetCgiParams();
         if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
             &General::log($Lang::tr{'firewall rule updated'});
-        }
-        else {
+        } else {
             &General::log($Lang::tr{'firewall rule added'});
         }
         `/usr/local/bin/setfwrules -f $ruletype < /dev/null > /dev/null 2>&1 &`;
@@ -188,13 +172,7 @@ if ($cgiparams{'BOX_ACTION'} eq $Lang::tr{'save'}) {
 if (   $cgiparams{'ACTION'} eq $Lang::tr{'toggle enable disable'}
     || $cgiparams{'ACTION'} eq "$Lang::tr{'toggle enable disable'}log")
 {
-    my $ruletype = 'OUTGOING';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruletype = 'INPUT';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype = 'EXTERNAL';
-    }
+    my $ruletype = 'INPUT';
 
     #~  print "type: $ruletype - RULETYPE: $cgiparams{'RULETYPE'} - Pos: $cgiparams{'RULE_POSITION'}";
     if ($cgiparams{'ACTION'} eq $Lang::tr{'toggle enable disable'}) {
@@ -215,13 +193,7 @@ if (   $cgiparams{'ACTION'} eq $Lang::tr{'toggle enable disable'}
 if (($cgiparams{'ACTION'} eq $Lang::tr{'edit'} || $cgiparams{'ACTION'} eq $Lang::tr{'copy rule'})
     && $cgiparams{'BOX_ACTION'} eq '')
 {
-    my $ruletype = 'OUTGOING';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruletype = 'INPUT';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype = 'EXTERNAL';
-    }
+    my $ruletype = 'INPUT';
 
     $cgiparams{'OLD_POSITION'} = $cgiparams{'RULE_POSITION'};
     $cgiparams{'OLD_RULETYPE'} = $cgiparams{'RULETYPE'};
@@ -243,13 +215,7 @@ if (($cgiparams{'ACTION'} eq $Lang::tr{'edit'} || $cgiparams{'ACTION'} eq $Lang:
 
 # broke out Remove routine as the logic is getting too complex to be combined with the Edit
 if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
-    my $ruletype = 'OUTGOING';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruletype = 'INPUT';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype = 'EXTERNAL';
-    }
+    my $ruletype = 'INPUT';
 
     if (defined @{$ruleConfig{$ruletype}}[ $cgiparams{'RULE_POSITION'} ]) {
         my $rule = @{$ruleConfig{$ruletype}}[ $cgiparams{'RULE_POSITION'} ];
@@ -272,13 +238,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
 if (   $cgiparams{'ACTION'} eq $Lang::tr{'up'}
     || $cgiparams{'ACTION'} eq $Lang::tr{'down'})
 {
-    my $ruletype = 'OUTGOING';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruletype = 'INPUT';
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruletype = 'EXTERNAL';
-    }
+    my $ruletype = 'INPUT';
 
     if (defined @{$ruleConfig{$ruletype}}[ $cgiparams{'RULE_POSITION'} ]) {
         my $rule = @{$ruleConfig{$ruletype}}[ $cgiparams{'RULE_POSITION'} ];
@@ -303,7 +263,7 @@ if (   $cgiparams{'ACTION'} eq $Lang::tr{'up'}
 }
 
 &Header::openpage($Lang::tr{'firewall access rules'}, 1, '');
-&Header::openbigbox('100%', 'left');
+##&Header::openbigbox('100%', 'left');
 
 ###############
 # DEBUG DEBUG
@@ -342,86 +302,32 @@ if (!$invalidSettings) {
 ##        }
         &printSelectNewRuleBox();
         &printCurrentRulesBox('all');
+    } else {
+        &printEnterParamsBox();
     }
-    else {
-        if ($cgiparams{'BOX_ACTION'} eq "$Lang::tr{'next'}") {
-            &printOverviewBox();
-        }
-        else {
-            &printEnterParamsBox();
-        }
-    }
-}
-else {
+} else {
     &printInvalidSettingsBox();
 }
 
-&Header::closebigbox();
+##&Header::closebigbox();
 &Header::closepage();
 
 sub printCurrentRulesBox
 {
     my $printMode = shift;
-    &Header::openbox('100%', 'left', "$Lang::tr{'current rules'}:");
+##    &Header::openbox('100%', 'left', "$Lang::tr{'current rules'}:");
 
     if ($printMode eq 'all' || $cgiparams{'RULETYPE'} eq 'INPUT') {
         &printCurrentRules('INPUT', $printMode);
-#### DEBUG:
-        #       foreach $line (@inputRules) {
-        #           print "$line<br />\n";
-        #       }
-#### end DEBUG
         print "<br />";
     }
 
-    if ($printMode eq 'all' || $cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        &printCurrentRules('EXTERNAL', $printMode);
-        print "<br />";
-    }
+    #if ($printMode eq 'all' || $cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+    #    &printCurrentRules('EXTERNAL', $printMode);
+    #    print "<br />";
+    #}
 
-    print <<END;
-<table>
-<tr>
-    <td class='boldbase'>&nbsp; $Lang::tr{'legend'}:</td>
-    <td align='right'>&nbsp;<img src='/images/input.gif' alt='=&gt;' /></td>
-    <td class='base' align='left'>$Lang::tr{'standard rule'}</td>
-    <td align='right'>&nbsp;<img src='/images/inputdeny.gif' alt='=X&gt;' /></td>
-    <td class='base' align='left'>$Lang::tr{'deny rule'}</td>
-    <td align='right'>&nbsp;<img src='/images/inputlog.gif' alt='=log&gt;' /></td>
-    <td class='base' align='left'>$Lang::tr{'logging rule'}</td>
-    <td align='right'>&nbsp;<img src='/images/inputadv.gif' alt='=ADV&gt;' /></td>
-    <td class='base' align='left'>$Lang::tr{'advanced rule'}</td>
-    <td colspan='2'></td>
-</tr>
-<tr>
-    <td class='boldbase'></td>
-    <td align='right'>&nbsp;<img src='/images/on.gif' alt='$Lang::tr{'click to disable'}' /></td>
-    <td class='base' align='left'>$Lang::tr{'click to disable'}</td>
-    <td align='right'>&nbsp;<img src='/images/off.gif' alt='$Lang::tr{'click to enable'}' /></td>
-    <td class='base' align='left'>$Lang::tr{'click to enable'}</td>
-    <td align='right'>&nbsp;<img src='/images/logging.gif' alt='$Lang::tr{'logging'} $Lang::tr{'click to disable'}' /></td>
-    <td class='base' align='left'>$Lang::tr{'logging'} $Lang::tr{'click to disable'}</td>
-    <td align='right'>&nbsp;<img src='/images/loggingoff.gif' alt='$Lang::tr{'logging'} $Lang::tr{'click to enable'}' /></td>
-    <td class='base' align='left'>$Lang::tr{'logging'} $Lang::tr{'click to enable'}</td>
-    <td colspan='2'></td>
-</tr>
-<tr>
-    <td class='boldbase'></td>
-    <td align='right'>&nbsp;<img src='/images/edit.gif' alt='$Lang::tr{'edit'}' /></td>
-    <td class='base' align='left'>$Lang::tr{'edit'}</td>
-    <td align='right'>&nbsp;<img src='/images/copy.gif' alt='$Lang::tr{'copy rule'}' /></td>
-    <td class='base' align='left'>$Lang::tr{'copy rule'}</td>
-    <td align='right'>&nbsp;<img src='/images/delete.gif' alt='$Lang::tr{'remove'}' /></td>
-    <td class='base' align='left'>$Lang::tr{'remove'}</td>
-    <td align='right'>&nbsp;<img src='/images/up.gif' alt='$Lang::tr{'up'}' /></td>
-    <td class='base' align='left'>$Lang::tr{'up'}</td>
-    <td align='right'>&nbsp;<img src='/images/down.gif' alt='$Lang::tr{'down'}' /></td>
-    <td class='base' align='left'>$Lang::tr{'down'}</td>
-</tr>
-</table>
-END
-
-    &Header::closebox();
+##    &Header::closebox();
 }
 
 sub printCurrentRules
@@ -442,19 +348,19 @@ END
     my $widthRemark = '26';
     my $colHeaderDestIface = $Lang::tr{'net dst br iface'};
 
-    if ($type eq 'INPUT') {
-        $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
-        print "<b>$Lang::tr{'openfirewall access'}:</b>";
-    }
-    elsif ($type eq 'EXTERNAL') {
-        $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
-        print "<b>$Lang::tr{'external openfirewall access'}:</b>";
-    }
+#    if ($type eq 'INPUT') {
+#        $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
+##        print "<b>$Lang::tr{'openfirewall access'}:</b>";
+#    }
+#    elsif ($type eq 'EXTERNAL') {
+#        $colHeaderDestIface = "<div class='ofw_box'>$colHeaderDestIface</div>";
+##        print "<b>$Lang::tr{'external openfirewall access'}:</b>";
+#    }
 
     print <<END;
     </td>
 </tr>
-<tr>
+<tr class='headbar'>
     <td width='2%' class='boldbase' align='center'>#</td>
     <td width='10%' class='boldbase' align='center'>$Lang::tr{'net br iface'}</td>
     <td width='$widthAdr%' class='boldbase' align='center'>$Lang::tr{'source'}</td>
@@ -480,13 +386,13 @@ END
     my $id = 0;
     my $idlast = $#{$ruleConfig{$type}};
     foreach my $rule (@{$ruleConfig{$type}}) {
-
         # Advanced Mode ?
         next if ($rule->{'RULEMODE'} eq 'adv' && &FW::hideAdvRule($rule->{'SRC_NET_TYPE'}, $rule->{'DST_NET_TYPE'}, $type));
 
         my $gif        = '';
         my $forwardgif = 'input';
         my $forwardalt = '=&gt;';
+        my $forwardname = $Lang::tr{'standard rule'};
 
         my $toggle    = '';
         my $toggleLog = '';
@@ -496,31 +402,30 @@ END
 
         my $srcNetColor       = '';
         my $srcNetInvertColor = 'RED';
-        if (   $FW::fwSettings{'SHOW_COLORS'} eq 'on'
-            && $rule->{'SRC_NET_TYPE'} eq 'defaultSrcNet'
-            && defined($FW::interfaces{$rule->{'SRC_NET'}}))
-        {
-            if ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'GREEN_COLOR') {
-                $srcNetColor = 'ofw_iface_bg_green';
-            }
-            elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'BLUE_COLOR') {
-                $srcNetColor = 'ofw_iface_bg_blue';
-            }
-            elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR') {
-                $srcNetColor = 'ofw_iface_bg_orange';
-            }
-            elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'RED_COLOR') {
-                $srcNetColor       = 'ofw_iface_bg_red';
-                $srcNetInvertColor = 'BLACK';
-            }
-            elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'IPSEC_COLOR') {
-                $srcNetColor = 'ofw_iface_bg_ipsec';
-            }
-            elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'OVPN_COLOR') {
-                $srcNetColor = 'ofw_iface_bg_ovpn';
-            }
-
-        }
+#        if ($FW::fwSettings{'SHOW_COLORS'} eq 'on'
+#            && $rule->{'SRC_NET_TYPE'} eq 'defaultSrcNet'
+#            && defined($FW::interfaces{$rule->{'SRC_NET'}}))
+#        {
+#            if ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'GREEN_COLOR') {
+#                $srcNetColor = 'ofw_iface_bg_green';
+#            }
+#            elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'BLUE_COLOR') {
+#                $srcNetColor = 'ofw_iface_bg_blue';
+#            }
+#            elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR') {
+#                $srcNetColor = 'ofw_iface_bg_orange';
+#            }
+#            elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'RED_COLOR') {
+#                $srcNetColor       = 'ofw_iface_bg_red';
+#                $srcNetInvertColor = 'BLACK';
+#            }
+##            elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'IPSEC_COLOR') {
+##                $srcNetColor = 'ofw_iface_bg_ipsec';
+##            }
+##            elsif ($FW::interfaces{$rule->{'SRC_NET'}}{'COLOR'} eq 'OVPN_COLOR') {
+##                $srcNetColor = 'ofw_iface_bg_ovpn';
+##            }
+#        }
 
         # Always display interface name (there are more than one interface per color possible)
         $srcNet = &General::translateinterface($rule->{'SRC_NET'});
@@ -529,24 +434,23 @@ END
         my $destNetInvertColor = 'RED';
 
         if (($type eq 'INPUT') || ($type eq 'EXTERNAL')) {
-            $destNetColor = 'ofw_iface_bg_fw';
+#            $destNetColor = 'ofw_iface_bg_fw';
             $destNet = 'OFW';
         }
 
         # highlight the row we are editing
-        if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'RULE_POSITION'} eq $id) {
-            print "<tr class='selectcolour'>";
-            $srcNetColor = '';
-        }
-        else {
+##        if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'RULE_POSITION'} eq $id) {
+##            print "<tr class='selectcolour'>";
+##            $srcNetColor = '';
+##        }
+##        else {
             print "<tr class='table".int(($id % 2) + 1)."colour'>";
-        }
+##        }
 
         $loggif = "logging";
         if ($rule->{'LOG_ENABLED'} eq 'on') {
             $toggleLog = 'off';
-        }
-        else {
+        } else {
             $loggif .= 'off';
             $toggleLog = 'on';
         }
@@ -558,46 +462,49 @@ END
         if ($rule->{'RULEMODE'} eq 'adv') {
             $forwardgif = 'inputadv';
             $forwardalt = '=ADV&gt;';
+            $forwardname = $Lang::tr{'advanced rule'};
         }
         else {    # $rule->{'RULEMODE'} eq 'std'
             $forwardgif = 'input';
             $forwardalt = '=&gt;';
+            $forwardname = $Lang::tr{'standard rule'};
         }
         if ($rule->{'RULEACTION'} eq 'logOnly') {
             $forwardgif .= 'log';
             $forwardalt = '=log&gt;';
             $imageType  = "img";
+            $forwardname = $Lang::tr{'logging rule'};
         }
         elsif ($rule->{'RULEACTION'} eq 'drop' || $rule->{'RULEACTION'} eq 'reject') {
             $forwardgif .= 'deny';
             $forwardalt = '=X&gt;';
+            $forwardname = $Lang::tr{'deny rule'};
         }
 
         if ($rule->{'ENABLED'} eq 'on') {
             $gif    = 'on.gif';
             $toggle = 'off';
-        }
-        else {
+        } else {
             $gif    = 'off.gif';
             $toggle = 'on';
         }
 
         my $srcaddr = $rule->{'SRC_ADR'};
-        if ($rule->{'INV_SRC_ADR'} eq 'on') {
-            $srcaddr =
-                  "<strong><font color='RED'>! (</font></strong>"
-                . $rule->{'SRC_ADR'}
-                . "<strong><font color='RED'>)</font></strong>";
-        }
+#        if ($rule->{'INV_SRC_ADR'} eq 'on') {
+#            $srcaddr =
+#                  "<strong><font color='RED'>! (</font></strong>"
+#                . $rule->{'SRC_ADR'}
+#                . "<strong><font color='RED'>)</font></strong>";
+#        }
         if ($rule->{'SRC_PORT'} ne '-') {
-            if ($rule->{'INV_SRC_PORT'} eq 'on') {
-                $srcaddr .= "&nbsp;:&nbsp;<strong><font color='RED'>! (</font></strong>";
-                $srcaddr .= "$rule->{'SRC_PORT'}";
-                $srcaddr .= "<strong><font color='RED'>)</font></strong>";
-            }
-            else {
+#            if ($rule->{'INV_SRC_PORT'} eq 'on') {
+#                $srcaddr .= "&nbsp;:&nbsp;<strong><font color='RED'>! (</font></strong>";
+#                $srcaddr .= "$rule->{'SRC_PORT'}";
+#                $srcaddr .= "<strong><font color='RED'>)</font></strong>";
+#            }
+#            else {
                 $srcaddr .= "&nbsp;:&nbsp;$rule->{'SRC_PORT'}";
-            }
+#            }
         }
 
         my $displayID = 1 + $id;
@@ -605,7 +512,7 @@ END
     <td class='boldbase'>$displayID</td>
     <td align='center' class='$srcNetColor'>$srcNet</td>
     <td align='center'>$srcaddr</td>
-    <td align='center'><img src='/images/$forwardgif.gif' alt='$forwardalt' /></td>
+    <td align='center'><img src='/images/$forwardgif.gif' alt='$forwardalt' title='$forwardname' /></td>
     <td align='center' class='$destNetColor'>$destNet</td>
 END
 
@@ -619,13 +526,13 @@ END
         print "<td align='center'>$dstaddr</td>";
 
         unless (defined $rule->{'REMARK'}) { $rule->{'REMARK'} = ''; }
-        if ($printMode ne 'all') {
-            print <<END;
-    <td colspan='8' align='left'>$rule->{'REMARK'}</td>
-</tr>
-END
-        }
-        else {
+#        if ($printMode ne 'all') {
+#            print <<END;
+#    <td colspan='8' align='left'>$rule->{'REMARK'}</td>
+#</tr>
+#END
+#        }
+#        else {
             print <<END;
     <td align='left'>$rule->{'REMARK'}</td>
     <td align='center'>
@@ -710,7 +617,8 @@ END
 END
             }
             print "</tr>";
-        }
+#        }
+##########################################################################################
 
         # display only if the option is really used
         if (
@@ -728,8 +636,7 @@ END
             if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'RULE_POSITION'} eq $id) {
                 print "<tr class='selectcolour'>";
                 $srcNetColor = '';
-            }
-            else {
+            } else {
                 print "<tr class='table".int(($id % 2) + 1)."colour'>";
             }
             my $options = "$Lang::tr{'adv options'}&nbsp;:&nbsp;&nbsp;";
@@ -737,8 +644,7 @@ END
                 if ($rule->{'INV_MATCH_STRING'} eq 'on') {
                     $options .=
 "--string <strong><font color='RED'>! (</font></strong> $rule->{'MATCH_STRING'} <strong><font color='RED'>)</font></strong> ;&nbsp;&nbsp;";
-                }
-                else {
+                } else {
                     $options .= "--string $rule->{'MATCH_STRING'} ;&nbsp;&nbsp;";
                 }
             }
@@ -792,8 +698,7 @@ END
             # highlight the row we are editing
             if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'RULE_POSITION'} eq $id) {
                 print "<tr class='selectcolour'>";
-            }
-            else {
+            } else {
                 print "<tr class='table".int(($id % 2) + 1)."colour'>";
             }
             print <<END;
@@ -825,8 +730,7 @@ sub validateSrcParams
         my $foundIface = 0;
         if ($cgiparams{'DEFAULT_SRC_NET'} eq "Any") {
             $foundIface = 1;
-        }
-        else {
+        } else {
             foreach my $ifaceName (sort keys %FW::interfaces) {
                 if ($cgiparams{'DEFAULT_SRC_NET'} eq $ifaceName) {
                     $foundIface = 1;
@@ -881,8 +785,7 @@ sub validateSrcParams
         if ($cgiparams{'GROUP_SRC_ADR'} eq '') {
             $errormessage .= "$Lang::tr{'invalid address group'}<br />";
         }
-    }
-    else {
+    } else {
         $errormessage .= "$Lang::tr{'none address type'}<br />";
     }
 
@@ -911,10 +814,6 @@ sub validateSrcParams
 
 sub validateDestParams
 {
-    unless ($cgiparams{'RULETYPE'} =~ /^(INPUT|EXTERNAL)$/) {
-        $errormessage .= "$Lang::tr{'invalid dest'}<br />";
-    }
-
     if (!defined($cgiparams{'SERVICE_ON'}) || $cgiparams{'SERVICE_ON'} ne 'on') {
         $cgiparams{'SERVICE_ON'} = 'off';
     }
@@ -983,42 +882,10 @@ sub validateDestParams
 sub checkBetweenParams
 {
     # Check if this is an advanced rule
-    if ($cgiparams{'RULEACTION'} eq 'accept_XXX') {
-
-        if ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-
-            # External Openfirewall access
-            $warnOpenFwMessage .= "$Lang::tr{'rule opens your Firewall'}<br />";
-        }
-        elsif ($cgiparams{'RULETYPE'} eq 'INPUT') {
-
-            # Openfirewall access
-            if ($FW::fwSettings{'ADV_MODE_ENABLE'} ne 'on') {
-
-                # only allow Openfirewall access from Green, Blue or VPN
-                if (($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') && ($FW::interfaces{$cgiparams{'DEFAULT_SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR')) {
-                    $errormessage .= "$Lang::tr{'openfirewall access only from green blue and vpn'}<br />";
-                }
-            }
-            else {
-                if ($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') {
-
-                    # only allow Openfirewall access from Green, Blue or VPN
-                    if ($FW::interfaces{$cgiparams{'DEFAULT_SRC_NET'}}{'COLOR'} eq 'ORANGE_COLOR') {
-                        $errormessage .= "$Lang::tr{'openfirewall access only from green blue and vpn'}<br />";
-                    }
-                }
-                else {    # we don't know if the custom source interface opens the Firewall
-                    $warnOpenFwMessage .= "$Lang::tr{'rule can open your Firewall'}<br />";
-                }
-            }
-        }
-    }
 
     if ($warnOpenFwMessage) {
         $cgiparams{'RULEMODE'} = "adv";
-    }
-    else {
+    } else {
         $cgiparams{'RULEMODE'} = "std";
     }
 }
@@ -1050,8 +917,7 @@ sub validateAdditionalParams
         if ($cgiparams{'INV_MATCH_STRING'} ne 'on') {
             $cgiparams{'INV_MATCH_STRING'} = 'off';
         }
-    }
-    else {
+    } else {
         $cgiparams{'MATCH_STRING_ON'} = 'off';
         $cgiparams{'MATCH_STRING'}    = "";
     }
@@ -1078,8 +944,7 @@ sub validateAdditionalParams
         else {
             $errormessage .= "$Lang::tr{'none limit type'}<br />";
         }
-    }
-    else {
+    } else {
         $errormessage .= "$Lang::tr{'none limit for'}<br />";
     }
     return;
@@ -1265,15 +1130,15 @@ sub resetCgiParams
 
 sub printSelectNewRuleBox
 {
-    &Header::openbox('100%', 'left', "$Lang::tr{'add a new rule'}:", $error);
+##    &Header::openbox('100%', 'left', "$Lang::tr{'add a new rule'}:", $error);
 
     print <<END;
-<table width='100%'>
-<tr>
+<div align='left' tyle='margin-top:0px'>
+<table width='100%' width='100%' height='33px' align='center'>
+<tr style='background-color: #F2F2F2;'>
     <td align='left'>
         <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-           <input type='submit' name='ACTION' value='$Lang::tr{'openfirewall access'}' />
-           <input type='hidden' name='RULETYPE' value='INPUT'  />
+           <input style='background-color: #F2F2F2;' class='buttons' type='submit' name='ACTION' value='$Lang::tr{'openfirewall access'}' />
 END
     &printHiddenFormParams('addNewRule');
 
@@ -1282,7 +1147,7 @@ END
     </td>
     <td align='left'>
         <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-            <input type='submit' name='ACTION' value='$Lang::tr{'external openfirewall access'}' />
+            <input style='background-color: #F2F2F2;' class='buttons' type='submit' name='ACTION' value='$Lang::tr{'external openfirewall access'}' />
             <input type='hidden' name='RULETYPE' value='EXTERNAL'  />
 END
     &printHiddenFormParams('addNewRule');
@@ -1296,9 +1161,10 @@ END
     </td>
 </tr>
 </table>
+</div>
 END
 
-    &Header::closebox();
+##    &Header::closebox();
 }
 
 sub printInvalidSettingsBox
@@ -1325,19 +1191,29 @@ END
 sub openEnterBox
 {
     my $title = '';
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $title = $Lang::tr{'openfirewall access'};
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $title = $Lang::tr{'external openfirewall access'};
-    }
+##    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
+##        $title = $Lang::tr{'openfirewall access'};
+##    }
+##    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+##        $title = $Lang::tr{'external openfirewall access'};
+##    }
 
     if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-        &Header::openbox('100%', 'left', "$Lang::tr{'edit a rule'}: $title", $error);
+##        &Header::openbox('100%', 'left', "$Lang::tr{'edit a rule'}: $title", $error);
+          $title = $Lang::tr{'edit a rule'};
     }
     else {
-        &Header::openbox('100%', 'left', "$Lang::tr{'add a new rule'}: $title", $error);
+##        &Header::openbox('100%', 'left', "$Lang::tr{'add a new rule'}: $title", $error);
+          $title = $Lang::tr{'add a new rule'};
     }
+
+    print <<END
+<table width='100%' height='33px' bgcolor='#69C'>
+<tr align='center'>
+    <td><strong>$title</strong></td>
+</tr>
+</table>
+END
 }
 
 sub printEnterParamsBox
@@ -1404,35 +1280,39 @@ END
         my $showCustomInterfacesExternal_src = 0;
 
         if($FW::fwSettings{'ADV_MODE_ENABLE'} eq 'on') {
-            if($customifacesCount_src{'NUM_INTERNAL'} > 0
-                && $cgiparams{'RULETYPE'} ne 'EXTERNAL') {
+            if($customifacesCount_src{'NUM_INTERNAL'} > 0) {
                 $showCustomInterfacesInternal_src = 1;
-            }
-            if($customifacesCount_src{'NUM_EXTERNAL'} > 0
-                && $cgiparams{'RULETYPE'} eq 'EXTERNAL') {
                 $showCustomInterfacesExternal_src = 1;
             }
+#            if($customifacesCount_src{'NUM_INTERNAL'} > 0
+#                && $cgiparams{'RULETYPE'} ne 'EXTERNAL') {
+#                $showCustomInterfacesInternal_src = 1;
+#            }
+#            if($customifacesCount_src{'NUM_EXTERNAL'} > 0
+#                && $cgiparams{'RULETYPE'} eq 'EXTERNAL') {
+#                $showCustomInterfacesExternal_src = 1;
+#            }
         }
 
-        if($showCustomInterfacesInternal_src || $showCustomInterfacesExternal_src) {
+        if ($showCustomInterfacesInternal_src) {
             print <<END;
     <td  width='1%' class='base'>
         <input type='radio' name='SRC_NET_TYPE' value='defaultSrcNet' $radio{'SRC_NET_TYPE'}{'defaultSrcNet'} />
     </td>
-    <td colspan='2' class='base'>
+    <td width='20%' class='base'>
 END
         }
-        else
-        {
-                        print <<END;
+        else {
+            print <<END;
     <td colspan='3' class='base'>
         <input type='hidden' name='SRC_NET_TYPE' value='defaultSrcNet' />
 END
         }
 
 print <<END;
-        $Lang::tr{'default interfaces'}:&nbsp;
-        <select name='DEFAULT_SRC_NET'>
+        $Lang::tr{'default interfaces'}&nbsp;
+    </td><td width='75%' class='base'>
+        <select name='DEFAULT_SRC_NET' style='width:300px'>
 END
 
         # External Access for external interface(s) only
@@ -1441,9 +1321,9 @@ END
         foreach my $iface (sort keys %FW::interfaces) {
 
             # Check for external OK
-            next if (($cgiparams{'RULETYPE'} eq 'EXTERNAL') && ($FW::interfaces{$iface}{'COLOR'} ne 'RED_COLOR'));
+#            next if (($cgiparams{'RULETYPE'} eq 'EXTERNAL') && ($FW::interfaces{$iface}{'COLOR'} ne 'RED_COLOR'));
             # Check for internal OK
-            next if (($cgiparams{'RULETYPE'} ne 'EXTERNAL') && ($FW::interfaces{$iface}{'COLOR'} eq 'RED_COLOR'));
+#            next if (($cgiparams{'RULETYPE'} ne 'EXTERNAL') && ($FW::interfaces{$iface}{'COLOR'} eq 'RED_COLOR'));
 
             print "<option value='$iface'";
             print " selected='selected'" if ($cgiparams{'DEFAULT_SRC_NET'} eq $iface);
@@ -1456,17 +1336,18 @@ END
 </tr>
 END
 
-        if ($showCustomInterfacesInternal_src || $showCustomInterfacesExternal_src)
-        {    # show this option only if there are Custom Interfaces available
+        if ($showCustomInterfacesInternal_src) {
+            # show this option only if there are Custom Interfaces available
             print <<END;
 <tr>
     <td class='base'></td>
     <td class='base'>
         <input type='radio' name='SRC_NET_TYPE' value='custSrcNet' $radio{'SRC_NET_TYPE'}{'custSrcNet'} />
     </td>
-    <td colspan='2' class='base'>
-        $Lang::tr{'custom interfaces'}:&nbsp;
-        <select name='CUST_SRC_NET'>
+    <td width='20%' class='base'>
+        $Lang::tr{'custom interfaces'}&nbsp;
+    </td><td width='75%' class='base'>
+        <select name='CUST_SRC_NET' style='width:300px'>
 END
 
             foreach my $iface (@customInterfaces_src) {
@@ -1496,32 +1377,31 @@ END
 END
 
 
-    if ($cgiparams{'RULETYPE'} eq 'EXTERNAL' || $cgiparams{'RULETYPE'} eq 'PORTFW') {
+    if ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
         print <<END;
 <tr>
     <td class='base'></td>
     <td class='base'>
         <input type='radio' name='SRC_ADR_TYPE' value='defaultSrcAdr' $radio{'SRC_ADR_TYPE'}{'defaultSrcAdr'} />
     </td>
-    <td colspan='2' class='base'>
+    <td width='20%' class='base'>
         $Lang::tr{'address'}:&nbsp;
         Any&nbsp;
         <input type='hidden' name='DEFAULT_SRC_ADR' value='Any' />
     </td>
 </tr>
 END
-    }
-    else
-    {
+    } else {
         print <<END;
 <tr>
     <td class='base'></td>
     <td class='base'>
         <input type='radio' name='SRC_ADR_TYPE' value='defaultSrcAdr' $radio{'SRC_ADR_TYPE'}{'defaultSrcAdr'} />
     </td>
-    <td colspan='2' class='base'>
-        $Lang::tr{'default networks'}:&nbsp;
-        <select name='DEFAULT_SRC_ADR'>
+    <td width='20%' class='base'>
+        $Lang::tr{'default networks'}&nbsp;
+    </td><td width='75%' class='base'>
+        <select name='DEFAULT_SRC_ADR' style='width:300px'>
 END
         foreach my $network (sort keys %defaultNetworks) {
             next if ($defaultNetworks{$network}{'LOCATION'} eq "IPCOP");
@@ -1543,20 +1423,24 @@ END
     <td class='base'>
         <input type='radio' name='SRC_ADR_TYPE' value='textSrcAdr' $radio{'SRC_ADR_TYPE'}{'textSrcAdr'} />
     </td>
-    <td class='base' width='25%'>
-        $Lang::tr{'addressformat'}:&nbsp;
-        <select name='SRC_ADRESSFORMAT'>
+    <td class='base' width='20%'>
+        $Lang::tr{'addressformat'}&nbsp;
+    </td><td class='base' width='75%'>
+        <select name='SRC_ADRESSFORMAT' style='width:300px'>
             <option value='ip' $selected{'SRC_ADRESSFORMAT'}{'ip'}>IP</option>
             <option value='mac' $selected{'SRC_ADRESSFORMAT'}{'mac'}>MAC</option>
         </select>
     </td>
-    <td class='base' width='70%' align='left' >
-        $Lang::tr{'source address'}:&nbsp;
+</tr><tr>
+    <td class='base'></td>
+    <td class='base'></td>
+    <td class='base' width='20%' align='left' >
+        $Lang::tr{'source address'}&nbsp;
+    </td><td class='base' width='75%' >
         <input type='text' name='SRC_ADRESS_TXT' value='$cgiparams{'SRC_ADRESS_TXT'}' size='20' maxlength='18' />&nbsp;
     </td>
 </tr>
 END
-
 
     my %customAdr = ();
     &DATA::readCustAddresses(\%customAdr);
@@ -1569,9 +1453,10 @@ END
     <td class='base'>
         <input type='radio' name='SRC_ADR_TYPE' value='custSrcAdr' $radio{'SRC_ADR_TYPE'}{'custSrcAdr'} />
     </td>
-    <td colspan='2' class='base'>
-        $Lang::tr{'custom addresses'}:&nbsp;
-        <select name='CUST_SRC_ADR'>
+    <td width='20%' class='base'>
+        $Lang::tr{'custom addresses'}&nbsp;
+    </td><td width='75%' class='base'>
+        <select name='CUST_SRC_ADR' style='width:300px'>
 END
         print "<option value='BLANK' selected='selected'>N/A</option>" if ($#customAddresses < 0);
         foreach my $adr (@customAddresses) {
@@ -1604,9 +1489,10 @@ END
     <td class='base'>
         <input type='radio' name='SRC_ADR_TYPE' value='groupSrcAdr' $radio{'SRC_ADR_TYPE'}{'groupSrcAdr'} />
     </td>
-    <td colspan='2' class='base'>
-        $Lang::tr{'address groups'}:&nbsp;
-        <select name='GROUP_SRC_ADR'>
+    <td width='20%' class='base'>
+        $Lang::tr{'address groups'}&nbsp;
+    </td><td width='75%' class='base'>
+        <select name='GROUP_SRC_ADR' style='width:300px'>
 END
         print "<option value='BLANK' selected='selected'>N/A</option>" if ($#adrGroups < 0);
         foreach my $adrGroup (@adrGroups) {
@@ -1627,19 +1513,17 @@ END
     }
 #######
     if ($FW::fwSettings{'ADV_MODE_ENABLE'} eq 'on' && $cgiparams{'RULETYPE'} ne 'PORTFW') {
-
         print <<END;
 <tr>
     <td class='base'></td>
     <td class='base'></td>
-    <td colspan='2' class='base'>
+    <td width='20%' class='base'>
         &nbsp; <input type='checkbox' name='INV_SRC_ADR' $checked{'INV_SRC_ADR'}{'on'} />
         $Lang::tr{'fw invert'}&nbsp;
     </td>
 </tr>
 END
-    }
-    else {
+    } else {
         print "<tr><td colspan='4'><input type='hidden' name='INV_SRC_ADR' value='off' /></td></tr>\n";
     }
 
@@ -1654,39 +1538,37 @@ END
     <td class='base'>
         <input type='checkbox' name='SRC_PORT_ON' $checked{'SRC_PORT_ON'}{'on'} />
     </td>
-    <td colspan='2' class='base'>
-        $Lang::tr{'use src port'}:
+    <td width='20%' class='base'>
+        $Lang::tr{'use src port'}
     </td>
 </tr>
 <tr>
     <td class='base'></td>
     <td class='base'>
     </td>
-    <td colspan='2' class='base' >
-        $Lang::tr{'source port'}:&nbsp;
+    <td width='20%' class='base' >
+        $Lang::tr{'source port'}&nbsp;
+    </td><td width='75%' class='base' >
         <input type='text' name='SRC_PORT' value='$cgiparams{'SRC_PORT'}' size='14' maxlength='12' />
     </td>
 </tr>
 END
-        if($cgiparams{'RULETYPE'} ne 'PORTFW') {
+        if ($cgiparams{'RULETYPE'} ne 'PORTFW') {
             print <<END;
 <tr>
     <td class='base'></td>
     <td class='base'></td>
-    <td colspan='2' class='base'>
+    <td width='20%' class='base'>
         &nbsp; <input type='checkbox' name='INV_SRC_PORT' $checked{'INV_SRC_PORT'}{'on'} />
         $Lang::tr{'fw invert'}&nbsp;
     </td>
 </tr>
 END
-        }
-        else
-        {
+        } else {
             print "<tr><td colspan='4'>\n";
             print "<input type='hidden' name='INV_SRC_PORT' value='off' /></td></tr>\n";
         }
-    }
-    else {
+    } else {
         print "<tr><td colspan='4'><input type='hidden' name='SRC_PORT_ON' value='off' />\n";
         print "<input type='hidden' name='SRC_PORT' value='' />\n";
         print "<input type='hidden' name='INV_SRC_PORT' value='off' /></td></tr>\n";
@@ -1703,19 +1585,18 @@ END
     # Openfirewall external destination for Port Forwarding
 ############################################################################################
 
-        print <<END;
-<table width='100%' cellpadding='0' cellspacing='0' border='0'>
-<tr>
-    <td >
-        <input type='hidden' name='PORTFW_EXT_ADR' value='--' />
-        <input type='hidden' name='PORTFW_SERVICE_TYPE' value='--' />
-        <input type='hidden' name='PORTFW_CUST_SERVICE' value='--' />
-        <input type='hidden' name='PORTFW_DEFAULT_SERVICE' value='--' />
-    </td>
-</tr>
-</table>
-END
-
+#        print <<END;
+#<table width='100%' cellpadding='0' cellspacing='0' border='0'>
+#<tr>
+#    <td >
+#        <input type='hidden' name='PORTFW_EXT_ADR' value='--' />
+#        <input type='hidden' name='PORTFW_SERVICE_TYPE' value='--' />
+#        <input type='hidden' name='PORTFW_CUST_SERVICE' value='--' />
+#        <input type='hidden' name='PORTFW_DEFAULT_SERVICE' value='--' />
+#    </td>
+#</tr>
+#</table>
+#END
 
 ###########################################################################################
     # Destination
@@ -1758,8 +1639,7 @@ END
     print <<END;
 <table width='100%'>
 <tr>
-    <td class='boldbase' >$destination_text
-    </td>
+    <td class='boldbase' >$destination_text</td>
 </tr>
 </table>
 
@@ -1770,298 +1650,19 @@ END
 <tr>
     <td width='4%' class='base' />
     <td width='1%' class='base' />
-    <td width='95%' class='base' />
+    <td width='20%' class='base' />
 </tr>
 <tr>
     <td class='base'></td>
-    <td colspan='2' class='base'>
+    <td width='1%' class='base' />
+    <td width='20%' class='base'>
         $ruletype_text
         <input type='hidden' name='RULETYPE' value='$cgiparams{'RULETYPE'}' />
     </td>
 </tr>
 END
 
-    if ($cgiparams{'RULETYPE'} ne 'EXTERNAL' && $cgiparams{'RULETYPE'} ne 'INPUT')
-    {
-
-        my %customIfaces_dst = ();
-        my %customifacesCount_dst = &DATA::readCustIfaces(\%customIfaces_dst);
-        my @customInterfaces_dst = sort keys(%customIfaces_dst);
-        my $showCustomInterfacesInternal_dst = 0;
-        my $showCustomInterfacesExternal_dst = 0;
-
-        if($FW::fwSettings{'ADV_MODE_ENABLE'} eq 'on') {
-            if($customifacesCount_dst{'NUM_INTERNAL'} > 0
-                && ($cgiparams{'RULETYPE'} eq 'PINHOLES' || $cgiparams{'RULETYPE'} eq 'PORTFW' )) {
-                $showCustomInterfacesInternal_dst = 1;
-            }
-            if($customifacesCount_dst{'NUM_EXTERNAL'} > 0
-                && $cgiparams{'RULETYPE'} eq 'OUTGOING') {
-                $showCustomInterfacesExternal_dst = 1;
-            }
-        }
-
-        print <<END;
-<tr>
-    <td class='base'></td>
-    <td class='base'></td>
-    <td class='base'>
-END
-
-        if($showCustomInterfacesInternal_dst || $showCustomInterfacesExternal_dst) {
-            print "<input type='radio' name='DST_NET_TYPE' value='defaultDestNet' $radio{'DST_NET_TYPE'}{'defaultDestNet'} />\n";
-        }
-        else {
-            print "<input type='hidden' name='DST_NET_TYPE' value='defaultDestNet' $radio{'DST_NET_TYPE'}{'defaultDestNet'} />\n";
-        }
-
-        print <<END;
-        $Lang::tr{'default interfaces'}:&nbsp;
-        <select name='DEFAULT_DST_NET'>
-END
-            foreach my $iface (sort keys %FW::interfaces) {
-                print "<option value='$iface'";
-                print " selected='selected'" if ($cgiparams{'DEFAULT_DST_NET'} eq $iface);
-                print ">".&General::translateinterface($iface)."</option>";
-            }
-
-            print <<END;
-        </select>
-    </td>
-</tr>
-END
-#~ print<<END;
-#~ <tr>
-#~     <td colspan='3'>
-#~         <input type='hidden' name='CUST_DST_NET' value='$cgiparams{'CUST_DST_NET'}' />
-#~     </td>
-#~ </tr>
-#~ END
-
-#~         }
-#~         elsif ($FW::fwSettings{'ADV_MODE_ENABLE'} eq 'on') {
-
-#~             # Advanced mode is on and we don't have a Pinhole rule
-#~         else {
-
-#~             # Default interfaces
-#~             print <<END;
-#~ <tr>
-#~     <td class='base'></td>
-#~     <td class='base'></td>
-#~     <td class='base'>
-#~         <input type='radio' name='DST_NET_TYPE' value='defaultDestNet' $radio{'DST_NET_TYPE'}{'defaultDestNet'} />
-#~         $Lang::tr{'default interfaces'}:&nbsp;
-#~         <select name='DEFAULT_DST_NET'>
-#~ END
-#~             foreach my $iface (sort keys %FW::interfaces) {
-#~                 print "<option value='$iface'";
-#~                 print " selected='selected'" if ($cgiparams{'DEFAULT_DST_NET'} eq $iface);
-#~                 print ">".&General::translateinterface($iface)."</option>";
-#~             }
-
-#~             print <<END;
-#~         </select>
-#~     </td>
-#~ </tr>
-#~ END
-
-
-            # Custom interfaces
-            if ($showCustomInterfacesInternal_dst || $showCustomInterfacesExternal_dst) {
-
-                # show this option only if there are Custom Networks available
-                print <<END;
-<tr>
-    <td class='base'></td>
-    <td class='base'></td>
-    <td class='base'>
-        <input type='radio' name='DST_NET_TYPE' value='custDestNet' $radio{'DST_NET_TYPE'}{'custDestNet'} />
-        $Lang::tr{'custom interfaces'}:&nbsp;
-        <select name='CUST_DST_NET'>
-END
-                print "<option value='BLANK' selected='selected'>N/A</option>" if ($#customInterfaces_dst < 0);
-                foreach my $iface (@customInterfaces_dst) {
-                    if( ($showCustomInterfacesInternal_dst && $customIfaces_dst{$iface}{'EXTERNAL'} ne 'on')
-                        || ($showCustomInterfacesExternal_dst && $customIfaces_dst{$iface}{'EXTERNAL'} eq 'on') ) {
-                        print "<option value='$iface'";
-                        print " selected='selected'" if ($cgiparams{'CUST_DST_NET'} eq $iface);
-                        print ">".&General::translateinterface($iface)."</option>";
-                    }
-                }
-                print <<END;
-        </select>
-    </td>
-</tr>
-END
-            }
-            else {
-                print
-"<tr><td colspan='3'><input type='hidden' name='CUST_DST_NET' value='$cgiparams{'CUST_DST_NET'}' /></td></tr>\n";
-            }
-
-#~         }
-#~         else {
-#~             print "<input type='hidden' name='DEFAULT_DST_NET' value='$cgiparams{'DEFAULT_DST_NET'}' />\n";
-#~             print "<input type='hidden' name='CUST_DST_NET' value='$cgiparams{'CUST_DST_NET'}' />\n";
-#~         }
-
-        print <<END;
-<tr>
-    <td colspan='3' class='base'>&nbsp;</td>
-</tr>
-END
-
-        my $showDestDefaultAdr = 0;
-
-##        if($cgiparams{'RULETYPE'} eq 'PORTFW') {
-##            print "<tr><td colspan='3'><input type='hidden' name='DEFAULT_DST_IP' value='-' /></td></tr>\n";
-##        }
-##        else {
-            $showDestDefaultAdr = 1;
-            print <<END;
-<tr>
-    <td class='base'></td>
-    <td class='base'></td>
-    <td class='base'>
-        <input type='radio' name='DST_IP_TYPE' value='defaultDstIP' $radio{'DST_IP_TYPE'}{'defaultDstIP'} />
-        $Lang::tr{'default networks'}:&nbsp;
-        <select name='DEFAULT_DST_IP'>
-END
-            foreach my $network (sort keys %defaultNetworks) {
-                next if ($defaultNetworks{$network}{'LOCATION'} eq "IPCOP");
-                print "<option value='$network'";
-                print " selected='selected'" if ($cgiparams{'DEFAULT_DST_IP'} eq $network);
-                print ">$network</option>";
-            }
-
-            print <<END;
-        </select>
-    </td>
-</tr>
-END
-##        }
-
-        my $showDestCustAdr = 0;
-        if ($#customAddresses >= 0) {
-            $showDestCustAdr = 1;
-
-            # show this option only if there are Custom Networks available
-            print <<END;
-<tr>
-    <td class='base'></td>
-    <td class='base'></td>
-    <td class='base'>
-        <input type='radio' name='DST_IP_TYPE' value='custDestIP' $radio{'DST_IP_TYPE'}{'custDestIP'} />
-        $Lang::tr{'custom addresses'}:&nbsp;
-        <select name='CUST_DST_ADR'>
-END
-            print "<option value='BLANK' selected='selected'>N/A</option>" if ($#customAddresses < 0);
-            foreach my $adr (sort @customAddresses) {
-                print "<option value='$adr'";
-                print " selected='selected'" if ($cgiparams{'CUST_DST_ADR'} eq $adr);
-                print ">$adr</option>";
-
-            }
-            print <<END;
-        </select>
-    </td>
-</tr>
-END
-        }
-        else {
-##            if($cgiparams{'RULETYPE'} eq 'PORTFW') {
-##                # Fall back to text input
-##                $radio{'DST_IP_TYPE'}{'ipDestTxt'} = "checked='checked'";
-##            }
-            print
-"<tr><td colspan='3'><input type='hidden' name='CUST_DST_ADR' value='$cgiparams{'CUST_DST_ADR'}' /></td></tr>\n";
-        }
-
-##########################################
-        my $showDestAdrGrp = 0;
-        if ($#adrGroups >= 0 &&  $cgiparams{'RULETYPE'} ne 'PORTFW') {    # show this option only if there are address groups available
-            $showDestAdrGrp = 1;
-            print <<END;
-<tr>
-    <td class='base'></td>
-    <td class='base'></td>
-    <td class='base'>
-        <input type='radio' name='DST_IP_TYPE' value='groupDestIP' $radio{'DST_IP_TYPE'}{'groupDestIP'} />
-        $Lang::tr{'address groups'}:&nbsp;
-        <select name='GROUP_DST_ADR'>
-END
-            print "<option value='BLANK' selected='selected'>N/A</option>" if ($#adrGroups < 0);
-            foreach my $adrGroup (@adrGroups) {
-                print "<option value='$adrGroup'";
-                print " selected='selected'" if ($cgiparams{'GROUP_DST_ADR'} eq $adrGroup);
-                print ">$adrGroup</option>";
-
-            }
-            print <<END;
-        </select>
-    </td>
-</tr>
-END
-        }
-        else {
-            print
-"<tr><td colspan='3'><input type='hidden' name='GROUP_DST_ADR' value='$cgiparams{'GROUP_DST_ADR'}' /></td></tr>\n";
-        }
-
-        my $dstIpTxtLabel = $Lang::tr{'destination ip or net'};
-##        if( $cgiparams{'RULETYPE'} eq 'PORTFW') {
-##            $dstIpTxtLabel =  $Lang::tr{'destination ip'};
-##        }
-        print <<END;
-<tr>
-    <td class='base'></td>
-    <td class='base'></td>
-    <td class='base'>
-END
-
-if($showDestDefaultAdr || $showDestCustAdr || $showDestAdrGrp) {
-    print"<input type='radio' name='DST_IP_TYPE' value='ipDestTxt' $radio{'DST_IP_TYPE'}{'ipDestTxt'} />\n";
-}
-else
-{
-    print"<input type='hidden' name='DST_IP_TYPE' value='ipDestTxt' />\n";
-}
-
-print <<END;
-
-        $dstIpTxtLabel:&nbsp;
-        <input type='text' name='DEST_IP_TXT' value='$cgiparams{'DEST_IP_TXT'}' size='21' maxlength='19' />
-    </td>
-</tr>
-END
-        if ($FW::fwSettings{'ADV_MODE_ENABLE'} eq 'on' &&  $cgiparams{'RULETYPE'} ne 'PORTFW') {
-
-            print <<END;
-<tr>
-    <td class='base'></td>
-    <td class='base'></td>
-    <td class='base'>
-        &nbsp; <input type='checkbox' name='INV_DST_IP' $checked{'INV_DST_IP'}{'on'} />
-        $Lang::tr{'fw invert'}&nbsp;
-    </td>
-</tr>
-END
-        }
-        else
-        {
-            print "<tr><td colspan='3'><input type='hidden' name='INV_DST_IP' value='off' /></td></tr>\n";
-
-        }
-        print <<END;
-<tr>
-    <td></td>
-    <td colspan='2' bgcolor='#000000'><img src='/images/null.gif' width='1' height='1' border='0' alt='--------' /></td>
-</tr>
-END
-    }
-    else {
-
+    if ($cgiparams{'RULETYPE'} eq 'EXTERNAL' || $cgiparams{'RULETYPE'} eq 'INPUT') {
         # this is an [External] Openfirewall Access  rule
         print <<END;
 <tr>
@@ -2074,7 +1675,6 @@ END
         <input type='hidden' name='DEST_IP_TXT' value='$cgiparams{'DEST_IP_TXT'}' />
         <input type='hidden' name='GROUP_DST_ADR' value='$cgiparams{'GROUP_DST_ADR'}' />
         <input type='hidden' name='CUST_DST_ADR' value='$cgiparams{'CUST_DST_ADR'}' />
-        <input type='hidden' name='INV_DST_IP' value='$cgiparams{'INV_DST_IP'}' />
     </td>
 </tr>
 END
@@ -2083,9 +1683,10 @@ END
     print <<END;
 <tr>
     <td class='base'></td>
+    <td class='base'></td>
 END
 
-    if($cgiparams{'RULETYPE'} ne 'EXTERNAL' && $cgiparams{'RULETYPE'} ne 'PORTFW') {
+    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
         print <<END;
     <td class='base'>
         <input type='checkbox' name='SERVICE_ON' $checked{'SERVICE_ON'}{'on'} />
@@ -2093,12 +1694,11 @@ END
     <td class='base'>
         $Lang::tr{'use Service'}&nbsp;
 END
-    }
-    else
-    {
+    } else {
         print <<END;
-    <td class='base' colspan='2'>
+    <td class='base' width='20%'>
     <input type='hidden' name='SERVICE_ON' value='on' />
+    </td><td>
 END
         print"\n";
     }
@@ -2118,11 +1718,12 @@ END
         print <<END;
 <tr>
     <td class='base'></td>
-    <td class='base'></td>
     <td class='base'>
         <input type='radio' name='SERVICE_TYPE' value='serviceGroup' $radio{'SERVICE_TYPE'}{'serviceGroup'} />
-        $Lang::tr{'service groups'}:&nbsp;
-        <select name='SERVICE_GROUP'>
+    </td><td>
+        $Lang::tr{'service groups'}&nbsp;
+    </td><td width='75%' class='base'>
+        <select name='SERVICE_GROUP' style='width:300px'>
 END
         foreach my $group (@existingGroups) {
             print "<option value='$group' ";
@@ -2134,8 +1735,7 @@ END
     </td>
 </tr>
 END
-    }
-    else {
+    } else {
         print
 "<tr><td colspan='3'><input type='hidden' name='SERVICE_GROUP' value='$cgiparams{'SERVICE_GROUP'}' /></td></tr>\n";
     }
@@ -2150,11 +1750,12 @@ END
         print <<END;
 <tr>
     <td class='base'></td>
-    <td class='base'></td>
     <td class='base'>
         <input type='radio' name='SERVICE_TYPE' value='custom' $radio{'SERVICE_TYPE'}{'custom'} />
-        $Lang::tr{'custom services'}:&nbsp;
-        <select name='CUST_SERVICE'>
+    </td><td>
+        $Lang::tr{'custom services'}&nbsp;
+    </td><td width='75%' class='base'>
+        <select name='CUST_SERVICE' style='width:300px'>
 END
         print "<option value='BLANK' selected='selected'>N/A</option>" if ($#customServices < 0);
         foreach my $service (sort @customServices) {
@@ -2168,14 +1769,12 @@ END
     </td>
 </tr>
 END
-    }
-    else {
+    } else {
         print
 "<tr><td colspan='3'><input type='hidden' name='CUST_SERVICE' value='$cgiparams{'CUST_SERVICE'}' /></td></tr>\n";
     }
     print <<END;
 <tr>
-    <td class='base'></td>
     <td class='base'></td>
     <td class='base'>
 END
@@ -2189,8 +1788,10 @@ else
 }
 
 print <<END;
-        $Lang::tr{'default services'}:&nbsp;
-        <select name='DEFAULT_SERVICE'>
+    </td><td>
+        $Lang::tr{'default services'}&nbsp;
+    </td><td>
+        <select name='DEFAULT_SERVICE' style='width:300px'>
 END
 
     my %defaultServices = ();
@@ -2200,7 +1801,7 @@ END
     print "selected='selected'" if ($cgiparams{'DEFAULT_SERVICE'} eq '');
     print ">-- $Lang::tr{'default services'} --</option>";
 
-    if($cgiparams{'RULETYPE'} eq 'EXTERNAL' || $cgiparams{'RULETYPE'} eq 'INPUT'){
+    if ($cgiparams{'RULETYPE'} eq 'EXTERNAL' || $cgiparams{'RULETYPE'} eq 'INPUT'){
         my %ofwServices = ();
         &DATA::readOfwServices(\%ofwServices);
         foreach my $defService (sort keys %ofwServices) {
@@ -2274,6 +1875,7 @@ END
 <table width='100%' cellpadding='0' cellspacing='5' border='0'>
 <tr>
     <td width='4%' class='base' ></td>
+    <td width='1%' class='base' ></td>
     <td class='base' >
         <input type='checkbox' name='ENABLED' $checked{'ENABLED'}{'on'} />&nbsp;
         <font class='boldbase'>$Lang::tr{'rule enabled'}</font>
@@ -2281,6 +1883,7 @@ END
 </tr>
 <tr>
     <td width='4%' class='base' ></td>
+    <td width='1%' class='base' ></td>
     <td class='base' >
         <input type='checkbox' name='LOG_ENABLED' $checked{'LOG_ENABLED'}{'on'} />&nbsp;
         <font class='boldbase'>$Lang::tr{'log rule'}</font>
@@ -2291,9 +1894,11 @@ END
         print <<END;
 <tr>
     <td width='4%' class='base' ></td>
-    <td class='base'>
-        $Lang::tr{'rule action'}:&nbsp;
-        <select name='RULEACTION'>
+    <td width='1%' class='base' ></td>
+    <td width='20%' class='base'>
+        $Lang::tr{'rule action'}&nbsp;
+    </td><td width='75%'>
+        <select name='RULEACTION' style='width:300px'>
             <option value='accept' $selected{'RULEACTION'}{'accept'}>$Lang::tr{'fw accept'}</option>
             <option value='drop' $selected{'RULEACTION'}{'drop'}>$Lang::tr{'fw drop'}</option>
             <option value='reject' $selected{'RULEACTION'}{'reject'}>$Lang::tr{'fw reject'}</option>
@@ -2305,61 +1910,49 @@ END
     print <<END;
 <tr>
     <td width='4%' class='base' ></td>
+    <td width='1%' class='base' ></td>
     <td class='base'>
-        <font class='boldbase'>$Lang::tr{'remark'}:</font>
+        <font class='boldbase'>$Lang::tr{'remark'}</font>
         <img src='/blob.gif' alt='*' />&nbsp;
+    </td><td>
         <input type='text' name='REMARK' value='$cgiparams{'REMARK'}' size='55' maxlength='50' />
     </td>
 </tr>
 
 <tr>
     <td width='4%' class='base' ></td>
+    <td width='1%' class='base' ></td>
     <td class='base'>
         <img src='/blob.gif' alt='*' align='top' />&nbsp;
         <font class='base'>$Lang::tr{'this field may be blank'}</font>
     </td>
 </tr>
+<tr>
+    <td colspan='4' bgcolor='#000000'><img src='/images/null.gif' width='1' height='2' border='0' alt='--------' /></td>
+</tr>
 </table>
 END
+################################################################################
+  ## Advanced Mode
+################################################################################
     if ($FW::fwSettings{'ADV_MODE_ENABLE'} eq 'on') {
         print <<END;
 <table width='100%' cellpadding='0' cellspacing='5' border='0'>
-<tr>
-        <td width='4%' class='base' ></td>
-        <td bgcolor='#000000'><img src='/images/null.gif' width='1' height='2' border='0' alt='--------' /></td>
-    </tr>
     <tr>
-        <td width='4%' class='base' ></td>
         <td class='boldbase' >$Lang::tr{'adv options'}</td>
     </tr>
+</table>
+<table width='100%' cellpadding='0' cellspacing='5' border='0'>
     <tr>
         <td width='4%' class='base' ></td>
-        <td class='base' >
-<!-- # Not sure if this is used often. As in current version the config is stored
-     # in plain text files, the string don't have comma inside.
-     # For now i comment this out, maybe include it in later version with DB stored
-     # config.
-        <input type='checkbox' name='MATCH_STRING_ON' $checked{'MATCH_STRING_ON'}{'on'} />&nbsp;
-        Match <b>string</b>
-        <input type='text' name='MATCH_STRING' value='$cgiparams{'MATCH_STRING'}' size='55' maxlength='50' />
-    </td>
-</tr>
-<tr>
-    <td width='4%' class='base' ></td>
-    <td class='base'>
-        &nbsp; <input type='checkbox' name='INV_MATCH_STRING' $checked{'INV_MATCH_STRING'}{'on'} />
-        $Lang::tr{'fw invert'}&nbsp;
-    </td>
-</tr>
-<tr>
-    <td width='4%' class='base' ></td>
-    <td class='base' >
--->
+        <td width='1%' class='base' ></td>
+        <td width='20%' class='base' >
         <input type='hidden' name='MATCH_STRING_ON' value='off' />&nbsp;
         <input type='hidden' name='MATCH_STRING' value='' />
         <input type='hidden' name='INV_MATCH_STRING' value='off' />
-        Match <b>limit</b>:
-        <select name='LIMIT_FOR'>
+        Match <b>limit</b>
+        </td><td width='75%'>
+        <select name='LIMIT_FOR' style='width:300px'>
             <option value='none' $selected{'LIMIT_FOR'}{'none'} >$Lang::tr{'match none'}</option>
             <option value='log' $selected{'LIMIT_FOR'}{'log'} >$Lang::tr{'match log'}</option>
             <option value='acceptOrDeny' $selected{'LIMIT_FOR'}{'acceptOrDeny'} >$Lang::tr{'match accept deny'}</option>
@@ -2369,9 +1962,11 @@ END
 </tr>
 <tr>
     <td width='4%' class='base' ></td>
-    <td class='base' >
+    <td width='1%' class='base' >
         <input type='radio' name='LIMIT_TYPE' value='average' $radio{'LIMIT_TYPE'}{'average'} />
+    </td><td width='20%'>
         &nbsp;--limit avg &nbsp;
+    </td><td>
         <input type='text' name='MATCH_LIMIT_AVG' value='$cgiparams{'MATCH_LIMIT_AVG'}' size='55' maxlength='50' />
     </td>
 </tr>
@@ -2379,14 +1974,15 @@ END
     <td width='4%' class='base' ></td>
     <td class='base' >
         <input type='radio' name='LIMIT_TYPE' value='burst' $radio{'LIMIT_TYPE'}{'burst'} />
+    </td><td>
         &nbsp;--limit-burst number &nbsp;
+    </td><td>
         <input type='text' name='MATCH_LIMIT_BURST' value='$cgiparams{'MATCH_LIMIT_BURST'}' size='55' maxlength='50' />
     </td>
 </tr>
 </table>
 END
-    }
-    else {
+    } else {
         print <<END;
 <table width='100%' cellpadding='0' cellspacing='5' border='0'>
 <tr>
@@ -2447,7 +2043,7 @@ END
         <input type='radio' value='dayOfMonth' name='DAY_TYPE' $radio{'DAY_TYPE'}{'dayOfMonth'} />&nbsp;
     </td>
     <td class='base' >
-        <select name='START_DAY_MONTH'>
+        <select name='START_DAY_MONTH' style='width:50px'>
 END
         my $currDay = 1;
         for (; $currDay <= 31; $currDay++) {
@@ -2460,7 +2056,7 @@ END
         &nbsp;
         $Lang::tr{'days to'}
         &nbsp;
-        <select name='END_DAY_MONTH'>
+        <select name='END_DAY_MONTH' style='width:50px'>
 END
         $currDay = 1;
         for (; $currDay <= 31; $currDay++) {
@@ -2516,7 +2112,7 @@ END
     <td class='base' ></td>
     <td class='base' ></td>
     <td class='base' >
-        <select name='START_HOUR'>
+        <select name='START_HOUR' style='width:50px'>
 END
 
         my $currHour = 0;
@@ -2528,7 +2124,7 @@ END
         }
         print <<END;
         </select>:
-        <select name='START_MINUTE'>
+        <select name='START_MINUTE' style='width:50px'>
 END
 
         my $currMinute = 0;
@@ -2543,7 +2139,7 @@ END
         &nbsp;
         $Lang::tr{'days to'}
         &nbsp;
-        <select name='END_HOUR'>
+        <select name='END_HOUR' style='width:50px'>
 END
 
         $currHour = 0;
@@ -2555,7 +2151,7 @@ END
         }
         print <<END;
         </select>:
-        <select name='END_MINUTE'>
+        <select name='END_MINUTE' style='width:50px'>
 END
 
         $currMinute = 0;
@@ -2607,8 +2203,7 @@ END
     print <<END;
 </form>
 END
-    &Header::closebox();
-
+##    &Header::closebox();
 }
 
 sub buildRuleObject
@@ -2616,14 +2211,13 @@ sub buildRuleObject
     my %newRule = ();
     $newRule{'ENABLED'} = $cgiparams{'ENABLED'};    # [1] we start with 1, [0] is key
 
-    #   $newRule{'HASHKEY'} = $cgiparams{'RULETYPE'};                   # [2]
+    #$newRule{'HASHKEY'} = $cgiparams{'RULETYPE'};                   # [2]
     $newRule{'RULEMODE'}     = $cgiparams{'RULEMODE'};        # [3]
     $newRule{'SRC_NET_TYPE'} = $cgiparams{'SRC_NET_TYPE'};    # [4]
 
     if ($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') {
         $newRule{'SRC_NET'} = $cgiparams{'DEFAULT_SRC_NET'};    # [5]
-    }
-    else {                                                      #'custSrcNet'
+    } else {                                                    #'custSrcNet'
         $newRule{'SRC_NET'} = $cgiparams{'CUST_SRC_NET'};       # [5]
     }
 
@@ -2647,12 +2241,11 @@ sub buildRuleObject
 
     if ($cgiparams{'SRC_PORT_ON'} eq 'on') {
         $newRule{'SRC_PORT'} = $cgiparams{'SRC_PORT'};                 # [9]
-    }
-    else {
+    } else {
         $newRule{'SRC_PORT'} = "-";                                    # [9]
     }
 
-    $newRule{'INV_SRC_PORT'} = $cgiparams{'INV_SRC_PORT'};             # [10]
+##    $newRule{'INV_SRC_PORT'} = $cgiparams{'INV_SRC_PORT'};             # [10]
 
 ##    $newRule{'PORTFW_EXT_ADR'} = $cgiparams{'PORTFW_EXT_ADR'};      # [11]
 ##    $newRule{'PORTFW_SERVICE_TYPE'} = $cgiparams{'PORTFW_SERVICE_TYPE'}; # [12]
@@ -2670,8 +2263,7 @@ sub buildRuleObject
 
     if ($cgiparams{'DST_NET_TYPE'} eq 'defaultDestNet') {
         $newRule{'DST_NET'} = $cgiparams{'DEFAULT_DST_NET'};           # [15]
-    }
-    else {                                                             #'custDestNet'
+    } else {                                                           #'custDestNet'
         $newRule{'DST_NET'} = $cgiparams{'CUST_DST_NET'};              # [15]
     }
 
@@ -2690,7 +2282,7 @@ sub buildRuleObject
         $newRule{'DST_IP'} = $cgiparams{'DEST_IP_TXT'};                # [17]
     }
 
-    $newRule{'INV_DST_IP'} = $cgiparams{'INV_DST_IP'};                 # [18]
+##    $newRule{'INV_DST_IP'} = $cgiparams{'INV_DST_IP'};                 # [18]
 
     if ($cgiparams{'SERVICE_ON'} eq 'on') {
         $newRule{'SERVICE_TYPE'} = $cgiparams{'SERVICE_TYPE'};         # [19]
@@ -2703,8 +2295,7 @@ sub buildRuleObject
         else {                                                         # 'default'
             $newRule{'SERVICE'} = $cgiparams{'DEFAULT_SERVICE'};       # [20]
         }
-    }
-    else {
+    } else {
         $newRule{'SERVICE_TYPE'} = "-";                                # [19]
         $newRule{'SERVICE'}      = "-";                                # [20]
     }
@@ -2715,8 +2306,7 @@ sub buildRuleObject
     if ($cgiparams{'LIMIT_FOR'} eq 'none') {
         $newRule{'LIMIT_TYPE'}  = "-";                                 # [23]
         $newRule{'MATCH_LIMIT'} = "-";                                 # [24]
-    }
-    else {
+    } else {
         $newRule{'LIMIT_TYPE'} = $cgiparams{'LIMIT_TYPE'};             # [23]
         if ($cgiparams{'LIMIT_TYPE'} eq 'average') {
             $newRule{'MATCH_LIMIT'} = $cgiparams{'MATCH_LIMIT_AVG'};    # [24]
@@ -2731,8 +2321,7 @@ sub buildRuleObject
     if ($cgiparams{'MATCH_STRING_ON'} eq 'on') {
         $newRule{'MATCH_STRING'}     = $cgiparams{'MATCH_STRING'};        # [26]
         $newRule{'INV_MATCH_STRING'} = $cgiparams{'INV_MATCH_STRING'};    # [27]
-    }
-    else {
+    } else {
         $newRule{'MATCH_STRING'}     = "-";                               # [26]
         $newRule{'INV_MATCH_STRING'} = "-";                               # [27]
     }
@@ -2775,8 +2364,7 @@ sub initCgiParamsFromConf
 
     if ($cgiparams{'SRC_NET_TYPE'} eq 'defaultSrcNet') {
         $cgiparams{'DEFAULT_SRC_NET'} = $rule->{'SRC_NET'};    # [5]
-    }
-    else {                                                     #'custSrcNet'
+    } else {                                                     #'custSrcNet'
         $cgiparams{'CUST_SRC_NET'} = $rule->{'SRC_NET'};       # [5]
     }
 
@@ -2807,8 +2395,7 @@ sub initCgiParamsFromConf
     if ($rule->{'SRC_PORT'} ne '-') {
         $cgiparams{'SRC_PORT_ON'} = 'on';
         $cgiparams{'SRC_PORT'}    = $rule->{'SRC_PORT'};        # [9]
-    }
-    else {
+    } else {
         $cgiparams{'SRC_PORT_ON'} = 'off';
         $cgiparams{'SRC_PORT'}    = '';                         # [9]
     }
@@ -2819,8 +2406,7 @@ sub initCgiParamsFromConf
 
     if ($cgiparams{'DST_NET_TYPE'} eq 'defaultDestNet') {
         $cgiparams{'DEFAULT_DST_NET'} = $rule->{'DST_NET'};     # [15]
-    }
-    else {                                                      #'custDestNet'
+    } else {                                                    #'custDestNet'
         $cgiparams{'CUST_DST_NET'} = $rule->{'DST_NET'};        # [15]
     }
 
@@ -2853,8 +2439,7 @@ sub initCgiParamsFromConf
         else {                                                   # 'default'
             $cgiparams{'DEFAULT_SERVICE'} = $rule->{'SERVICE'};    # [20]
         }
-    }
-    else {
+    } else {
         $cgiparams{'SERVICE_ON'} = 'off';
     }
 
@@ -2865,8 +2450,7 @@ sub initCgiParamsFromConf
         $cgiparams{'LIMIT_TYPE'} = $rule->{'LIMIT_TYPE'};          # [23]
         if ($cgiparams{'LIMIT_TYPE'} eq 'average') {
             $cgiparams{'MATCH_LIMIT_AVG'} = $rule->{'MATCH_LIMIT'};    # [24]
-        }
-        else {                                                         # 'burst'
+        } else {                                                         # 'burst'
             $cgiparams{'MATCH_LIMIT_BURST'} = $rule->{'MATCH_LIMIT'};    # [24]
         }
     }
@@ -2885,7 +2469,6 @@ sub initCgiParamsFromConf
     }
 
     if ($cgiparams{'TIMEFRAME_ENABLED'} eq 'on') {
-
         # Time parameter
         $cgiparams{'DAY_TYPE'}        = $rule->{'DAY_TYPE'};
         $cgiparams{'START_DAY_MONTH'} = $rule->{'START_DAY_MONTH'};
@@ -2954,7 +2537,6 @@ END
         <input type='hidden' name='DEFAULT_DST_NET' value='$cgiparams{'DEFAULT_DST_NET'}' />
         <input type='hidden' name='CUST_DST_NET' value='$cgiparams{'CUST_DST_NET'}' />
         <input type='hidden' name='DEST_IP_TXT' value='$cgiparams{'DEST_IP_TXT'}' />
-        <input type='hidden' name='INV_DST_IP' value='$cgiparams{'INV_DST_IP'}' />
         <input type='hidden' name='DST_IP_TYPE' value='$cgiparams{'DST_IP_TYPE'}' />
         <input type='hidden' name='DEFAULT_DST_IP' value='$cgiparams{'DEFAULT_DST_IP'}' />
         <input type='hidden' name='CUST_DST_ADR' value='$cgiparams{'CUST_DST_ADR'}' />
@@ -3003,367 +2585,23 @@ END
 END
 }
 
-sub printOverviewBox
-{
-    if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-        &Header::openbox('100%', 'left', "$Lang::tr{'edit a rule'}: $Lang::tr{'overview'}");
-    }
-    else {
-        &Header::openbox('100%', 'left', "$Lang::tr{'add a new rule'}: $Lang::tr{'overview'}");
-    }
-
-
-    # not existing here means they're undefined and not selected on enter params box
-    $cgiparams{'SERVICE_ON'} = 'off' unless exists $cgiparams{'SERVICE_ON'};
-    $cgiparams{'ENABLED'} = 'off'  unless exists $cgiparams{'ENABLED'};
-
-    my $src_adr_inv      = "";
-    my $src_adr_inv_tail = "";
-    if ($cgiparams{'INV_SRC_ADR'} eq 'on') {
-        $src_adr_inv      = " <strong><font color='RED'>! (</font></strong>";
-        $src_adr_inv_tail = "<strong><font color='RED'>)</font></strong>";
-    }
-    my $ruleTypeTxt = $Lang::tr{'outgoing traffic'};
-    my  $destination_text = $Lang::tr{'destination'};
-    if ($cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruleTypeTxt = $Lang::tr{'openfirewall access'};
-    }
-    elsif ($cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruleTypeTxt = $Lang::tr{'external openfirewall access'};
-    }
-
-    my $src_net = "\u$cgiparams{'DEFAULT_SRC_NET'}";
-    if ($cgiparams{'SRC_NET_TYPE'} eq 'custSrcNet') {
-        $src_net = $cgiparams{'CUST_SRC_NET'};
-    }
-
-    my $src_address = $cgiparams{'SRC_ADRESS_TXT'};
-    if ($cgiparams{'SRC_ADR_TYPE'} eq 'defaultSrcAdr') {
-        $src_address = $cgiparams{'DEFAULT_SRC_ADR'};
-    }
-    elsif ($cgiparams{'SRC_ADR_TYPE'} eq 'custSrcAdr') {
-        $src_address = $cgiparams{'CUST_SRC_ADR'};
-    }
-    elsif ($cgiparams{'SRC_ADR_TYPE'} eq 'groupSrcAdr') {
-        $src_address = $cgiparams{'GROUP_SRC_ADR'};
-    }
-
-    print <<END;
-<form method='post' action='$ENV{'SCRIPT_NAME'}'>
-
-<table width='100%' cellpadding='0' cellspacing='5' border='0'>
-<tr>
-    <td colspan='2' class='base'>
-        <font class='boldbase'>$Lang::tr{'source'}:</font>
-    </td>
-    <td class='boldbase' >&nbsp;</td>
-</tr>
-<tr>
-    <td width='2%' class='base' ></td>
-    <td width='10%' class='base' >
-        <font class='boldbase'>$Lang::tr{'fw iface'}:</font>&nbsp;
-    </td>
-    <td width='88%' class='boldbase' >$src_net</td>
-</tr>
-<tr>
-    <td class='base' ></td>
-    <td class='base' >
-        <font class='boldbase'>$Lang::tr{'address'}:</font>&nbsp;
-    </td>
-    <td class='base' >$src_adr_inv<b>$src_address</b>$src_adr_inv_tail</td>
-</tr>
-END
-    if ($cgiparams{'SRC_PORT_ON'} eq 'on') {
-        my $src_port_inv      = "";
-        my $src_port_inv_tail = "";
-        if ($cgiparams{'INV_SRC_PORT'} eq 'on') {
-            $src_port_inv      = " <strong><font color='RED'>! (</font></strong>";
-            $src_port_inv_tail = "<strong><font color='RED'>)</font></strong>";
-        }
-        print <<END;
-<tr>
-    <td class='base' ></td>
-    <td class='base' >
-        <font class='boldbase'>$Lang::tr{'port'}:</font>&nbsp;
-    </td>
-    <td class='base' >$src_port_inv<b>$cgiparams{'SRC_PORT'}</b>$src_port_inv_tail</td>
-</tr>
-END
-    }
-
-    print <<END;
-<tr>
-    <td colspan='3' class='base'>&nbsp;</td>
-</tr>
-<tr>
-    <td colspan='2' class='boldbase'>$destination_text:&nbsp;</td>
-    <td class='boldbase'>$ruleTypeTxt</td>
-</tr>
-END
-
-    if ($cgiparams{'SERVICE_ON'} eq 'on') {
-        my $dst_service = $cgiparams{'CUST_SERVICE'};
-        if ($cgiparams{'SERVICE_TYPE'} eq 'default') {
-            $dst_service = $cgiparams{'DEFAULT_SERVICE'};
-        }
-        elsif ($cgiparams{'SERVICE_TYPE'} eq 'serviceGroup') {
-            $dst_service = $cgiparams{'SERVICE_GROUP'};
-        }
-
-        print <<END;
-<tr>
-    <td class='base' ></td>
-    <td class='base' >
-        <font class='boldbase'>$Lang::tr{'service'}:</font>&nbsp;
-    </td>
-    <td class='boldbase'>$dst_service</td>
-</tr>
-END
-    }
-
-    my $ruleAction = '';
-    if ($cgiparams{'RULEACTION'} eq 'accept') {
-        $ruleAction = $Lang::tr{'fw accept'};
-    }
-    elsif ($cgiparams{'RULEACTION'} eq 'drop') {
-        $ruleAction = $Lang::tr{'fw drop'};
-    }
-    elsif ($cgiparams{'RULEACTION'} eq 'reject') {
-        $ruleAction = $Lang::tr{'fw reject'};
-    }
-    elsif ($cgiparams{'RULEACTION'} eq 'logOnly') {
-        $ruleAction = $Lang::tr{'fw log only'};
-    }
-
-    print <<END;
-<tr>
-    <td colspan='3' class='base'>&nbsp;</td>
-</tr>
-<tr>
-    <td colspan='2' class='base'>
-        <font class='boldbase'>$Lang::tr{'rule action'}:</font>
-    </td>
-    <td class='boldbase'>$ruleAction</td>
-</tr>
-<tr>
-    <td colspan='2' class='base'>
-        <font class='boldbase'>$Lang::tr{'rule enabled'}:</font>
-    </td>
-    <td class='base' >
-        <img  src="/images/$cgiparams{'ENABLED'}.gif" alt='$cgiparams{'ENABLED'}' border='0' />
-    </td>
-</tr>
-<tr>
-    <td colspan='2' class='base'>
-        <font class='boldbase'>$Lang::tr{'log rule'}:</font>
-    </td>
-    <td class='base' >
-        <img  src="/images/$cgiparams{'LOG_ENABLED'}.gif" alt='$cgiparams{'LOG_ENABLED'}' border='0' />
-    </td>
-</tr>
-<tr>
-    <td colspan='2' class='base'>
-        <font class='boldbase'>$Lang::tr{'remark'}:&nbsp;</font>
-    </td>
-    <td class='boldbase'>$cgiparams{'REMARK'}</td>
-</tr>
-<tr>
-    <td colspan='2' class='base'>
-        <font class='boldbase'>$Lang::tr{'rule position'}:</font>
-    </td>
-    <td class='base'>
-        <select name='RULE_POSITION'>
-END
-
-    my $ruleCount = 0;
-    if (defined($ruleConfig{'INPUT'}) && $cgiparams{'RULETYPE'} eq 'INPUT') {
-        $ruleCount = @{$ruleConfig{'INPUT'}};
-    }
-    elsif (defined($ruleConfig{'EXTERNAL'}) && $cgiparams{'RULETYPE'} eq 'EXTERNAL') {
-        $ruleCount = @{$ruleConfig{'EXTERNAL'}};
-    }
-
-    $cgiparams{'RULE_POSITION'} = $ruleCount if ($cgiparams{'RULE_POSITION'} < 0);
-
-    # if we want to add a new rule we have to increment the total count
-    $ruleCount++ if ($cgiparams{'ACTION'} ne $Lang::tr{'edit'});
-
-    for (my $countIndex = 0; $countIndex < $ruleCount; $countIndex++) {
-        print "<option value='$countIndex'";
-        print " selected='selected'" if ($cgiparams{'RULE_POSITION'} eq $countIndex);
-        my $displayID = $countIndex + 1;
-        print ">$displayID</option>";
-    }
-
-    print <<END;
-        </select>
-    </td>
-</tr>
-<tr>
-    <td colspan='3' class='base'>&nbsp;</td>
-</tr>
-END
-
-    if ($FW::fwSettings{'ADV_MODE_ENABLE'} eq 'on' && $cgiparams{'TIMEFRAME_ENABLED'} eq 'on') {
-        my $startDay = $cgiparams{'START_DAY_MONTH'};
-        my $endDay   = $cgiparams{'END_DAY_MONTH'};
-
-        my $dayText = "$startDay&nbsp;$Lang::tr{'days to'}&nbsp;$endDay&nbsp;$Lang::tr{'of month'}";
-
-        if ($cgiparams{'DAY_TYPE'} eq 'weekDays') {
-            $dayText = "";
-            my $currDay = 0;
-            for (; $currDay <= 6; $currDay++) {
-                my $dayKey = $DATA::weekDays[$currDay];
-                next unless ($cgiparams{$dayKey} eq 'on');
-                $dayText .= "$weekDays[$currDay]&nbsp;&nbsp;";
-            }
-
-        }
-
-        my $startHour = $cgiparams{'START_HOUR'} < 10 ? "0" . $cgiparams{'START_HOUR'} : $cgiparams{'START_HOUR'};
-        my $startMinute =
-            $cgiparams{'START_MINUTE'} < 10 ? "0" . $cgiparams{'START_MINUTE'} : $cgiparams{'START_MINUTE'};
-        my $endHour   = $cgiparams{'END_HOUR'} < 10   ? "0" . $cgiparams{'END_HOUR'}   : $cgiparams{'END_HOUR'};
-        my $endMinute = $cgiparams{'END_MINUTE'} < 10 ? "0" . $cgiparams{'END_MINUTE'} : $cgiparams{'END_MINUTE'};
-
-        print <<END;
-<tr>
-    <td colspan='2' class='base'>
-        <font class='boldbase'>$Lang::tr{'rule active'}:</font>
-    </td>
-    <td class='base' ></td>
-</tr>
-<tr>
-    <td class='base'></td>
-    <td class='boldbase'>$Lang::tr{'days'}:</td>
-    <td class='boldbase'>$dayText</td>
-</tr>
-<tr>
-    <td class='base'></td>
-    <td class='base'>
-        <font class='boldbase'>$Lang::tr{'daytime'}:</font>
-    </td>
-    <td class='boldbase'>
-        $startHour:$startMinute
-        &nbsp;
-        $Lang::tr{'days to'}
-        &nbsp;
-        $endHour:$endMinute
-    </td>
-</tr>
-<tr>
-    <td colspan='3' class='base'>&nbsp;</td>
-</tr>
-END
-    }
-    if ($FW::fwSettings{'ADV_MODE_ENABLE'} eq 'on') {
-        if ($cgiparams{'MATCH_STRING_ON'} eq 'on') {
-
-            my $invMatchString     = "";
-            my $invMatchStringTail = "";
-            if ($cgiparams{'INV_MATCH_STRING'} eq 'on') {
-                $invMatchString     = " <strong><font color='RED'>! (</font></strong>";
-                $invMatchStringTail = "<strong><font color='RED'>)</font></strong>";
-            }
-            print <<END;
-<tr>
-    <td colspan='2' class='base'>
-        <font class='boldbase'>Match string:</font>
-    </td>
-    <td class='base' >
-        $invMatchString<b>$cgiparams{'MATCH_STRING'}</b>$invMatchStringTail
-    </td>
-</tr>
-END
-        }
-        if ($cgiparams{'LIMIT_FOR'} ne 'none') {
-            my $limitFor = "";
-            if ($cgiparams{'LIMIT_FOR'} eq 'log') {
-                $limitFor = $Lang::tr{'match log'};
-            }
-            elsif ($cgiparams{'LIMIT_FOR'} eq 'acceptOrDeny') {
-                $limitFor = $Lang::tr{'match accept deny'};
-            }
-            elsif ($cgiparams{'LIMIT_FOR'} eq 'both') {
-                $limitFor = $Lang::tr{'match both'};
-            }
-
-            my $limitOption = "--limit";
-            my $limitValue  = $cgiparams{'MATCH_LIMIT_AVG'};
-            if ($cgiparams{'LIMIT_TYPE'} eq 'burst') {
-                $limitOption = "--limit-burst ";
-                $limitValue  = $cgiparams{'MATCH_LIMIT_BURST'};
-            }
-
-            print <<END;
-<tr>
-    <td colspan='2' class='base'>
-        <font class='boldbase'>Match limit:</font>
-    </td>
-    <td class='boldbase'>$limitFor</td>
-</tr>
-<tr>
-    <td class='base'></td>
-    <td class='base'>
-        <font class='boldbase'>$limitOption</font>
-    </td>
-    <td class='boldbase'>$limitValue</td>
-</tr>
-END
-        }
-    }
-##    if ($warnOpenFwMessage) {
-##        print <<END;
-##<tr>
-##    <td colspan='3' class='base'>
-##        <font color='RED'>
-##            <b>$Lang::tr{'note'}:</b><br />
-##            $warnOpenFwMessage
-##        </font>
-##    </td>
-##</tr>
-##END
-##    }
-
-    print <<END;
-</table>
-END
-    &printHiddenFormParams('Overview');
-    &printEnterButtons('Overview');
-    print <<END;
-<input type='hidden' name='RULEACTION' value='$cgiparams{'RULEACTION'}' />
-</form>
-END
-
-    &Header::closebox();
-    &printCurrentRulesBox('single');
-}
-
 sub printEnterButtons
 {
     my $boxName      = shift;
-    my $backDisabled = '';
-    my $nextDisabled = '';
-    if ($boxName eq 'EnterParams') {
-        $backDisabled = "disabled='disabled'";
-    }
-    elsif ($boxName eq 'Overview') {
-        $nextDisabled = "disabled='disabled'";
-    }
+
     print <<END;
 <table width='100%'>
 <tr>
-    <td width='10%'>&nbsp;</td>
-    <td class='base' width='60%'>
-        <input type='submit' name='BOX_ACTION' value='$Lang::tr{'back'}' $backDisabled />&nbsp;
-        <input type='submit' name='BOX_ACTION' value='$Lang::tr{'next'}' $nextDisabled/>&nbsp;
-        <input type='submit' name='BOX_ACTION' value='$Lang::tr{'save'}' />&nbsp;
-        <input type='reset' name='BOX_ACTION' value='$Lang::tr{'reset'}' />&nbsp;
-        <input type='submit' name='BOX_ACTION' value='$Lang::tr{'cancel'}' />
+    <td width='20%'>&nbsp;</td>
+    <td width='60%' align='center'>
+        <input class='footbutton' type='submit' name='BOX_ACTION' value='$Lang::tr{'save'}' />&nbsp;
+        <input class='footbutton' type='reset' name='BOX_ACTION' value='$Lang::tr{'reset'}' />&nbsp;
+        <input class='footbutton' type='submit' name='BOX_ACTION' value='$Lang::tr{'cancel'}' />
     </td>
-    <td width='10%'>&nbsp;</td>
+    <td width='20%'>&nbsp;</td>
 </tr>
+<tr><td>&nbsp;</td></tr>
 </table>
 END
 }
+
