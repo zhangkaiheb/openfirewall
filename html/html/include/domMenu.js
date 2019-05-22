@@ -51,8 +51,6 @@
  *
  * Freshmeat Project: http://freshmeat.net/projects/dommenu/?topic_id=92
  *
- * Updated: $Date: 2006-10-22 16:09:10 -0400 (Sun, 22 Oct 2006) $
- *
  * Supported Browsers:
  * Mozilla (Gecko), IE 5.0+, IE on Mac, Safari, Konqueror, Opera 7+
  *
@@ -93,7 +91,7 @@ domMenu_settings.set('global', new Hash(
 	'targetDocumentXOrigin', 0,
 	'targetDocumentYOrigin', 0,
 	'menuBarWidth', '100%',
-	'subMenuMinWidth', 'inherit',
+	'subMenuMinWidth', '120',
 	'distributeSpace', true,
 	'axis', 'horizontal',
 	'verticalExpand', 'south',
@@ -130,7 +128,6 @@ var domMenu_selectElements;
 var domMenu_scrollbarWidth = 14;
 var domMenu_eventTo = domLib_isIE ? 'toElement' : 'relatedTarget';
 var domMenu_eventFrom = domLib_isIE ? 'fromElement' : 'relatedTarget';
-
 var domMenu_activeElement = new Hash();
 
 /**
@@ -156,10 +153,8 @@ function domMenu_activate(in_containerId, in_location, in_disableWarning)
 	var data;
 
 	// make sure we can use the menu system
-	if (!domLib_useLibrary)
-	{
-		if (!in_disableWarning)
-		{
+	if (!domLib_useLibrary) {
+		if (!in_disableWarning)	{
 				alert('domMenu: Browser not supported.  Menu will be disabled.');
 		}
 
@@ -407,8 +402,7 @@ function domMenu_activateSubMenu(in_parentElement)
 			if (settings.get('horizontalExpand') == 'east') {
 				element.style.backgroundPosition = 'right center';
 				element.style.paddingRight = '16px';
-			}
-			else {
+			} else {
 				element.style.backgroundPosition = 'left center';
 				element.style.paddingLeft = '16px';
 			}
@@ -421,8 +415,7 @@ function domMenu_activateSubMenu(in_parentElement)
 			element.appendChild(targetDoc.createTextNode(menuTableCell.data.get('contents')));
 			// MacIE has to have a newline and it has to be added with createTextNode!
 			menuTableCell.appendChild(targetDoc.createTextNode("\n"));
-		}
-		else {
+		} else {
 			element.innerHTML = menuTableCell.data.get('contents');
 		}
 
@@ -560,8 +553,7 @@ function domMenu_changeActivePath(in_newActiveElement, in_oldActiveElement, in_c
 
 		var isRootLevel = in_newActiveElement.data.get('level') == 1 ? true : false;
 		var closeDelay = isRootLevel ? settings.get('closeMouseoutMenuDelay') : settings.get('closeMouseoutSubMenuDelay');
-	}
-	else {
+	} else {
 		var isRootLevel = false;
 		var closeDelay = settings.get('closeMouseoutMenuDelay');
 		window.status = window.defaultStatus;
@@ -608,8 +600,7 @@ function domMenu_changeActivePath(in_newActiveElement, in_oldActiveElement, in_c
 		if (isRootLevel) {
 			domMenu_toggleHighlight(oldActivePath.get(i), false); 
 			domMenu_toggleSubMenu(oldActivePath.get(i), 'hidden');
-		}
-		else {
+		} else {
 			domMenu_timeouts['close'].set(i, domLib_setTimeout(domMenu_closeMenuCallback, closeDelay, [oldActivePath.get(i), basename]));
 		}
 	}
@@ -682,14 +673,12 @@ function domMenu_openEvent(in_this, in_event, in_delayType)
 			domMenu_activateSubMenu(currentTarget);
 			// clear the active path and initialize the new one
 			domMenu_activeElement.set(basename, domMenu_changeActivePath(currentTarget, domMenu_activeElement.get(basename)));
-		}
-		else {
+		} else {
 			// clear the active path and initialize the new one
 			domMenu_activeElement.set(basename, domMenu_changeActivePath(currentTarget, domMenu_activeElement.get(basename)));
 			domMenu_timeouts['open'].set(currentTarget.id, domLib_setTimeout(domMenu_openMenuCallback, settings.get(in_delayType), [currentTarget, basename]));
 		}
-	}
-	else {
+	} else {
 		// clear the active path and initialize the new one
 		domMenu_activeElement.set(basename, domMenu_changeActivePath(currentTarget, domMenu_activeElement.get(basename)));
 	}
@@ -746,8 +735,7 @@ function domMenu_getElement(in_object, in_basename)
 		try {
 			if (in_object.id && in_object.id.search(new RegExp('^' + in_basename + '(\\[[0-9]\\])*\\[[1-9]\\]$')) == 0) {
 				return in_object;
-			}
-			else {
+			} else {
 				in_object = in_object.parentNode;
 			}
 		}
@@ -785,8 +773,7 @@ function domMenu_correctEdgeBleed(in_width, in_height, in_x, in_y, in_padding, i
 		if (bleedLeft < 0) {
 			in_x += bleedLeft;
 		}
-	}
-	else {
+	} else {
 		var bleedTop = (in_y - pageYOffset) - in_padding;
 		var bleedBottom = (in_y - pageYOffset) + in_height - (pageHeight - in_padding);
 		// if we are bleeding off the bottom, move menu to stay on page
@@ -845,8 +832,7 @@ function domMenu_toggleSubMenu(in_parentElement, in_style)
 					if (settings.get('verticalExpand') == 'north') {
 						if (targetOtherDoc) {
 							yCoor = subMenu.offsetHeight;
-						}
-						else {
+						} else {
 							yCoor = tmp_offsets.get('top') - subMenu.offsetHeight - settings.get('verticalSubMenuOffsetY');
 						}
 					}
@@ -854,20 +840,17 @@ function domMenu_toggleSubMenu(in_parentElement, in_style)
 					else {
 						if (targetOtherDoc) {
 							yCoor = settings.get('targetDocumentYOrigin');
-						}
-						else {
+						} else {
 							yCoor = tmp_offsets.get('bottom');
 						}
 					}
-				}
-				else {
+				} else {
 					yCoor = tmp_offsets.get('top') + settings.get('horizontalSubMenuOffsetY');
 					// expand east
 					if (settings.get('horizontalExpand') == 'east') {
 						if (targetOtherDoc) {
 							xCoor = settings.get('targetDocumentXOrigin');
-						}
-						else {
+						} else {
 							xCoor = tmp_offsets.get('right') + settings.get('horizontalSubMenuOffsetX');
 						}
 					}
@@ -896,8 +879,7 @@ function domMenu_toggleSubMenu(in_parentElement, in_style)
 				if (domLib_isKonq) {
 					// change with width of the first cell
 					subMenu.firstChild.firstChild.firstChild.firstChild.style.width = Math.max(minWidth, renderedWidth) + 'px';
-				}
-				else {
+				} else {
 					// change the width of the table
 					subMenu.firstChild.style.width = Math.max(minWidth, renderedWidth) + 'px';
 				}
@@ -961,8 +943,7 @@ function domMenu_toggleHighlight(in_element, in_status)
 			highlightElement.firstChild.style.display = 'none';
 			highlightElement.lastChild.style.display = '';
 		}
-	}
-	else {
+	} else {
 		// if we are changing to non-hover, change the alt contents (only change if needs it)
 		if (highlightElement.childNodes.length == 2 && highlightElement.firstChild.style.display == 'none') {
 			highlightElement.lastChild.style.display = 'none';
