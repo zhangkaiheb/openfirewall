@@ -116,6 +116,10 @@ endif
 ##	cd $(DIR_APP) && cp zlib.map /usr/lib/libz_pic.map
 ##	cd /usr/lib && ln -sf libz.a libz_pic.a
 
+	# for base packaging
+	# FIXME: why zlib install will change aux-cache mod.
+	chmod 777 /var/cache/ldconfig
+	chmod 777 /var/cache/ldconfig/aux-cache
 
 ##	ln -sfv ../../lib/libz.so.$(VER)  /$(TOOLS_DIR)/lib/libz.so.1
 

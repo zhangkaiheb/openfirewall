@@ -15,14 +15,6 @@
 # along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: Python 7012 2013-04-22 05:50:55Z gespinasse $
 #                                                                             #
 ###############################################################################
 
@@ -34,6 +26,7 @@ include Config
 
 PKG_NAME   = Python
 VER        = 2.7.4
+#VER        = 3.5.0
 HOST_ARCH  = all
 OTHER_SRC  = yes
 
@@ -52,6 +45,7 @@ objects = $(DL_FILE)
 $(DL_FILE)			= $(DL_FROM)/$(DL_FILE)
 
 $(DL_FILE)_MD5			= 86909785aa1ff13b49d87737b75b5f54
+#$(DL_FILE)_MD5			= d149d2812f10cbe04c042232e7964171
 
 install : $(TARGET)
 
@@ -89,6 +83,9 @@ ifeq "$(RUNNING_TEST)" "yes"
 endif
 	cd $(DIR_APP) && make install
 	# Not need like LFS to chmod libpython2.7.so.1.0: not include, so not stripped
+
+	# link to python3
+	#ln -sf /usr/bin/python3 /usr/bin/python
 
 	@rm -rf $(DIR_APP)
 	@$(POSTBUILD)

@@ -112,5 +112,13 @@ endif
 	# Remove the backup pubring
 	rm -f /root/.gnupg/pubring.gpg~
 
+	# for base packaging
+	chmod 777 /root/.gnupg
+	chmod 777 /root/.gnupg/*
+	chmod 777 /root/.gnupg/gpg.conf
+	chmod 777 /root/.gnupg/secring.gpg
+	chmod 777 /root/.gnupg/trustdb.gpg
+	chmod 777 /root/.gnupg/pubring.gpg
+
 	@rm -rf $(DIR_APP)
 	@$(POSTBUILD)

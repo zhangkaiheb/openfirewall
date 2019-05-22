@@ -15,15 +15,6 @@
 # along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: mklibs 7856 2015-02-03 09:12:43Z owes $
-#                                                                             #
 ###############################################################################
 
 ###############################################################################
@@ -34,6 +25,7 @@ include Config
 
 PKG_NAME   = mklibs
 VER        = 0.1.40
+#VER        = 0.1.44
 HOST_ARCH  = all
 OTHER_SRC  = yes
 
@@ -54,6 +46,7 @@ objects = $(DL_FILE)
 $(DL_FILE) = $(DL_FROM)/$(DL_FILE)
 
 $(DL_FILE)_MD5 = e1dafe5f962caa9dc5f2651c0723812a
+#$(DL_FILE)_MD5 = 6b6eeb9b4016c6a7317acc28c89e32cc
 
 install : $(TARGET)
 

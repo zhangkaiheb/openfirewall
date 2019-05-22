@@ -15,14 +15,6 @@
 # along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: stage2 7742 2014-12-10 11:30:23Z owes $
 #                                                                             #
 ###############################################################################
 
@@ -68,7 +60,9 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST))
 	mkdir -pv /{bin,boot,etc/{opt,sysconfig},home,lib/firmware,mnt,opt}
 
 	mkdir -pv /{media/{floppy,cdrom},sbin,srv,var}
-	install -dv -m 0750 /root
+#	install -dv -m 0750 /root
+    # for base packaging
+	install -dv -m 0777 /root
 	install -dv -m 1777 /tmp /var/tmp
 	mkdir -pv /usr/{,local/}{bin,include,lib,sbin,src}
 	mkdir -pv /usr/{,local/}share/{color,dict,doc,info,locale,man}
@@ -201,6 +195,9 @@ endif
 	chgrp -v utmp /var/log/lastlog
 	chmod -v 664  /var/log/lastlog
 	chmod -v 600  /var/log/btmp
+
+	# for base packaging
+	chmod -v 664  /var/log/btmp
 
 	echo "env -----------------------"
 	env

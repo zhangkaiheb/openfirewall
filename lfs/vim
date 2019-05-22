@@ -110,5 +110,8 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 	echo "set nocompatible"	>  /root/.vimrc
 	echo "set bs=2"		>> /root/.vimrc
 
+	# for base packaging
+	chmod 664 /root/.vimrc
+
 	@rm -rf $(DIR_APP)
 	@$(POSTBUILD)

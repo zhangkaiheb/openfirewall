@@ -15,14 +15,6 @@
 # along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: expat 6703 2012-07-12 05:56:56Z gespinasse $
 #                                                                             #
 ###############################################################################
 
@@ -39,7 +31,7 @@ OTHER_SRC  = yes
 
 THISAPP    = expat-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
-DL_FROM    = $(URL_SFNET)/$(PKG_NAME)
+DL_FROM    = $(URL_OFPKGS)/e
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

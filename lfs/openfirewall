@@ -72,7 +72,8 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST))
 	for i in auth/users backup/include.user backup/exclude.user \
 		certs/index.txt ddns/config ddns/settings \
 		dhcp/settings dhcp/fixedleases dhcp/advoptions dhcp/dnsmasq.statichosts dhcp/dnsmasq.staticopts \
-		email/settings ethernet/aliases ethernet/isdn ethernet/staticRoutes ethernet/settings \
+		email/settings \
+		ethernet/aliases ethernet/isdn ethernet/staticRoutes ethernet/customNeighbours ethernet/settings \
 		firewall/addressGroups firewall/config firewall/custominterfaces firewall/customnetworks \
 		firewall/customservices firewall/policy firewall/serviceGroups firewall/settings firewall/wireless \
 		ipsec/config ipsec/settings ipsec/ipsec.conf ipsec/ipsec.secrets \

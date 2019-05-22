@@ -164,5 +164,9 @@ endif
 	# contrary to LFS, do not try to 'exec /bin/bash --login +h' or it's hang
 endif
 
+	# for base packaging
+	touch /root/.bash_history
+	chmod -f 664 /root/.bash_history
+
 	@rm -rf $(DIR_APP)
 	@$(POSTBUILD)

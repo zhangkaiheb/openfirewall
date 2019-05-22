@@ -106,7 +106,7 @@ $(TARGET) : $(firstword $(MAKEFILE_LIST)) $(patsubst %,$(DIR_DL)/%,$(objects))
 
 	# let it used by the perl CGI
 	chown root:nobody /sbin/ip
-	chmod 4750 /sbin/ip
+#	chmod 4750 /sbin/ip
 
 	@rm -rf $(DIR_APP)
 	@$(POSTBUILD)

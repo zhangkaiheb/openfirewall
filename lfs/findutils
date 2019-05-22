@@ -15,14 +15,6 @@
 # along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: findutils 4437 2010-04-07 18:11:35Z gespinasse $
 #                                                                             #
 ###############################################################################
 
@@ -40,7 +32,7 @@ OTHER_SRC  = yes
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
 #DL_FROM    = $(URL_GNU)/$(PKG_NAME)
-DL_FROM    = http://ftp.gnu.org/gnu/findutils
+DL_FROM    = $(URL_OFPKGS)/f
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

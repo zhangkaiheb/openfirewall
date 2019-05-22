@@ -15,14 +15,6 @@
 # along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: ca-certificates 7875 2015-02-08 12:36:06Z owes $
 #                                                                             #
 ###############################################################################
 
@@ -34,12 +26,15 @@ include Config
 
 PKG_NAME   = ca-certificates
 VER        = 20141019
+#VER        = 20170717~16.04.1
 HOST_ARCH  = all
 OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
+#THISAPP    = $(PKG_NAME)-20160104ubuntu1.1
 DL_FILE    = $(PKG_NAME)_$(VER).tar.xz
 DL_FROM    = $(URL_DEBIAN)/c/$(PKG_NAME)
+#DL_FROM    = http://archive.ubuntu.com/ubuntu/pool/main/c/ca-certificates
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 
@@ -54,6 +49,7 @@ objects = $(DL_FILE)
 $(DL_FILE) = $(DL_FROM)/$(DL_FILE)
 
 $(DL_FILE)_MD5 = f619282081c8bfc65ea64c37fa5285ed
+#$(DL_FILE)_MD5 = 6e7f2262b7c1375d63bbb1651f509b40
 
 install : $(TARGET)
 

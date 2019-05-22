@@ -1,28 +1,20 @@
 ###############################################################################
-# This file is part of the Openfirewall.                                    #
+# This file is part of the Openfirewall.                                      #
 #                                                                             #
-# Openfirewall is free software; you can redistribute it and/or modify               #
+# Openfirewall is free software; you can redistribute it and/or modify        #
 # it under the terms of the GNU General Public License as published by        #
 # the Free Software Foundation; either version 2 of the License, or           #
 # (at your option) any later version.                                         #
 #                                                                             #
-# Openfirewall is distributed in the hope that it will be useful,                    #
+# Openfirewall is distributed in the hope that it will be useful,             #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of              #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
 # GNU General Public License for more details.                                #
 #                                                                             #
 # You should have received a copy of the GNU General Public License           #
-# along with Openfirewall; if not, write to the Free Software                        #
+# along with Openfirewall; if not, write to the Free Software                 #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: strip 6523 2012-04-01 16:03:42Z gespinasse $
 #                                                                             #
 ###############################################################################
 
@@ -100,6 +92,45 @@ ifeq "$(STAGE)" "toolchain"
 	# use strip2 to not bother for strip hardlink
 	-find /$(TOOLS_DIR)/{bin,sbin,usr/bin,libexec} -type f -not -name strip2 -exec strip2 --strip-all {} \;
 	rm -f /$(TOOLS_DIR)/bin/strip2
+
 endif
 
+ifeq "$(STAGE)" "base"
+	# strip all libraries and bin
+	if [ ! -f /usr/src/files_${MACHINE}/${STAGE_ORDER}_${STAGE}/strip ]; then \
+		echo "strip bins";  \
+		cp -f /usr/bin/strip /usr/bin/strip2 ; \
+		find /bin /sbin /usr/bin /usr/sbin /usr/libexec -type f -not -name strip2 > .tmp; \
+		for line in `cat .tmp`; do \
+			ELF=`file $$line`; \
+			if echo $$ELF | grep 'ELF'; then \
+				strip2 --strip-all $$line; \
+			fi \
+		done; \
+		rm -f /usr/bin/strip2 ; \
+		echo "strip static libs"; \
+		find /lib /usr/lib -type f -name *.a > .tmp; \
+		for line in `cat .tmp`; do \
+			ELF=`file $$line`; \
+			if echo $$ELF | grep 'ar archive'; then \
+				strip --remove-section=.comment --remove-section=.note --strip-unneeded $$line; \
+			fi \
+		done; \
+		echo "strip shared libs"; \
+		find /lib /usr/lib -type f -name *.so -not -name libbfd-2* -not -name libz.so.1* -not -name libdl-2* -not -name libc.2* -not -name ld-2*  > .tmp; \
+		for line in `cat .tmp`; do \
+			ELF=`file $$line`; \
+			if echo $$ELF | grep 'ELF'; then \
+				strip $$line; \
+			fi \
+		done; \
+	fi
+endif
 	@$(POSTBUILD)
+
+#		echo "strip usr bin sbin";  \
+#		cp -f /usr/bin/strip /usr/bin/strip2 ; \
+#		find /usr/{bin,sbin,libexec} -type f -not -name strip2 -exec file {} \; > .tmp; \
+#		cat .tmp | grep "\<ELF\>" | awk -F ':' '{print $$1}' > .tmp2; \
+#		cat .tmp2 | xargs strip2 --strip-all; \
+#
