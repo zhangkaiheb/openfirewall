@@ -20,7 +20,7 @@
 #
 
 # Add entry in menu
-# MENUTHRDLVL "proxy" 010 "proxy common config" "web proxy common configuration"
+# MENUTHRDLVL "web proxy" 010 "proxy common config" "web proxy common configuration"
 #
 # Make sure translation exists $Lang::tr{'proxy common config'}
 
