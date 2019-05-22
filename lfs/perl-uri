@@ -34,7 +34,7 @@ OTHER_SRC  = yes
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
 #DL_FROM    = http://www.cpan.org/authors/id/E/ET/ETHER
-DL_FROM    = $(URL_OFPKGS)/p
+DL_FROM    = $(URL_OFPKGS)/u
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(LFS_NAME)-$(VER)
 
