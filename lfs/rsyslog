@@ -15,14 +15,6 @@
 # along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: rsyslog 8042 2016-01-04 11:43:43Z owes $
 #                                                                             #
 ###############################################################################
 
@@ -40,7 +32,7 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
-DL_FROM    = http://www.rsyslog.com/files/download/$(PKG_NAME)
+DL_FROM    = $(URL_OFPKGS)/r
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 
@@ -60,10 +52,10 @@ DL_LOGGING = $(APP_LOGGING).tar.gz
 objects = $(DL_FILE) $(DL_ESTR) $(DL_EE) $(DL_FASTJSON) $(DL_LOGGING)
 
 $(DL_FILE) = $(DL_FROM)/$(DL_FILE)
-$(DL_ESTR) = http://libestr.adiscon.com/files/download/$(DL_ESTR)
-$(DL_EE) = http://www.libee.org/files/download/$(DL_EE)
-$(DL_FASTJSON) = http://download.rsyslog.com/libfastjson/$(DL_FASTJSON)
-$(DL_LOGGING) = http://download.rsyslog.com/liblogging/$(DL_LOGGING)
+$(DL_ESTR) = $(URL_OFPKGS)/l/$(DL_ESTR)
+$(DL_EE) = $(URL_OFPKGS)/l/$(DL_EE)
+$(DL_FASTJSON) = $(URL_OFPKGS)/l/$(DL_FASTJSON)
+$(DL_LOGGING) = $(URL_OFPKGS)/l/$(DL_LOGGING)
 
 $(DL_FILE)_MD5 = 5c691d1c743a07df855a8c89bd3bc903
 $(DL_ESTR)_MD5 = f4c9165a23587e77f7efe65d676d5e8e
