@@ -20,6 +20,7 @@
 # MENUENTRY network 060 "routing table" "routing table"
 #
 # Make sure translation exists $Lang::tr{'routing table'}
+#
 
 use strict;
 
@@ -249,7 +250,7 @@ END
 
     &Header::closebox();
 
-    &Header::openbox('100%', 'left', "$Lang::tr{'static routes'}:");
+    &Header::openbox('100%', 'left', "$Lang::tr{'static route table'}:");
     print <<END;
 <div align='center'>
 <table width='100%' align='center'>

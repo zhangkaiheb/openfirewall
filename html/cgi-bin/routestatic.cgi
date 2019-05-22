@@ -239,7 +239,7 @@ print <<END;
     </td>
 </tr>
 </table>
-
+<hr />
 <table width='100%'>
 <tr><td width='5%'></td>
 <td>
@@ -280,12 +280,6 @@ END
     <td align='left'>
         <form method='post' action='$ENV{'SCRIPT_NAME'}'>
             <input type='submit' name='ACTION' value='$Lang::tr{'add static route'}' />
-        </form>
-    </td>
-    <td align='left'>
-        <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-            <input type='submit' name='ACTION' value='$Lang::tr{'edit'}' />
-            <input type='hidden' name='RULETYPE' value='OUTGOING'  />
         </form>
     </td>
     <td align='left' width='90%'></td>
