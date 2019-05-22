@@ -20,7 +20,7 @@
 #
 
 # Add entry in menu
-# MENUTHRDLVL "proxy" 020 "proxy access control" "proxy access control"
+# MENUTHRDLVL "web proxy" 020 "proxy access control" "proxy access control"
 #
 # Make sure translation exists $Lang::tr{'proxy access control'}
 

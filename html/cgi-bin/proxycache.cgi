@@ -20,7 +20,7 @@
 #
 
 # Add entry in menu
-# MENUTHRDLVL "proxy" 030 "proxy cache mgmt" "web proxy cache mgmt"
+# MENUTHRDLVL "web proxy" 030 "proxy cache mgmt" "web proxy cache mgmt"
 #
 # Make sure translation exists $Lang::tr{'proxy cache mgmt'}
 

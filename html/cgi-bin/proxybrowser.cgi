@@ -20,7 +20,7 @@
 #
 
 # Add entry in menu
-# MENUTHRDLVL "proxy" 040 "proxy browser" "web proxy browser configuration"
+# MENUTHRDLVL "web proxy" 040 "proxy browser" "web proxy browser configuration"
 #
 # Make sure translation exists $Lang::tr{'proxy browser'}
 

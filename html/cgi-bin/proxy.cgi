@@ -21,9 +21,9 @@
 #
 
 # Add entry in menu
-# MENUENTRY services 010 "proxy" "web proxy configuration"
+# MENUENTRY services 010 "web proxy" "web proxy configuration"
 #
-# Make sure translation exists $Lang::tr{'proxy'}
+# Make sure translation exists $Lang::tr{'web proxy'}
 
 use strict;
 use NetAddr::IP;
