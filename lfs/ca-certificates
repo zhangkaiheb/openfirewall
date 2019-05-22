@@ -33,8 +33,8 @@ OTHER_SRC  = yes
 THISAPP    = $(PKG_NAME)-$(VER)
 #THISAPP    = $(PKG_NAME)-20160104ubuntu1.1
 DL_FILE    = $(PKG_NAME)_$(VER).tar.xz
-DL_FROM    = $(URL_DEBIAN)/c/$(PKG_NAME)
-#DL_FROM    = http://archive.ubuntu.com/ubuntu/pool/main/c/ca-certificates
+#DL_FROM    = $(URL_DEBIAN)/c/$(PKG_NAME)
+DL_FROM    = $(URL_OFPKGS)/c
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

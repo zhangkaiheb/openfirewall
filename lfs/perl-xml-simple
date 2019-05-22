@@ -15,15 +15,6 @@
 # along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:                                                           #
-# ??-12-2003 Mark Wormgoor < mark@wormgoor.com>                               #
-#          - Modified Makefile for Openfirewall build                                #
-#                                                                             #
-# $Id: perl-xml-simple 8030 2016-01-03 13:40:36Z owes $
-#                                                                             #
 ###############################################################################
 
 ###############################################################################
@@ -40,7 +31,8 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(PKG_NAME)-$(VER).tar.gz
-DL_FROM    = $(URL_CPAN)/G/GR/GRANTM
+#DL_FROM    = $(URL_CPAN)/G/GR/GRANTM
+DL_FROM    = $(URL_OFPKGS)/p
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(LFS_NAME)-$(VER)
 

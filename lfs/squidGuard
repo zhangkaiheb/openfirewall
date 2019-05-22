@@ -15,14 +15,6 @@
 # along with Openfirewall; if not, write to the Free Software                        #
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA    #
 #                                                                             #
-# Makefiles are based on LFSMake, which is                                    #
-# Copyright (C) 2002 Rod Roard <rod@sunsetsystems.com>                        #
-#                                                                             #
-# Modifications by:
-#     2011-03-23 Perry Valdez <perryv@gmail.com>
-#               - Modified Makefile for Openfirewall build
-#
-# $Id: squidGuard 7997 2015-07-11 07:28:37Z owes $
 #                                                                             #
 ###############################################################################
 
@@ -39,7 +31,8 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
-DL_FROM    = http://www.squidguard.org/Downloads/Devel
+#DL_FROM    = http://www.squidguard.org/Downloads/Devel
+DL_FROM    = $(URL_OFPKGS)/s
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 
