@@ -16,11 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright (c) 2004-2018 The Openfirewall Team
+# Copyright (c) 2018-2019 The Openfirewall Team
 #
 
 package Header;
 require '/usr/lib/ofw/menu.pl';
+require '/usr/lib/ofw/menu-layout.pl';
 
 use strict;
 use Time::Local;
@@ -55,6 +56,7 @@ $Header::boxframe     = '';           # retain frametype for closebox
 my $menuidx = 0;
 my %menu = ();
 my %l3menu = ();
+my %layout = ();
 our $javascript = 1;
 our $httpheaders = 0;
 
@@ -89,6 +91,12 @@ sub genmenu
     %l3menu = %Menu::l3menu;
 }
 
+sub genmenulayout
+{
+    &MLayout::buildlayout();
+    %layout = %MLayout::layout;
+}
+
 sub showhttpheaders
 {
     ### Make sure this is an SSL request
@@ -102,8 +110,7 @@ sub showhttpheaders
         print "Status: 302 Moved\r\n";
         print "Location: https://$ENV{'SERVER_ADDR'}:$mainsettings{'GUIPORT'}/$ENV{'PATH_INFO'}\r\n\r\n";
         exit 0;
-    }
-    else {
+    } else {
         print "Pragma: no-cache\n";
         print "Cache-control: no-cache\n";
         print "Connection: close\n";
@@ -152,8 +159,7 @@ sub showjsmenu
 
                 if ($c3 <= $#{$l3menu{@{$k2}[0]}{'subMenu'}}) {
                     print "\t    ),\n";
-                }
-                else {
+                } else {
                     print "\t    )\n";
                 }
                 $c3++;
@@ -161,8 +167,7 @@ sub showjsmenu
 
             if ($c2 <= $#{$menu{$k1}{'subMenu'}}) {
                 print "\t    ),\n";
-            }
-            else {
+            } else {
                 print "\t    )\n";
             }
             $c2++;
@@ -183,7 +188,7 @@ sub showjsmenu
     'subMenuElementClass', 'ofw_subMenuElement',
     'subMenuElementHoverClass', 'ofw_subMenuElementHover',
     'subMenuElementActiveClass', 'ofw_subMenuElementHover',
-    'subMenuMinWidth', 'auto',
+    'subMenuMinWidth', '145',
     'distributeSpace', false,
     'openMouseoverMenuDelay', 0,
     'openMousedownMenuDelay', 0,
@@ -260,15 +265,13 @@ sub openpage
 
     if ($settings{'JAVASCRIPT'} eq 'off') {
         $javascript = 0;
-    }
-    else {
+    } else {
         $javascript = 1;
     }
 
     if ($settings{'WINDOWWITHHOSTNAME'} eq 'on') {
         $full_title = "$settings{'HOSTNAME'}.$settings{'DOMAINNAME'} - $title";
-    }
-    else {
+    } else {
         $full_title = "Openfirewall - $title";
     }
 
@@ -289,32 +292,22 @@ END
         print "<script type='text/javascript' src='/include/domMenu.js'></script>\n";
         print "<script type='text/javascript' src='/include/ofwsys.js'></script>\n";
         &genmenu();
+        &genmenulayout();
         &showjsmenu();
-    }
-    else {
+    } else {
         &genmenu();
+        &genmenulayout();
     }
 
     my $location    = '';
     my $sublocation = '';
     my $l3location = '';
-    my @URI         = split('\?', $ENV{'REQUEST_URI'});
-    foreach my $k1 (keys %menu) {
-        my $temp = $menu{$k1}{'contents'};
-        foreach my $k2 (@{$menu{$k1}{'subMenu'}}) {
-            if (@{$k2}[1] eq $URI[0]) {
-                $location    = $temp;
-                $sublocation = @{$k2}[0];
-            }
+    my @URI = split('\?', $ENV{'REQUEST_URI'});
 
-            foreach my $k3 (@{$l3menu{@{$k2}[0]}{'subMenu'}}) {
-                if (@{$k3}[1] eq $URI[0]) {
-                    $location    = $temp;
-                    $sublocation = @{$k2}[0];
-                    $l3location = @{$k3}[0];
-                }
-            }
-        }
+    if (defined($layout{$URI[0]})) {
+        $location = $layout{$URI[0]}{'l1'};
+        $sublocation = $layout{$URI[0]}{'l2'};
+        $l3location = $layout{$URI[0]}{'l3'};
     }
     if ($location eq '') {
        $location = $menu{'010'}{'contents'};
@@ -349,8 +342,7 @@ document.onmouseup = function()
 <body $onload_menu>
 END
             ;
-    }
-    else {
+    } else {
         print "</head>\n\n<body>\n";
     }
 
@@ -435,8 +427,7 @@ sub openbigbox
     print "<table width='100%' border='0'>\n";
     if ($sideimg) {
         print "<tr><td valign='top'><img src='/images/$sideimg' width='65' height='345' alt='' /></td>\n";
-    }
-    else {
+    } else {
         print "<tr>\n";
     }
     print "<td valign='top' align='center'><table $tablewidth cellspacing='0' cellpadding='10' border='0'>\n";
@@ -460,8 +451,7 @@ sub openbox
     my $tablewidth = "width='100%'";
     if ($width eq '100%') {
         $width = 500;
-    }
-    else {
+    } else {
         $tablewidth = "";
     }
     my $tdwidth = $width - 12 - 145;
@@ -542,8 +532,7 @@ sub percentbar
 {
     my $percent = $_[0];
 
-    if ($percent =~ m/^(\d+)%$/ )
-    {
+    if ($percent =~ m/^(\d+)%$/ ) {
         print <<END
 <table class='percentbar'>
 <tr>
@@ -600,4 +589,5 @@ END
 }
 
 1;
+
 

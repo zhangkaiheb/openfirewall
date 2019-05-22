@@ -33,7 +33,7 @@
 # haveBlue and haveProxy are optional flags, so menus can be selectively displayed.
 #
 #
-# After making modifications, like adding a new CGI file, run updatemenu.pl and the menu will be 
+# After making modifications, like adding a new CGI file, run updatemenu.pl and the menu will be
 # regenerated.
 #
 
@@ -51,12 +51,17 @@ my $line;
 my %menunumbers = ();
 
 my @l3lines = ();
+##my @sub12lines = ();
+##my @sub23lines = ();
 #my %menul2numbers = ();
 my %menul3numbers = ();
 
 @lines = `cat /var/ofw/main/menu.lst`;
 @sublines = `grep "# MENUENTRY" ${path}*.cgi`;
 @l3lines = `grep "# MENUTHRDLVL" ${path}*.cgi`;
+
+##@sub12lines = `grep "# MENUENTRY" ${path}*.cgi`;
+##@sub23lines = `grep "# MENUTHRDLVL" ${path}*.cgi`;
 # TODO: die if no content
 
 open(MENUFILE, ">/usr/lib/ofw/menu.pl") or die "Unable to write menu";
@@ -66,7 +71,7 @@ print MENUFILE <<END
 # This file is part of the Openfirewall.
 #
 # DO NOT MODIFY ANY CONTENT HERE.
-# Use updatemenu.pl to (re)generate this file from the information contained in 
+# Use updatemenu.pl to (re)generate this file from the information contained in
 # the CGI files.
 #
 
@@ -104,7 +109,7 @@ foreach $line (@lines) {
     # TODO: skip top-level if there are no matching sub-level entries
     #  If a sub-level is missing, menu creation will fail in header.pl
 
-    $menunumbers{$name} = $head;    
+    $menunumbers{$name} = $head;
 
     # And print to menu.pl
     print MENUFILE <<END
@@ -223,8 +228,10 @@ foreach $line (@l3lines) {
     my $head = $1;
     my $name = $2;
     my $contents = "\$Lang::tr{'$1'}";
+#print "content: $contents .. 1: $1\n";
     # Revert to the 'real text' if translation is missing
     $contents = "'$1'" unless(defined($Lang::tr{$1}));
+#print "content2: $contents \n";
 
 #    if (!defined($menul2numbers{$name})) {
 #        # protect against duplicates
@@ -328,3 +335,110 @@ print MENUFILE <<END
 END
 ;
 close MENUFILE;
+
+
+
+#####################################################################
+#                                                                   #
+# Write out menu layout.                                            #
+#                                                                   #
+#####################################################################
+
+my @sub12lines = ();
+my @sub23lines = ();
+
+@sub12lines = `grep "# MENUENTRY" ${path}*.cgi`;
+@sub23lines = `grep "# MENUTHRDLVL" ${path}*.cgi`;
+
+
+open(LAYOUTFILE, ">/usr/lib/ofw/menu-layout.pl") or die "Unable to write menu layout";
+
+print LAYOUTFILE <<END
+#!/usr/bin/perl
+#
+# This file is part of the Openfirewall.
+#
+
+package MLayout;
+\%MLayout::layout = ();
+
+sub buildlayout()
+{
+
+END
+;
+
+
+foreach $line (sort @sub23lines) {
+    chomp $line;
+    next unless ($line =~ /${path}(.*):# MENUTHRDLVL\s+"(.+?)"\s+(\d{3})\s+"(.+?)"\s+(.*)/);
+    my $l1;
+    my $cginame = "/cgi-bin/$1";
+
+    my $l3 = "\$Lang::tr{'$4'}";
+    $l3 = "'$4'" unless(defined($Lang::tr{$4}));
+
+    my $l2 = "\$Lang::tr{'$2'}";
+    $l2 = "'$2'" unless(defined($Lang::tr{$2}));
+
+
+
+    foreach my $subline (sort @sub12lines) {
+        chomp $subline;
+        next unless ($subline =~ /${path}(.*):# MENUENTRY\s+(\w+)\s+(\d{3})\s+"(.+?)"\s+(.*)/);
+
+        my $l2sub = "\$Lang::tr{'$4'}";
+        $l2sub = "'$4'" unless(defined($Lang::tr{$4}));
+
+        if ($l2sub eq $l2) {
+            $l1 = "\$Lang::tr{'$2'}";
+            $l1 = "'$2'" unless(defined($Lang::tr{$2}));
+            last;
+        }
+    }
+
+
+    print LAYOUTFILE <<END
+    \%{\$MLayout::layout{"$cginame"}} = (
+        'l1'    => $l1,
+        'l2'    => $l2,
+        'l3'    => $l3
+    );
+END
+;
+}
+
+foreach my $subline (sort @sub12lines) {
+    chomp $subline;
+    next unless ($subline =~ /${path}(.*):# MENUENTRY\s+(\w+)\s+(\d{3})\s+"(.+?)"\s+(.*)/);
+
+    my $cginame = "/cgi-bin/$1";
+
+    my $l1 = "\$Lang::tr{'$2'}";
+    $l1 = "'$2'" unless(defined($Lang::tr{$2}));
+
+    my $l2 = "\$Lang::tr{'$4'}";
+    $l2 = "'$4'" unless(defined($Lang::tr{$4}));
+
+    my $l3;
+
+    print LAYOUTFILE <<END
+    \%{\$MLayout::layout{"$cginame"}} = (
+        'l1'    => $l1,
+        'l2'    => $l2,
+        'l3'    => $l3
+    );
+END
+;
+
+}
+
+
+print LAYOUTFILE <<END
+}
+
+1;
+END
+;
+close LAYOUTFILE;
+
