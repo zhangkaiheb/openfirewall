@@ -9,6 +9,8 @@ usr/local/apache/cgi-bin/connections.cgi
 usr/local/apache/cgi-bin/credits.cgi
 usr/local/apache/cgi-bin/ddns.cgi
 usr/local/apache/cgi-bin/dhcp.cgi
+usr/local/apache/cgi-bin/dhcpconf.cgi
+usr/local/apache/cgi-bin/dhcpleases.cgi
 usr/local/apache/cgi-bin/dial.cgi
 usr/local/apache/cgi-bin/email.cgi
 usr/local/apache/cgi-bin/fwrules-access.cgi
@@ -29,6 +31,8 @@ usr/local/apache/cgi-bin/logsummary.cgi
 usr/local/apache/cgi-bin/logsystem.cgi
 usr/local/apache/cgi-bin/logurlfilter.cgi
 usr/local/apache/cgi-bin/modem.cgi
+usr/local/apache/cgi-bin/neighlist.cgi
+usr/local/apache/cgi-bin/neighstatic.cgi
 usr/local/apache/cgi-bin/neightable.cgi
 usr/local/apache/cgi-bin/netstatus.cgi
 usr/local/apache/cgi-bin/openvpn.cgi
@@ -40,6 +44,8 @@ usr/local/apache/cgi-bin/proxy.cgi
 usr/local/apache/cgi-bin/proxygraphs.cgi
 usr/local/apache/cgi-bin/proxystatus.cgi
 usr/local/apache/cgi-bin/remote.cgi
+usr/local/apache/cgi-bin/routelist.cgi
+usr/local/apache/cgi-bin/routestatic.cgi
 usr/local/apache/cgi-bin/routetable.cgi
 usr/local/apache/cgi-bin/scheduler.cgi
 usr/local/apache/cgi-bin/servicegrps.cgi
