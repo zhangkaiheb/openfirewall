@@ -169,12 +169,14 @@ foreach $line (sort @lines) {
     my $head = $1;
     my $sub = $2;
     my $cginame = "$3";
+    my $menuname = '';
     $line = $4;
 
     # We need at least 1 text
     next unless ($line =~ /"(.+?)"\s*(.*)/);
     my $contents = "\$Lang::tr{'$1'}";
     $contents = "'$1'" unless(defined($Lang::tr{$1}));
+    $menuname = $1;
     $line = $2;
 
     # A 2nd text is optional
@@ -197,6 +199,12 @@ foreach $line (sort @lines) {
     }
     if (index($line, 'haveBlue') != -1) {
         print MENUFILE "    if (\$menuconfig->{'haveBlue'}) {\n";
+    }
+
+    # If third submenu exist, disable the second level menu URI
+    my @thirdmenu = `grep '# MENUTHRDLVL \"$menuname\"' ${path}*.cgi`;
+    if ($#thirdmenu >= 0) {
+        $cginame = '';
     }
 
     # And print to menu.pl
