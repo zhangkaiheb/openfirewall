@@ -19,10 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) Darren Critchley 2003
- * (c) 2006-2010, the Openfirewall Team
- * 
- * $Id: restartntpd.c 4075 2010-01-05 16:13:18Z owes $
+ * (c) 2017-2020, the Openfirewall Team
  * 
  */
 
@@ -121,7 +118,7 @@ int main(int argc, char *argv[])
     }
 
     if (flag_red) {
-        if (access("/var/run/ntpdate-red", 0) == -1) {
+        if (access("/var/run/ntpdate-red", F_OK) == -1) {
             verbose_printf(2, "Flagfile ntpdate RED not there\n");
             exit(0);
         }
@@ -131,10 +128,10 @@ int main(int argc, char *argv[])
     }
 
     /* Fetch ethernet/settings, exit on error */
-    read_ethernet_settings(1);
+    helper_read_ethernet_settings(1);
     
     /* Stop ntpd if running */
-    if (access("/var/run/ntpd.pid", 0) != -1) {
+    if (access("/var/run/ntpd.pid", F_OK) != -1) {
         verbose_printf(1, "Flush ntp iptables chain ... \n");
         safe_system("/sbin/iptables -t nat -F NTP");
         verbose_printf(1, "Stopping NTPd ... \n");
@@ -191,19 +188,21 @@ int main(int argc, char *argv[])
 
     if (enabled && enabled_redirect) {
         /* redirect for GREEN */
-        for (i = 1; i <= ofw_ethernet.count[GREEN]; i++) {
+        for (i = 1; i <= openfw_ethernet.count[GREEN]; i++) {
             verbose_printf(2, "Setting redirect iptables rule for GREEN %i ... \n", i);
             snprintf(command, STRING_SIZE - 1,
                         "/sbin/iptables -t nat -A NTP -i %s -p udp --dport 123 ! -d %s -j DNAT --to %s",
-                        ofw_ethernet.device[GREEN][i], ofw_ethernet.address[GREEN][i], ofw_ethernet.address[GREEN][i]);
+                        openfw_ethernet.device[GREEN][i], openfw_ethernet.address[GREEN][i],
+						openfw_ethernet.address[GREEN][i]);
             safe_system(command);
         }
         /* redirect for BLUE */
-        for (i = 1; i <= ofw_ethernet.count[BLUE]; i++) {
+        for (i = 1; i <= openfw_ethernet.count[BLUE]; i++) {
             verbose_printf(2, "Setting redirect iptables rule for BLUE %i ... \n", i);
             snprintf(command, STRING_SIZE - 1,
                         "/sbin/iptables -t nat -A NTP -i %s -p udp --dport 123 ! -d %s -j DNAT --to %s",
-                        ofw_ethernet.device[BLUE][i], ofw_ethernet.address[BLUE][i], ofw_ethernet.address[BLUE][i]);
+                        openfw_ethernet.device[BLUE][i], openfw_ethernet.address[BLUE][i],
+						openfw_ethernet.address[BLUE][i]);
             safe_system(command);
         }
     }
