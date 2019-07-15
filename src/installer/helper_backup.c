@@ -17,14 +17,13 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2010, the Openfirewall Team
+ * (c) 2017-2020 the Openfirewall Team
  *
- * $Id: helper_backup.c 5049 2010-10-21 07:39:19Z owes $
- * 
  */
 
 
 #include <string.h>
+#include <stdarg.h>
 #include "common.h"
 #include "common_backup.h"
 
@@ -32,25 +31,25 @@
     Accept backups from older versions, unless the backup is very old with too many differences (< v1.9.9)
     Accept backups from newer versions, where only revision (last number) is different, v2.0.x will accept v2.0.y
 */
-int testbackupversion(char *path)
+int helper_backup_test_version(char *path)
 {
     unsigned int backupversion;
     unsigned int ofwversion;
 
-    backupversion = getbackupversion(path);
+    backupversion = helper_backup_get_version(path);
     if (backupversion == 0) {
-        fprintf(flog, "Backup version missing\n");
+        F_LOG("Backup version missing\n");
         return FAILURE;
     }
-    ofwversion = getofwversion();
+    ofwversion = helper_getofwversion();
     if (ofwversion == 0) {
-        fprintf(flog, "Openfirewall version missing\n");
+        F_LOG("Openfirewall version missing\n");
         return FAILURE;
     }
 
     /* Do not accept really old backups (think alpha releases here) */
     if (backupversion < 0x010909) {
-        fprintf(flog, "Backup 0x%08X too old\n", backupversion);
+        F_LOG("Backup 0x%08X too old\n", backupversion);
         return FAILURE;
     }
     /* We know how to deal with old backups */
@@ -63,12 +62,12 @@ int testbackupversion(char *path)
         return SUCCESS;
     }
 
-    fprintf(flog, "Backup: 0x%08X  >>  Openfirewall: 0x%08X\n", backupversion, ofwversion);
+    F_LOG("Backup: 0x%08X  >>  Openfirewall: 0x%08X\n", backupversion, ofwversion);
     return FAILURE;
 }
 
 
-unsigned int getbackupversion(char *path)
+unsigned int helper_backup_get_version(char *path)
 {
     char filename[STRING_SIZE];
     FILE *f = NULL;

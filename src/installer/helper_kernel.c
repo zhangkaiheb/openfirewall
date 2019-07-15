@@ -16,10 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2015, the Openfirewall Team
+ * (c) 2017-2020 the Openfirewall Team
  *
- * $Id: helper_kernel.c 7909 2015-03-01 11:25:39Z owes $
- * 
  */
 
  
@@ -59,7 +57,7 @@ int helper_kernel_init(void)
         exit(1);
     }
     sprintf(name, "/lib/modules/%s", uts.release);
-    fprintf(flog, "Kernelpath %s\n", name);
+    F_LOG("Kernel modules path %s\n", name);
 
     kernel_inited = 1;
     return 1;
@@ -76,7 +74,7 @@ char *helper_kernel_release(void)
 
 
 /* find a kernel module for pci/usb bus depending on vendor and device id */
-char *find_modulename(char *bus, uint16_t vendor_id, uint16_t device_id)
+char *helper_kernel_find_modulename(char *bus, uint16_t vendor_id, uint16_t device_id)
 {
     FILE *p;
     char command[STRING_SIZE];
@@ -120,7 +118,7 @@ char *find_modulename(char *bus, uint16_t vendor_id, uint16_t device_id)
  * Return module_buffer.
  * vendorid_buffer and deviceid_buffer are global variables.
  */
-char *getkernelmodule(char *device)
+char *helper_kernel_get_netdev_info(char *device)
 {
     char command[STRING_SIZE];
     char line[STRING_SIZE];
@@ -129,7 +127,8 @@ char *getkernelmodule(char *device)
 
     strcpy(module_buffer, "");
 
-    snprintf(command, STRING_SIZE, "ls -l /sys/class/net/%s/device/driver/module", device);
+    snprintf(command, STRING_SIZE-1,
+			"ls -l /sys/class/net/%s/device/driver/module", device);
 
     f = popen(command, "r");
     if (fgets(line, STRING_SIZE, f) != NULL) {
@@ -143,7 +142,6 @@ char *getkernelmodule(char *device)
             }
         }
     }
-
     pclose(f);
 
     strcpy(vendorid_buffer, "");
@@ -167,3 +165,4 @@ char *getkernelmodule(char *device)
     }
     return module_buffer;
 }
+
