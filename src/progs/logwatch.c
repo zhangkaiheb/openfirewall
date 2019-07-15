@@ -3,9 +3,7 @@
  * This program is distributed under the terms of the GNU General Public
  * Licence.  See the file COPYING for details.
  *
- * Copyright (C) 2003-07-12 Robert Kerr <rkerr@go.to>
- *
- * $Id: logwatch.c 5156 2010-11-20 21:56:54Z owes $
+ * Copyright (C) 2017-2020 the Openfirewall Team
  *
  */
 
@@ -16,6 +14,7 @@
 #include <grp.h>
 #include <pwd.h>
 #include <sys/types.h>
+#include <stdarg.h>
 #include "common.h"
 #include "setuid.h"
 
