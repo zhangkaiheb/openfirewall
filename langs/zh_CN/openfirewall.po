@@ -248,6 +248,8 @@ msgid "vlan id"
 msgstr "VLAN ID"
 msgid "add new alias"
 msgstr "新增別名"
+msgid "interface group"
+msgstr "接口组"
 #### static route:
 msgid "add static route"
 msgstr "新增静态路由"
