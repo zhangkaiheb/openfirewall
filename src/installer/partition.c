@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2014, the Openfirewall Team
+ * (c) 2017-2020, the Openfirewall Team
  *
  *
  *
@@ -63,7 +63,7 @@
 
 
 // tweak for errorbox
-#define  gettext  ofw_gettext
+#define  gettext  lang_gettext
 
 #define BLKGETSIZE64 _IOR(0x12,114,size_t)
 
@@ -87,276 +87,276 @@ static int partition_index[NR_PARTITIONS];  // [0] is / partition number, 0 tran
 /*  Calculate for the user a useable disk schema partition
     and make it so.
 */
-int make_partitions(char *dev, char *dev2, long int disk_size, int part_options, long int *swap_file)
+int pt_make_partitions(char *dev, char *dev2, long int disk_size, int part_options, long int *swap_file)
 {
-    int i;
-    int retcode = FAILURE;
-    long int root_partition, log_partition;
-    long int current_free;
-    char command[STRING_SIZE];
-    char device[STRING_SIZE];
-    char device2[STRING_SIZE];
-    newtComponent *f;
-    newtComponent scale;
+	int i;
+	int retcode = FAILURE;
+	long int root_partition, log_partition;
+	long int current_free;
+	char command[STRING_SIZE];
+	char device[STRING_SIZE];
+	char device2[STRING_SIZE];
+	newtComponent *f;
+	newtComponent scale;
 
-    snprintf(device, STRING_SIZE, "/dev/%s", dev);
-    snprintf(device2, STRING_SIZE, "/dev/%s", dev2);
+	snprintf(device, STRING_SIZE, "/dev/%s", dev);
+	snprintf(device2, STRING_SIZE, "/dev/%s", dev2);
 
-    /*
-        Reduce disk size by 5MiB to reduce risk of partition errors caused by
-        wrong disk size informations from /sys/block/DEVICE/size.
-        Also alignment 'modifications' might lead to difficulty.
-    */
-    if (!(part_options & PART_OPTIONS_USER_SIZE))
-        disk_size -= 5;
+	/*
+	   Reduce disk size by 5MiB to reduce risk of partition errors caused by
+	   wrong disk size informations from /sys/block/DEVICE/size.
+	   Also alignment 'modifications' might lead to difficulty.
+	 */
+	if (!(part_options & PART_OPTIONS_USER_SIZE))
+		disk_size -= 5;
 
-    /*
-       someday offer semi-manual partition here
-       keep /, /var/log but allow user to set different sizes (> MINIMUM) or leave free space
-     */
+	/*
+	   someday offer semi-manual partition here
+	   keep /, /var/log but allow user to set different sizes (> MINIMUM) or leave free space
+	 */
 
-    if (medium_target == MT_FLASH) {
-        /* flash install is easy */
-        *swap_file = 0;
-        log_partition = LOGCOMPRESSED;
-        root_partition = disk_size - log_partition;
-        if (raid)
-            strcpy(install_type,"flashraid");
-        else
-            strcpy(install_type,"flash");
-    }
-    else {
-        if (raid)
-            strcpy(install_type,"raid");
-        else
-            strcpy(install_type,"onedisk");
+	if (inst_get_medium_target() == MT_FLASH) {
+		/* flash install is easy */
+		*swap_file = 0;
+		log_partition = LOGCOMPRESSED;
+		root_partition = disk_size - log_partition;
+		if (raid)
+			strcpy(install_type,"flashraid");
+		else
+			strcpy(install_type,"flash");
+	} else {
+		if (raid)
+			strcpy(install_type,"raid");
+		else
+			strcpy(install_type,"onedisk");
 
-        /* set the minimum size(s) */
-        root_partition = ROOT_MINIMUM;
+		/* set the minimum size(s) */
+		root_partition = ROOT_MINIMUM;
 
-        if ((*swap_file != -1) && (ROOT_MINIMUM + *swap_file >= disk_size)) {
-            /* The wanted swapfilesize does not fit */
-            fprintf(flog, "Not enough space for %ld MiB swapfile\n", *swap_file);
-            *swap_file = -1;
-        }
+		if ((*swap_file != -1) && (ROOT_MINIMUM + *swap_file >= disk_size)) {
+			/* The wanted swapfilesize does not fit */
+			F_LOG("Not enough space for %ld MiB swapfile\n", *swap_file);
+			*swap_file = -1;
+		}
 
-        if (*swap_file == -1) {
-            *swap_file = SWAP_MINIMUM;
-            log_partition = DISK_MINIMUM - ROOT_MINIMUM - SWAP_MINIMUM;
-            current_free = disk_size - root_partition - log_partition - *swap_file;
+		if (*swap_file == -1) {
+			*swap_file = SWAP_MINIMUM;
+			log_partition = DISK_MINIMUM - ROOT_MINIMUM - SWAP_MINIMUM;
+			current_free = disk_size - root_partition - log_partition - *swap_file;
 
-            /* 25% of remaining space goes to swap and maximize swap */
-            *swap_file += current_free / 4;
-            if (*swap_file > SWAP_MAXIMUM) {
-                *swap_file = SWAP_MAXIMUM;
-            }
-        }
-        else {
-            log_partition = DISK_MINIMUM - ROOT_MINIMUM - *swap_file;
-            current_free = disk_size - root_partition - log_partition - *swap_file;
-        }
+			/* 25% of remaining space goes to swap and maximize swap */
+			*swap_file += current_free / 4;
+			if (*swap_file > SWAP_MAXIMUM) {
+				*swap_file = SWAP_MAXIMUM;
+			}
+		}
+		else {
+			log_partition = DISK_MINIMUM - ROOT_MINIMUM - *swap_file;
+			current_free = disk_size - root_partition - log_partition - *swap_file;
+		}
 
-        /* 25% of remaining space goes to root partition */
-        root_partition += current_free / 4;
-        /* and maximize root */
-        if (root_partition > ROOT_MAXIMUM)
-            root_partition = ROOT_MAXIMUM;
+		/* 25% of remaining space goes to root partition */
+		root_partition += current_free / 4;
+		/* and maximize root */
+		if (root_partition > ROOT_MAXIMUM)
+			root_partition = ROOT_MAXIMUM;
 
-        /* swap is just a file in root partition */
-        root_partition = root_partition + *swap_file;
-    }
+		/* swap is just a file in root partition */
+		root_partition = root_partition + *swap_file;
+	}
 
 #if defined(__sparc__) || defined(__sparc64__)
-    /* Trunk to 16 MB block and maximize to 65520 MByte which should be enough */
-    root_partition &= 0xFFF0;
+	/* Trunk to 16 MB block and maximize to 65520 MByte which should be enough */
+	root_partition &= 0xFFF0;
 #endif
-    /* recalc log */
-    log_partition = disk_size - root_partition;
+	/* recalc log */
+	log_partition = disk_size - root_partition;
 
-    /*
-       We now have auto-partition data (in MiB)
-       start:                    end:
-       start_p                   root_p
-       root_p                    disk_size
-     */
+	/*
+	   We now have auto-partition data (in MiB)
+start:                    end:
+start_p                   root_p
+root_p                    disk_size
+	 */
 
-    for (i = 0; i < NR_PARTITIONS; i++) {
-        /* zap label and mountpoint strings */
-        partition_label[i][0] = 0;
-        partition_mount[i][0] = 0;
-        partition_index[i] = -1;
-    }
+	for (i = 0; i < NR_PARTITIONS; i++) {
+		/* zap label and mountpoint strings */
+		partition_label[i][0] = 0;
+		partition_mount[i][0] = 0;
+		partition_index[i] = -1;
+	}
 
-    /* define all label and mountpoints for the architectures we support */
+	/* define all label and mountpoints for the architectures we support */
 #if defined(__i386__) || defined(__x86_64__)
-    if (part_options & PART_OPTIONS_PARTED) {
-        strcpy(arch, "x86_parted");
-    }
-    else {
-        strcpy(arch, "x86");
-    }
-    partition_index[PART_INDEX_ROOT] = 0;
-    partition_index[PART_INDEX_VARLOG] = 1;
+	if (part_options & PART_OPTIONS_PARTED) {
+		strcpy(arch, "x86_parted");
+	}
+	else {
+		strcpy(arch, "x86");
+	}
+	partition_index[PART_INDEX_ROOT] = 0;
+	partition_index[PART_INDEX_VARLOG] = 1;
 #endif
 #if defined(__powerpc__) || defined(__powerpc64__)
-    strcpy(arch, "powerpc");
-    partition_index[PART_INDEX_ROOT] = 2;
-    partition_index[PART_INDEX_VARLOG] = 3;
+	strcpy(arch, "powerpc");
+	partition_index[PART_INDEX_ROOT] = 2;
+	partition_index[PART_INDEX_VARLOG] = 3;
 #endif
 #if defined(__sparc__) || defined(__sparc64__)
-    strcpy(arch, "sparc");
-    partition_index[PART_INDEX_ROOT] = 0;
-    partition_index[PART_INDEX_VARLOG] = 1;
+	strcpy(arch, "sparc");
+	partition_index[PART_INDEX_ROOT] = 0;
+	partition_index[PART_INDEX_VARLOG] = 1;
 #endif
 #if defined(__alpha__)
-    strcpy(arch, "alpha");
-    partition_index[PART_INDEX_ROOT] = 0;
-    partition_index[PART_INDEX_VARLOG] = 1;
+	strcpy(arch, "alpha");
+	partition_index[PART_INDEX_ROOT] = 0;
+	partition_index[PART_INDEX_VARLOG] = 1;
 #endif
 
-    strcpy(partition_label[partition_index[PART_INDEX_ROOT]], "root");
-    strcpy(partition_mount[partition_index[PART_INDEX_ROOT]], "/");
+	strcpy(partition_label[partition_index[PART_INDEX_ROOT]], "root");
+	strcpy(partition_mount[partition_index[PART_INDEX_ROOT]], "/");
 
-    if (partition_index[PART_INDEX_ROOT] == -1) {
-        /* Can't be, probably because of non-supported arch. */
-        fprintf(flog, "Partition# for / is not set, non-supported arch?\n");
-        return FAILURE;         /* exit immediately */
-    }
-    if (partition_index[PART_INDEX_VARLOG] == -1) {
-        /* Can't be, probably because of non-supported arch. */
-        fprintf(flog, "Partition# for /var/log is 0, non-supported arch?\n");
-        return FAILURE;         /* exit immediately */
-    }
+	if (partition_index[PART_INDEX_ROOT] == -1) {
+		/* Can't be, probably because of non-supported arch. */
+		F_LOG("Partition# for / is not set, non-supported arch?\n");
+		return FAILURE;         /* exit immediately */
+	}
+	if (partition_index[PART_INDEX_VARLOG] == -1) {
+		/* Can't be, probably because of non-supported arch. */
+		F_LOG("Partition# for /var/log is 0, non-supported arch?\n");
+		return FAILURE;         /* exit immediately */
+	}
 
-    if (medium_target == MT_FLASH) {
-        strcpy(partition_label[partition_index[PART_INDEX_VARLOG]], "varlog_comp");
-        strcpy(partition_mount[partition_index[PART_INDEX_VARLOG]], "/var/log_compressed");
-    }
-    else {
-        strcpy(partition_label[partition_index[PART_INDEX_VARLOG]], "varlog");
-        strcpy(partition_mount[partition_index[PART_INDEX_VARLOG]], "/var/log");
-    }
+	if (inst_get_medium_target() == MT_FLASH) {
+		strcpy(partition_label[partition_index[PART_INDEX_VARLOG]], "varlog_comp");
+		strcpy(partition_mount[partition_index[PART_INDEX_VARLOG]], "/var/log_compressed");
+	}
+	else {
+		strcpy(partition_label[partition_index[PART_INDEX_VARLOG]], "varlog");
+		strcpy(partition_mount[partition_index[PART_INDEX_VARLOG]], "/var/log");
+	}
 
 
-    if (part_options & PART_OPTIONS_MANUAL) {
-        /* OK, user thinks he's smart enough to do by himself */
+	if (part_options & PART_OPTIONS_MANUAL) {
+		/* OK, user thinks he's smart enough to do by himself */
 
-        newtWinMessage(ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_OK"), "Do your thing with parted now!");
+		newtWinMessage(lang_gettext("TR_TITLE_DISK"), lang_gettext("TR_OK"), "Do your thing with parted now!");
 
-        /* TODO: some verification? */
-        return SUCCESS;
-    }
+		/* TODO: some verification? */
+		return SUCCESS;
+	}
 
-    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MAKING_PARTITIONS"));
-        /* disk-partition parameters
-         #1 arch (alpha, powerpc, sparc, x86)
-         #2 dev name (without /dev)
-         #3 size of root partition (in MiB)
-         #4 disk size (in MiB) as seen by parted <device> unit MiB print
-         #5 install type (onedisk , raid , flash) */
-    snprintf(command, STRING_SIZE, "/usr/bin/disk-partition.sh %s %s %ld %ld %s",
-             arch, dev, root_partition*1024*2, disk_size*1024*2, install_type);
-    if (mysystem(command)) {
-        fprintf(flog, "error partitioning %s\n", device);
-        goto PARTITION_EXIT;
-    }
+	helper_nt_statuswindow(72, 5,
+			lang_gettext("TR_TITLE_DISK"), lang_gettext("TR_MAKING_PARTITIONS"));
+	/* disk-partition parameters
+#1 arch (alpha, powerpc, sparc, x86)
+#2 dev name (without /dev)
+#3 size of root partition (in MiB)
+#4 disk size (in MiB) as seen by parted <device> unit MiB print
+#5 install type (onedisk , raid , flash) */
+	snprintf(command, STRING_SIZE, "/usr/bin/disk-partition.sh %s %s %ld %ld %s",
+			arch, dev, root_partition*1024*2, disk_size*1024*2, install_type);
+	if (mysystem(command)) {
+		F_LOG("error partitioning %s\n", device);
+		goto PARTITION_EXIT;
+	}
 
-    if (raid) {
-        /* Repeat partitioning for 2nd disk */
-        snprintf(command, STRING_SIZE, "/usr/bin/disk-partition.sh %s %s %ld %ld %s",
-                 arch, dev2, root_partition*1024*2, disk_size*1024*2, install_type);
-        if (mysystem(command)) {
-            fprintf(flog, "error partitioning %s\n", device2);
-            goto PARTITION_EXIT;
-        }
-    }
+	if (raid) {
+		/* Repeat partitioning for 2nd disk */
+		snprintf(command, STRING_SIZE, "/usr/bin/disk-partition.sh %s %s %ld %ld %s",
+				arch, dev2, root_partition*1024*2, disk_size*1024*2, install_type);
+		if (mysystem(command)) {
+			F_LOG("error partitioning %s\n", device2);
+			goto PARTITION_EXIT;
+		}
+	}
 
-    retcode = SUCCESS;
+	retcode = SUCCESS;
 
 PARTITION_EXIT:
-    /* Remove status window */
-    newtPopWindow();
+	/* Remove status window */
+	newtPopWindow();
 
-    if (retcode == FAILURE) {
-        fprintf(flog, "Make partitions failed ...\n");
-        return FAILURE;
-    }
+	if (retcode == FAILURE) {
+		F_LOG("Make partitions failed ...\n");
+		return FAILURE;
+	}
 
-    fprintf(flog, "Make partitions done ...\n");
+	F_LOG("Make partitions done ...\n");
 
-    if (!raid)
-        return SUCCESS;
+	if (!raid)
+		return SUCCESS;
 
-    /* Create RAID and wait for the drives to be synchronised */
+	/* Create RAID and wait for the drives to be synchronised */
 
-    f = (newtComponent *) statuswindow_progress(72, 5, ofw_gettext("TR_TITLE_DISK"),
-                                                ofw_gettext("TR_CREATING_RAID"));
-    scale = newtScale(1, 3, 70, 100);
-    newtFormAddComponent(*f, scale);
-    newtDrawForm(*f);
-    newtScaleSet(scale, 0);
-    newtRefresh();
+	f = (newtComponent *) statuswindow_progress(72, 5, lang_gettext("TR_TITLE_DISK"),
+			lang_gettext("TR_CREATING_RAID"));
+	scale = newtScale(1, 3, 70, 100);
+	newtFormAddComponent(*f, scale);
+	newtDrawForm(*f);
+	newtScaleSet(scale, 0);
+	newtRefresh();
 
-    mysystem("/sbin/modprobe md-mod");
-    mysystem("/sbin/modprobe raid1");
-    if (system("echo y > /tmp/yes")) {
-        /* We are in serious trouble if something simple like this fails */
-        newtPopWindow();
-        fprintf(flog, "ERROR: echo /tmp/yes failed\n");
-        fprintf(flog, "Make RAID failed ...\n");
-        return FAILURE;
-    }
+	mysystem("/sbin/modprobe md-mod");
+	mysystem("/sbin/modprobe raid1");
+	if (system("echo y > /tmp/yes")) {
+		/* We are in serious trouble if something simple like this fails */
+		newtPopWindow();
+		F_LOG("ERROR: echo /tmp/yes failed\n");
+		F_LOG("Make RAID failed ...\n");
+		return FAILURE;
+	}
 
-    for (i = 0; i < OFW_PARTITIONS; i++) {
-        FILE *pipe;
-        char string[STRING_SIZE];
-        char *ptr;
-        int percentage;
+	for (i = 0; i < OFW_PARTITIONS; i++) {
+		FILE *pipe;
+		char string[STRING_SIZE];
+		char *ptr;
+		int percentage;
 
-        snprintf(command, STRING_SIZE,
-            "/sbin/mdadm --create /dev/md%d --homehost=openfirewall --metadata=0.9 --level=1 --raid-devices=2 %s%d %s%d < /tmp/yes",
-            i, device, partition_index[i]+1, device2, partition_index[i]+1);
-        if (mysystem(command)) {
-            newtPopWindow();
-            fprintf(flog, "Make RAID failed ...\n");
-            return FAILURE;
-        }
+		snprintf(command, STRING_SIZE,
+				"/sbin/mdadm --create /dev/md%d --homehost=openfirewall --metadata=0.9 --level=1 --raid-devices=2 %s%d %s%d < /tmp/yes",
+				i, device, partition_index[i]+1, device2, partition_index[i]+1);
+		if (mysystem(command)) {
+			newtPopWindow();
+			F_LOG("Make RAID failed ...\n");
+			return FAILURE;
+		}
 
-        newtScaleSet(scale, (i * 100) / OFW_PARTITIONS);
-        newtRefresh();
-        sleep(1);
+		newtScaleSet(scale, (i * 100) / OFW_PARTITIONS);
+		newtRefresh();
+		sleep(1);
 
-        while(system("cat /proc/mdstat | grep resync > /dev/null") == 0) {
-            if ((pipe = popen("cat /proc/mdstat | grep resync", "r")) != NULL) {
-                if(fgets(string, STRING_SIZE, pipe) == NULL) {
-                    pclose(pipe);
-                    continue;
-                }
+		while(system("cat /proc/mdstat | grep resync > /dev/null") == 0) {
+			if ((pipe = popen("cat /proc/mdstat | grep resync", "r")) != NULL) {
+				if(fgets(string, STRING_SIZE, pipe) == NULL) {
+					pclose(pipe);
+					continue;
+				}
 
-                /* Something like this:
-                 *      [====>.....]  resync = 35.5% (x/y) etc... */
+				/* Something like this:
+				 *      [====>.....]  resync = 35.5% (x/y) etc... */
 
-                ptr = strstr(string, "resync = ");
-                if (ptr == NULL) {
-                    pclose(pipe);
-                    continue;
-                }
+				ptr = strstr(string, "resync = ");
+				if (ptr == NULL) {
+					pclose(pipe);
+					continue;
+				}
 
-                ptr += strlen("resync = ");
-                percentage = atoi(ptr);
-                newtScaleSet(scale, percentage/OFW_PARTITIONS + (i*100)/OFW_PARTITIONS);
-                newtRefresh();
+				ptr += strlen("resync = ");
+				percentage = atoi(ptr);
+				newtScaleSet(scale, percentage/OFW_PARTITIONS + (i*100)/OFW_PARTITIONS);
+				newtRefresh();
 
-                pclose(pipe);
-                sleep(1);
-            }
-        }
-    }
+				pclose(pipe);
+				sleep(1);
+			}
+		}
+	}
 
-    fprintf(flog, "Make RAID done ...\n");
-    newtPopWindow();
+	F_LOG("Make RAID done ...\n");
+	newtPopWindow();
 
-    return SUCCESS;
+	return SUCCESS;
 }   /* End of int autopart() */
 
 
@@ -365,7 +365,7 @@ PARTITION_EXIT:
     We assume the disk is partitioned.
     No manual labelling.
 */
-static int make_disk(char *dev, char *dev2, long int swap_file)
+static int pt_make_disk(char *dev, char *dev2, long int swap_file)
 {
     char command[STRING_SIZE];
     char string[STRING_SIZE];
@@ -378,12 +378,12 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
     newtComponent *f;
 
     if ((handlelocal = fopen("/etc/fstab", "w")) == NULL) {
-        errorbox(ofw_gettext("TR_UNABLE_TO_WRITE_ETC_FSTAB"));
+        errorbox(lang_gettext("TR_UNABLE_TO_WRITE_ETC_FSTAB"));
         return FAILURE;
     }
     /* Need to create a temp. first, since /harddisk is not yet populated */
     if ((handletarget = fopen("/tmp/tmpfstab", "w")) == NULL) {
-        errorbox(ofw_gettext("TR_UNABLE_TO_WRITE_ETC_FSTAB"));
+        errorbox(lang_gettext("TR_UNABLE_TO_WRITE_ETC_FSTAB"));
         return FAILURE;
     }
 #define FORMAT_FSTAB  "%-14s %-14s %-10s %-20s %-5s %-5s\n"
@@ -391,11 +391,12 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
     fprintf(handletarget, FORMAT_FSTAB, "#", "", "", "", "", "order");
 
     /*  No special need to read and test for partitions.
-        They are created by make_partitions() or by the user in case of manual partitioning.
+        They are created by pt_make_partitions() or by the user in case of manual partitioning.
         If a partition is missing, mke2fs will throw an error and we can abort.
     */
 
-    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MAKING_FILESYSTEMS"));
+    helper_nt_statuswindow(72, 5,
+			lang_gettext("TR_TITLE_DISK"), lang_gettext("TR_MAKING_FILESYSTEMS"));
 
     for (i = 0; i < OFW_PARTITIONS; i++) {
         int pindex = partition_index[i];
@@ -417,10 +418,10 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
             newtPopWindow();
             switch (i) {
             case PART_INDEX_ROOT:
-                errorbox(ofw_gettext("TR_UNABLE_TO_MAKE_ROOT_FILESYSTEM"));
+                errorbox(lang_gettext("TR_UNABLE_TO_MAKE_ROOT_FILESYSTEM"));
                 break;
             case PART_INDEX_VARLOG:
-                errorbox(ofw_gettext("TR_UNABLE_TO_MAKE_LOG_FILESYSTEM"));
+                errorbox(lang_gettext("TR_UNABLE_TO_MAKE_LOG_FILESYSTEM"));
                 break;
             default:
                 /* FIXME: cannot be, can it? */
@@ -433,11 +434,11 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
         /* Following sequence from udev/vol_id.c to retrieve the UUID */
         fd = open(string, O_RDONLY);
         if (fd < 0) {
-            fprintf(flog, " %s: error opening volume\n", devname);
+            F_LOG(" %s: error opening volume\n", devname);
         }
         else {
             if ((vid = volume_id_open_fd(fd)) == NULL) {
-                fprintf(flog, " %s: error opening VID\n", devname);
+                F_LOG(" %s: error opening VID\n", devname);
             }
             else {
                 /* OWES: could do with some error checking here. */
@@ -445,7 +446,7 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
                 volume_id_probe_filesystem(vid, 0, size);
                 volume_id_get_uuid(vid, &uuid);
                 volume_id_encode_string(uuid, partition_uuidenc[pindex], STRING_SIZE);
-                fprintf(flog, "  %s UUID %s\n", devname, partition_uuidenc[pindex]);
+                F_LOG("  %s UUID %s\n", devname, partition_uuidenc[pindex]);
             }
             close(fd);
         }
@@ -479,35 +480,38 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
     fclose(handletarget);
     newtPopWindow();
 
-    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MOUNTING_ROOT_FILESYSTEM"));
+    helper_nt_statuswindow(72, 5,
+			lang_gettext("TR_TITLE_DISK"), lang_gettext("TR_MOUNTING_ROOT_FILESYSTEM"));
     /* load ext3 now */
     if (mysystem("/sbin/modprobe ext4") || mysystem("/bin/mount /harddisk/")) {
         newtPopWindow();
-        errorbox(ofw_gettext("TR_UNABLE_TO_MOUNT_ROOT_FILESYSTEM"));
+        errorbox(lang_gettext("TR_UNABLE_TO_MOUNT_ROOT_FILESYSTEM"));
         return FAILURE;
     }
     newtPopWindow();
 
     /* create mountpoint for /var/log and mount */
-    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MOUNTING_LOG_FILESYSTEM"));
+    helper_nt_statuswindow(72, 5,
+			lang_gettext("TR_TITLE_DISK"), lang_gettext("TR_MOUNTING_LOG_FILESYSTEM"));
     snprintf(command, STRING_SIZE, "/bin/mkdir -p /harddisk%s", partition_mount[partition_index[PART_INDEX_VARLOG]]);
     mysystem(command);
     snprintf(command, STRING_SIZE, "/bin/mount /harddisk%s", partition_mount[partition_index[PART_INDEX_VARLOG]]);
     if (mysystem(command)) {
         newtPopWindow();
-        errorbox(ofw_gettext("TR_UNABLE_TO_MOUNT_LOG_FILESYSTEM"));
+        errorbox(lang_gettext("TR_UNABLE_TO_MOUNT_LOG_FILESYSTEM"));
         return FAILURE;
     }
     newtPopWindow();
 
     /* populate files on the partitions */
-    switch (medium_sources) {
+    switch (inst_get_medium_sources()) {
     case MT_CDROM:
         strcpy(tarball_location, "/cdrom");
         break;
     case MT_NETWORK:
         /* download needed files */
-        statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_DOWNLOADING_IMAGE"));
+        helper_nt_statuswindow(72, 5,
+				lang_gettext("TR_TITLE_DISK"), lang_gettext("TR_DOWNLOADING_IMAGE"));
         mysystem("mkdir -p /harddisk/tmp");
 
         strcpy(string, TARBALL_OFW);
@@ -519,7 +523,7 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
 
         if (retcode) {
             /* Houston we have a problem, wget failed */
-            snprintf(command, STRING_SIZE, ofw_gettext("TR_TAR_GZ_NOT_FOUND"), string, network_source);
+            snprintf(command, STRING_SIZE, lang_gettext("TR_TAR_GZ_NOT_FOUND"), string, network_source);
             errorbox(command);
             return FAILURE;
         }
@@ -530,11 +534,11 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
         return FAILURE;
     }
 
-    f = (newtComponent *) statuswindow_progress(72, 5, ofw_gettext("TR_TITLE_DISK"),
-                                                ofw_gettext("TR_INSTALLING_FILES"));
+    f = (newtComponent *) statuswindow_progress(72, 5, lang_gettext("TR_TITLE_DISK"),
+                                                lang_gettext("TR_INSTALLING_FILES"));
     snprintf(command, STRING_SIZE, "/bin/tar -C /harddisk -vxpzf %s/" TARBALL_OFW, tarball_location);
     retcode = mysystem_progress(command, f, 1, 3, 70, 5250, 0);
-    if (medium_sources == MT_NETWORK) {
+    if (inst_get_medium_sources() == MT_NETWORK) {
         mysystem("rm -f /harddisk/tmp/" TARBALL_OFW);
     }
 
@@ -543,34 +547,36 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
 
     /* abort if tar failed (source missing or archive broken) */
     if (retcode) {
-        newtWinMessage(get_title(), ofw_gettext("TR_OK"), "tar error");
+        newtWinMessage(helper_get_title(), lang_gettext("TR_OK"), "tar error");
         return FAILURE;
     }
 
     /* Create swapfile (if any) */
     if (swap_file != 0) {
-        statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MAKING_SWAPSPACE"));
+        helper_nt_statuswindow(72, 5,
+				lang_gettext("TR_TITLE_DISK"), lang_gettext("TR_MAKING_SWAPSPACE"));
         snprintf(command, STRING_SIZE, "/bin/dd if=/dev/zero of=/harddisk/swapfile bs=1024k count=%ld", swap_file);
         if (mysystem(command)) {
             newtPopWindow();
-            errorbox(ofw_gettext("TR_UNABLE_TO_MAKE_SWAPSPACE"));
+            errorbox(lang_gettext("TR_UNABLE_TO_MAKE_SWAPSPACE"));
             return FAILURE;
         }
 
         retcode = mysystem("mkswap /harddisk/swapfile");
         newtPopWindow();
         if (retcode) {
-            errorbox(ofw_gettext("TR_UNABLE_TO_MAKE_SWAPSPACE"));
+            errorbox(lang_gettext("TR_UNABLE_TO_MAKE_SWAPSPACE"));
             return FAILURE;
         }
 
         /*  We need to activate swap here
          *  depmod requires a lot of memory (~50-60 MB) which will fail on a 64 MB machine without swap */
-        statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MOUNTING_SWAP_PARTITION"));
+        helper_nt_statuswindow(72, 5,
+				lang_gettext("TR_TITLE_DISK"), lang_gettext("TR_MOUNTING_SWAP_PARTITION"));
         retcode = mysystem("swapon /harddisk/swapfile");
         newtPopWindow();
         if (retcode) {
-            errorbox(ofw_gettext("TR_UNABLE_TO_MOUNT_SWAP_PARTITION"));
+            errorbox(lang_gettext("TR_UNABLE_TO_MOUNT_SWAP_PARTITION"));
             return FAILURE;
         }
     }
@@ -582,11 +588,11 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
         /* Create mdadm.conf, also for inclusion in initramfs */
         mysystem("mkdir -p /harddisk/etc/mdadm");
         if (system("echo DEVICE partitions > /harddisk/etc/mdadm/mdadm.conf")) {
-            errorbox(ofw_gettext("TR_UNABLE_TO_INSTALL_FILES"));
+            errorbox(lang_gettext("TR_UNABLE_TO_INSTALL_FILES"));
             return FAILURE;
         }
         if (system("/sbin/mdadm --examine --scan >> /harddisk/etc/mdadm/mdadm.conf")) {
-            errorbox(ofw_gettext("TR_UNABLE_TO_INSTALL_FILES"));
+            errorbox(lang_gettext("TR_UNABLE_TO_INSTALL_FILES"));
             return FAILURE;
         }
     }
@@ -595,19 +601,20 @@ static int make_disk(char *dev, char *dev2, long int swap_file)
 }
 
 
-static int create_initramfs(void)
+static int pt_create_initramfs(void)
 {
     char bigstring[STRING_SIZE_LARGE];  // many modules maybe!
     int i;
     int retcode;
     FILE *handle;
 
-    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_BUILDING_INITRD"));
+    helper_nt_statuswindow(72, 5,
+			lang_gettext("TR_TITLE_DISK"), lang_gettext("TR_BUILDING_INITRD"));
 
     // run depmod to have complete modules.* files on target system
     snprintf(bigstring, STRING_SIZE, "chroot /harddisk /sbin/depmod -a %s", helper_kernel_release());
     if (mysystem(bigstring)) {
-        errorbox(ofw_gettext("TR_UNABLE_TO_BUILD_INITRD"));
+        errorbox(lang_gettext("TR_UNABLE_TO_BUILD_INITRD"));
         newtPopWindow();
         return FAILURE;
     }
@@ -619,7 +626,7 @@ static int create_initramfs(void)
            "chroot /harddisk /sbin/mkinitramfs --with-firmware --many-modules --with-list=/etc/modules.initramfs");
 
     if ((handle = fopen("/harddisk/etc/modules.initramfs", "w")) == NULL) {
-        errorbox(ofw_gettext("TR_UNABLE_TO_BUILD_INITRD"));
+        errorbox(lang_gettext("TR_UNABLE_TO_BUILD_INITRD"));
         newtPopWindow();
         return FAILURE;
     }
@@ -629,7 +636,7 @@ static int create_initramfs(void)
     fprintf(handle, "ehci-hcd\nohci-hcd\nuhci-hcd\nhid\nusbhid\n");
 
     //add each module to module-list
-    for (i = 0; i < get_hardwares_num(); i++) {
+    for (i = 0; i < hw_get_hardwares_num(); i++) {
         if ((hardwares[i].type == MT_SPECIAL_MODULE) && hardwares[i].module[0])
             fprintf(handle, "%s\n", hardwares[i].module);
     }
@@ -651,7 +658,7 @@ static int create_initramfs(void)
     retcode = mysystem(bigstring);
     newtPopWindow();
     if (retcode) {
-        errorbox(ofw_gettext("TR_UNABLE_TO_BUILD_INITRD"));
+        errorbox(lang_gettext("TR_UNABLE_TO_BUILD_INITRD"));
         return FAILURE;
     }
 
@@ -662,14 +669,15 @@ static int create_initramfs(void)
 /*  Make the new installation bootable, add ramdisksize.
     Note that there are few similarities between the architectures here.
 */
-static int make_bootable(char *dev, char *dev2, int part_options)
+static int pt_make_bootable(char *dev, char *dev2, int part_options)
 {
     char command[STRING_SIZE];
     char bigstring[STRING_SIZE_LARGE];
     char device[STRING_SIZE];
     char device2[STRING_SIZE];
 
-    statuswindow(72, 5, ofw_gettext("TR_TITLE_DISK"), ofw_gettext("TR_MAKING_BOOTABLE"));
+    helper_nt_statuswindow(72, 5,
+			lang_gettext("TR_TITLE_DISK"), lang_gettext("TR_MAKING_BOOTABLE"));
 
     snprintf(device, STRING_SIZE, "/dev/%s", dev);
     snprintf(device2, STRING_SIZE, "/dev/%s", dev2);
@@ -698,12 +706,12 @@ static int make_bootable(char *dev, char *dev2, int part_options)
         strcat(bigstring, command);
     }
 
-    if (medium_console == MT_SERIAL) {
+    if (inst_get_medium_console() == MT_SERIAL) {
         snprintf(command, STRING_SIZE, "-i -e 's+SERIAL_CONSOLE+SERIAL %u %u\\nCONSOLE 0+' ",
                 serial_console, serial_bitrate);
         strcat(bigstring, command);
         snprintf(command, STRING_SIZE, "-i -e 's+serial_settings+console=%s+' ",
-                serial_commandline);
+                inst_get_serial_commandline());
         strcat(bigstring, command);
     }
     else {
@@ -712,7 +720,7 @@ static int make_bootable(char *dev, char *dev2, int part_options)
     }
     if (part_options & PART_OPTIONS_NO_DMA) {
         /* Add nodma */
-        fprintf(flog, "Adding nodma\n");
+        F_LOG("Adding nodma\n");
         strcat(bigstring, "-i -e 's+flashdisk_settings+nodma+' ");
     }
     else {
@@ -730,10 +738,10 @@ static int make_bootable(char *dev, char *dev2, int part_options)
          return FAILURE;
 
     if (part_options & PART_OPTIONS_NO_MBR) {
-        fprintf(flog, "Skipping MBR\n");
+        F_LOG("Skipping MBR\n");
     }
     else {
-        fprintf(flog, "Writing MBR\n");
+        F_LOG("Writing MBR\n");
         snprintf(command, STRING_SIZE, "/bin/cat /harddisk/boot/mbr.bin > %s", device);
         if (system(command))
             return FAILURE;
@@ -754,7 +762,7 @@ static int make_bootable(char *dev, char *dev2, int part_options)
 
     /* Let's first detect if this is a newworld or an oldworld mac */
     if (!(cpufile = fopen("/proc/cpuinfo", "r"))) {
-        fprintf(flog, "Couldn't open cpufile: /proc/cpuinfo\n");
+        F_LOG("Couldn't open cpufile: /proc/cpuinfo\n");
     }
     else {
         while (fgets(line, STRING_SIZE, cpufile)) {
@@ -766,14 +774,14 @@ static int make_bootable(char *dev, char *dev2, int part_options)
             }
         }
 
-        fprintf(flog, "Found %s mac.\n", string);
+        F_LOG("Found %s mac.\n", string);
         fclose(cpufile);
     }
 
-    fprintf(flog, "Making this machine bootable\n");
+    F_LOG("Making this machine bootable\n");
 
     if (newworld) {
-        fprintf(flog, "Configuring Open Firmware (NewWorld)\n");
+        F_LOG("Configuring Open Firmware (NewWorld)\n");
         snprintf(command, STRING_SIZE, "chroot /harddisk /usr/sbin/mkofboot --force -b %s2", device);
         mysystem(command);
 
@@ -792,13 +800,13 @@ static int make_bootable(char *dev, char *dev2, int part_options)
         snprintf(command, STRING_SIZE, "/bin/sed -i -e 's+ROOT_DEV+%s4+g' /harddisk/etc/yaboot.conf", device);
         mysystem(command);
 
-        fprintf(flog, "Running ybin\n");
+        F_LOG("Running ybin\n");
         snprintf(command, STRING_SIZE, "chroot /harddisk /usr/sbin/ybin");
         if (mysystem(command))
              return FAILURE;
     }
     else {
-        fprintf(flog, "Configuring Open Firmware (OldWorld)\n");
+        F_LOG("Configuring Open Firmware (OldWorld)\n");
         snprintf(command, STRING_SIZE, "chroot /harddisk /usr/local/bin/install-quik.sh %s3 %s4", device, device);
         if (mysystem(command))
              return FAILURE;
@@ -806,7 +814,7 @@ static int make_bootable(char *dev, char *dev2, int part_options)
 #endif
 
 #if defined (__sparc__) || defined (__sparc64__)
-    fprintf(flog, "Installing silo\n");
+    F_LOG("Installing silo\n");
 
     snprintf(command, STRING_SIZE, "/bin/sed -i -e 's+KVER+%s+g' /harddisk/etc/silo.conf", helper_kernel_release());
     mysystem(command);
@@ -844,7 +852,7 @@ static int make_bootable(char *dev, char *dev2, int part_options)
     /* set boot-device once calculated the number from the letter hda=>disk0 hdc=>disk2 */
     /* TODO make that work too with device name lenght different of 3 (hardware raid cciss and )? */
     if (strlen(device) != 7 ) {
-        fprintf(flog, "with mmcblk and cciss, you need to set boot-device manually with setenv boot-device disk<your number>\n");
+        F_LOG("with mmcblk and cciss, you need to set boot-device manually with setenv boot-device disk<your number>\n");
     } else {
         int devnum = device[7] - 'a';   /* 0/ 1d 2e 3v 4/ 5h 6d 7a */
         if (!raid) {
@@ -876,17 +884,17 @@ static int make_bootable(char *dev, char *dev2, int part_options)
 
 /*  The big one. Cleaning, cooking, laundring, the whole enchilada.
 */
-int make_ofw_disk(char *dev, char *dev2, long int disk_size, long int swap_file, int part_options)
+int pt_make_ofw_disk(char *dev, char *dev2, long int disk_size, long int swap_file, int part_options)
 {
     raid = (*dev2 != 0);
     /* Make partition table and partitions */
-    if (make_partitions(dev, dev2, disk_size, part_options, &swap_file) != SUCCESS) {
-        errorbox(ofw_gettext("TR_UNABLE_TO_PARTITION"));
+    if (pt_make_partitions(dev, dev2, disk_size, part_options, &swap_file) != SUCCESS) {
+        errorbox(lang_gettext("TR_UNABLE_TO_PARTITION"));
         return FAILURE;
     }
 
     /* Format the fresh partitions and fill them with files */
-    if (make_disk(dev, dev2, swap_file) != SUCCESS)
+    if (pt_make_disk(dev, dev2, swap_file) != SUCCESS)
         return FAILURE;
 
     /* Mount some filesystems for later use (chroot'd setup) */
@@ -898,12 +906,12 @@ int make_ofw_disk(char *dev, char *dev2, long int disk_size, long int swap_file,
     mysystem("/bin/mount -n -o bind /dev /harddisk/dev");
 
     /* InitRD */
-    if (create_initramfs() != SUCCESS)
+    if (pt_create_initramfs() != SUCCESS)
         return FAILURE;
 
     /* Make the new installation bootable */
-    if (make_bootable(dev, dev2, part_options)) {
-         errorbox(ofw_gettext("TR_BOOTLOADER_INSTALLATION_ERROR"));
+    if (pt_make_bootable(dev, dev2, part_options)) {
+         errorbox(lang_gettext("TR_BOOTLOADER_INSTALLATION_ERROR"));
          return FAILURE;
     }
 
