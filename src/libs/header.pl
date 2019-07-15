@@ -444,9 +444,16 @@ sub openbox
     my $width   = $_[0];
     my $align   = $_[1];
     my $caption = $_[2];
-    $Header::boxframe = '';
 
+    $Header::boxframe = '';
     $Header::boxframe = $_[3] if (defined($_[3]));
+
+    my $hdrcolor = '';
+    if (defined($_[4])) {
+        $hdrcolor = $_[4];
+    } else {
+        $hdrcolor = $Header::boxcolour;
+    }
 
     my $tablewidth = "width='100%'";
     if ($width eq '100%') {
@@ -464,7 +471,7 @@ sub openbox
         <td></td>
         <td style='width:145px' ></td>
     </tr>
-    <tr style='background-color: "#88DB78";'>
+    <tr style='background-color: $hdrcolor;'>
         <td colspan='1' width='15' height='33'></td>
         <td>
 END
