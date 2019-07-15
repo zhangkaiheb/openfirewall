@@ -14,9 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2009-2015 The Openfirewall Team
- *
- * $Id: restartopenvpn.c 7890 2015-02-15 17:01:39Z owes $
+ * (c) 2017-2020 The Openfirewall Team
  *
  */
 
@@ -133,7 +131,7 @@ int main(int argc, char *argv[])
     }
 
     /* Terminate running OpenVPN server */
-    if (access("/var/run/openvpn.pid", 0) != -1) {
+    if (access("/var/run/openvpn.pid", F_OK) != -1) {
         verbose_printf(2, "Stopping OpenVPN server ... \n");
         if (mysignalpidfile("/var/run/openvpn.pid", SIGTERM) != SUCCESS ) {
             exit(0);
@@ -146,7 +144,7 @@ int main(int argc, char *argv[])
     }
 
     /* Fetch ethernet/settings, exit on error */
-    read_ethernet_settings(1);
+    helper_read_ethernet_settings(1);
 
     /* Fetch openvpn/settings */
     verbose_printf(1, "Reading OpenVPN settings ... \n");
@@ -163,18 +161,19 @@ int main(int argc, char *argv[])
         }
 
         for (j = 1; j <= MAX_NETWORK_COLOUR; j++) {
-            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", ofw_colours_text[i], j);
+            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", openfw_colours_text[i], j);
 
             if (test_kv(openvpn_kv, buffer, "on") == SUCCESS) {
                 /* this card is enabled in openvpn/settings */
-                if (j > ofw_ethernet.count[i]) {
+                if (j > openfw_ethernet.count[i]) {
                     /* card is missing in ethernet/settings */
                     if (i == RED) {
                         /* RED could be Modem/ISDN */
                         verbose_printf(2, "RED is enabled and is not in ethernet/settings ... \n");
                     }
                     else {
-                        fprintf(stderr, "%s_%d enabled but no device defined\n", ofw_colours_text[i], j);
+                        fprintf(stderr, "%s_%d enabled but no device defined\n",
+								openfw_colours_text[i], j);
                         exit(1);
                     }
                 }
