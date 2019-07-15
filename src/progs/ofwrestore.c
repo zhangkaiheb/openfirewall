@@ -15,9 +15,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * Copyright (C) 2003-06-25 Tim Butterfield <timbutterfield@mindspring.com>
- *
- * $Id: ofwrestore.c 7797 2015-01-08 08:45:27Z owes $
+ * Copyright (C) 2017-2020 the Openfirewall Team
  *
  */
 
@@ -220,7 +218,7 @@ int main(int argc, char *argv[])
     }
 
     /* Backup version OK ? */
-    if (testbackupversion(tmpdir) != SUCCESS) {
+    if (helper_backup_test_version(tmpdir) != SUCCESS) {
         fprintf(stderr, "No version or invalid version in archive\n");
         exit(BACKUP_ERR_VERSION);
     }
