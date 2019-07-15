@@ -15,16 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * restartsquid originally from the Smoothwall project
- * (c) Lawrence Manning, 2001
- *
- * 05/02/2004 - Roy Walker <rwalker@miracomnetwork.com>
- * Exclude red network from transparent proxy to allow browsing to alias IPs
- * Read in VPN settings and exclude each VPN network from transparent proxy
- *
- * (c) 2004-2012 The Openfirewall Team
- *
- * $Id: restartsquid.c 7262 2014-02-28 21:50:59Z owes $
+ * (c) 2017-2020 The Openfirewall Team
  *
  */
 
@@ -180,7 +171,7 @@ void setdirectipsec(int setdirectipsec_green, int setdirectipsec_blue)
         if (setdirectipsec_green) {
             if (snprintf(buffer, STRING_SIZE - 1,
                          "/sbin/iptables -t nat -A SQUID -i %s -p tcp -d %s/%s --dport 80 -j RETURN",
-                         ofw_ethernet.device[GREEN][1], ipsec_netaddress, ipsec_netmask) >= STRING_SIZE) {
+                         openfw_ethernet.device[GREEN][1], ipsec_netaddress, ipsec_netmask) >= STRING_SIZE) {
                 fprintf(stderr, "Command too long\n");
                 fclose(file);
                 exit(1);
@@ -192,7 +183,7 @@ void setdirectipsec(int setdirectipsec_green, int setdirectipsec_blue)
             if (snprintf(buffer,
                          STRING_SIZE - 1,
                          "/sbin/iptables -t nat -A SQUID -i %s -p tcp -d %s/%s --dport 80 -j RETURN",
-                         ofw_ethernet.device[BLUE][1], ipsec_netaddress, ipsec_netmask) >= STRING_SIZE) {
+                         openfw_ethernet.device[BLUE][1], ipsec_netaddress, ipsec_netmask) >= STRING_SIZE) {
                 fprintf(stderr, "Command too long\n");
                 fclose(file);
                 exit(1);
@@ -383,7 +374,7 @@ int main(int argc, char **argv)
     }
 
     /* Fetch ethernet/settings, exit on error */
-    read_ethernet_settings(1);
+    helper_read_ethernet_settings(1);
 
 
     if (enabled_green || enabled_blue || enabled_ovpn) {
@@ -404,12 +395,12 @@ int main(int argc, char **argv)
     }
 
     /* static (green/blue) interfaces must exist if transparence is requested */
-    if (transparent_green && enabled_green && !ofw_ethernet.count[GREEN]) {
+    if (transparent_green && enabled_green && !openfw_ethernet.count[GREEN]) {
         fprintf(stderr, "No GREEN device, not running transparent\n");
         exit(1);
     }
 
-    if (transparent_blue && enabled_blue && !ofw_ethernet.count[BLUE]) {
+    if (transparent_blue && enabled_blue && !openfw_ethernet.count[BLUE]) {
         fprintf(stderr, "No BLUE device, not running transparent\n");
         exit(1);
     }
@@ -439,12 +430,12 @@ int main(int argc, char **argv)
 
     /* choose RED destination: 'localip' or 'red_netaddress/red_netmask' */
     char destination[STRING_SIZE] = "";
-    if (strcmp(ofw_ethernet.red_type[1], "STATIC") == 0) {
-        snprintf(destination, STRING_SIZE, "%s/%s", ofw_ethernet.address[RED][1], ofw_ethernet.netmask[RED][1]);
+    if (strcmp(openfw_ethernet.red_type[1], "STATIC") == 0) {
+        snprintf(destination, STRING_SIZE, "%s/%s", openfw_ethernet.address[RED][1], openfw_ethernet.netmask[RED][1]);
     }
     else {
-        if (ofw_ethernet.red_address[1][0] && VALID_IP(ofw_ethernet.red_address[1])) {
-            snprintf(destination, STRING_SIZE, "%s", ofw_ethernet.red_address[1]);
+        if (openfw_ethernet.red_address[1][0] && VALID_IP(openfw_ethernet.red_address[1])) {
+            snprintf(destination, STRING_SIZE, "%s", openfw_ethernet.red_address[1]);
         }
     }
 
@@ -463,7 +454,7 @@ int main(int argc, char **argv)
         verbose_printf(1, "Setting transparent iptables rule for GREEN ... \n");
         if (snprintf(buffer, STRING_SIZE - 1,
                      "/sbin/iptables -t nat -A SQUID -i %s -p tcp -d %s --dport 80 -j RETURN",
-                     ofw_ethernet.device[GREEN][1], destination) >= STRING_SIZE) {
+                     openfw_ethernet.device[GREEN][1], destination) >= STRING_SIZE) {
             fprintf(stderr, "Command too long\n");
             exit(1);
         }
@@ -473,7 +464,7 @@ int main(int argc, char **argv)
         /* install the redirect for other port http destinations from green */
         if (snprintf(buffer, STRING_SIZE - 1,
                      "/sbin/iptables -t nat -A SQUID -i %s -p tcp --dport 80 -j REDIRECT --to-port %d",
-                     ofw_ethernet.device[GREEN][1], PORT_PROXY_INTERCEPT) >= STRING_SIZE) {
+                     openfw_ethernet.device[GREEN][1], PORT_PROXY_INTERCEPT) >= STRING_SIZE) {
             fprintf(stderr, "Command too long\n");
             exit(1);
         }
@@ -485,7 +476,7 @@ int main(int argc, char **argv)
         verbose_printf(1, "Setting transparent iptables rule for BLUE ... \n");
         if (snprintf(buffer, STRING_SIZE - 1,
                      "/sbin/iptables -t nat -A SQUID -i %s -p tcp -d %s --dport 80 -j RETURN",
-                     ofw_ethernet.device[BLUE][1], destination) >= STRING_SIZE) {
+                     openfw_ethernet.device[BLUE][1], destination) >= STRING_SIZE) {
             fprintf(stderr, "Command too long\n");
             exit(1);
         }
@@ -495,7 +486,7 @@ int main(int argc, char **argv)
         /* install the redirect for other port http destinations from blue */
         if (snprintf(buffer, STRING_SIZE - 1,
                      "/sbin/iptables -t nat -A SQUID -i %s -p tcp --dport 80 -j REDIRECT --to-port %d",
-                     ofw_ethernet.device[BLUE][1], PORT_PROXY_INTERCEPT) >= STRING_SIZE) {
+                     openfw_ethernet.device[BLUE][1], PORT_PROXY_INTERCEPT) >= STRING_SIZE) {
             fprintf(stderr, "Command too long\n");
             exit(1);
         }
