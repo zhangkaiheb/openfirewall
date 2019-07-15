@@ -17,9 +17,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2010, the Openfirewall Team
- *
- * $Id: language.c 4410 2010-03-26 07:58:35Z owes $
+ * (c) 2017-2020, the Openfirewall Team
  *
  */
 
@@ -58,7 +56,7 @@ static char selected_locale[STRING_SIZE];
 struct language *languages;
 
 
-void write_lang_configs(void)
+void lang_write_lang_configs(void)
 {
     NODEKV *kv = NULL;
 
@@ -85,11 +83,11 @@ void write_lang_configs(void)
 }
 
 
-static void set_language(char *shortname, char *locale, char *font)
+static void lang_set_language(char *shortname, char *locale, char *font)
 {
     char command[STRING_SIZE];
 
-    fprintf(flog, "Setting language %s.\n", shortname);
+    F_LOG("Setting language %s.\n", shortname);
 
     sprintf(command, "/usr/bin/setfont %s", font);
     mysystem(command);
@@ -101,7 +99,7 @@ static void set_language(char *shortname, char *locale, char *font)
 
     strcpy(selected_lang, shortname);
 
-    ofw_locale(selected_locale);
+    lang_locale(selected_locale);
 }
 
 
@@ -111,10 +109,10 @@ static void set_language(char *shortname, char *locale, char *font)
       short name:locale:full name:translated full name:usable in installer:screenfont
     Then present list of languages and set our language to selected choice.
 */
-void handlelanguage(NODEKV * kv)
+void handle_language(NODEKV * kv)
 {
 #ifdef LANG_EN_ONLY
-    set_language("en", "en_GB", "lat0-16");
+    lang_set_language("en", "en_GB", "lat0-16");
 #else
     FILE *f;
     int choice;
@@ -132,13 +130,13 @@ void handlelanguage(NODEKV * kv)
     f = fopen("/usr/share/locale/language.lst", "rb");
     if (f == NULL) {
         fprintf(fstderr, "Could not open language list.\n");
-        set_language("en", "en_GB", "lat0-16");
+        lang_set_language("en", "en_GB", "lat0-16");
         return;
     }
 
     userlang = find_kv(kv, "lang");
     if (userlang != NULL) {
-        fprintf(flog, "Language userselect %s\n", userlang);
+        F_LOG("Language userselect %s\n", userlang);
     }
 
     userselect = -1;
@@ -201,7 +199,7 @@ void handlelanguage(NODEKV * kv)
 
                 if (tmp_lang->inuse == 0) {
 #if _DEBUG_GETTEXT
-                    fprintf(flog, "Language skip %s %s %s\n", tmp_lang->shortname, tmp_lang->locale,
+                    F_LOG("Language skip %s %s %s\n", tmp_lang->shortname, tmp_lang->locale,
                             tmp_lang->longname);
 #endif
                     free(tmp_lang);
@@ -211,7 +209,7 @@ void handlelanguage(NODEKV * kv)
                 }
                 else {
 #if _DEBUG_GETTEXT
-                    fprintf(flog, "Language add %s %s %s\n", tmp_lang->shortname, tmp_lang->locale, tmp_lang->longname);
+                    F_LOG("Language add %s %s %s\n", tmp_lang->shortname, tmp_lang->locale, tmp_lang->longname);
 #endif
                     count++;
 
@@ -227,7 +225,7 @@ void handlelanguage(NODEKV * kv)
 
     /* no languages found ? */
     if (count == 0) {
-        set_language("en", "en_GB", "lat0-16");
+        lang_set_language("en", "en_GB", "lat0-16");
         fclose(f);
         return;
     }
@@ -259,7 +257,7 @@ void handlelanguage(NODEKV * kv)
     count = 0;
     while (p_lang) {
         if (choice == count) {
-            set_language(p_lang->shortname, p_lang->locale, p_lang->font);
+            lang_set_language(p_lang->shortname, p_lang->locale, p_lang->font);
         }
 
         tmp_lang = p_lang;
@@ -325,7 +323,7 @@ static inline nls_uint32 SWAP(i)
     Set locale and read .mo file.
     Parameter should something like en_GB, de_DE
 */
-void ofw_locale(char *locale)
+void lang_locale(char *locale)
 {
     FILE *f;
     char filename[STRING_SIZE];
@@ -337,17 +335,17 @@ void ofw_locale(char *locale)
     nls_uint32 *len_trans;
     nls_uint32 *pos_trans;
 
-
     mo_h.count = 0;
     snprintf(filename, STRING_SIZE, "/usr/share/locale/%s/LC_MESSAGES/install.mo", locale);
+
     f = fopen(filename, "rb");
     if (f == NULL) {
         /* TODO: revert to en_GB if not found */
-        fprintf(flog, "ERROR: install.mo file not found for locale %s. \n", locale);
+        F_LOG("ERROR: install.mo file not found for locale %s. \n", locale);
         return;
     }
     if (fread(&mo_h, sizeof(mo_h), 1, f) != 1) {
-        fprintf(flog, "ERROR: no header in install.mo file\n");
+        F_LOG("ERROR: no header in install.mo file\n");
         return;
     }
     if (mo_h.magic == MO_MAGIC) {
@@ -356,22 +354,22 @@ void ofw_locale(char *locale)
         must_swap = 1;
     }
     else {
-        fprintf(flog, "ERROR: no MAGIC in install.mo file\n");
+        F_LOG("ERROR: no MAGIC in install.mo file\n");
         return;
     }
 
     if (mo_h.count == 0) {
-        fprintf(flog, "ERROR: .mo file does not have strings\n");
+        F_LOG("ERROR: .mo file does not have strings\n");
         return;
     }
     mo_h.count = mo_swap(mo_h.count);
 
-    fprintf(flog, "LOCALE: so far so good, .mo contains %u strings\n", mo_h.count);
+    F_LOG("LOCALE: so far so good, .mo contains %u strings\n", mo_h.count);
 
     mo_h.offset_org = mo_swap(mo_h.offset_org);
     mo_h.offset_trans = mo_swap(mo_h.offset_trans);
 
-//  fprintf(flog, "offset org 0x%X, trans 0x%X\n", mo_h.offset_org, mo_h.offset_trans);
+//  F_LOG("offset org 0x%X, trans 0x%X\n", mo_h.offset_org, mo_h.offset_trans);
 
     len_org = calloc(mo_h.count, sizeof(nls_uint32));
     pos_org = calloc(mo_h.count, sizeof(nls_uint32));
@@ -440,7 +438,7 @@ ERROR_EXIT:
     fclose(f);
 
     if (!b_locale) {
-        fprintf(flog, "ERROR: ofw_locale()\n");
+        F_LOG("ERROR: lang_locale()\n");
     }
 }
 
@@ -449,17 +447,17 @@ ERROR_EXIT:
     Look for a translated text.
     If non found simply return the original text.
 */
-char *ofw_gettext(char *txt)
+char *lang_gettext(char *txt)
 {
     int i;
 
 #if _DEBUG_GETTEXT
-    fprintf(flog, "LOCALE: %s\n", txt);
+    F_LOG("LOCALE: %s\n", txt);
 #endif
 
     if (!b_locale) {
 #if _DEBUG_GETTEXT
-        fprintf(flog, "not initialised\n");
+        F_LOG("not initialised\n");
 #endif
         return (txt);
     }
@@ -467,7 +465,7 @@ char *ofw_gettext(char *txt)
     for (i = 0; i < mo_h.count; i++) {
         if (!strcmp(strings_org[i], txt)) {
 #if _DEBUG_GETTEXT
-            fprintf(flog, "-> %s\n", strings_trans[i]);
+            F_LOG("-> %s\n", strings_trans[i]);
 #endif
             return (strings_trans[i]);
         }
