@@ -17,10 +17,8 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2008, the Openfirewall Team
+ * (c) 2017-2020, the Openfirewall Team
  *
- * $Id: helper_newt.c 5079 2010-10-30 22:33:15Z owes $
- * 
  */
 
 
@@ -36,7 +34,7 @@
 
 newtComponent f_progress;
 
-void statuswindow(int width, int height, char *title, char *text, ...)
+void helper_nt_statuswindow(int width, int height, char *title, char *text, ...)
 {
     newtComponent t, f;
     char *buf = NULL;
@@ -131,7 +129,7 @@ int mysystem_progress(char *command, void *form, int left, int top, int width, i
     newtRefresh();
 
     if (flog != NULL) {
-        fprintf(flog, "Running command: %s\n", command);
+        F_LOG("Running command: %s\n", command);
     }
 
     if (!(p = popen(command, "r"))) {
@@ -160,7 +158,7 @@ int filterip(newtComponent entry, void *data, int ch, int cursor)
 }
 
 /* Small window to change IP and Netmask of some colour */
-void changeaddress(char *colour, int *changed_flag)
+void helper_nt_change_address(char *colour, int *changed_flag)
 {
     newtComponent networkform;
     newtComponent text;

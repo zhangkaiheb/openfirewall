@@ -16,9 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2011-2014 The Openfirewall Team
- *
- * $Id: emailhelper.c 7321 2014-03-14 16:16:36Z owes $
+ * (c) 2017-2020 The Openfirewall Team
  *
  */
 
@@ -355,7 +353,7 @@ int main(int argc, char **argv)
     }
 
     if (flag_messagefile) {
-        if (access(opt_messagefile, 0) == -1) {
+        if (access(opt_messagefile, F_OK) == -1) {
             verbose_printf(2, "Messagefile is not available \n");
             exit(EMAIL_ERR_MESSAGE);
         }
@@ -385,7 +383,7 @@ int main(int argc, char **argv)
     }
 
     if (flag_attachment) {
-        if (access(opt_attachment, 0) == -1) {
+        if (access(opt_attachment, F_OK) == -1) {
             verbose_printf(2, "Attachment is not available \n");
             exit(EMAIL_ERR_ATTACH);
         }

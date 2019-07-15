@@ -86,7 +86,7 @@ static int writehostsfiles(char *hostname, char *domainname)
  *  - setup called during installation (chroot'd)
  *  - 'normal' setup
 */
-int handlehostname(void)
+int handle_hostname(void)
 {
     NODEKV *kv = NULL;
     char *values[] = { hostname, NULL };
@@ -156,7 +156,7 @@ int handlehostname(void)
  *  - setup called during installation (chroot'd)
  *  - 'normal' setup
 */
-int handledomainname(void)
+int handle_domainname(void)
 {
     NODEKV *kv = NULL;
     char *values[] = { domainname, NULL };
