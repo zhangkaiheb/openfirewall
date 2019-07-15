@@ -15,9 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# (c) 2001-2015, the Openfirewall Team
-#
-# $Id: rc.sysinit 7884 2015-02-09 16:54:04Z owes $
+# (c) 2017-2020, the Openfirewall Team
 #
 # bash -c help show the list of builtin command
 # external command should be with full path
