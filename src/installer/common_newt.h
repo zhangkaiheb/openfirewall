@@ -31,7 +31,7 @@
 
 
 /* Implemented in helper_newt.c */
-void statuswindow(int width, int height, char *title, char *text, ...);
+void helper_nt_statuswindow(int width, int height, char *title, char *text, ...);
 void *statuswindow_progress(int width, int height, char *title, char *text, ...);
 
 int mysystem_progress(char *command, void *form, int left, int top, int width, int lines, int offset);
@@ -44,33 +44,33 @@ int filterip(newtComponent entry, void *data, int ch, int cursor);
 
 
 /* All kinds of functions used by setup */
-void handlelanguage(NODEKV * kv);
-void write_lang_configs(void);
-int handlerestore(void);
-int handlekeymap(void);
-int write_keymap(void);
-int handletimezone(void);
-int write_timezone(void);
-int handledatetime(void);
-int handlehostname(void);
-int handledomainname(void);
+void handle_language(NODEKV * kv);
+void lang_write_lang_configs(void);
+int handle_restore(void);
+int handle_keymap(void);
+int kmap_write_keymap(void);
+int handle_timezone(void);
+int tzone_write_timezone(void);
+int handle_datetime(void);
+int handle_hostname(void);
+int handle_domainname(void);
 int handleisdn(void);
-int handlenetworking(void);
-int handlepasswords(void);
+int handle_networking(void);
+int handle_passwords(void);
 
 /* These belong to setup - networking */
-int changedhcpserver(void);
+int change_dhcp_server(void);
 
 /* Dialogs for changing passwords. Possible user: "root", "admin", "backup" */
 int password(char *user);
 
 /* Translation functions used in installer */
-void ofw_locale(char *locale);
-char *ofw_gettext(char *txt);
+void lang_locale(char *locale);
+char *lang_gettext(char *txt);
 
 /* Small window to change IP and Netmask of some colour */
 int changed_config;      /* something has changed      */
-void changeaddress(char *colour, int *changed_flag);
+void helper_nt_change_address(char *colour, int *changed_flag);
 
 
 #endif

@@ -50,13 +50,13 @@
 /* Test backup version from versionfile.
     path can be empty string or rootdir holding extracted backup archive.
     FAILURE if version file missing or version to old.  */
-int testbackupversion(char *path);
+int helper_backup_test_version(char *path);
 
 
 /* Get backup version from versionfile.
     path can be empty string or rootdir holding extracted backup archive.
     0 if version file missing or version invalid.
     (a << 16) + (b << 8) + c for version a.b.c          */
-unsigned int getbackupversion(char *path);
+unsigned int helper_backup_get_version(char *path);
 
 #endif

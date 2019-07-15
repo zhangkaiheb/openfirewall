@@ -17,10 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2014, the Openfirewall Team
+ * (c) 2017-2020, the Openfirewall Team
  *
- * $Id: arch_defs.h 7846 2015-02-01 18:35:46Z owes $
- * 
  */
 
 
@@ -77,7 +75,7 @@
 typedef enum
 {
     MT_NONE = 0,
-    MT_FLOPPY,                     /* bootable, restore */
+//    MT_FLOPPY,                     /* bootable, restore */
     MT_CDROM,                      /* bootable and sources available */
     MT_USB,                        /* bootable, sources available and restore */
     MT_HARDDISK,                   /* possible installation target */
@@ -90,43 +88,48 @@ typedef enum
 } supported_media_t;
 
 
-extern supported_media_t medium_boot;
-extern supported_media_t medium_sources;
-extern supported_media_t medium_target;
-extern supported_media_t medium_console;
+//extern supported_media_t medium_boot;
+//extern supported_media_t medium_sources;
+//extern supported_media_t medium_target;
+//extern supported_media_t medium_console;
+
+int inst_get_medium_console(void);
+int inst_get_medium_target(void);
+int inst_get_medium_sources(void);
+char *inst_get_serial_commandline(void);
 
 struct hardware_s
 {
-    char *module;               /* kernel module */
-    char *device;               /* hda, sda, eth0 etc. */
+    char *module;        /* kernel module */
+    char *device;        /* hda, sda, eth0 etc. */
     char *description;
-    supported_media_t type;     /* network */
-    char *vendorid;             /* vendor and device ID for better NIC matching */
+    int type;            /* network */
+    char *vendorid;      /* vendor and device ID for better NIC matching */
     char *modelid;
 };
 
 //extern unsigned int numhardwares;
-extern int get_hardwares_num(void);
+extern int hw_get_hardwares_num(void);
 //extern unsigned int numharddisk;
-extern int get_harddisk_num(void);
+extern int hw_get_harddisk_num(void);
 //extern unsigned int numcdrom;
 //extern unsigned int numnetwork;
-extern int get_network_num(void);
-extern void set_network_num(int num);
+extern int hw_get_network_num(void);
+extern void hw_set_network_num(int num);
 extern struct hardware_s *hardwares;
 
 extern char network_source[STRING_SIZE];        /* something like http://ip/path */
-extern unsigned int memtotal;                   /* Total memory in MB */
+//extern unsigned int memtotal;                   /* Total memory in MB */
 
 extern unsigned int serial_console;             /* 0 = ttyS0, 1 = ttyS1, etc. */
 extern unsigned int serial_bitrate;             /* 9600, 38400, etc. */
-extern char *serial_commandline;                /* ttyS0,38400n81 */
+//extern char *serial_commandline;                /* ttyS0,38400n81 */
 
 /*
     Functions implemented in hardware.c and partition.c    
 */
-void scan_hardware(int installer_setup, int nopcmcia, int nousb, int manualmodule);
-int make_ofw_disk(char *device, char *device2, long int disk_size, long int swapfilesize, int part_options);
+void hw_scan_hardware(int installer_setup, int nopcmcia, int nousb, int manualmodule);
+int pt_make_ofw_disk(char *device, char *device2, long int disk_size, long int swapfilesize, int part_options);
 
 #define PART_OPTIONS_MANUAL     0x0001
 #define PART_OPTIONS_NO_MBR     0x0002
@@ -142,14 +145,14 @@ int helper_kernel_init(void);
 char *helper_kernel_release(void);
 
 /* find a kernel module for pci/usb bus depending on vendor and device id */
-char *find_modulename(char *bus, uint16_t vendor_id, uint16_t device_id);
+char *helper_kernel_find_modulename(char *bus, uint16_t vendor_id, uint16_t device_id);
 
 /* 
  * Get kernel module, vendor and device ID for device using 
  *     /sys/class/net/interface/device/driver/module
  * and /sys/class/net/interface/device/{vendor,device}
  */
-char *getkernelmodule(char *device);
+char *helper_kernel_get_netdev_info(char *device);
 extern char module_buffer[STRING_SIZE];    /* to return the value out of the function */
 
 extern char vendorid_buffer[STRING_SIZE];  /* global variable */

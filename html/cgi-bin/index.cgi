@@ -71,7 +71,7 @@ elsif ($mainsettings{'REFRESHINDEX'} eq 'on') {
 &Header::openbigbox('', 'center');
 
 print "<div align='center'>";
-&Header::openbox('50%', 'center', &Header::cleanhtml(`/bin/uname -n`, "y"));
+&Header::openbox('50%', 'center', &Header::cleanhtml(`/bin/uname -n`, "y"), '', '#69C');
 
 # hide buttons only when pppsettings mandatory used and not valid
 if (   ($pppsettings{'VALID'} eq 'yes')
@@ -317,7 +317,7 @@ print "</div>";
 print "<div style='float:left; margin-right:5px'>";
 
 print "<a name='memory'/>\n";
-&Header::openbox('50%', 'left', "$Lang::tr{'memory'}:");
+&Header::openbox('50%', 'left', "$Lang::tr{'memory'}:", '', '#69C');
 print "<table>";
 my $mem_size=0;
 my $mem_used=0;
@@ -400,7 +400,7 @@ print "</div>";
 print "<div style='float:right; margin-left:5px'>";
 
 print "<a name='disk'/>\n";
-&Header::openbox('50%', 'left', "$Lang::tr{'disk usage'}:");
+&Header::openbox('50%', 'left', "$Lang::tr{'disk usage'}:", '', '#69C');
 print "<table>\n";
 
 print <<END

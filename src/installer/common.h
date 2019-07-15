@@ -17,7 +17,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2011, the Openfirewall Team
+ * (c) 2017-2020, the Openfirewall Team
  *
  */
 
@@ -25,6 +25,7 @@
 #define __COMMON_H
 
 #include <stdio.h>
+#include <stdarg.h>
 
 #define TRUE      1
 #define FALSE     0
@@ -64,12 +65,12 @@ int mysystemhidden(char *command);
 int mysignalpidfile(char *pidfile, int signal);
 
 /* Gets Openfirewall version number, platform and 'slogan'. */
-char *get_title(void);
+char *helper_get_title(void);
 
 /* Get Openfirewall version.
     0 if version file missing or version invalid.
     (a << 16) + (b << 8) + c for version a.b.c          */
-unsigned int getofwversion(void);
+unsigned int helper_getofwversion(void);
 
 /* stripnl().  Replaces \n with \0 */
 void stripnl(char *s);
@@ -108,7 +109,7 @@ int write_kv_to_file(NODEKV ** p, char *filename);
 
 
 /*  Many helper programs need ethernet/settings config file (read only).
-    Make life easier, first do read_ethernet_settings then use ofw_ethernet structure.
+    Make life easier, first do helper_read_ethernet_settings then use openfw_ethernet structure.
 */
 
 /* How many colours do we have */
@@ -122,7 +123,7 @@ int write_kv_to_file(NODEKV ** p, char *filename);
     Return  0 if no error reading ethernet/settings
             1 otherwise
 */
-int read_ethernet_settings(int exitonerror);
+int helper_read_ethernet_settings(int exitonerror);
 
 typedef enum
 {
@@ -133,11 +134,11 @@ typedef enum
     NONE,
 } ofw_colours;
 
-extern char *ofw_colours_text[CFG_COLOURS_COUNT];     /* GREEN, RED etc. as strings */
-extern char *ofw_aliases_text[CFG_COLOURS_COUNT];     /* lan, wan etc. as network aliases */
-extern char *ofw_red_text[CFG_RED_COUNT];     /* ANALOG, ISDN, etc. */
+extern char *openfw_colours_text[CFG_COLOURS_COUNT];     /* GREEN, RED etc. as strings */
+extern char *openfw_aliases_text[CFG_COLOURS_COUNT];     /* lan, wan etc. as network aliases */
+extern char *openfw_red_text[CFG_RED_COUNT];     /* ANALOG, ISDN, etc. */
 
-struct network_s
+struct network_dev_s
 {
     char *module;               /* kernel module */
     char *options;              /* modprobe parameters */
@@ -166,7 +167,7 @@ struct ethernet_s
     /* this one is very special */
     char *default_gateway;
 };
-extern struct ethernet_s ofw_ethernet;
+extern struct ethernet_s openfw_ethernet;
 
 /* Return SUCCESS if device exist */
 int exist_ethernet_device(char *device);
@@ -174,7 +175,7 @@ int exist_ethernet_device(char *device);
 
 /* Get device MAC address */
 char mac_buffer[STRING_SIZE]; /* to return the value out of the function */
-char *getmac(char *device);
+char *helper_getmac(char *device);
 
 /* Some useful defines, tests etc. */
 #define LETTERS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -218,6 +219,28 @@ int VALID_IP(const char *ip);
 #define VALID_PROTOCOL(prot) (strlen(prot) \
                           &&  strlen(prot) <16 \
                           &&  strspn(prot, LETTERS_NUMBERS "-") == strlen(prot))
+
+
+static inline void hw_log(FILE *fd1, FILE *fd2, const char *msg, ...)
+{
+	va_list args;
+	char buf[STRING_SIZE];
+
+	va_start(args, msg);
+	vsnprintf(buf, sizeof(buf) - 1, msg, args);
+	va_end(args);
+	buf[sizeof(buf) - 1] = '\0';
+
+	if (fd1)
+		fprintf(fd1, "%s", buf);
+	if (fd2)
+		fprintf(fd2, "%s", buf);
+}
+
+#define F_LOG(args...) hw_log(flog, NULL, args)
+#define HW_DETECT_LOG(args...) hw_log(fhwdetect, NULL, args)
+#define HW_DETECT_F_LOG(args...) hw_log(flog, fhwdetect, args)
+
 
 
 #endif
