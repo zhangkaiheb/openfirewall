@@ -16,9 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2018, the Openfirewall Team
- *
- * $Id: helper.c 7846 2015-02-01 18:35:46Z owes $
+ * (c) 2017-2020, the Openfirewall Team
  * 
  */
 
@@ -36,13 +34,13 @@
 
 
 /* use ---- for non-assigned card */
-char *ofw_colours_text[CFG_COLOURS_COUNT] = { "GREEN", "RED", "BLUE", "ORANGE", "----" };
-char *ofw_aliases_text[CFG_COLOURS_COUNT] = { "lan", "wan", "wlan", "dmz", "unused" };
+char *openfw_colours_text[CFG_COLOURS_COUNT] = { "GREEN", "RED", "BLUE", "ORANGE", "----" };
+char *openfw_aliases_text[CFG_COLOURS_COUNT] = { "lan", "wan", "wlan", "dmz", "unused" };
 
-char *ofw_red_text[CFG_RED_COUNT] = { "PPPOE", "PPTP", "STATIC", "DHCP" };
+char *openfw_red_text[CFG_RED_COUNT] = { "PPPOE", "PPTP", "STATIC", "DHCP" };
 
 /* Global structure with everything from ethernet/settings config file */
-struct ethernet_s ofw_ethernet;
+struct ethernet_s openfw_ethernet;
 /* Verbose level */
 int flag_verbose = 0;
 
@@ -76,7 +74,7 @@ void stripnl(char *s)
 /* Return a pointer to the actual running version number of Openfirewall.
  * Successive updates increase effective version but not compiled VERSION ! */
 char title[STRING_SIZE] = "";
-char *get_title(void)
+char *helper_get_title(void)
 {
     FILE *f_title;
 
@@ -112,7 +110,7 @@ char *get_title(void)
 /* Get Openfirewall version from /etc/issue.
     0 if version file missing or version invalid.
     (a << 16) + (b << 8) + c for version a.b.c          */
-unsigned int getofwversion(void)
+unsigned int helper_getofwversion(void)
 {
     FILE *f_version;
     char buffer[STRING_SIZE] = "";
@@ -164,9 +162,9 @@ int mysystem(char *command)
     snprintf(mycommand, STRING_SIZE, "%s >> /dev/tty3", command);
 #endif
     if (flog != NULL) {
-        fprintf(flog, "Running command: %s\n", command);
+        F_LOG("Running command: %s\n", command);
         if (cr)
-            fprintf(flog, "WARNING mysystem return value is always 0 when a CR is on command\n");
+            F_LOG("WARNING mysystem return value is always 0 when a CR is on command\n");
     }
     return system(mycommand);
 }
@@ -179,7 +177,7 @@ int mysystemhidden(char *command)
 
     snprintf(mycommand, STRING_SIZE, "%s >> /dev/null", command);
     if (flog != NULL) {
-        fprintf(flog, "Running command: %s\n", "HIDDEN");
+        F_LOG("Running command: %s\n", "HIDDEN");
     }
     return system(mycommand);
 }
@@ -466,7 +464,7 @@ int exist_ethernet_device(char *device)
     }
     snprintf(filename, STRING_SIZE, "/sys/class/net/%s", device);
 
-    if (access(filename, 0) != -1) {
+    if (access(filename, F_OK) != -1) {
         return SUCCESS;
     }
 
@@ -475,12 +473,12 @@ int exist_ethernet_device(char *device)
 
 
 /* Read 1 specific key, exit immediatelly on error */
-static int read_ethernet_key(int colour, int index, char *eth_key, char **ptr, int exitonerror, char *error_description)
+static int helper_read_ethernet_key(int colour, int index, char *eth_key, char **ptr, int exitonerror, char *error_description)
 {
     char key[STRING_SIZE];
 
     /* Build the key, for example GREEN_1_ADDRESS */
-    snprintf(key, STRING_SIZE, "%s_%d_%s", ofw_colours_text[colour], index, eth_key);
+    snprintf(key, STRING_SIZE, "%s_%d_%s", openfw_colours_text[colour], index, eth_key);
     if (find_kv(eth_kv, key) == NULL) {
         /* Depending on RED type, the key/value may be missing */
         if (colour == RED) {
@@ -492,150 +490,156 @@ static int read_ethernet_key(int colour, int index, char *eth_key, char **ptr, i
         /* We expect the key, but it is not there */
         if (exitonerror) {
             free_kv(&eth_kv);
-
-            fprintf(stderr, "%s for %s_%d not defined\n", error_description, ofw_colours_text[colour], index);
+			fprintf(stderr, "%s for %s_%d not defined\n", error_description, ofw_colours_text[colour], index);
             exit(1);
         }
 
-        verbose_printf(1, "  %s for %s_%d not defined\n", error_description, ofw_colours_text[colour], index);
+		verbose_printf(1, "  %s for %s_%d not defined\n", error_description, ofw_colours_text[colour], index);
 
         return FAILURE;
     }
 
     /* Store the keyvalue */
     *ptr = strdup(find_kv(eth_kv, key));
-    verbose_printf(2, "  %s for %s_%d: %s\n", error_description, ofw_colours_text[colour], index, *ptr);
+	verbose_printf(2, "  %s for %s_%d: %s\n", error_description, ofw_colours_text[colour], index, *ptr);
     return SUCCESS;
 }
 
 
 /* This to make life easier for SUID helpers. */
-int read_ethernet_settings(int exitonerror)
+int helper_read_ethernet_settings(int exitonerror)
 {
-    int i, j;
-    char key[STRING_SIZE];
-    char value[STRING_SIZE];
-    FILE *ipfile;
+	int i, j;
+	char key[STRING_SIZE];
+	char value[STRING_SIZE];
+	FILE *ipfile;
 
-    /* zap contents */
-    memset(&ofw_ethernet, 0, sizeof(ofw_ethernet));
-    verbose_printf(1, "Reading Ethernet settings ... \n");
+	/* zap contents */
+	memset(&openfw_ethernet, 0, sizeof(openfw_ethernet));
+	verbose_printf(1, "Reading Ethernet settings ... \n");
 
-    if (read_kv_from_file(&eth_kv, "/var/ofw/ethernet/settings") != SUCCESS) {
-        /* What's a Openfirewall without ethernet/settings...  Nothing... */
-        if (exitonerror) {
-            free_kv(&eth_kv);
-            fprintf(stderr, "Cannot read ethernet settings\n");
-            exit(1);
-        }
+	if (read_kv_from_file(&eth_kv, "/var/ofw/ethernet/settings") != SUCCESS) {
+		/* What's a Openfirewall without ethernet/settings...  Nothing... */
+		if (exitonerror) {
+			free_kv(&eth_kv);
+			fprintf(stderr, "Cannot read ethernet settings\n");
+			exit(1);
+		}
 
-        return 1;
-    }
+		return 1;
+	}
 
-    /* special case, default gateway. There can be only one ..... */
-    strcpy(value, "");
-    find_kv_default(eth_kv, "DEFAULT_GATEWAY", value);
-    ofw_ethernet.default_gateway = strdup(value);
-    verbose_printf(2, "  Default gateway: %s\n", ofw_ethernet.default_gateway);
+	/* special case, default gateway. There can be only one ..... */
+	strcpy(value, "");
+	find_kv_default(eth_kv, "DEFAULT_GATEWAY", value);
+	openfw_ethernet.default_gateway = strdup(value);
+	verbose_printf(2, "  Default gateway: %s\n", openfw_ethernet.default_gateway);
 
-    /* special case, red active */
-    if (access("/var/ofw/red/active", 0) != -1) {
-        ofw_ethernet.red_active[1] = 1;
-    }
-    else {
-        ofw_ethernet.red_active[1] = 0;
-    }
-    verbose_printf(2, "  RED active: %d\n", ofw_ethernet.red_active[1]);
+	/* special case, red active */
+	if (access("/var/ofw/red/active", F_OK) != -1) {
+		openfw_ethernet.red_active[1] = 1;
+	} else {
+		openfw_ethernet.red_active[1] = 0;
+	}
+	verbose_printf(2, "  RED active: %d\n", openfw_ethernet.red_active[1]);
 
-    /* another special case, (real) red address, from red/local-ipaddress */
-    if ((ipfile = fopen("/var/ofw/red/local-ipaddress", "r")) != NULL) {
-        if (fgets(value, STRING_SIZE, ipfile)) {
-            /* remove possible trailing \n */
-            stripnl(value);
-        }
-        fclose(ipfile);
-    }
-    else {
-        strcpy(value, "");
-    }
-    ofw_ethernet.red_address[1] = strdup(value);
-    verbose_printf(2, "  RED address: %s\n", ofw_ethernet.red_address[1]);
+	/* another special case, (real) red address, from red/local-ipaddress */
+	if ((ipfile = fopen("/var/ofw/red/local-ipaddress", "r")) != NULL) {
+		if (fgets(value, STRING_SIZE, ipfile)) {
+			/* remove possible trailing \n */
+			stripnl(value);
+		}
+		fclose(ipfile);
+	} else {
+		strcpy(value, "");
+	}
+	openfw_ethernet.red_address[1] = strdup(value);
+	verbose_printf(2, "  RED address: %s\n", openfw_ethernet.red_address[1]);
 
-    /* yet another special case, (real) red device, from red/iface */
-    if ((ipfile = fopen("/var/ofw/red/iface", "r")) != NULL) {
-        if (fgets(value, STRING_SIZE, ipfile)) {
-            /* remove possible trailing \n */
-            stripnl(value);
-        }
-        fclose(ipfile);
+	/* yet another special case, (real) red device, from red/iface */
+	if ((ipfile = fopen("/var/ofw/red/iface", "r")) != NULL) {
+		if (fgets(value, STRING_SIZE, ipfile)) {
+			/* remove possible trailing \n */
+			stripnl(value);
+		}
+		fclose(ipfile);
 
-        if (!VALID_DEVICE(value)) {
-            if (exitonerror) {
-                free_kv(&eth_kv);
-                fprintf(stderr, "Bad RED iface: %s\n", value);
-                exit(1);
-            }
-            verbose_printf(1, "Bad RED iface: %s\n", value);
-            return 1;
-        }
-    }
-    else {
-        strcpy(value, "");
-    }
-    ofw_ethernet.red_device[1] = strdup(value);
-    verbose_printf(2, "  RED device: %s\n", ofw_ethernet.red_device[1]);
+		if (!VALID_DEVICE(value)) {
+			if (exitonerror) {
+				free_kv(&eth_kv);
+				fprintf(stderr, "Bad RED iface: %s\n", value);
+				exit(1);
+			}
+			verbose_printf(1, "Bad RED iface: %s\n", value);
+			return 1;
+		}
+	} else {
+		strcpy(value, "");
+	}
+	openfw_ethernet.red_device[1] = strdup(value);
+	verbose_printf(2, "  RED device: %s\n", openfw_ethernet.red_device[1]);
 
-    /* for all colours */
-    for (i = 0; i < NONE; i++) {
-        snprintf(key, STRING_SIZE, "%s_COUNT", ofw_colours_text[i]);
-        strcpy(value, "0");
-        find_kv_default(eth_kv, key, value);
-        ofw_ethernet.count[i] = atoi(value);
+	/* for all colours */
+	for (i = 0; i < NONE; i++) {
+		snprintf(key, STRING_SIZE, "%s_COUNT", openfw_colours_text[i]);
+		strcpy(value, "0");
+		find_kv_default(eth_kv, key, value);
+		openfw_ethernet.count[i] = atoi(value);
 
-        if ((ofw_ethernet.count[i] < 0) || (ofw_ethernet.count[i] > MAX_NETWORK_COLOUR)) {
-            /* Count is not a sane value */
-            if (exitonerror) {
-                free_kv(&eth_kv);
-                fprintf(stderr, "Illegal count (%d) for colour %s\n", ofw_ethernet.count[i], ofw_colours_text[i]);
-                exit(1);
-            }
+		if ((openfw_ethernet.count[i] < 0) || (openfw_ethernet.count[i] > MAX_NETWORK_COLOUR)) {
+			/* Count is not a sane value */
+			if (exitonerror) {
+				free_kv(&eth_kv);
+				fprintf(stderr, "Illegal count (%d) for colour %s\n",
+					openfw_ethernet.count[i], openfw_colours_text[i]);
+				F_LOG("Illegal count (%d) for colour %s\n",
+					openfw_ethernet.count[i], openfw_colours_text[i]);
+				exit(1);
+			}
 
-            return 1;
-        }
+			return 1;
+		}
 
-        for (j = 1; j <= ofw_ethernet.count[i]; j++) {
-            if (read_ethernet_key(i, j, "DEV", &ofw_ethernet.device[i][j], exitonerror, "Device") != SUCCESS)
-                return FAILURE;
-            if (read_ethernet_key(i, j, "ADDRESS", &ofw_ethernet.address[i][j], exitonerror, "IP address") != SUCCESS)
-                return FAILURE;
-            if (read_ethernet_key(i, j, "NETMASK", &ofw_ethernet.netmask[i][j], exitonerror, "Subnetmask") != SUCCESS)
-                return FAILURE;
-            if (read_ethernet_key(i, j, "NETADDRESS", &ofw_ethernet.netaddress[i][j], exitonerror, "Network address")
-                != SUCCESS)
-                return FAILURE;
+		for (j = 1; j <= openfw_ethernet.count[i]; j++) {
+			if (helper_read_ethernet_key(i, j, "DEV",
+						&openfw_ethernet.device[i][j], exitonerror, "Device") != SUCCESS) {
+				return FAILURE;
+			}
+			if (helper_read_ethernet_key(i, j, "ADDRESS",
+						&openfw_ethernet.address[i][j], exitonerror, "IP address") != SUCCESS) {
+				return FAILURE;
+			}
+			if (helper_read_ethernet_key(i, j, "NETMASK",
+						&openfw_ethernet.netmask[i][j], exitonerror, "Subnetmask") != SUCCESS) {
+				return FAILURE;
+			}
+			if (helper_read_ethernet_key(i, j, "NETADDRESS",
+						&openfw_ethernet.netaddress[i][j], exitonerror, "Network address") != SUCCESS) {
+				return FAILURE;
+			}
 
-            read_ethernet_key(i, j, "DRIVER", &ofw_ethernet.driver[i][j], 0, "Driver");
-        }
-    }
+			helper_read_ethernet_key(i, j, "DRIVER", &openfw_ethernet.driver[i][j], 0, "Driver");
+		}
+	}
 
-    /* We need at least 1 RED connection type */
-    if (read_ethernet_key(RED, 1, "TYPE", &ofw_ethernet.red_type[1], exitonerror, "Connection type") != SUCCESS)
-        return FAILURE;
-    /* more red types, we may one day allow for more red devices */
-    for (j = 2; j <= ofw_ethernet.count[RED]; j++) {
-        if (read_ethernet_key(RED, j, "TYPE", &ofw_ethernet.red_type[j], exitonerror, "Type") != SUCCESS)
-            return FAILURE;
-    }
+	/* We need at least 1 RED connection type */
+	if (helper_read_ethernet_key(RED, 1, "TYPE", &openfw_ethernet.red_type[1], exitonerror, "Connection type") != SUCCESS)
+		return FAILURE;
+	/* more red types, we may one day allow for more red devices */
+	for (j = 2; j <= openfw_ethernet.count[RED]; j++) {
+		if (helper_read_ethernet_key(RED, j, "TYPE", &openfw_ethernet.red_type[j], exitonerror, "Type") != SUCCESS)
+			return FAILURE;
+	}
 
-    free_kv(&eth_kv);
-    eth_kv = NULL;
+	free_kv(&eth_kv);
+	eth_kv = NULL;
 
-    return 0;
+	return 0;
 }
 
 
 /* Get device MAC address */
-char *getmac(char *device)
+char *helper_getmac(char *device)
 {
     FILE *f;
 
