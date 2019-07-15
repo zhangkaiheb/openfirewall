@@ -16,10 +16,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) Alan Hourihane, 2003
- *
- *
- *   $Id: rebuildhosts.c 4139 2010-01-19 09:58:59Z owes $
+ * (c) 2017-2020 the Openfirewall team
  *
  */
 
@@ -99,7 +96,7 @@ int main(int argc, char *argv[])
     memset(buffer, 0, STRING_SIZE);
 
     /* Fetch ethernet/settings, exit on error */
-    read_ethernet_settings(1);
+    helper_read_ethernet_settings(1);
 
     if (read_kv_from_file(&main_kv, "/var/ofw/main/settings") != SUCCESS) {
         fprintf(stderr, "Couldn't read main settings\n");
@@ -125,9 +122,9 @@ int main(int argc, char *argv[])
     fprintf(hosts, "127.0.0.1\tlocalhost\n");
 
     if (strlen(domainname))
-        fprintf(hosts, "%s\t%s.%s\t%s\n", ofw_ethernet.address[GREEN][1], hostname, domainname, hostname);
+        fprintf(hosts, "%s\t%s.%s\t%s\n", openfw_ethernet.address[GREEN][1], hostname, domainname, hostname);
     else
-        fprintf(hosts, "%s\t%s\n", ofw_ethernet.address[GREEN][1], hostname);
+        fprintf(hosts, "%s\t%s\n", openfw_ethernet.address[GREEN][1], hostname);
 
     while (fgets(buffer, STRING_SIZE, fd)) {
         buffer[strlen(buffer) - 1] = 0;
