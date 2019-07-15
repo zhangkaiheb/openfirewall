@@ -16,11 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2007-2015, the Openfirewall Team
- *
- * Commandline options:
- *
- * $Id: setup.c 7846 2015-02-01 18:35:46Z owes $
+ * (c) 2017-2020, the Openfirewall Team
  *
  */
 
@@ -42,11 +38,15 @@
 
 NODEKV *kv = NULL;              // contains a list key=value pairs
 installer_setup_t flag_is_state = INST_SETUP;
-supported_media_t medium_console = MT_CONSOLE;
+int medium_console = MT_CONSOLE;
 char selected_locale[STRING_SIZE];
 
+int inst_get_medium_console(void)
+{
+	return medium_console;
+}
 
-char *ofw_gettext(char *txt)
+char *lang_gettext(char *txt)
 {
     return gettext(txt);
 }
@@ -124,18 +124,18 @@ int main(int argc, char **argv)
     menuchoices[5] = gettext("TR_PASSWORDS");
     menuchoices[6] = NULL;
 
-    newtDrawRootText(18, 0, get_title());
+    newtDrawRootText(18, 0, helper_get_title());
     newtPushHelpLine(gettext("TR_HELPLINE"));
 
     if (flag_is_state == INST_SETUPCHROOT) {
         /* all settings in a row, no main menu */
-        handlekeymap();
-        handlehostname();
-        handledomainname();
-        handlenetworking();
-        password("root");
-        password("admin");
-        password("backup");
+        handle_keymap();
+        handle_hostname();
+        handle_domainname();
+        handle_networking();
+        pwd_set_password("root");
+        pwd_set_password("admin");
+        pwd_set_password("backup");
         /* The dial user is fully optional and will created after the password is set through the GUI or setup */
     }
     else {
@@ -144,28 +144,27 @@ int main(int argc, char **argv)
             rc = newtWinMenu(gettext("TR_SECTION_MENU"),
                              gettext("TR_SELECT_THE_ITEM"), 50, 5, 5, 11,
                              menuchoices, &choice, gettext("TR_SELECT"), gettext("TR_EXIT"), NULL);
-
             if (rc == 2)
                 break;
 
             switch (choice) {
             case 0:
-                handlekeymap();
+                handle_keymap();
                 break;
             case 1:
-                handletimezone();
+                handle_timezone();
                 break;
             case 2:
-                handlehostname();
+                handle_hostname();
                 break;
             case 3:
-                handledomainname();
+                handle_domainname();
                 break;
             case 4:
-                handlenetworking();
+                handle_networking();
                 break;
             case 5:
-                handlepasswords();
+                handle_passwords();
                 break;
 
             default:
