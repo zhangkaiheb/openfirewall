@@ -17,9 +17,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2008, the Openfirewall Team
- * 
- * $Id: restore.c 4963 2010-09-19 17:33:05Z owes $
+ * (c) 2018-2020, the Openfirewall Team
  * 
  */
 
@@ -37,7 +35,7 @@
 
 
 // tweak for errorbox
-#define  gettext  ofw_gettext
+#define  gettext  lang_gettext
 
 #define TMP_RESTORE_PATH_FULL       "/harddisk/tmp/restore"
 #define TMP_RESTORE_PATH_CHROOT     "/tmp/restore"
@@ -46,8 +44,8 @@
 #define DATFILE_FULL                "/harddisk/usr/local/apache/html/backup/openfirewall-xxxx-xx-xx_xx-xx-xx.dat"
 #define DATFILE_CHROOT              "/usr/local/apache/html/backup/openfirewall-xxxx-xx-xx_xx-xx-xx.dat"
 
-static char command[STRING_SIZE];
-static char message[STRING_SIZE_LARGE];
+//static char command[STRING_SIZE];
+//static char message[STRING_SIZE_LARGE];
 /* these are module global, to make callback function work */
 static newtComponent restoreform;
 static newtComponent radiofloppy, radiousb, radionetwork;
@@ -58,13 +56,13 @@ static char hostname_filter[STRING_SIZE];
 /* */
 static int copy_change_files(void)
 {
-    if (access(TMP_RESTORE_PATH_FULL "/var/ofw/main/settings", 0)) {
-        errorbox(ofw_gettext("TR_NO_MAIN_SETTINGS_IN_BACKUP"));
+    if (access(TMP_RESTORE_PATH_FULL "/var/ofw/main/settings", F_OK)) {
+        errorbox(lang_gettext("TR_NO_MAIN_SETTINGS_IN_BACKUP"));
         return FAILURE;
     }
 
-    if (testbackupversion(TMP_RESTORE_PATH_FULL) != SUCCESS) {
-        errorbox(ofw_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
+    if (helper_backup_test_version(TMP_RESTORE_PATH_FULL) != SUCCESS) {
+        errorbox(lang_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
         return FAILURE;
     }
 
@@ -98,28 +96,30 @@ static int filter_dat(const struct dirent *d)
  * Leave dev mounted and copy backup dat file for use in chroot */
 static int test_backup_key(char *dev, char *hostname)
 {
+	char command[STRING_SIZE_LARGE];
+
     /* Test if device present */
-    if (access(dev, 0)) {
+    if (access(dev, F_OK)) {
         return FAILURE;                 /* no device */
     }
 
     mysystem("/bin/umount " MOUNT_BACKUP_FULL " 2>/dev/null");
     /* Mount device and verify result */
-    snprintf(command, STRING_SIZE, "/bin/mount -t vfat -o ro %s " MOUNT_BACKUP_FULL, dev);
+    snprintf(command, STRING_SIZE_LARGE, "/bin/mount -t vfat -o ro %s " MOUNT_BACKUP_FULL, dev);
     if (mysystem(command)) {
         return FAILURE;                 /* no mountable dev */
     }
 
     /* Test backup .key */
-    snprintf(command, STRING_SIZE, MOUNT_BACKUP_FULL "/backup.%s.key", hostname);
-    if (access(command, 0)) {
+    snprintf(command, STRING_SIZE_LARGE, MOUNT_BACKUP_FULL "/backup.%s.key", hostname);
+    if (access(command, F_OK)) {
         return FAILURE;                 /* no backup key on this dev */
     }
     /* Test backup .dat */
-    snprintf(command, STRING_SIZE, MOUNT_BACKUP_FULL "/%s.dat", hostname);
-    if (access(command, 0) == 0) {
+    snprintf(command, STRING_SIZE_LARGE, MOUNT_BACKUP_FULL "/%s.dat", hostname);
+    if (access(command, F_OK) == 0) {
         /* Copy the backup dat file to make it accessable and useable for ofwrestore */
-        snprintf(command, STRING_SIZE, "cp -f " MOUNT_BACKUP_FULL "/%s.dat " DATFILE_FULL, hostname);
+        snprintf(command, STRING_SIZE_LARGE, "cp -f " MOUNT_BACKUP_FULL "/%s.dat " DATFILE_FULL, hostname);
         mysystem(command);
 
         return SUCCESS;
@@ -136,7 +136,7 @@ static int test_backup_key(char *dev, char *hostname)
     n = scandir(MOUNT_BACKUP_FULL, &eps, filter_dat, alphasort);
     if (n > 0) {
         /* Copy the latest backup dat file to make it accessable and useable for ofwrestore */
-        snprintf(command, STRING_SIZE, "cp -f " MOUNT_BACKUP_FULL "/%s " DATFILE_FULL, eps[n-1]->d_name);
+        snprintf(command, STRING_SIZE_LARGE, "cp -f " MOUNT_BACKUP_FULL "/%s " DATFILE_FULL, eps[n-1]->d_name);
         mysystem(command);
 
         return SUCCESS;
@@ -147,7 +147,7 @@ static int test_backup_key(char *dev, char *hostname)
 
 
 /* Try to mount usb device until backup.<hostname>.key is found */
-static int mountusb(char *hostname)
+static int mount_usb(char *hostname)
 {
     char sourcedev[30];
     int i, j;
@@ -170,7 +170,7 @@ static int mountusb(char *hostname)
 
 /* Try and grab from /dev/fd0 (1st floppy)
    USB floppy is /dev/sd[a-z], need some magic to walk through sd devices */
-static int restorefromfloppy(void)
+static int restore_from_floppy(void)
 {
     char device[STRING_SIZE];
     struct stat st;
@@ -204,19 +204,20 @@ static int restorefromfloppy(void)
     }
 
     newtPopWindow();            // Pop status window
-    errorbox(ofw_gettext("TR_UNABLE_TO_INSTALL_FILES"));
+    errorbox(lang_gettext("TR_UNABLE_TO_INSTALL_FILES"));
     return FAILURE;
 }
 
 
 /* */
-static int restorefromusb(char *hostname, char *password)
+static int restore_from_usb(char *hostname, char *password)
 {
     int rc;
+	char command[STRING_SIZE];
 
-    if (mountusb(hostname) == FAILURE) {
+    if (mount_usb(hostname) == FAILURE) {
         newtPopWindow();
-        errorbox(ofw_gettext("TR_NO_BACKUP_ON_USB_FOUND"));
+        errorbox(lang_gettext("TR_NO_BACKUP_ON_USB_FOUND"));
         return FAILURE;
     }
 
@@ -230,7 +231,7 @@ static int restorefromusb(char *hostname, char *password)
                         password, hostname);
     if (mysystem(command)) {
         newtPopWindow();
-        errorbox(ofw_gettext("TR_WRONG_PASSWORD_OR_KEYFILE"));
+        errorbox(lang_gettext("TR_WRONG_PASSWORD_OR_KEYFILE"));
         return FAILURE;
     }
 
@@ -241,13 +242,13 @@ static int restorefromusb(char *hostname, char *password)
         " --restore=%s --hostname=openfirewall --hardware", DATFILE_CHROOT);
     if ((rc = mysystem(command)) != 0) {
         newtPopWindow();
-        fprintf(flog, "ofwrestore returned errorcode: %d (%d)\n", (rc >> 8), rc);
+        F_LOG("ofwrestore returned errorcode: %d (%d)\n", (rc >> 8), rc);
         if (rc == (BACKUP_ERR_VERSION << 8)) {
             /* Special case, inform with some more detail */
-            errorbox(ofw_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
+            errorbox(lang_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
         }
         else {
-            errorbox(ofw_gettext("TR_UNABLE_TO_INSTALL_FILES"));
+            errorbox(lang_gettext("TR_UNABLE_TO_INSTALL_FILES"));
         }
         return FAILURE;
     }
@@ -258,15 +259,17 @@ static int restorefromusb(char *hostname, char *password)
 
 
 /* */
-static int restorefromnetwork(char *url, char *hostname, char *password)
+static int restore_from_network(char *url, char *hostname, char *password)
 {
     int rc;
+	char command[STRING_SIZE];
+	char message[STRING_SIZE_LARGE];
 
     snprintf(command, STRING_SIZE, "wget -O /harddisk/tmp/backup.key %s/backup.%s.key", url, hostname);
     if (mysystem(command)) {
         newtPopWindow();
         snprintf(command, STRING_SIZE, "%s/backup.%s.key", url, hostname);
-        snprintf(message, STRING_SIZE, ofw_gettext("TR_FILE_NOT_FOUND"), command);
+        snprintf(message, STRING_SIZE, lang_gettext("TR_FILE_NOT_FOUND"), command);
         errorbox(message);
         return FAILURE;
     }
@@ -279,7 +282,7 @@ static int restorefromnetwork(char *url, char *hostname, char *password)
                         password);
     if (mysystem(command)) {
         newtPopWindow();
-        errorbox(ofw_gettext("TR_WRONG_PASSWORD_OR_KEYFILE"));
+        errorbox(lang_gettext("TR_WRONG_PASSWORD_OR_KEYFILE"));
         return FAILURE;
     }
 
@@ -290,7 +293,7 @@ static int restorefromnetwork(char *url, char *hostname, char *password)
     if (mysystem(command)) {
         newtPopWindow();
         snprintf(command, STRING_SIZE, "%s/%s.dat", url, hostname);
-        snprintf(message, STRING_SIZE, ofw_gettext("TR_FILE_NOT_FOUND"), command);
+        snprintf(message, STRING_SIZE, lang_gettext("TR_FILE_NOT_FOUND"), command);
         errorbox(message);
         return FAILURE;
     }
@@ -301,13 +304,13 @@ static int restorefromnetwork(char *url, char *hostname, char *password)
     if (rc != 0) {
         unlink(DATFILE_FULL);
         newtPopWindow();
-        fprintf(flog, "ofwrestore returned errorcode: %d (%d)\n", (rc >> 8), rc);
+        F_LOG("ofwrestore returned errorcode: %d (%d)\n", (rc >> 8), rc);
         if (rc == (BACKUP_ERR_VERSION << 8)) {
             /* Special case, inform with some more detail */
-            errorbox(ofw_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
+            errorbox(lang_gettext("TR_NO_VALID_VERSION_IN_BACKUP"));
         }
         else {
-            errorbox(ofw_gettext("TR_UNABLE_TO_INSTALL_FILES"));
+            errorbox(lang_gettext("TR_UNABLE_TO_INSTALL_FILES"));
         }
         
         return FAILURE;
@@ -319,7 +322,7 @@ static int restorefromnetwork(char *url, char *hostname, char *password)
 
 
 /* Change disbabled hostname & password depending on radio selection */
-static void restorecallback(newtComponent cm, void *data)
+static void restore_callback(newtComponent cm, void *data)
 {
     newtComponent selected = newtRadioGetCurrent(radiofloppy);
 
@@ -329,14 +332,14 @@ static void restorecallback(newtComponent cm, void *data)
         newtEntrySetFlags(entrypassword, NEWT_FLAG_DISABLED, NEWT_FLAGS_RESET);
     }
     else if (selected == radiousb) {
-        if (medium_sources == MT_NETWORK) {
+        if (inst_get_medium_sources() == MT_NETWORK) {
             newtEntrySetFlags(entryurl, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
         }
         newtEntrySetFlags(entryhostname, NEWT_FLAG_DISABLED, NEWT_FLAGS_RESET);
         newtEntrySetFlags(entrypassword, NEWT_FLAG_DISABLED, NEWT_FLAGS_RESET);
     }
     else {
-        if (medium_sources == MT_NETWORK) {
+        if (inst_get_medium_sources() == MT_NETWORK) {
             newtEntrySetFlags(entryurl, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
         }
         newtEntrySetFlags(entryhostname, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
@@ -348,7 +351,7 @@ static void restorecallback(newtComponent cm, void *data)
 
 
 /* Selection screen for source of backup */
-int handlerestore(void)
+int handle_restore(void)
 {
     newtComponent text;
     newtComponent ok, skip;
@@ -371,31 +374,31 @@ int handlerestore(void)
     strcpy(typevalue, "floppy");
 
     httpLines = 0;
-    if (medium_sources == MT_NETWORK) {
+    if (inst_get_medium_sources() == MT_NETWORK) {
         /* Increase height this many lines if http/ftp restore is an option */
         httpLines = 2;
         strcpy(urlinitvalue, network_source);
     }
 
     do {
-        snprintf(message, STRING_SIZE, ofw_gettext("TR_RESTORE_CONFIGURATION"), NAME);
+        snprintf(message, STRING_SIZE, lang_gettext("TR_RESTORE_CONFIGURATION"), NAME);
         text = newtTextboxReflowed(1, 1, message, 68, 0, 0, 0);
         numLines = newtTextboxGetNumLines(text);
 
-        newtCenteredWindow(72, 13 + numLines + httpLines, ofw_gettext("TR_RESTORE"));
+        newtCenteredWindow(72, 13 + numLines + httpLines, lang_gettext("TR_RESTORE"));
         restoreform = newtForm(NULL, NULL, 0);
         newtFormAddComponent(restoreform, text);
 
         /* selections: floppy, usb */
-        radiofloppy = newtRadiobutton(12, 2 + numLines, ofw_gettext("TR_FLOPPY"), !strcmp(typevalue, "floppy"), NULL);
-        radiousb = newtRadiobutton(12, 3 + numLines, ofw_gettext("TR_USB_KEY"), !strcmp(typevalue, "usb"), radiofloppy);
+        radiofloppy = newtRadiobutton(12, 2 + numLines, lang_gettext("TR_FLOPPY"), !strcmp(typevalue, "floppy"), NULL);
+        radiousb = newtRadiobutton(12, 3 + numLines, lang_gettext("TR_USB_KEY"), !strcmp(typevalue, "usb"), radiofloppy);
 
-        newtComponentAddCallback(radiofloppy, restorecallback, NULL);
-        newtComponentAddCallback(radiousb, restorecallback, NULL);
+        newtComponentAddCallback(radiofloppy, restore_callback, NULL);
+        newtComponentAddCallback(radiousb, restore_callback, NULL);
 
-        if (medium_sources == MT_NETWORK) {
+        if (inst_get_medium_sources() == MT_NETWORK) {
             radionetwork = newtRadiobutton(12, 4 + numLines, "http/ftp", !strcmp(typevalue, "http"), radiousb);
-            newtComponentAddCallback(radionetwork, restorecallback, NULL);
+            newtComponentAddCallback(radionetwork, restore_callback, NULL);
             newtFormAddComponents(restoreform, radiofloppy, radiousb, radionetwork, NULL);
 
             labelurl = newtTextbox(2, 4 + numLines + httpLines, 35, 1, 0);
@@ -412,13 +415,13 @@ int handlerestore(void)
 
         /* hostname for network restore */
         labelhostname = newtTextbox(2, 5 + numLines + httpLines, 35, 1, 0);
-        newtTextboxSetText(labelhostname, ofw_gettext("TR_HOSTNAME"));
+        newtTextboxSetText(labelhostname, lang_gettext("TR_HOSTNAME"));
         newtFormAddComponent(restoreform, labelhostname);
         entryhostname = newtEntry(25, 5 + numLines + httpLines, hostnameinitvalue, 35, &hostnamevalue, 0);
         newtFormAddComponent(restoreform, entryhostname);
         /* password */
         labelpassword = newtTextbox(2, 6 + numLines + httpLines, 35, 1, 0);
-        newtTextboxSetText(labelpassword, ofw_gettext("TR_BACKUP_PASSWORD"));
+        newtTextboxSetText(labelpassword, lang_gettext("TR_BACKUP_PASSWORD"));
         newtFormAddComponent(restoreform, labelpassword);
         entrypassword = newtEntry(25, 6 + numLines + httpLines, "", 20, &passwordvalue, 0);
         newtEntrySetFlags(entrypassword, NEWT_FLAG_PASSWORD, NEWT_FLAGS_SET);
@@ -426,14 +429,14 @@ int handlerestore(void)
 
         if (!strcmp(typevalue, "floppy")) {
             /* disabled for default selection */
-            if (medium_sources == MT_NETWORK) {
+            if (inst_get_medium_sources() == MT_NETWORK) {
                 newtEntrySetFlags(entryurl, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
             }
             newtEntrySetFlags(entryhostname, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
             newtEntrySetFlags(entrypassword, NEWT_FLAG_DISABLED, NEWT_FLAGS_SET);
         }
 
-        ok = newtButton(6, 8 + numLines + httpLines, ofw_gettext("TR_OK"));
+        ok = newtButton(6, 8 + numLines + httpLines, lang_gettext("TR_OK"));
         skip = newtButton(26, 8 + numLines + httpLines, gettext("TR_SKIP"));
         newtFormAddComponents(restoreform, ok, skip, NULL);
 
@@ -444,7 +447,7 @@ int handlerestore(void)
         userskip = 0;
         newtFormRun(restoreform, &exitstruct);
         newtPopWindow();
-        if (medium_sources == MT_NETWORK) {
+        if (inst_get_medium_sources() == MT_NETWORK) {
             strcpy(urlinitvalue, (char *)urlvalue);
         }
         strcpy(hostnameinitvalue, (char *)hostnamevalue);
@@ -458,7 +461,8 @@ int handlerestore(void)
         if (exitstruct.u.co == ok) {
             newtComponent selected = newtRadioGetCurrent(radiofloppy);
 
-            statuswindow(72, 5, ofw_gettext("TR_RESTORE"), ofw_gettext("TR_READING_BACKUP"));
+            helper_nt_statuswindow(72, 5,
+					lang_gettext("TR_RESTORE"), lang_gettext("TR_READING_BACKUP"));
             /* cleanout possible leftovers and (re)create temp path */
             mysystem("/bin/rm -rf " TMP_RESTORE_PATH_FULL);
             mkdir(TMP_RESTORE_PATH_FULL, S_IRWXU | S_IRWXG | S_IRWXO);
@@ -467,18 +471,18 @@ int handlerestore(void)
 
             if (selected == radiofloppy) {
                 strcpy(typevalue, "floppy");
-                error = restorefromfloppy();
+                error = restore_from_floppy();
             }
             else if (selected == radiousb) {
                 strcpy(typevalue, "usb");
                 if (!strcmp(passwordinitvalue, "")) {
                     /* password is mandatory to decrypt the key */
                     newtPopWindow();
-                    errorbox(ofw_gettext("TR_PASSWORD_CANNOT_BE_BLANK"));
+                    errorbox(lang_gettext("TR_PASSWORD_CANNOT_BE_BLANK"));
                     error = FAILURE;
                 }
                 else {
-                    error = restorefromusb(hostnameinitvalue, passwordinitvalue);
+                    error = restore_from_usb(hostnameinitvalue, passwordinitvalue);
                 }
             }
             else {
@@ -486,11 +490,11 @@ int handlerestore(void)
                 if (!strcmp(passwordinitvalue, "")) {
                     /* password is mandatory to decrypt the key */
                     newtPopWindow();
-                    errorbox(ofw_gettext("TR_PASSWORD_CANNOT_BE_BLANK"));
+                    errorbox(lang_gettext("TR_PASSWORD_CANNOT_BE_BLANK"));
                     error = FAILURE;
                 }
                 else {
-                    error = restorefromnetwork(urlinitvalue, hostnameinitvalue, passwordinitvalue);
+                    error = restore_from_network(urlinitvalue, hostnameinitvalue, passwordinitvalue);
                 }
             }
         }
