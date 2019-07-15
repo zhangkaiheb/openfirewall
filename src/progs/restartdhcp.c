@@ -17,9 +17,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2001-2008, the Openfirewall Team
- *
- * $Id: restartdhcp.c 3215 2009-07-11 14:47:26Z owes $
+ * (c) 2017-2020, the Openfirewall Team
  *
  */
 
@@ -94,7 +92,7 @@ int main(int argc, char **argv)
     }
 
     /* Fetch ethernet/settings, exit on error */
-    read_ethernet_settings(1);
+    helper_read_ethernet_settings(1);
 
     /* Read DHCP settings */
     verbose_printf(1, "Reading DHCP settings ... \n");
@@ -112,13 +110,14 @@ int main(int argc, char **argv)
         }
 
         for (j = 1; j <= MAX_NETWORK_COLOUR; j++) {
-            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", ofw_colours_text[i], j);
+            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", openfw_colours_text[i], j);
 
             if (test_kv(dhcp_kv, buffer, "on") == SUCCESS) {
                 /* this card is enabled in dhcp/settings */
-                if (j > ofw_ethernet.count[i]) {
+                if (j > openfw_ethernet.count[i]) {
                     /* card is missing in ethernet/settings */
-                    fprintf(stderr, "%s_%d enabled but no device defined\n", ofw_colours_text[i], j);
+                    fprintf(stderr, "%s_%d enabled but no device defined\n",
+							openfw_colours_text[i], j);
                     exit(1);
                 }
 
