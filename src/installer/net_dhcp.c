@@ -38,7 +38,7 @@
     This is only a minimal setup, to help get an admin PC working.
     Full DHCP server config is done through web GUI.
 */
-int changedhcpserver(void)
+int change_dhcp_server(void)
 {
     newtComponent netdhcpform;
     newtComponent text;
@@ -70,29 +70,35 @@ int changedhcpserver(void)
 
     changed = FALSE;
 
+F_LOG("change_dhcp_server start\n");
     /* we will need GREEN IP and mask */
-    if (read_ethernet_settings(0)) {
+    if (helper_read_ethernet_settings(0)) {
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
-    if (inet_aton(ofw_ethernet.address[GREEN][1], &green_address) == 0) {
+F_LOG("change_dhcp_server line %d\n", __LINE__);
+    if (inet_aton(openfw_ethernet.address[GREEN][1], &green_address) == 0) {
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
-    if (inet_aton(ofw_ethernet.netmask[GREEN][1], &green_netmask) == 0) {
+F_LOG("change_dhcp_server line %d\n", __LINE__);
+    if (inet_aton(openfw_ethernet.netmask[GREEN][1], &green_netmask) == 0) {
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
-    if (inet_aton(ofw_ethernet.netaddress[GREEN][1], &green_netaddress) == 0) {
+F_LOG("change_dhcp_server line %d\n", __LINE__);
+    if (inet_aton(openfw_ethernet.netaddress[GREEN][1], &green_netaddress) == 0) {
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
+F_LOG("change_dhcp_server line %d\n", __LINE__);
 
     if (read_kv_from_file(&dhcpkv, "/var/ofw/dhcp/settings") != SUCCESS) {
         errorbox(gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
 
+F_LOG("change_dhcp_server line %d\n", __LINE__);
     /* Fetch domainname */
     domainname[0] = 0;
     if (read_kv_from_file(&mainkv, "/var/ofw/main/settings") == SUCCESS) {
@@ -113,8 +119,7 @@ int changedhcpserver(void)
 
         if (addr+2 < broadcast) {
             addr++;
-        }
-        else {
+        } else {
             addr = htonl(green_netaddress.s_addr) + 1;
         }
 
@@ -132,18 +137,18 @@ int changedhcpserver(void)
 
         if (addr+2 < broadcast) {
             addr = broadcast - 1;
-        }
-        else {
+        } else {
             addr--;
         }
 
+F_LOG("change_dhcp_server line %d\n", __LINE__);
         iaddr.s_addr = htonl(addr);
         strcpy(keyvalue, inet_ntoa(iaddr));
         update_kv(&dhcpkv, "END_ADDR_GREEN_1", keyvalue);
         changed = TRUE;
     }
     if (find_kv(dhcpkv, "DNS1_GREEN_1") == NULL) {
-        update_kv(&dhcpkv, "DNS1_GREEN_1", ofw_ethernet.address[GREEN][1]);
+        update_kv(&dhcpkv, "DNS1_GREEN_1", openfw_ethernet.address[GREEN][1]);
         changed = TRUE;
     }
     if (find_kv(dhcpkv, "DEFAULT_LEASE_TIME_GREEN_1") == NULL) {
@@ -193,6 +198,7 @@ int changedhcpserver(void)
     newtRefresh();
     newtDrawForm(netdhcpform);
 
+F_LOG("change_dhcp_server line %d\n", __LINE__);
     do {
         error = FALSE;
         newtFormRun(netdhcpform, &exitstruct);
@@ -221,18 +227,17 @@ int changedhcpserver(void)
                     update_kv(&dhcpkv, "END_ADDR_GREEN_1", (char *)resultend);
                     update_kv(&dhcpkv, "DEFAULT_LEASE_TIME_GREEN_1", (char *)resultlease);
                     changed = TRUE;
-                }
-                else {
+                } else {
                     errorbox(message);
                 }
-            }
-            else {
+            } else {
                 update_kv(&dhcpkv, "ENABLED_GREEN_1", "off");
                 changed = TRUE;
             }
         }
     } while (error == TRUE);
 
+F_LOG("change_dhcp_server line %d\n", __LINE__);
     newtFormDestroy(netdhcpform);
     newtPopWindow();
 
@@ -291,5 +296,6 @@ int changedhcpserver(void)
 
     free_kv(&dhcpkv);
 
+F_LOG("change_dhcp_server line %d\n", __LINE__);
     return SUCCESS;
 }
