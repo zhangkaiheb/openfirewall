@@ -17,9 +17,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2009, the Openfirewall Team
- * 
- * $Id: keymap.c 3436 2009-08-14 09:14:53Z owes $
+ * (c) 2017-2020, the Openfirewall Team
  * 
  */
 
@@ -50,7 +48,7 @@ static int cmp(const void *s1, const void *s2);
 static char keymap_setting[STRING_SIZE];
 
 /*  Used by installer to update main/settings after all the files are inplace */ 
-int write_keymap(void)
+int kmap_write_keymap(void)
 {
     NODEKV *kv = NULL;
 
@@ -61,7 +59,7 @@ int write_keymap(void)
 
     if (read_kv_from_file(&kv, "/harddisk/var/ofw/main/settings") != SUCCESS) {
         free_kv(&kv);
-        errorbox(ofw_gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
+        errorbox(lang_gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
         return FAILURE;
     }
 
@@ -79,7 +77,7 @@ int write_keymap(void)
  *  - setup called during installation (chroot'd)
  *  - 'normal' setup
 */
-int handlekeymap(void)
+int handle_keymap(void)
 {
     int c;
     int choice;
@@ -124,7 +122,7 @@ int handlekeymap(void)
     if (flag_is_state != INST_INSTALLER) {
         if (read_kv_from_file(&kv, "/var/ofw/main/settings") != SUCCESS) {
             free_kv(&kv);
-            errorbox(ofw_gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
+            errorbox(lang_gettext("TR_UNABLE_TO_OPEN_SETTINGS_FILE"));
             return FAILURE;
         }
 
@@ -146,11 +144,11 @@ int handlekeymap(void)
     }
 
     /* In case of serial console we can skip this question, and simply use our default */
-    if (! ((flag_is_state != INST_SETUP) && (medium_console == MT_SERIAL))) {
-        rc = newtWinMenu(ofw_gettext("TR_KEYBOARD_MAPPING"),
-				ofw_gettext("TR_KEYBOARD_MAPPING_LONG"), 50, 5, 5, 6, displaynames, &choice,
-				ofw_gettext("TR_OK"),
-				(flag_is_state != INST_SETUP) ? ofw_gettext("TR_SKIP") : ofw_gettext("TR_GO_BACK"), NULL);
+    if (! ((flag_is_state != INST_SETUP) && (inst_get_medium_console() == MT_SERIAL))) {
+        rc = newtWinMenu(lang_gettext("TR_KEYBOARD_MAPPING"),
+				lang_gettext("TR_KEYBOARD_MAPPING_LONG"), 50, 5, 5, 6, displaynames, &choice,
+				lang_gettext("TR_OK"),
+				(flag_is_state != INST_SETUP) ? lang_gettext("TR_SKIP") : lang_gettext("TR_GO_BACK"), NULL);
     }
     strcpy(keymap_setting, filenames[choice]);
 
@@ -190,7 +188,7 @@ static int process(char *prefix, char *path)
     snprintf(newpath, PATH_MAX, "%s%s", prefix, path);
 
     if (!(dir = opendir(newpath))) {
-        if (access(newpath, 0) == -1) {
+        if (access(newpath, F_OK) == -1) {
             return FAILURE;
         }
         if (filenamecount > MAX_FILENAMES)
