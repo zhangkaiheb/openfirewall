@@ -157,7 +157,7 @@ my %selected = ();
 my $disabled        = '';
 my $hiddenIfaceName = '';
 
-if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} || $cgiparams{'ACTION'} eq $Lang::tr{'add interface'}) {
+if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} || $cgiparams{'ACTION'} eq $Lang::tr{'add neigh'}) {
     if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
         if ($cgiparams{'USED_COUNT'} > 0) {
             $disabled        = "disabled='disabled'";
@@ -250,7 +250,7 @@ END
 <tr style='background-color: #F2F2F2;'>
     <td align='left'>
         <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-            <input type='submit' name='ACTION' value='$Lang::tr{'add interface'}' />
+            <input type='submit' name='ACTION' value='$Lang::tr{'add neigh'}' />
         </form>
     </td>
     <td align='left' width='90%'></td>
