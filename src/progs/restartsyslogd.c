@@ -16,11 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright (C) 2003-07-12 Robert Kerr <rkerr@go.to>
- *
- * (c) 2004-2014 The Openfirewall Team
- *
- * $Id: restartsyslogd.c 7576 2014-05-24 08:45:28Z owes $
+ * (c) 2017-2020 The Openfirewall Team
  *
  */
 
@@ -80,7 +76,7 @@ int main(int argc, char **argv)
     memset(buffer, 0, STRING_SIZE);
     memset(hostname, 0, STRING_SIZE);
     strcpy(proto, "udp");
-    if (access("/etc/FLASH", 0) != -1) {
+    if (access("/etc/FLASH", F_OK) != -1) {
         strcpy(log_keep, "14");
     }
     else {
@@ -204,7 +200,7 @@ int main(int argc, char **argv)
         exit(ERR_CONFIG);
     }
 
-    if (access("/var/run/rsyslogd.pid", 0) != -1) {
+    if (access("/var/run/rsyslogd.pid", F_OK) != -1) {
         verbose_printf(1, "Stopping rsyslogd ... \n");
     
         mysignalpidfile("/var/run/rsyslogd.pid", SIGTERM);
