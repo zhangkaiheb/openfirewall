@@ -16,9 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2008-2011, the Openfirewall Team
- *
- * $Id: accountingctrl.c 7108 2013-09-29 10:43:06Z dotzball $
+ * (c) 2018-2020, the Openfirewall Team
  *
  */
 
@@ -86,7 +84,7 @@ static void add_device_rules(char *dev_id, char *iface)
 static void add_vnstat_db(char *dev_id, char *iface)
 {
     snprintf(command, STRING_SIZE, "/var/log/traffic/vnstat/%s", iface);
-    if (access(command, 0) == -1) {
+    if (access(command, F_OK) == -1) {
         snprintf(message, STRING_SIZE, "Create vnstat DB for %s nick %s", iface, dev_id);
         verbose_printf(1, "%s\n", message);
         syslog(LOG_NOTICE, "%s", message);
@@ -195,26 +193,26 @@ int main(int argc, char **argv)
 
     if (enabled) {
         /* Fetch ethernet/settings, exit on error */
-        read_ethernet_settings(1);
+        helper_read_ethernet_settings(1);
 
         verbose_printf(1, "Create traffic accounting iptables rules... \n");
 
         /* for all colours */
         for (i = 0; i < NONE; i++) {
 
-            for (j = 1; j <= ofw_ethernet.count[i]; j++) {
+            for (j = 1; j <= openfw_ethernet.count[i]; j++) {
                 if (i == RED) {
-                    if (! ofw_ethernet.red_active[j]) {
+                    if (! openfw_ethernet.red_active[j]) {
                         continue;
                     }
 
-                    iface = ofw_ethernet.red_device[j];
+                    iface = openfw_ethernet.red_device[j];
                 }
                 else {
-                    iface = ofw_ethernet.device[i][j];
+                    iface = openfw_ethernet.device[i][j];
                 }
                 
-                snprintf(dev_id, STRING_SIZE, "%s_%d", ofw_colours_text[i], j);
+                snprintf(dev_id, STRING_SIZE, "%s_%d", openfw_colours_text[i], j);
                 if (detail_high) {
                     add_device_rules(dev_id, iface);
                 }
@@ -224,13 +222,13 @@ int main(int argc, char **argv)
             }
         }
         
-        if ((ofw_ethernet.count[RED] == 0) && (strlen(ofw_ethernet.red_device[1]))) {
+        if ((openfw_ethernet.count[RED] == 0) && (strlen(openfw_ethernet.red_device[1]))) {
             // Special case for Modem/ISDN
             if (detail_high) {
-                add_device_rules("RED_1", ofw_ethernet.red_device[1]);
+                add_device_rules("RED_1", openfw_ethernet.red_device[1]);
             }
             else {
-                add_vnstat_db("RED_1", ofw_ethernet.red_device[1]);
+                add_vnstat_db("RED_1", openfw_ethernet.red_device[1]);
             }
         }
         
@@ -238,7 +236,7 @@ int main(int argc, char **argv)
             verbose_printf(1, "Start ulogd ... \n");
             safe_system("/usr/sbin/ulogd -d");
         }
-        if (!detail_high && (access("/var/run/vnstat.pid", 0) == -1)) {
+        if (!detail_high && (access("/var/run/vnstat.pid", F_OK) == -1)) {
             verbose_printf(1, "Start vnstatd ... \n");
             safe_system("/usr/sbin/vnstatd -d");
         }
@@ -250,7 +248,7 @@ int main(int argc, char **argv)
         safe_system("/usr/bin/killall ulogd");
     }
     /* Stop vnstat if traffic accounting is not enabled and low detail */
-    if ((access("/var/run/vnstat.pid", 0) != -1) && !(enabled && !detail_high)) {
+    if ((access("/var/run/vnstat.pid", F_OK) != -1) && !(enabled && !detail_high)) {
         verbose_printf(1, "Stop vnstatd ... \n");
         mysignalpidfile("/var/run/vnstat.pid", SIGTERM);
     }
