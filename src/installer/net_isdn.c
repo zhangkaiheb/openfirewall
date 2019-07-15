@@ -84,9 +84,9 @@ static void readisdncards(void)
 
 #if 0
     /* Output the found list for testing purposes */
-    fprintf(flog, "ISDN list\n");
+    F_LOG("ISDN list\n");
     for (i = 0; isdn_cards_type[i] != 0; i++) {
-        fprintf(flog, "%s, %d\n", isdn_cards_description[i], isdn_cards_type[i]);
+        F_LOG("%s, %d\n", isdn_cards_description[i], isdn_cards_type[i]);
     }
 #endif
 }
@@ -122,7 +122,7 @@ static void changeparameters(void)
 
     find_kv_default(isdn_kv, "MODULE_PARAMS", parameters);
 
-    rc = newtWinEntries(get_title(), gettext("TR_ENTER_ADDITIONAL_MODULE_PARAMS"), 65, 5, 5, 40, 
+    rc = newtWinEntries(helper_get_title(), gettext("TR_ENTER_ADDITIONAL_MODULE_PARAMS"), 65, 5, 5, 40, 
                         entries, gettext("TR_OK"), gettext("TR_GO_BACK"), NULL);
 
     if (rc == 1) {
@@ -187,7 +187,7 @@ static void changemsn(void)
 
     for (;;)
     {
-        rc = newtWinEntries(get_title(), gettext("TR_ENTER_THE_LOCAL_MSN"), 65, 5, 5, 40,
+        rc = newtWinEntries(helper_get_title(), gettext("TR_ENTER_THE_LOCAL_MSN"), 65, 5, 5, 40,
                             entries, gettext("TR_OK"), gettext("TR_GO_BACK"), NULL);
 
         if (rc == 1) {
