@@ -16,9 +16,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * Copyright (C) 2002-04-09 Mark Wormgoor <mark@wormgoor.com>
- *
- * $Id: restartshaping.c 5146 2010-11-19 09:26:12Z owes $
+ * Copyright (C) 2017-2020 the Openfirewall team
  *
  */
 
@@ -99,15 +97,15 @@ int main(int argc, char *argv[])
     }
 
     /* Fetch ethernet/settings, exit on error */
-    read_ethernet_settings(1);
+    helper_read_ethernet_settings(1);
 
     /* See what interface there is */
-    if (ofw_ethernet.red_device[1][0] == 0) {
+    if (openfw_ethernet.red_device[1][0] == 0) {
         fprintf(stderr, "Couldn't open iface file\n");
         return (1);
     }
 
-    iface = ofw_ethernet.red_device[1];
+    iface = openfw_ethernet.red_device[1];
 
     /* Remove old shaping, silence error since shaping may have been inactive */
     verbose_printf(1, "Remove qdiscs ... \n");
