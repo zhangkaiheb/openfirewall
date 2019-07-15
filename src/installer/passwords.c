@@ -17,9 +17,7 @@
  * along with Openfirewall; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
- * (c) 2007-2010, the Openfirewall Team
- *
- * $Id: passwords.c 4545 2010-04-30 21:33:00Z owes $
+ * (c) 2017-2020, the Openfirewall Team
  * 
  */
 
@@ -36,7 +34,7 @@
    Return SUCCESS if OK
    Return FAILURE if CANCEL
 */
-static int getpassword(char *password, char *text)
+static int pwd_get_password(char *password, char *text)
 {
     char *values[] = { NULL, NULL, NULL };      /* pointers for the values. */
     struct newtWinEntry entries[] = {
@@ -95,7 +93,7 @@ static int getpassword(char *password, char *text)
 }
 
 
-int password(char *user)
+int pwd_set_password(char *user)
 {
     char message[STRING_SIZE];
     char password[STRING_SIZE];
@@ -121,7 +119,7 @@ int password(char *user)
         return FAILURE;
     }
 
-    if (getpassword(password, message) == SUCCESS) {
+    if (pwd_get_password(password, message) == SUCCESS) {
         if (!strcmp(user, "admin") || !strcmp(user, "dial")) {
             snprintf(commandstring, STRING_SIZE, "/usr/bin/htpasswd -m -b /var/ofw/auth/users %s '%s'",
                      user, password);
@@ -132,7 +130,7 @@ int password(char *user)
 
         if (mysystemhidden(commandstring)) {
             snprintf(message, STRING_SIZE, "%s %s", gettext("TR_PROBLEM_SETTING_PASSWORD_FOR"), user);
-            newtWinMessage(get_title(), gettext("TR_OK"), message);
+            newtWinMessage(helper_get_title(), gettext("TR_OK"), message);
             return FAILURE;
         }
     }
@@ -142,7 +140,7 @@ int password(char *user)
 
 
 /* Open a window with selection of which password to modify */
-int handlepasswords(void)
+int handle_passwords(void)
 {
     int rc;
     int choice;
@@ -166,16 +164,16 @@ int handlepasswords(void)
 
         switch (choice) {
         case 0:
-            password("root");
+            pwd_set_password("root");
             break;
         case 1:
-            password("admin");
+            pwd_set_password("admin");
             break;
         case 2:
-            password("backup");
+            pwd_set_password("backup");
             break;
         case 3:
-            password("dial");
+            pwd_set_password("dial");
             break;
         default:
             break;
