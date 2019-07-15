@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
  *
- * (c) 2018-2019, the Openfirewall Team
+ * (c) 2018-2020, the Openfirewall Team
  *
  */
 
@@ -68,7 +68,7 @@ void usage(char *prg, int exit_code)
 
 int ipsec_running()
 {
-    return (access("/var/run/pluto/pluto.pid", 0) != -1) ? SUCCESS : FAILURE;
+    return (access("/var/run/pluto/pluto.pid", F_OK) != -1) ? SUCCESS : FAILURE;
 }
 
 /*
@@ -81,11 +81,11 @@ void add_alias_interfaces(int offset)
     int alias = 0;
 
     /* Check for RED present. If not, exit gracefully.  This is not an error... */
-    if (!VALID_DEVICE(ofw_ethernet.red_device[1]))
+    if (!VALID_DEVICE(openfw_ethernet.red_device[1]))
         return;
 
     /* Now check the RED_TYPE - aliases only work with STATIC. */
-    if (!(strcmp(ofw_ethernet.red_type[1], "STATIC") == 0))
+    if (!(strcmp(openfw_ethernet.red_type[1], "STATIC") == 0))
         return;
 
     /* Now set up the new aliases from the config file */
@@ -123,7 +123,7 @@ void add_alias_interfaces(int offset)
         if (strcmp(enabled, "on") == 0) {
             memset(s, 0, STRING_SIZE);
             snprintf(s, STRING_SIZE - 1, "/usr/sbin/ipsec tncfg --attach --virtual ipsec%d --physical %s:%d %s",
-                     offset + alias, ofw_ethernet.red_device[1], alias, flag_verbose ? "" : ">/dev/null");
+                     offset + alias, openfw_ethernet.red_device[1], alias, flag_verbose ? "" : ">/dev/null");
             safe_system(s);
             alias++;
         }
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
     safe_system("/usr/local/bin/vpn-watch --stop");
 
     /* Fetch ethernet/settings, exit on error */
-    read_ethernet_settings(1);
+    helper_read_ethernet_settings(1);
 
     /* read IPsec config */
     verbose_printf(1, "Reading IPsec settings ... \n");
@@ -351,13 +351,14 @@ int main(int argc, char *argv[])
         }
 
         for (j = 1; j <= MAX_NETWORK_COLOUR; j++) {
-            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", ofw_colours_text[i], j);
+            snprintf(buffer, STRING_SIZE, "ENABLED_%s_%d", openfw_colours_text[i], j);
 
             if (test_kv(ipsec_kv, buffer, "on") == SUCCESS) {
                 /* this card is enabled in vpn/settings */
-                if (j > ofw_ethernet.count[i]) {
+                if (j > openfw_ethernet.count[i]) {
                     /* card is missing in ethernet/settings */
-                    fprintf(stderr, "%s_%d enabled but no device defined\n", ofw_colours_text[i], j);
+                    fprintf(stderr, "%s_%d enabled but no device defined\n",
+							openfw_colours_text[i], j);
                     exit(1);
                 }
 
@@ -418,14 +419,14 @@ int main(int argc, char *argv[])
         /*  TODO:   check if interface is ENABLED 
                     do we really want/need to block *all* tunnels if only one is using a no longer valid interface?
         */
-        if (!enable_red && (strcmp(interface, "RED") == 0) && VALID_DEVICE(ofw_ethernet.red_device[1])) {
+        if (!enable_red && (strcmp(interface, "RED") == 0) && VALID_DEVICE(openfw_ethernet.red_device[1])) {
             enable_red += 2;
         }
 
         if (!enable_blue && strcmp(interface, "BLUE") == 0) {
             enable_blue++;
 
-            if (ofw_ethernet.count[BLUE])
+            if (openfw_ethernet.count[BLUE])
                 enable_blue++;
             else
                 fprintf(stderr, "IPsec enabled on blue but blue interface is invalid or not found\n");
