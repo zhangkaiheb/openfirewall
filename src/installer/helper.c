@@ -35,7 +35,7 @@
 
 /* use ---- for non-assigned card */
 char *openfw_colours_text[CFG_COLOURS_COUNT] = { "GREEN", "RED", "BLUE", "ORANGE", "----" };
-char *openfw_aliases_text[CFG_COLOURS_COUNT] = { "lan", "wan", "wlan", "dmz", "unused" };
+char *openfw_aliases_text[CFG_COLOURS_COUNT] = { "lan", "wan", "wlan", "dmz", "eth" };
 
 char *openfw_red_text[CFG_RED_COUNT] = { "PPPOE", "PPTP", "STATIC", "DHCP" };
 
@@ -490,18 +490,18 @@ static int helper_read_ethernet_key(int colour, int index, char *eth_key, char *
         /* We expect the key, but it is not there */
         if (exitonerror) {
             free_kv(&eth_kv);
-			fprintf(stderr, "%s for %s_%d not defined\n", error_description, ofw_colours_text[colour], index);
+			fprintf(stderr, "%s for %s_%d not defined\n", error_description, openfw_colours_text[colour], index);
             exit(1);
         }
 
-		verbose_printf(1, "  %s for %s_%d not defined\n", error_description, ofw_colours_text[colour], index);
+		verbose_printf(1, "  %s for %s_%d not defined\n", error_description, openfw_colours_text[colour], index);
 
         return FAILURE;
     }
 
     /* Store the keyvalue */
     *ptr = strdup(find_kv(eth_kv, key));
-	verbose_printf(2, "  %s for %s_%d: %s\n", error_description, ofw_colours_text[colour], index, *ptr);
+	verbose_printf(2, "  %s for %s_%d: %s\n", error_description, openfw_colours_text[colour], index, *ptr);
     return SUCCESS;
 }
 

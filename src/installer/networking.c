@@ -609,8 +609,7 @@ static void net_card_config(int n)
 				strcpy(command, "killall ethtool");
 				mysystem(command);
 			}
-		}
-		else {
+		} else {
 			break;
 		}
 	}
@@ -630,7 +629,7 @@ static void net_card_config(int n)
 static void net_udev_config(void)
 {
     int i;
-    int counter = 1;
+    int counter = 0;
     char device[STRING_SIZE];
     char key[STRING_SIZE];
     FILE *fnet = NULL;
@@ -647,7 +646,12 @@ static void net_udev_config(void)
     for (i = 0; i < hw_get_network_num(); i++) {
         if (sys_netdevices[i].address[0]) {
             if (sys_netdevices[i].colour == NONE) {
-                snprintf(device, STRING_SIZE, "%s-%d", openfw_aliases_text[NONE], counter++);
+                /* use the device name allocated by Linux kernel */
+                if (sys_netdevices[i].device) {
+                    snprintf(device, STRING_SIZE, "%s", sys_netdevices[i].device);
+                } else {
+                    snprintf(device, STRING_SIZE, "%s%d", openfw_aliases_text[NONE], counter);
+                }
             }
             else {
                 snprintf(device, STRING_SIZE, "%s-%d", openfw_aliases_text[sys_netdevices[i].colour], 1);
@@ -660,6 +664,7 @@ static void net_udev_config(void)
             fprintf(fnet, "SUBSYSTEM==\"net\", ACTION==\"add\", DRIVERS==\"?*\"," \
 						" ATTR{address}==\"%s\", ATTR{type}==\"1\", NAME=\"%s\"\n", 
                     	sys_netdevices[i].address, device);
+			counter++;
         }
     }
 
