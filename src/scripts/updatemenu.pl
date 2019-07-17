@@ -98,7 +98,7 @@ foreach $line (@lines) {
     my $name = $2;
     my $contents = "\$Lang::tr{'$3'}";
     # Revert to the 'real text' if translation is missing
-    $contents = "'$3'" unless(defined($Lang::tr{$3}));
+    $contents = "'$3'" unless(defined($Lang::tr{"$3"}));
 
     if (defined($menunumbers{$name})) {
         # protect against duplicates
@@ -175,7 +175,7 @@ foreach $line (sort @lines) {
     # We need at least 1 text
     next unless ($line =~ /"(.+?)"\s*(.*)/);
     my $contents = "\$Lang::tr{'$1'}";
-    $contents = "'$1'" unless(defined($Lang::tr{$1}));
+    $contents = "'$1'" unless(defined($Lang::tr{"$1"}));
     $menuname = $1;
     $line = $2;
 
@@ -183,7 +183,7 @@ foreach $line (sort @lines) {
     my $status = "''";
     if ($line =~ /"(.*?)"\s*(.*)/) {
         $status = "\$Lang::tr{'$1'}";
-        $status = "'$1'" unless(defined($Lang::tr{$1}));
+        $status = "'$1'" unless(defined($Lang::tr{"$1"}));
         $line = $2;
     }
 
@@ -238,7 +238,7 @@ foreach $line (@l3lines) {
     my $contents = "\$Lang::tr{'$1'}";
 #print "content: $contents .. 1: $1\n";
     # Revert to the 'real text' if translation is missing
-    $contents = "'$1'" unless(defined($Lang::tr{$1}));
+    $contents = "'$1'" unless(defined($Lang::tr{"$1"}));
 #print "content2: $contents \n";
 
 #    if (!defined($menul2numbers{$name})) {
@@ -302,19 +302,19 @@ foreach $line (sort @lines) {
 
     # find the sub-level menu
     my $head = "\$Lang::tr{'$1'}";
-    $head = "'$1'" unless(defined($Lang::tr{$1}));
+    $head = "'$1'" unless(defined($Lang::tr{"$1"}));
 
     # We need at least 1 text
     next unless ($line =~ /"(.+?)"\s*(.*)/);
     my $contents = "\$Lang::tr{'$1'}";
-    $contents = "'$1'" unless(defined($Lang::tr{$1}));
+    $contents = "'$1'" unless(defined($Lang::tr{"$1"}));
     $line = $2;
 
     # A 2nd text is optional
     my $status = "''";
     if ($line =~ /"(.*?)"\s*(.*)/) {
         $status = "\$Lang::tr{'$1'}";
-        $status = "'$1'" unless(defined($Lang::tr{$1}));
+        $status = "'$1'" unless(defined($Lang::tr{"$1"}));
         $line = $2;
     }
 
@@ -384,10 +384,10 @@ foreach $line (sort @sub23lines) {
     my $cginame = "/cgi-bin/$1";
 
     my $l3 = "\$Lang::tr{'$4'}";
-    $l3 = "'$4'" unless(defined($Lang::tr{$4}));
+    $l3 = "'$4'" unless(defined($Lang::tr{"$4"}));
 
     my $l2 = "\$Lang::tr{'$2'}";
-    $l2 = "'$2'" unless(defined($Lang::tr{$2}));
+    $l2 = "'$2'" unless(defined($Lang::tr{"$2"}));
 
 
 
@@ -396,11 +396,11 @@ foreach $line (sort @sub23lines) {
         next unless ($subline =~ /${path}(.*):# MENUENTRY\s+(\w+)\s+(\d{3})\s+"(.+?)"\s+(.*)/);
 
         my $l2sub = "\$Lang::tr{'$4'}";
-        $l2sub = "'$4'" unless(defined($Lang::tr{$4}));
+        $l2sub = "'$4'" unless(defined($Lang::tr{"$4"}));
 
         if ($l2sub eq $l2) {
             $l1 = "\$Lang::tr{'$2'}";
-            $l1 = "'$2'" unless(defined($Lang::tr{$2}));
+            $l1 = "'$2'" unless(defined($Lang::tr{"$2"}));
             last;
         }
     }
@@ -423,10 +423,10 @@ foreach my $subline (sort @sub12lines) {
     my $cginame = "/cgi-bin/$1";
 
     my $l1 = "\$Lang::tr{'$2'}";
-    $l1 = "'$2'" unless(defined($Lang::tr{$2}));
+    $l1 = "'$2'" unless(defined($Lang::tr{"$2"}));
 
     my $l2 = "\$Lang::tr{'$4'}";
-    $l2 = "'$4'" unless(defined($Lang::tr{$4}));
+    $l2 = "'$4'" unless(defined($Lang::tr{"$4"}));
 
     my $l3;
 
