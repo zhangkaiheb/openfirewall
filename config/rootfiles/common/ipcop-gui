@@ -19,8 +19,10 @@ usr/local/apache/cgi-bin/fwrulesadm.cgi
 usr/local/apache/cgi-bin/graphs.cgi
 usr/local/apache/cgi-bin/gui.cgi
 usr/local/apache/cgi-bin/hosts.cgi
+usr/local/apache/cgi-bin/ifacegroup.cgi
 usr/local/apache/cgi-bin/ifaces.cgi
 usr/local/apache/cgi-bin/index.cgi
+usr/local/apache/cgi-bin/interfaces.cgi
 usr/local/apache/cgi-bin/ipinfo.cgi
 usr/local/apache/cgi-bin/ipsec.cgi
 usr/local/apache/cgi-bin/iptablesgui.cgi
