@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2014-2018, the Openfirewall Team
+# (c) 2017-2020, the Openfirewall Team
 #
 
 # Add entry in menu
-# MENUENTRY firewall 050 "addresses" "addresses"
+# MENUTHRDLVL "addresses" 010 "addresses" "addresses"
 #
 # Make sure translation exists $Lang::tr{'addresses'}
 

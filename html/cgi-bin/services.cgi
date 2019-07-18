@@ -18,7 +18,7 @@
 # (c) 2014-2018, the Openfirewall Team
 #
 # Add entry in menu
-# MENUENTRY firewall 030 "alt services" "alt services"
+# MENUTHRDLVL "alt services" 010 "alt services" "alt services"
 #
 # Make sure translation exists $Lang::tr{'alt services'}
 

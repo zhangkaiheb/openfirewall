@@ -19,7 +19,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY firewall 060 "address groups" "address groups"
+# MENUTHRDLVL "addresses" 020 "address groups" "address groups"
 
 use strict;
 
