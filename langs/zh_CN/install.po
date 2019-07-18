@@ -19,7 +19,7 @@
 # (c) The Openfirewall Team
 # 
 # Openfirewall translation
-# (c) 2003 Vince Chu, Yuan-Chen Cheng 
+# (c) 2017 - 2020
 #
 msgid ""
 msgstr ""
