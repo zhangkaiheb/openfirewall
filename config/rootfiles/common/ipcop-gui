@@ -2,6 +2,7 @@
 ##
 usr/local/apache/cgi-bin/addresses.cgi
 usr/local/apache/cgi-bin/addressgrps.cgi
+usr/local/apache/cgi-bin/addrmenu.cgi
 usr/local/apache/cgi-bin/aliases.cgi
 usr/local/apache/cgi-bin/backup.cgi
 usr/local/apache/cgi-bin/changepw.cgi
@@ -54,6 +55,7 @@ usr/local/apache/cgi-bin/servicegrps.cgi
 usr/local/apache/cgi-bin/services.cgi
 usr/local/apache/cgi-bin/shaping.cgi
 usr/local/apache/cgi-bin/shutdown.cgi
+usr/local/apache/cgi-bin/srvmenu.cgi
 usr/local/apache/cgi-bin/status.cgi
 usr/local/apache/cgi-bin/sysinfo.cgi
 usr/local/apache/cgi-bin/time.cgi
