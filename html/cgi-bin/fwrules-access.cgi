@@ -1304,7 +1304,8 @@ END
         }
         else {
             print <<END;
-    <td colspan='3' class='base'>
+    <td width='1%' class='base'>
+    <td width='20%' class='base'>
         <input type='hidden' name='SRC_NET_TYPE' value='defaultSrcNet' />
 END
         }
