@@ -446,7 +446,7 @@ sub saveCustIfaces
     foreach my $ifaceName (sort keys %$ifaces) {
         print FILE "$ifaceName,";
         print FILE "$ifaces->{$ifaceName}{'TYPE'},";
-        print FILE "$ifaces->{$ifaceName}{'iface'},";
+        print FILE "$ifaces->{$ifaceName}{'IFACE'},";
 
         # for bridge members, use plus sign as seprates.
         print FILE "$ifaces->{$ifaceName}{'BR_MEMBERS'},";
