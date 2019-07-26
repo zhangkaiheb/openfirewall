@@ -6,7 +6,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 080 "shutdown" "shutdown"
+# MENUTHRDLVL "maintenance" 020 "shutdown" "shutdown"
 
 use strict;
 

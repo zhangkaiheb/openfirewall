@@ -21,7 +21,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 070 "backup" "backup"
+# MENUTHRDLVL "maintenance" 010 "backup" "backup"
 
 use strict;
 
