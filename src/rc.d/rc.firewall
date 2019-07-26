@@ -212,7 +212,7 @@ start)
     iptables_red
 
     # FW_PINHOLES pinhole chain, used for internal traffic from ORANGE/BLUE/GREEN to ORANGE/BLUE/GREEN
-    /sbin/iptables -N FW_PINHOLES
+    #/sbin/iptables -N FW_PINHOLES
 
     # PORTFWACCESS chain, used for portforwarding
     /sbin/iptables -N PORTFWACCESS
