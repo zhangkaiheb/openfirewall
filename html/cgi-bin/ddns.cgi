@@ -20,7 +20,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY services 040 "dynamic dns" "dynamic dns client"
+# MENUTHRDLVL "dns service" 020 "dynamic dns" "dynamic dns client"
 #
 # Make sure translation exists $Lang::tr{'dynamic dns client'}
 

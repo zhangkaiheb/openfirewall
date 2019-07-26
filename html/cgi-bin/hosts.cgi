@@ -17,7 +17,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY services 050 "edit hosts" "host configuration"
+# MENUTHRDLVL "dns service" 010 "edit hosts" "host configuration"
 #
 # Make sure translation exists $Lang::tr{'edit hosts'} $Lang::tr{'host configuration'}
 
