@@ -17,7 +17,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY network 040 "aliases" "dialup settings"
+# MENUTHRDLVL "aliases" 010 "aliases" "dialup settings"
 #
 # Make sure translation exists $Lang::tr{'aliases'}
 
