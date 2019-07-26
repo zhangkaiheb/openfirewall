@@ -290,7 +290,11 @@ END
     if ($javascript) {
         print "<script type='text/javascript' src='/include/domLib.js'></script>\n";
         print "<script type='text/javascript' src='/include/domMenu.js'></script>\n";
-        print "<script type='text/javascript' src='/include/ofwsys.js'></script>\n";
+        print "<script type='text/javascript' src='/js/ofwsys.js'></script>\n";
+        print "<script type='text/javascript' src='/js/ofwpolicy.js'></script>\n";
+        print "<script type='text/javascript' src='/js/ofwutils.js'></script>\n";
+        print "<script type='text/javascript' src='/js/dtree.js'></script>\n";
+        print "<script type='text/javascript' src='/js/jquery-min.js'></script>\n";
         &genmenu();
         &genmenulayout();
         &showjsmenu();
