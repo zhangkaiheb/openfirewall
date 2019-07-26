@@ -78,8 +78,7 @@ int main(int argc, char *argv[])
         case 'f':
             flag_force = 1;
             if (strcmp(optarg,"INPUT") && strcmp(optarg,"OUTGOING") &&
-                strcmp(optarg,"EXTERNAL") && strcmp(optarg,"PINHOLES") &&
-                strcmp(optarg,"PORTFW")) {
+                strcmp(optarg,"EXTERNAL") && strcmp(optarg,"PORTFW")) {
 
                 fprintf(stderr, "invalid chain (%s)\n", optarg);
                 exit(2);
