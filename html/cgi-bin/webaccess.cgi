@@ -96,6 +96,7 @@ print <<END
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <style type="text/css">\@import url(/include/openfirewall.css);</style>
+    <style type="text/css">\@import url(/css/main.css);</style>
 </head>
  
 <body>
