@@ -418,25 +418,6 @@ print <<END;
 </div>
 END
 &Header::closebox();
-
-&Header::openbox('100%', 'left', "$Lang::tr{'default services'}:");
-print <<END;
-<div align='center'>
-<table width='100%' align='center'>
-<tr align="center">
-    <td><strong>$Lang::tr{'servicename'}</strong></td>
-    <td><strong>$Lang::tr{'ports'}</strong></td>
-    <td><strong>$Lang::tr{'protocol'}</strong></td>
-</tr>
-END
-
-&display_default_services();
-print <<END;
-</table>
-</div>
-END
-
-&Header::closebox();
 &Header::closebigbox();
 &Header::closepage();
 
@@ -541,39 +522,6 @@ END
     </td>
 END
         }
-        print "</tr>\n";
-        $id++;
-    }
-}
-
-sub display_default_services {
-    my $prev    = "";
-    my $newline = "";
-
-    my %defaultServices = ();
-    &DATA::readDefaultServices(\%defaultServices);
-
-    my %ofwServices = ();
-    &DATA::readOfwServices(\%ofwServices);
-
-    my $id = 0;
-    foreach my $defService (sort keys %ofwServices) {
-        print "<tr class='table".int(($id % 2) + 1)."colour'>";
-        print "<td>$defService</td>\n";
-        print "<td align='center'>$ofwServices{$defService}{'PORT_NR'}</td>\n";
-        print "<td align='center'>" . &cleanprotocol($ofwServices{$defService}{'PROTOCOL'}) . "</td>\n";
-        print "</tr>\n";
-        $id++;
-    }
-
-    print
-"<tr><td colspan='3' bgcolor='#000000'><img src='/images/null.gif' width='1' height='1' border='0' alt='--------' /></td></tr>\n";
-
-    foreach my $defService (sort keys %defaultServices) {
-        print "<tr class='table".int(($id % 2) + 1)."colour'>";
-        print "<td>$defService</td>\n";
-        print "<td align='center'>$defaultServices{$defService}{'PORT_NR'}</td>\n";
-        print "<td align='center'>" . &cleanprotocol($defaultServices{$defService}{'PROTOCOL'}) . "</td>\n";
         print "</tr>\n";
         $id++;
     }
