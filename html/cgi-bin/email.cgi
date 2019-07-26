@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
-# (c) 2018-2019 The Openfirewall Team
+# (c) 2018-2020 The Openfirewall Team
 #
 
 # Add entry in menu
-# MENUENTRY system 060 "email settings" "email settings"
+# MENUTHRDLVL "sys settings" 020 "email settings" "email settings"
 
 use strict;
 
