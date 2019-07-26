@@ -19,9 +19,9 @@
 #
 
 # Add entry in menu
-# MENUENTRY status 090 "IPtables" "IPTables"
+# MENUENTRY status 090 "IPTables" "IPTables"
 #
-# Do not translate IPTables
+# Do not translate IPTables ?
 
 use strict;
 
