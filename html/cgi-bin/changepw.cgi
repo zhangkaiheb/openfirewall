@@ -19,7 +19,7 @@
 #
 
 # Add entry in menu
-# MENUENTRY system 030 "sspasswords" "sspasswords"
+# MENUTHRDLVL "administrator" 010 "sspasswords" "sspasswords"
 #
 # Make sure translation exists $Lang::tr{'sspasswords'}
 
