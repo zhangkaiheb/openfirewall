@@ -55,7 +55,7 @@ my ($second, $minute, $hour, $day, $month, $year, $wday) = localtime(time);
 
 # weekday starts on sunday with 0
 
-my @allRuleTypes = ("INPUT", "OUTGOING", "EXTERNAL", "PINHOLES", "PORTFW");
+my @allRuleTypes = ("INPUT", "OUTGOING", "EXTERNAL", "PORTFW");
 
 my @runRuleTypes          = ();
 my $doUpdateOfwRules    = 0;
@@ -210,7 +210,6 @@ foreach my $type (@runRuleTypes) {
 
     # flush External Access rules
     &prepareRuleDirect("-F FW_XTACCESS") if ($type eq "EXTERNAL");
-    &prepareRuleDirect("-F FW_PINHOLES") if ($type eq "PINHOLES");
     if($type eq "PORTFW") {
          &prepareRuleDirect("-t nat -F PORTFW");
          &prepareRuleDirect("-t nat -F PORTFWNAT");
@@ -261,6 +260,7 @@ $ovpnSettings{'ENABLED_RED_1'} = 'off' if (!exists($ovpnSettings{'ENABLED_RED_1'
 $ovpnSettings{'ENABLED_BLUE_1'} = 'off' if (!exists($ovpnSettings{'ENABLED_BLUE_1'}));
 
 foreach my $type (@runRuleTypes) {
+=pod
     if($type eq "PORTFW") {
         # create POSTROUTING rules to be able to hit a portforward from inside local network
 
@@ -273,6 +273,7 @@ foreach my $type (@runRuleTypes) {
             &prepareRule("$rulebody");
          }    # foreach my (keys %defaultNetworks)
     }
+=cut
 
     foreach my $rule (@{$ruleConfig{$type}}) {
         # Enabled ?
@@ -461,6 +462,7 @@ foreach my $type (@runRuleTypes) {
         my $rulebody     = '';
 
         # incoming interface
+=pod
         if ($rule->{'SRC_NET_TYPE'} eq 'defaultSrcNet') {
             if (defined($FW::interfaces{$rule->{'SRC_NET'}})
                 && $FW::interfaces{$rule->{'SRC_NET'}}{'ACTIV'} eq 'yes')
@@ -480,19 +482,20 @@ foreach my $type (@runRuleTypes) {
             $srcInterface = $rule->{'SRC_NET'};
         }
         else {    # 'custSrcNet'
+=cut
             if ($custIfaces{$rule->{'SRC_NET'}} eq '') {
                 &General::log("ERROR in puzzleFwRules: Custom Interface $rule->{'SRC_NET'} does not exist");
                 next;
             }
             $inDev = $custIfaces{$rule->{'SRC_NET'}}{'IFACE'};
-        }
+#        }
 
         if ($inDev ne '') {
             $inDev = "-i $inDev";
         }
 
         # we only need outgoing interface in a FORWARD rule
-        if ($type eq 'OUTGOING' || $type eq 'PINHOLES' || $type eq 'PORTFW') {
+        if ($type eq 'OUTGOING' || $type eq 'PORTFW') {
 
             # outgoing interface
             if ($rule->{'DST_NET_TYPE'} eq 'defaultDestNet') {
@@ -626,7 +629,7 @@ foreach my $type (@runRuleTypes) {
 
         # we only need destination addresses in a FORWARD rule
         # and in external access so we do not open alias IPs unexpected
-        if ($type eq 'OUTGOING' || $type eq 'PINHOLES' || $type eq 'PORTFW' || $type eq 'EXTERNAL') {
+        if ($type eq 'OUTGOING' || $type eq 'PORTFW' || $type eq 'EXTERNAL') {
 
             # destination address
             if ($rule->{'DST_IP_TYPE'} eq 'defaultDstIP') {
@@ -760,9 +763,6 @@ foreach my $type (@runRuleTypes) {
         elsif ($type eq 'EXTERNAL') {
             $chain = "-A FW_XTACCESS";
         }
-        elsif ($type eq 'PINHOLES') {
-            $chain = "-A FW_PINHOLES";
-        }
         elsif ($type eq 'PORTFW') {
             $chain = "-A PORTFWACCESS";
         }
@@ -867,6 +867,7 @@ foreach my $type (@runRuleTypes) {
                          }    # foreach my $tmpSrcAdr (@srcAdres)
                     }    # foreach $service (@extPfwServices)
 
+=pod
                     foreach my $service (@extPfwServices) {
                         foreach my $inIface (keys %defaultNetworks) {
                             next if (!defined($defaultNetworks{$inIface}{'PFWMARK'}));
@@ -877,6 +878,7 @@ foreach my $type (@runRuleTypes) {
                             &prepareRule("$rulebody");
                          }    # foreach my (keys %defaultNetworks)
                     }    # foreach $service (@extPfwServices)
+=cut
 
                     foreach my $service (@services) {
                         foreach my $tmpSrcAdr (@srcAdres) {
@@ -1009,7 +1011,6 @@ if ($doUpdateOfwRules) {
         if ($FW::interfaces{$inIface}{'COLOR'} ne "RED_COLOR") {
             # add 'Pinholes' for all policies and all 'our' interfaces except for RED.
             # Policy 'open' also needs Pinholes to be able to define a block or log rule.
-            &prepareRule("-A FW_OFW_FORWARD -i $FW::interfaces{$inIface}{'IFACE'} -j FW_PINHOLES");
         }
         else {
 
@@ -1127,23 +1128,6 @@ if ($doUpdateOfwRules) {
     }
 
     # add Pinholes for Custom Interfaces
-    if ($FW::fwSettings{'ADV_MODE_ENABLE'} eq 'on') {
-        foreach my $iface (keys %custIfaces) {
-            ## DEBUG
-            print " Custom: $iface\n" if ($debugLevel > 0);
-            ## DEBUG END
-
-            &prepareRule("-A FW_OFW_FORWARD -i $custIfaces{$iface}{'IFACE'} -j FW_PINHOLES");
-
-            my $defaultRule = "-A FW_LOG -i $custIfaces{$iface}{'IFACE'} -j";
-            my $defaultAction = 'DROP';
-            $defaultAction = 'REJECT' if ($ifacePolicies{$iface}{'DEFAULT_ACTION'} eq 'reject');
-            if ($ifacePolicies{$iface}{'DEFAULT_LOG'} eq 'on') {
-                &prepareRule("$defaultRule LOG --log-prefix \"\U$iface\E $defaultAction \" ");
-            }
-            &prepareRule("$defaultRule $defaultAction");
-        }
-    }
 
     # default Logging (if enabled) + DROP/REJECT rules for everything to catch everything
     $defaultRule = "-A FW_LOG -j";
@@ -1491,6 +1475,7 @@ sub buildAddressParams
             }
         }
     }
+=pod
     elsif ($p_addressType eq 'default') {
         # Check for defined and non-empty
         return () unless (defined($defaultNetworks{$p_addressName}{'IPT'}));
@@ -1498,6 +1483,7 @@ sub buildAddressParams
 
         return "$p_addressInv $prefixIP $defaultNetworks{$p_addressName}{'IPT'}";
     }
+=cut
 
     # we should never come to here
     return ();
