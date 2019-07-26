@@ -1,0 +1,8 @@
+@charset "utf-8";
+
+.text-left-impt {text-align: left !important;}
+
+
+.sub-heading-row {border-bottom: 1px solid #fff;background-color: #ccf !important;}
+div.sub-heading-row, .sub-heading-row>td {padding:5px 10px;font-size: 13px;}
+
