@@ -391,6 +391,8 @@ sub hideAdvRule
         # Advanced Mode is enabled, don't hide anything
         return 0;
     }
+=pod
+    # delete defaultSrcNet and defaultDestNet. zk
     if($srcNetType ne 'defaultSrcNet'
         || ($dstNetType ne 'defaultDestNet' && $ruleType =~ /^(OUTGOING|PORTFW|PINHOLES)$/)) {
         # Rules with custom interfaces are only in adv. mode
@@ -403,5 +405,7 @@ sub hideAdvRule
 
     # If we are here the rule is an Openfirewall Access rule with Orange -> Openfirewall. Those rules are only created in adv. mode
     return 1;
+=cut
+    return 0;
 }
 # EOF
