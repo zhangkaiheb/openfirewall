@@ -31,7 +31,8 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(PKG_NAME)_$(VER).tar.xz
-DL_FROM    = $(URL_DEBIAN)/m/$(PKG_NAME)
+#DL_FROM    = $(URL_DEBIAN)/m/$(PKG_NAME)
+DL_FROM    = $(URL_OFPKGS)/m
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

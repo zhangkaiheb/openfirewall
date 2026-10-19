@@ -39,7 +39,8 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.bz2
-DL_FROM    = ftp://ftp.vim.org/pub/vim/unix
+#DL_FROM    = ftp://ftp.vim.org/pub/vim/unix
+DL_FROM    = $(URL_OFPKGS)/v
 DIR_APP    = $(DIR_SRC)/vim74
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

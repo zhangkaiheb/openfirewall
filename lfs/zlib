@@ -42,7 +42,8 @@ THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.xz
 #DL_FROM    = $(URL_SFNET)/libpng
 #DL_FROM    = http://www.zlib.net
-DL_FROM    = http://zlib.net
+#DL_FROM    = http://zlib.net
+DL_FROM    = $(URL_OFPKGS)/z
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

@@ -38,7 +38,8 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
-DL_FROM    = https://github.com/thkukuk/rpcsvc-proto/archive/v1.3.1
+#DL_FROM    = https://github.com/thkukuk/rpcsvc-proto/archive/v1.3.1
+DL_FROM    = $(URL_OFPKGS)/r
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

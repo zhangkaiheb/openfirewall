@@ -40,7 +40,8 @@ OTHER_SRC  = yes
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.xz
 #DL_FROM    = $(URL_SFNET)/$(PKG_NAME)
-DL_FROM    = https://github.com/strace/strace/releases/download/v4.21
+#DL_FROM    = https://github.com/strace/strace/releases/download/v4.21
+DL_FROM    = $(URL_OFPKGS)/s
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

@@ -42,7 +42,8 @@ OTHER_SRC  = yes
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
 #DL_FROM    = ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable
-DL_FROM    = https://openbsd.hk/pub/OpenBSD/OpenSSH/portable
+#DL_FROM    = https://openbsd.hk/pub/OpenBSD/OpenSSH/portable
+DL_FROM    = $(URL_OFPKGS)/o
 ##https://cloudflare.cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-7.6p1.tar.gz
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)

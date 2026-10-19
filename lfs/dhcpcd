@@ -39,7 +39,8 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.xz
-DL_FROM    = http://roy.marples.name/downloads/dhcpcd
+#DL_FROM    = http://roy.marples.name/downloads/dhcpcd
+DL_FROM    = $(URL_OFPKGS)/d
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

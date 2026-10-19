@@ -42,7 +42,8 @@ OTHER_SRC  = yes
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(PKG_NAME)-$(VER).tar.xz
 ##DL_FROM    = http://ftp.gnome.org/pub/gnome/sources/glib/2.42
-DL_FROM    = http://ftp.acc.umu.se/pub/gnome/sources/glib/2.56
+#DL_FROM    = http://ftp.acc.umu.se/pub/gnome/sources/glib/2.56
+DL_FROM    = $(URL_OFPKGS)/g
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

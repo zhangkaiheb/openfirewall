@@ -39,7 +39,8 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(THISAPP).tar.gz
-DL_FROM    = ftp://ftp.in-berlin.de/pub/capi4linux
+#DL_FROM    = ftp://ftp.in-berlin.de/pub/capi4linux
+DL_FROM    = $(URL_OFPKGS)/c
 DIR_APP    = $(DIR_SRC)/capi4k-utils
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(THISAPP)
 

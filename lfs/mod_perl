@@ -34,7 +34,8 @@ OTHER_SRC  = yes
 
 THISAPP    = $(PKG_NAME)-$(VER)
 DL_FILE    = $(PKG_NAME)-$(VER).tar.gz
-DL_FROM    = http://mirror.bit.edu.cn/apache/perl
+#DL_FROM    = http://mirror.bit.edu.cn/apache/perl
+DL_FROM    = $(URL_OFPKGS)/m
 DIR_APP    = $(DIR_SRC)/$(THISAPP)
 TARGET     = $(DIR_INFO)/$(STAGE_ORDER)_$(STAGE)/$(LFS_NAME)-$(VER)
 
