@@ -138,7 +138,9 @@ endif # IPSEC_KLIPS yes
 	# currently don't use a value higher than 1 for make -j or it fail
 
 ###	cd $(DIR_APP) && make -j 1 USERCOMPILE="-fno-strict-aliasing" programs install
-	cd $(DIR_APP) && make -j 1 USE_OBJDIR=true programs install
+#	cd $(DIR_APP) && make -j 1 USE_OBJDIR=true programs install
+	cd $(DIR_APP) && cp ports/linux/include/sysdep.h include/sysdep.h
+	cd $(DIR_APP) && make -j 1 CFLAGS="-fpie -I$(DIR_APP)/include" USE_OBJDIR=true programs install
 	if [ -e /etc/rc.d/init.d/ipsec ]; then \
 		mv -f /etc/rc.d/init.d/ipsec /etc/rc.d/; \
 	fi
