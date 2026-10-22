@@ -32,7 +32,8 @@ require '/usr/lib/ofw/lang.pl';
 require '/usr/lib/ofw/header.pl';
 require '/usr/lib/ofw/firewall-lib.pl';
 
-&Header::showhttpheaders();
+# Enable output buffering
+$| = 1;
 
 my %cgiparams    = ();
 my $errormessage = '';
@@ -40,6 +41,189 @@ my $error        = '';
 $cgiparams{'ACTION'}     = '';
 $cgiparams{'USED_COUNT'} = 0;
 &General::getcgihash(\%cgiparams);
+
+# Read interface data early for POST processing
+my %custIfaces = ();
+&DATA::readCustIfaces(\%custIfaces);
+
+# Check if this is a POST request that needs redirect
+my $needs_redirect = 0;
+if ($ENV{'REQUEST_METHOD'} eq 'POST' && $cgiparams{'ACTION'} ne '') {
+    $needs_redirect = 1;
+
+    # Process add interface action
+    if ($cgiparams{'ACTION'} eq $Lang::tr{'add interface'}) {
+        &validateIFaceParams(\%custIfaces);
+        &ip_link_add_cmd();
+
+        unless ($errormessage) {
+            $custIfaces{$cgiparams{'IF_NAME'}}{'TYPE'}        = $cgiparams{'TYPE'};
+            $custIfaces{$cgiparams{'IF_NAME'}}{'DESCRIPTION'} = $cgiparams{'DESCRIPTION'};
+            $custIfaces{$cgiparams{'IF_NAME'}}{'IFACE'}       = $cgiparams{'IFACE'};
+            $custIfaces{$cgiparams{'IF_NAME'}}{'ADDRESSING_MODE'} = $cgiparams{'ADDRESSING_MODE'};
+            if ($cgiparams{'IPADDR_MASK'} ne '0.0.0.0/0.0.0.0') {
+               my @tmp = split(/\//, $cgiparams{'IPADDR_MASK'});
+               $custIfaces{$cgiparams{'IF_NAME'}}{'IPADDRESS'} = $tmp[0];
+               $custIfaces{$cgiparams{'IF_NAME'}}{'NETMASK'} = $tmp[1];
+            }
+            $custIfaces{$cgiparams{'IF_NAME'}}{'MTU'}         = $cgiparams{'MTU'};
+            $custIfaces{$cgiparams{'IF_NAME'}}{'VLANID'}      = $cgiparams{'VLANID'};
+            $custIfaces{$cgiparams{'IF_NAME'}}{'ACCESSMODE'}  = $cgiparams{'ACCESSMODE'};
+
+            $custIfaces{$cgiparams{'IF_NAME'}}{'BR_MEMBERS'} = $cgiparams{'BR_MEMBERS'};
+            if ($cgiparams{'BR_MEMBERS'} ne '') {
+               my @mbrs = split(/\#/, $cgiparams{'BR_MEMBERS'});
+               foreach my $intf (@mbrs) {
+                    $custIfaces{$cgiparams{'$intf'}}{'USED_BR'} = 1;
+               }
+            }
+
+            $custIfaces{$cgiparams{'IF_NAME'}}{'BOND_MEMBERS'} = $cgiparams{'BOND_MEMBERS'};
+            if ($cgiparams{'BOND_MEMBERS'} ne '') {
+               my @mbrs = split(/\#/, $cgiparams{'BOND_MEMBERS'});
+               foreach my $intf (@mbrs) {
+                    $custIfaces{$cgiparams{'$intf'}}{'USED_BOND'} = 1;
+               }
+            }
+
+            $custIfaces{$cgiparams{'IF_NAME'}}{'EXTERNAL'}    = $cgiparams{'EXTERNAL'};
+            $custIfaces{$cgiparams{'IF_NAME'}}{'USED_COUNT'}  = 0;
+
+            &DATA::saveCustIfaces(\%custIfaces);
+
+            &General::log("$Lang::tr{'iface added'}: $cgiparams{'IF_NAME'}");
+            `/usr/local/bin/setfwrules --ofw < /dev/null > /dev/null 2>&1 &`;
+        }
+    }
+
+    &General::log("DEBUG - ACTION received: '$cgiparams{'ACTION'}'");
+    &General::log("DEBUG - edit action string: '$Lang::tr{'edit'}'");
+
+    if (lc($cgiparams{'ACTION'}) eq lc($Lang::tr{'edit'})) {
+        # Debug: log received parameters
+        &General::log("DEBUG EDIT - IF_NAME: $cgiparams{'IF_NAME'}");
+        &General::log("DEBUG EDIT - OLD_IF_NAME: $cgiparams{'OLD_IF_NAME'}");
+        &General::log("DEBUG EDIT - TYPE: $cgiparams{'TYPE'}");
+        &General::log("DEBUG EDIT - ADDRESSING_MODE: $cgiparams{'ADDRESSING_MODE'}");
+        &General::log("DEBUG EDIT - IPADDR_MASK: $cgiparams{'IPADDR_MASK'}");
+        &General::log("DEBUG EDIT - DESCRIPTION: $cgiparams{'DESCRIPTION'}");
+        &General::log("DEBUG EDIT - BR_MEMBERS: $cgiparams{'BR_MEMBERS'}");
+
+        &validateIFaceParams(\%custIfaces);
+        &General::log("DEBUG EDIT - After validation, errormessage: '$errormessage'");
+        if ($errormessage) {
+            &General::log("DEBUG EDIT - Validation error: $errormessage");
+            $cgiparams{'ACTION'} = $Lang::tr{'edit'};
+        }
+        else {
+            my $ifaceName    = $cgiparams{'IF_NAME'};
+            my $oldIfaceName = $cgiparams{'OLD_IF_NAME'} || $ifaceName;
+            &General::log("DEBUG EDIT - ifaceName=$ifaceName, oldIfaceName=$oldIfaceName");
+
+            # Update IP address
+            if ($cgiparams{'ADDRESSING_MODE'} eq '0') {
+                # Static mode: update IP from form
+                &General::log("DEBUG EDIT - Static mode, IPADDR_MASK: '$cgiparams{'IPADDR_MASK'}'");
+                if ($cgiparams{'IPADDR_MASK'} ne '' && $cgiparams{'IPADDR_MASK'} ne '0.0.0.0/0.0.0.0') {
+                    my @tmp = split(/\//, $cgiparams{'IPADDR_MASK'});
+                    if (scalar(@tmp) == 2) {
+                        $custIfaces{$oldIfaceName}{'IPADDRESS'} = $tmp[0];
+                        $custIfaces{$oldIfaceName}{'NETMASK'}   = $tmp[1];
+                        &General::log("DEBUG EDIT - Updated IP to $tmp[0] / $tmp[1]");
+                    }
+                }
+            } else {
+                # DHCP mode: clear IP address
+                &General::log("DEBUG EDIT - DHCP mode, clearing IP address");
+                $custIfaces{$oldIfaceName}{'IPADDRESS'} = '0.0.0.0';
+                $custIfaces{$oldIfaceName}{'NETMASK'}   = '0.0.0.0';
+            }
+            $custIfaces{$oldIfaceName}{'DESCRIPTION'} = $cgiparams{'DESCRIPTION'};
+            $custIfaces{$oldIfaceName}{'MTU'}         = $cgiparams{'MTU'};
+            $custIfaces{$oldIfaceName}{'ADDRESSING_MODE'} = $cgiparams{'ADDRESSING_MODE'};
+
+            # Update BR_MEMBERS
+            $custIfaces{$oldIfaceName}{'BR_MEMBERS'} = $cgiparams{'BR_MEMBERS'};
+
+            # Update BOND_MEMBERS
+            $custIfaces{$oldIfaceName}{'BOND_MEMBERS'} = $cgiparams{'BOND_MEMBERS'};
+
+            # Update VLAN fields
+            $custIfaces{$oldIfaceName}{'VLANID'} = $cgiparams{'VLANID'};
+            $custIfaces{$oldIfaceName}{'IFACE'}  = $cgiparams{'IFACE'};
+
+            &General::log("DEBUG EDIT - Before saveCustIfaces, IPADDRESS=$custIfaces{$oldIfaceName}{'IPADDRESS'}");
+            &DATA::saveCustIfaces(\%custIfaces);
+            &General::log("DEBUG EDIT - After saveCustIfaces");
+
+            # Apply IP address changes to the system
+            if ($cgiparams{'ADDRESSING_MODE'} eq '0' && $cgiparams{'IPADDR_MASK'} ne '' && $cgiparams{'IPADDR_MASK'} ne '0.0.0.0/0.0.0.0') {
+                # Static mode: apply IP address
+                my $ip_cmd = "ip addr add $cgiparams{'IPADDR_MASK'} dev $ifaceName";
+                &General::log("DEBUG EDIT - Applying IP address to system");
+                &General::log("DEBUG EDIT - Full command: $ip_cmd");
+                my $ip_result = `$ip_cmd 2>&1`;
+                my $exit_code = $? >> 8;
+                &General::log("DEBUG EDIT - ip addr add result: $ip_result, exit code: $exit_code");
+            }
+
+            &General::log("$Lang::tr{'iface updated'}: $oldIfaceName");
+            `/usr/local/bin/setfwrules --all < /dev/null > /dev/null 2>&1 &`;
+        }
+    }
+
+    if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
+        # Get all IF_NAME parameters (support multiple deletions)
+        my @ifaceNames;
+        if (ref $cgiparams{'IF_NAME'} eq 'ARRAY') {
+            @ifaceNames = @{$cgiparams{'IF_NAME'}};
+        } elsif ($cgiparams{'IF_NAME'} =~ /\|/) {
+            # Multiple values joined by pipe
+            @ifaceNames = split(/\|/, $cgiparams{'IF_NAME'});
+        } else {
+            @ifaceNames = ($cgiparams{'IF_NAME'});
+        }
+
+        &General::log("DEBUG REMOVE - Interfaces to delete: " . join(', ', @ifaceNames));
+
+        foreach my $ifaceName (@ifaceNames) {
+            next unless $ifaceName;
+
+            # Delete system interface
+            my $del_cmd = "ip link delete $ifaceName";
+            &General::log("DEBUG REMOVE - Deleting system interface: $ifaceName");
+            &General::log("DEBUG REMOVE - Full command: $del_cmd");
+            my $del_result = `$del_cmd 2>&1`;
+            my $exit_code = $? >> 8;
+            &General::log("DEBUG REMOVE - ip link delete result: $del_result, exit code: $exit_code");
+
+            # Delete from config file
+            delete($custIfaces{$ifaceName});
+            &General::log("$Lang::tr{'iface removed'}: $ifaceName");
+        }
+
+        &DATA::saveCustIfaces(\%custIfaces);
+        `/usr/local/bin/setfwrules --ofw < /dev/null > /dev/null 2>&1 &`;
+    }
+
+    if ($cgiparams{'ACTION'} eq $Lang::tr{'cancel'}) {
+        undef %cgiparams;
+        $cgiparams{'ACTION'} = '';
+        # Redirect to avoid form resubmission on refresh
+        print "Status: 302 Found\n";
+        print "Location: /cgi-bin/interfaces.cgi\n\n";
+        exit 0;
+    }
+
+    # Send redirect after processing POST request
+    if ($needs_redirect) {
+        print "Status: 302 Found\n";
+        print "Location: /cgi-bin/interfaces.cgi\n\n";
+        exit 0;
+    }
+}
+
+&Header::showhttpheaders();
 
 # vars for setting up sort order
 my $sort_col  = '1';
@@ -60,105 +244,15 @@ if ($ENV{'QUERY_STRING'} ne '') {
     }
 }
 
-my %custIfaces = ();
-&DATA::readCustIfaces(\%custIfaces);
+# Only process GET parameters if not a POST request
+if ($ENV{'REQUEST_METHOD'} ne 'POST') {
+    $cgiparams{'KEY'}            = '';
+    $cgiparams{'IFACE'}          = '';
+    $cgiparams{'IF_NAME'}     = '';
+    &General::getcgihash(\%cgiparams);
 
-$cgiparams{'KEY'}            = '';
-$cgiparams{'IFACE'}          = '';
-$cgiparams{'IF_NAME'}     = '';
-&General::getcgihash(\%cgiparams);
-
-$cgiparams{'IF_NAME'} = &Header::cleanConfNames($cgiparams{'IF_NAME'});
-
-if ($cgiparams{'ACTION'} eq $Lang::tr{'add'}) {
-    &validateIFaceParams(\%custIfaces);
-    &ip_link_add_cmd();
-
-    unless ($errormessage) {
-        $custIfaces{$cgiparams{'IF_NAME'}}{'TYPE'}        = $cgiparams{'TYPE'};
-        $custIfaces{$cgiparams{'IF_NAME'}}{'DESCRIPTION'} = $cgiparams{'DESCRIPTION'};
-        $custIfaces{$cgiparams{'IF_NAME'}}{'IFACE'}       = $cgiparams{'IFACE'};
-        $custIfaces{$cgiparams{'IF_NAME'}}{'ADDRESSING_MODE'} = $cgiparams{'ADDRESSING_MODE'};
-        if ($cgiparams{'IPADDR_MASK'} ne '0.0.0.0/0.0.0.0') {
-           my @tmp = split(/\//, $cgiparams{'IPADDR_MASK'});
-           $custIfaces{$cgiparams{'IF_NAME'}}{'IPADDRESS'} = $tmp[0];
-           $custIfaces{$cgiparams{'IF_NAME'}}{'NETMASK'} = $tmp[1];
-        }
-        $custIfaces{$cgiparams{'IF_NAME'}}{'MTU'}         = $cgiparams{'MTU'};
-        $custIfaces{$cgiparams{'IF_NAME'}}{'VLANID'}      = $cgiparams{'VLANID'};
-        $custIfaces{$cgiparams{'IF_NAME'}}{'ACCESSMODE'}  = $cgiparams{'ACCESSMODE'};
-
-        $custIfaces{$cgiparams{'IF_NAME'}}{'BR_MEMBERS'} = $cgiparams{'BR_MEMBERS'};
-        if ($cgiparams{'BR_MEMBERS'} ne '') {
-           my @mbrs = split(/\#/, $cgiparams{'BR_MEMBERS'});
-           foreach my $intf (@mbrs) {
-                $custIfaces{$cgiparams{'$intf'}}{'USED_BR'} = 1;
-           }
-        }
-
-        $custIfaces{$cgiparams{'IF_NAME'}}{'BOND_MEMBERS'} = $cgiparams{'BOND_MEMBERS'};
-        if ($cgiparams{'BOND_MEMBERS'} ne '') {
-           my @mbrs = split(/\#/, $cgiparams{'BOND_MEMBERS'});
-           foreach my $intf (@mbrs) {
-                $custIfaces{$cgiparams{'$intf'}}{'USED_BOND'} = 1;
-           }
-        }
-
-        $custIfaces{$cgiparams{'IF_NAME'}}{'EXTERNAL'}    = $cgiparams{'EXTERNAL'};
-        $custIfaces{$cgiparams{'IF_NAME'}}{'USED_COUNT'}  = 0;
-
-        &DATA::saveCustIfaces(\%custIfaces);
-
-        &General::log("$Lang::tr{'iface added'}: $cgiparams{'IF_NAME'}");
-        undef %cgiparams;
-        $cgiparams{'ACTION'} = '';
-        `/usr/local/bin/setfwrules --ofw < /dev/null > /dev/null 2>&1 &`;
-    }
+    $cgiparams{'IF_NAME'} = &Header::cleanConfNames($cgiparams{'IF_NAME'});
 }
-
-if ($cgiparams{'ACTION'} eq $Lang::tr{'update'}) {
-    &validateIFaceParams(\%custIfaces);
-    if ($errormessage) {
-        $cgiparams{'ACTION'} = $Lang::tr{'edit'};
-    }
-    else {
-        my $ifaceName    = $cgiparams{'IF_NAME'};
-
-        $custIfaces{$cgiparams{'OLD_IF_NAME'}}{'IPADDRESS'}   = $cgiparams{'IPADDRESS'};
-        $custIfaces{$cgiparams{'OLD_IF_NAME'}}{'NETMASK'}     = $cgiparams{'NETMASK'};
-        $custIfaces{$cgiparams{'OLD_IF_NAME'}}{'DESCRIPTION'} = $cgiparams{'DESCRIPTION'};
-        $custIfaces{$cgiparams{'OLD_IF_NAME'}}{'MTU'}         = $cgiparams{'MTU'};
-        $custIfaces{$cgiparams{'IF_NAME'}}{'MBR_CNT'}         = $cgiparams{'MBR_CNT'};
-        for (my $i; $i < $cgiparams{'MBR_CNT'}; $i++) {
-            my $key = 'MEMBER'.'$i';
-            $custIfaces{$cgiparams{'IF_NAME'}}{'key'}   = $cgiparams{'key'};
-        }
-
-        &DATA::saveCustIfaces(\%custIfaces);
-
-        &General::log("$Lang::tr{'iface updated'}: $cgiparams{'IF_NAME'}");
-        undef %cgiparams;
-        $cgiparams{'ACTION'} = '';
-        `/usr/local/bin/setfwrules --all < /dev/null > /dev/null 2>&1 &`;
-    }
-}
-
-if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
-    delete($custIfaces{$cgiparams{'IF_NAME'}});
-
-    &DATA::saveCustIfaces(\%custIfaces);
-
-    &General::log("$Lang::tr{'iface removed'}: $cgiparams{'IF_NAME'}");
-    undef %cgiparams;
-    $cgiparams{'ACTION'} = '';
-    `/usr/local/bin/setfwrules --ofw < /dev/null > /dev/null 2>&1 &`;
-}
-
-if ($cgiparams{'ACTION'} eq $Lang::tr{'cancel'}) {
-    undef %cgiparams;
-    $cgiparams{'ACTION'} = '';
-}
-
 
 &Header::openpage($Lang::tr{'interfaces settings'}, 1, '');
 
@@ -197,41 +291,296 @@ my $hiddenIfaceName = '';
 #############################################################
 
 if ($cgiparams{'ACTION'} eq '') {
-#    &Header::openbigbox('100%', 'left');
-#    &Header::openbox('100%', 'left', "$Lang::tr{'custom interfaces'}:");
+    # Convert interface data to JavaScript format
+    my @jsData;
+    foreach my $ifaceName (keys %custIfaces) {
+        my $iface = $custIfaces{$ifaceName};
+        my $type = '';
+        if ($iface->{'TYPE'} eq '0') {
+            $type = 'PHYSICAL';
+        } elsif ($iface->{'TYPE'} eq '1') {
+            $type = 'VLAN';
+        } elsif ($iface->{'TYPE'} eq '2') {
+            $type = 'BRIDGE';
+        } elsif ($iface->{'TYPE'} eq '3') {
+            $type = 'BOND';
+        }
+
+        my $ipAddr = $iface->{'IPADDRESS'} || '0.0.0.0';
+        my $netmask = $iface->{'NETMASK'} || '0.0.0.0';
+        my $mtu = $iface->{'MTU'} || '1500';
+        my $brMembers = $iface->{'BR_MEMBERS'} || '';
+        my $vlanId = $iface->{'VLANID'} || '';
+        my $usedCount = $iface->{'USED_COUNT'} || 0;
+
+        # Escape single quotes for JavaScript
+        my $desc = $iface->{'DESCRIPTION'} || '';
+        $desc =~ s/'/\\'/g;
+        $brMembers =~ s/'/\\'/g;
+
+        my $addressingMode = $iface->{'ADDRESSING_MODE'} || '0';
+        my $parentIface = $iface->{'IFACE'} || '';
+        my $bondMembers = $iface->{'BOND_MEMBERS'} || '';
+        $bondMembers =~ s/'/\\'/g;
+
+        push @jsData, sprintf(
+            "{id:'%s',name:'%s',description:'%s',ipaddress:'%s',netmask:'%s',type:'%s',typeCode:'%s',status:'%s',used:%d,mtu:'%s',brMembers:'%s',vlanId:'%s',addressingMode:'%s',iface:'%s',bondMembers:'%s'}",
+            $ifaceName, $ifaceName, $desc, $ipAddr, $netmask, $type, $iface->{'TYPE'}, $iface->{'ADMSTATUS'}, $usedCount, $mtu, $brMembers, $vlanId, $addressingMode, $parentIface, $bondMembers
+        );
+    }
+    my $jsDataStr = join(",\n", @jsData);
+
+    my $jsAddAction = $Lang::tr{'add interface'};
+    my $jsEditAction = $Lang::tr{'edit'};
+    my $jsRemoveAction = $Lang::tr{'remove'};
+
+    # Get available interfaces for the add modal
+    my @jsInterfaces;
+    foreach my $iface (sort keys %FW::interfaces) {
+        push @jsInterfaces, "'$FW::interfaces{$iface}{'IFACE'}'";
+    }
+    my $jsInterfacesStr = join(',', @jsInterfaces);
+
     print <<END;
-<div align='center' style='margin-top:0px'>
-<div align='left' tyle='margin-top:5px'>
-<table width='100%' height='33px' align='center'>
-<tr style='background-color: #F2F2F2;'>
-    <td align='right'>
-       <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-       <input style='background-color: #F2F2F2;' class='buttons' type='submit' name='ACTION' value='$Lang::tr{'add interface'}' />
-       </form>
-    </td>
-</tr>
-</table>
-<table width='100%' height='33px' align='center'>
-<tr class='headbar' align="center">
-    <td width='15%'><strong>$Lang::tr{'name'}</strong></td>
-    <td width='20%'><strong>$Lang::tr{'description'}</strong></td>
-    <td width='40%'><strong>$Lang::tr{'ip address'}</strong></td>
-    <td width='10%'><strong>$Lang::tr{'type'}</strong></td>
-    <td width='10%'><strong>$Lang::tr{'status'}</strong></td>
-    <td width='10px'>&nbsp;</td>
-    <td width='10px'>&nbsp;</td>
-</tr>
+<div id='interfaceTable'></div>
+<script type='text/javascript'>
+function toggleAddressMode() {
+    var staticMode = document.getElementById('mode_static');
+    var ipaddrRow = document.getElementById('ipaddr_row');
+    var ipaddrInput = document.querySelector('input[name="IPADDR_MASK"]');
+    
+    if (staticMode && ipaddrRow) {
+        if (staticMode.checked) {
+            ipaddrRow.style.display = '';
+            if (ipaddrInput) ipaddrInput.disabled = false;
+        } else {
+            ipaddrRow.style.display = 'none';
+            if (ipaddrInput) {
+                ipaddrInput.disabled = true;
+                ipaddrInput.value = '';
+            }
+        }
+    }
+}
+
+function toggleAddTypeFields(type) {
+    var vlanIfRow = document.getElementById('vlan_if_row');
+    var vlanIdRow = document.getElementById('vlan_id_row');
+    var bondRow = document.getElementById('bond_members_row');
+    var bridgeRow = document.getElementById('bridge_members_row');
+    
+    if (vlanIfRow) vlanIfRow.style.display = (type === '1') ? '' : 'none';
+    if (vlanIdRow) vlanIdRow.style.display = (type === '1') ? '' : 'none';
+    if (bondRow) bondRow.style.display = (type === '3') ? '' : 'none';
+    if (bridgeRow) bridgeRow.style.display = (type === '2') ? '' : 'none';
+}
+
+function moveOption(fromSelect, toSelect) {
+    for (var i = 0; i < fromSelect.options.length; i++) {
+        if (fromSelect.options[i].selected) {
+            var option = fromSelect.options[i];
+            var newOption = new Option(option.text, option.value);
+            toSelect.options[toSelect.options.length] = newOption;
+            fromSelect.options[i] = null;
+            i--;
+        }
+    }
+}
+
+function prepareAddFormSubmit() {
+    var form = document.getElementById('addInterfaceForm');
+    var type = form.TYPE.value;
+    var staticMode = document.getElementById('mode_static');
+    
+    // 如果是 DHCP 模式，清空 IP 地址字段
+    if (!staticMode.checked) {
+        var ipaddrInput = form.querySelector('input[name="IPADDR_MASK"]');
+        if (ipaddrInput) ipaddrInput.value = '';
+    }
+    
+    // 处理 BOND_MEMBERS
+    if (type === '3') {
+        var bondSelected = document.getElementById('bond_selected');
+        var bondValues = [];
+        for (var i = 0; i < bondSelected.options.length; i++) {
+            bondValues.push(bondSelected.options[i].value);
+        }
+        // 创建隐藏字段存储选中的值
+        var hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'BOND_MEMBERS';
+        hiddenInput.value = bondValues.join('#');
+        form.appendChild(hiddenInput);
+        // 移除多选框的 name 属性，避免重复提交
+        bondSelected.name = '';
+    }
+    
+    // 处理 BR_MEMBERS
+    if (type === '2') {
+        var bridgeSelected = document.getElementById('bridge_selected');
+        var bridgeValues = [];
+        for (var i = 0; i < bridgeSelected.options.length; i++) {
+            bridgeValues.push(bridgeSelected.options[i].value);
+        }
+        // 创建隐藏字段存储选中的值
+        var hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'BR_MEMBERS';
+        hiddenInput.value = bridgeValues.join('#');
+        form.appendChild(hiddenInput);
+        // 移除多选框的 name 属性，避免重复提交
+        bridgeSelected.name = '';
+    }
+    
+    // Use AJAX to submit form
+    var formData = new FormData(form);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', form.action, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                // Close modal and refresh page
+                var overlay = document.querySelector('.ofw_modal_overlay');
+                if (overlay) overlay.remove();
+                window.location.reload();
+            } else if (xhr.status !== 0) {
+                // Only show error if status is not 0 (request cancelled)
+                alert('Error: ' + xhr.status);
+            }
+        }
+    };
+    xhr.send(formData);
+}
+
+function prepareEditFormSubmit() {
+    var form = document.getElementById('editInterfaceForm');
+    var type = form.querySelector('input[name="TYPE"]').value;
+    var staticMode = document.getElementById('mode_static');
+    
+    // 如果是静态模式，确保 IP 地址字段被启用
+    if (staticMode && staticMode.checked) {
+        var ipaddrInput = form.querySelector('input[name="IPADDR_MASK"]');
+        if (ipaddrInput) ipaddrInput.disabled = false;
+    } else {
+        // 如果是 DHCP 模式，清空 IP 地址字段
+        var ipaddrInput = form.querySelector('input[name="IPADDR_MASK"]');
+        if (ipaddrInput) ipaddrInput.value = '';
+    }
+    
+    // 处理 BOND_MEMBERS
+    if (type === '3') {
+        var bondSelected = document.getElementById('bond_selected');
+        var bondValues = [];
+        for (var i = 0; i < bondSelected.options.length; i++) {
+            bondValues.push(bondSelected.options[i].value);
+        }
+        var hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'BOND_MEMBERS';
+        hiddenInput.value = bondValues.join('#');
+        form.appendChild(hiddenInput);
+        bondSelected.name = '';
+    }
+    
+    // 处理 BR_MEMBERS
+    if (type === '2') {
+        var bridgeSelected = document.getElementById('bridge_selected');
+        var bridgeValues = [];
+        for (var i = 0; i < bridgeSelected.options.length; i++) {
+            bridgeValues.push(bridgeSelected.options[i].value);
+        }
+        var hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'BR_MEMBERS';
+        hiddenInput.value = bridgeValues.join('#');
+        form.appendChild(hiddenInput);
+        bridgeSelected.name = '';
+    }
+    
+    // Use AJAX to submit form
+    var formData = new FormData(form);
+    
+    // Debug: log all form data
+    console.log('Edit form data:');
+    for (var pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', form.action, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                var overlay = document.querySelector('.ofw_modal_overlay');
+                if (overlay) overlay.remove();
+                window.location.reload();
+            } else {
+                alert('Error: ' + xhr.status);
+            }
+        }
+    };
+    xhr.send(formData);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var tableData = [
+        $jsDataStr
+    ];
+
+    var dt = new DataTable('#interfaceTable', {
+        tableKey: 'interfaces',
+        columns: [
+            {key: 'name', title: 'Name'},
+            {key: 'description', title: 'Description'},
+            {key: 'ipaddress', title: 'IP Address', render: function(val, row) { return row.ipaddress + '/' + row.netmask; }},
+            {key: 'addressingMode', title: 'Address Mode', render: function(val) { return val === '1' ? 'DHCP' : 'Static'; }},
+            {key: 'type', title: 'Type'},
+            {key: 'vlanId', title: 'VLAN ID'},
+            {key: 'mtu', title: 'MTU'},
+            {key: 'status', title: 'Status'}
+        ],
+        defaultSort: {key: 'name', order: 'asc'},
+        data: tableData,
+        rowKey: 'id',
+        selectable: true,
+        pageSize: 20,
+        actions: ['create', 'edit', 'delete', 'refresh'],
+        addAction: '$jsAddAction',
+        interfaces: [$jsInterfacesStr],
+        onAction: function(action, data) {
+            if (action === 'delete') {
+                // Create form with all selected interfaces
+                var form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/cgi-bin/interfaces.cgi';
+                
+                // Add ACTION field
+                var actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'ACTION';
+                actionInput.value = '$jsRemoveAction';
+                form.appendChild(actionInput);
+                
+                // Add all selected interface names
+                for (var i = 0; i < data.length; i++) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'IF_NAME';
+                    input.value = data[i];
+                    form.appendChild(input);
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            } else if (action === 'refresh') {
+                document.location.reload();
+            }
+        }
+    });
+});
+</script>
 END
 
-    &display_custom_interfaces(\%custIfaces);
-
-#    &display_default_interfaces();
-    print <<END;
-</table>
-</div>
-END
-
-#    &Header::closebigbox();
 }
 
 
@@ -303,11 +652,18 @@ END
             print "<select name='TYPE' style='width:200px' onchange='chg_intf_type(this.value)' autocomplete='nope'>";
         }
 
-        if (($cgiparams{'TYPE'} eq '1') || ($cgiparams{'ACTION'} eq $Lang::tr{'add interface'})) {
+        if ($cgiparams{'TYPE'} eq '0') {
+            print "<option value='0' selected>PHYSICAL</option>";
+            print "<option value='1'>VLAN</option>";
+            print "<option value='2'>BRIDGE</option>";
+            print "<option value='3'>BOND</option>";
+        } elsif (($cgiparams{'TYPE'} eq '1') || ($cgiparams{'ACTION'} eq $Lang::tr{'add interface'})) {
+            print "<option value='0'>PHYSICAL</option>";
             print "<option value='1' selected>VLAN</option>";
             print "<option value='2'>BRIDGE</option>";
             print "<option value='3'>BOND</option>";
         } else {
+            print "<option value='0'>PHYSICAL</option>";
             print "<option value='1'>VLAN</option>";
             if ($cgiparams{'TYPE'} eq '2') {
                 print "<option value='2' selected>BRIDGE</option>";
@@ -620,76 +976,6 @@ END
 
 &Header::closepage();
 
-sub display_custom_interfaces {
-    my $custIfaceRef = shift;
-    my @sortedKeys = &General::sortHashArray($sort_col, $sort_type, $sort_dir, $custIfaceRef);
-    my $id = 0;
-
-    foreach my $ifaceName (@sortedKeys) {
-
-    my $type = '';
-    if ($custIfaceRef->{$ifaceName}{'TYPE'} eq '0') {
-        $type = 'PHYSICAL';
-    }
-    if ($custIfaceRef->{$ifaceName}{'TYPE'} eq '1') {
-        $type = 'VLAN';
-    }
-    if ($custIfaceRef->{$ifaceName}{'TYPE'} eq '2') {
-        $type = 'BRIDGE';
-    }
-    if ($custIfaceRef->{$ifaceName}{'TYPE'} eq '3') {
-        $type = 'BOND';
-    }
-
-    if ($custIfaceRef->{$ifaceName}{'IPADDRESS'} eq '') {
-        $custIfaceRef->{$ifaceName}{'IPADDRESS'} = '0.0.0.0';
-    }
-    if ($custIfaceRef->{$ifaceName}{'NETMASK'} eq '') {
-        $custIfaceRef->{$ifaceName}{'NETMASK'} = '0.0.0.0';
-    }
-
-    print "<tr class='table".int(($id % 2) + 1)."colour'>";
-    print <<END;
-    <td><strong>$ifaceName</strong></td>
-    <td align='center'>$custIfaceRef->{$ifaceName}{'DESCRIPTION'}</td>
-    <td align='center'>$custIfaceRef->{$ifaceName}{'IPADDRESS'}/$custIfaceRef->{$ifaceName}{'NETMASK'}</td>
-    <td align='center'>$type</td>
-    <td align='center'>$custIfaceRef->{$ifaceName}{'ADMSTATUS'}</td>
-    <td align='center'>
-    <form method='post' name='frm$id' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='ACTION' value='$Lang::tr{'edit'}' />
-        <input type='image' name='$Lang::tr{'edit'}' src='/images/edit.gif' alt='$Lang::tr{'edit'}' title='$Lang::tr{'edit'}' />
-        <input type='hidden' name='IF_NAME' value='$ifaceName' />
-        <input type='hidden' name='TYPE' value=$custIfaceRef->{$ifaceName}{'TYPE'} />
-        <input type='hidden' name='DESCRIPTION' value=$custIfaceRef->{$ifaceName}{'DESCRIPTION'} />
-        <input type='hidden' name='IPADDRESS' value=$custIfaceRef->{$ifaceName}{'IPADDRESS'} />
-        <input type='hidden' name='NETMASK' value=$custIfaceRef->{$ifaceName}{'NETMASK'} />
-        <input type='hidden' name='MTU' value=$custIfaceRef->{$ifaceName}{'MTU'} />
-        <input type='hidden' name='BR_MEMBERS' value=$custIfaceRef->{$ifaceName}{'BR_MEMBERS'} />
-        <input type='hidden' name='VLANID' value=$custIfaceRef->{$ifaceName}{'VLANID'} />
-        <input type='hidden' name='USED_COUNT' value='$custIfaceRef->{$ifaceName}{'USED_COUNT'}' />
-    </form>
-    </td>
-END
-        if ($custIfaceRef->{$ifaceName}{'USED_COUNT'} > 0) {
-            print "<td align='center'></td>";
-        }
-        else {
-            print <<END;
-    <td align='center'>
-    <form method='post' name='frmb$id' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='ACTION' value='$Lang::tr{'remove'}' />
-        <input type='image' name='$Lang::tr{'remove'}' src='/images/delete.gif' alt='$Lang::tr{'remove'}' title='$Lang::tr{'remove'}' />
-        <input type='hidden' name='IF_NAME' value='$ifaceName' />
-    </form>
-    </td>
-END
-        }
-        print "</tr>\n";
-        $id++;
-    }
-}
-
 sub display_default_interfaces {
     my $id = 0;
     foreach my $iface (sort keys %FW::interfaces) {
@@ -746,21 +1032,29 @@ sub validateIFaceParams {
         $errormessage = $Lang::tr{'noIFacename'};
         return;
     }
-    if ($cgiparams{'IFACE'} eq '') {
-        $errormessage = $Lang::tr{'noIFace'};
-        return;
+    my $ifaceType = $cgiparams{'TYPE'};
+    if ($ifaceType eq '' && $cgiparams{'OLD_IF_NAME'} ne '' && defined($ifaceConfRef->{$cgiparams{'OLD_IF_NAME'}})) {
+        $ifaceType = $ifaceConfRef->{$cgiparams{'OLD_IF_NAME'}}{'TYPE'};
     }
 
-    if ($cgiparams{'IFACE'} !~ /^[a-zA-Z0-9]([a-zA-Z0-9:_\-\.])*$/) {
-        $errormessage = $Lang::tr{'falseIFace'};
-        return;
+    # Only VLAN (type 1) requires IFACE field
+    if ($ifaceType eq '1') {
+        if ($cgiparams{'IFACE'} eq '') {
+            $errormessage = $Lang::tr{'noIFace'};
+            return;
+        }
+
+        if ($cgiparams{'IFACE'} !~ /^[a-zA-Z0-9]([a-zA-Z0-9:_\-\.])*$/) {
+            $errormessage = $Lang::tr{'falseIFace'};
+            return;
+        }
     }
 
     # a new interface has to have a different name
     if (defined($ifaceConfRef->{$cgiparams{'IF_NAME'}})) {
 
         # when this is an update, the old name is allowed
-        unless ($cgiparams{'ACTION'} eq $Lang::tr{'update'})
+        unless (lc($cgiparams{'ACTION'}) eq lc($Lang::tr{'edit'}))
         {
             $errormessage .= "$Lang::tr{'iface name exists already'} <br />";
         }
@@ -769,15 +1063,75 @@ sub validateIFaceParams {
 
 # ip link command
 sub ip_link_add_cmd {
+    &General::log("DEBUG ip_link_add_cmd - TYPE: $cgiparams{'TYPE'}");
+    &General::log("DEBUG ip_link_add_cmd - IF_NAME: $cgiparams{'IF_NAME'}");
+    &General::log("DEBUG ip_link_add_cmd - IFACE: $cgiparams{'IFACE'}");
+    &General::log("DEBUG ip_link_add_cmd - VLANID: $cgiparams{'VLANID'}");
 
-    if ($cgiparams{'TYPE'} eq 'VLAN') {
-        $errormessage = `ip link add link $cgiparams{'IFACE'} name $cgiparams{'IF_NAME'} type vlan id $cgiparams{'IFACE'}`;
+    my $cmd_result;
+    my $exit_code;
+
+    # Check if interface already exists
+    my $check_cmd = "ip link show $cgiparams{'IF_NAME'}";
+    my $check_result = `$check_cmd 2>&1`;
+    my $check_exit = $? >> 8;
+    &General::log("DEBUG ip_link_add_cmd - Check if exists: $check_result, exit code: $check_exit");
+
+    if ($check_exit == 0) {
+        # Interface exists, delete it first
+        &General::log("DEBUG ip_link_add_cmd - Interface $cgiparams{'IF_NAME'} already exists, deleting first");
+        my $del_cmd = "ip link delete $cgiparams{'IF_NAME'}";
+        my $del_result = `$del_cmd 2>&1`;
+        my $del_exit = $? >> 8;
+        &General::log("DEBUG ip_link_add_cmd - Delete result: $del_result, exit code: $del_exit");
     }
-    if ($cgiparams{'TYPE'} eq 'BRIDGE') {
-        $errormessage = `ip link add name $cgiparams{'IF_NAME'} type bridge`;
+
+    if ($cgiparams{'TYPE'} eq '1') {
+        my $vlan_cmd = "ip link add link $cgiparams{'IFACE'} name $cgiparams{'IF_NAME'} type vlan id $cgiparams{'VLANID'}";
+        &General::log("DEBUG ip_link_add_cmd - Creating VLAN");
+        &General::log("DEBUG ip_link_add_cmd - Full command: $vlan_cmd");
+        $cmd_result = `$vlan_cmd 2>&1`;
+        $exit_code = $? >> 8;
+        &General::log("DEBUG ip_link_add_cmd - VLAN result: $cmd_result, exit code: $exit_code");
+        $errormessage = $cmd_result if $exit_code != 0;
     }
-    if ($cgiparams{'TYPE'} eq 'BOND') {
-        $errormessage = `ip link add name $cgiparams{'IF_NAME'} type bond`;
+    if ($cgiparams{'TYPE'} eq '2') {
+        my $bridge_cmd = "ip link add name $cgiparams{'IF_NAME'} type bridge";
+        &General::log("DEBUG ip_link_add_cmd - Creating BRIDGE");
+        &General::log("DEBUG ip_link_add_cmd - Full command: $bridge_cmd");
+        $cmd_result = `$bridge_cmd 2>&1`;
+        $exit_code = $? >> 8;
+        &General::log("DEBUG ip_link_add_cmd - BRIDGE result: $cmd_result, exit code: $exit_code");
+        $errormessage = $cmd_result if $exit_code != 0;
+    }
+    if ($cgiparams{'TYPE'} eq '3') {
+        my $bond_cmd = "ip link add name $cgiparams{'IF_NAME'} type bond";
+        &General::log("DEBUG ip_link_add_cmd - Creating BOND");
+        &General::log("DEBUG ip_link_add_cmd - Full command: $bond_cmd");
+        $cmd_result = `$bond_cmd 2>&1`;
+        $exit_code = $? >> 8;
+        &General::log("DEBUG ip_link_add_cmd - BOND result: $cmd_result, exit code: $exit_code");
+        $errormessage = $cmd_result if $exit_code != 0;
+    }
+
+    # Enable interface if no error
+    unless ($errormessage) {
+        my $up_cmd = "ip link set $cgiparams{'IF_NAME'} up";
+        &General::log("DEBUG ip_link_add_cmd - Enabling interface");
+        &General::log("DEBUG ip_link_add_cmd - Full command: $up_cmd");
+        my $up_result = `$up_cmd 2>&1`;
+        $exit_code = $? >> 8;
+        &General::log("DEBUG ip_link_add_cmd - ip link set up result: $up_result, exit code: $exit_code");
+
+        # Configure IP if static mode and IP is provided
+        if ($cgiparams{'ADDRESSING_MODE'} eq '0' && $cgiparams{'IPADDR_MASK'} ne '' && $cgiparams{'IPADDR_MASK'} ne '0.0.0.0/0.0.0.0') {
+            my $ip_cmd = "ip addr add $cgiparams{'IPADDR_MASK'} dev $cgiparams{'IF_NAME'}";
+            &General::log("DEBUG ip_link_add_cmd - Configuring IP");
+            &General::log("DEBUG ip_link_add_cmd - Full command: $ip_cmd");
+            my $ip_result = `$ip_cmd 2>&1`;
+            $exit_code = $? >> 8;
+            &General::log("DEBUG ip_link_add_cmd - ip addr add result: $ip_result, exit code: $exit_code");
+        }
     }
 }
 

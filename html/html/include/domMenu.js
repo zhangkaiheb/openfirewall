@@ -91,7 +91,7 @@ domMenu_settings.set('global', new Hash(
 	'targetDocumentXOrigin', 0,
 	'targetDocumentYOrigin', 0,
 	'menuBarWidth', '100%',
-	'subMenuMinWidth', '120',
+	'subMenuMinWidth', '180',
 	'distributeSpace', true,
 	'axis', 'horizontal',
 	'verticalExpand', 'south',
@@ -199,7 +199,7 @@ function domMenu_activate(in_containerId, in_location, in_disableWarning)
 	);
 	
 	// if we choose to distribute either height or width, determine ratio of each cell
-	var distributeRatio = Math.round(100/container.data.get('numChildren')) + '%';
+	var distributeRatio = (100/container.data.get('numChildren')).toFixed(2) + '%';
 	
 	// the first menu is the rootMenu, which is a child of the zero level element
 	var rootMenu = document.createElement('div');
@@ -261,6 +261,13 @@ function domMenu_activate(in_containerId, in_location, in_disableWarning)
 		var spanElement = rootElement.appendChild(document.createElement('span'));
 		// can't use createTextNode() because there might be img tags in the contents
 		spanElement.innerHTML = rootMenuTableCell.data.get('contents').replace(/\/\/\//, settings.get('baseUri'));
+		// add arrow indicator for items with submenus
+		if (rootMenuTableCell.data.get('numChildren')) {
+			var arrowSpan = rootElement.appendChild(document.createElement('span'));
+			arrowSpan.className = 'menu-arrow';
+			arrowSpan.style.color = '#999';
+			arrowSpan.innerHTML = ' &#9662;';
+		}
 		// add hover contents if needed
 		if (rootMenuTableCell.data.has('contentsHover')) {
 			spanElement = rootElement.appendChild(document.createElement('span'));
@@ -299,6 +306,7 @@ function domMenu_activate(in_containerId, in_location, in_disableWarning)
 		rootMenuTableCell.oncontextmenu = makeFalse; 
 		if (spanElement.innerHTML == in_location) {
 			//domMenu_activeElement.set(rootMenuTableCell, true);
+			rootMenuTableCell.setAttribute('data-current-location', 'true');
 			domMenu_toggleHighlight(rootMenuTableCell, true);
 		}
 	}
@@ -924,12 +932,25 @@ function domMenu_toggleHighlight(in_element, in_status)
 	var highlightElement = in_element.firstChild;
 
 	var pseudoClass;
-	if (in_status) {
-		if (in_element.data.has('subMenu') && in_element.data.get('subMenu').style.visibility == 'visible') {
-			pseudoClass = 'Active';
-		}
-		else if (in_element.data.get('numChildren') || in_element.data.get('uri')) {
-			pseudoClass = 'Hover';
+	// Check if this is the current page's menu item first
+	if (in_element.getAttribute('data-current-location') === 'true') {
+		// Always apply Active styling for the current page's menu item
+		pseudoClass = 'Active';
+	} else if (in_status) {
+		// For top-level menu items, only apply Hover styling (no blue background)
+		// Active styling should only be for the current page's menu item
+		if (in_element.data.get('level') == 1) {
+			if (in_element.data.get('numChildren') || in_element.data.get('uri')) {
+				pseudoClass = 'Hover';
+			}
+		} else {
+			// For sub-menu items, use the original logic
+			if (in_element.data.has('subMenu') && in_element.data.get('subMenu').style.visibility == 'visible') {
+				pseudoClass = 'Active';
+			}
+			else if (in_element.data.get('numChildren') || in_element.data.get('uri')) {
+				pseudoClass = 'Hover';
+			}
 		}
 	}
 

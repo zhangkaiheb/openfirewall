@@ -188,8 +188,8 @@ sub showjsmenu
     'subMenuElementClass', 'ofw_subMenuElement',
     'subMenuElementHoverClass', 'ofw_subMenuElementHover',
     'subMenuElementActiveClass', 'ofw_subMenuElementHover',
-    'subMenuMinWidth', '145',
-    'distributeSpace', false,
+    'subMenuMinWidth', '180',
+    'distributeSpace', true,
     'openMouseoverMenuDelay', 0,
     'openMousedownMenuDelay', 0,
     'closeClickMenuDelay', 0,
@@ -290,6 +290,7 @@ END
     if ($javascript) {
         print "<script type='text/javascript' src='/include/domLib.js'></script>\n";
         print "<script type='text/javascript' src='/include/domMenu.js'></script>\n";
+        print "<script type='text/javascript' src='/include/datatable.js'></script>\n";
         print "<script type='text/javascript' src='/js/ofwsys.js'></script>\n";
         print "<script type='text/javascript' src='/js/ofwpolicy.js'></script>\n";
         print "<script type='text/javascript' src='/js/ofwutils.js'></script>\n";
@@ -353,10 +354,9 @@ END
     print <<END
 <!-- OPENFIREWALL HEADER -->
 <table width='100%' border='0' cellpadding='0' cellspacing='0'>
-<col width='719' /><col /><col width='32' />
 <tr><td style='background-color: #000;'>
     <table width='100%' border='0' cellpadding='0' cellspacing='0' style='table-layout:fixed;'>
-    <col width='75' /><col width='182' /><col />
+    <col width='75' /><col />
     <tr valign='middle'><td colspan='3' height='3'></td></tr>
     <tr valign='middle'><td height='45' align='center'><font style='font-size: 24px; color: #69C'>OFW</font></td>
         <td colspan='2'>
@@ -370,28 +370,26 @@ END
     }
     print "    </td></tr>";
 print <<END
-    <tr valign='middle' style='background-color: $Header::boxcolour;'><td></td>
-    <td class='ofw_menuLocationMain' colspan='2' height='32'><img src='/images/null.gif' width='8' height='1' alt='' /><font style='font-size: 14px; color: #696969'>$location</font>
-    <img src='/images/null.gif' width='8' height='1' alt='' /><font style='font-size: 14px; color: #696969'>/</font><img src='/images/null.gif' width='12' height='1' alt='' /><font style='font-size: 14px; color: #696969'>$sublocation</font>
+    </table>
+</td></tr>
+</table>
+<div class='ofw_breadcrumb'>
+    <div class='ofw_breadcrumb_path'>
+        <span class='ofw_breadcrumb_item'>$location</span>
+        <span class='ofw_breadcrumb_separator'>/</span>
+        <span class='ofw_breadcrumb_item'>$sublocation</span>
 END
 ;
     if ($l3location ne '') {
         print <<END
-<img src='/images/null.gif' width='8' height='1' alt='' /><font style='font-size: 14px; color: #696969'>/</font><img src='/images/null.gif' width='12' height='1' alt='' /><font style='font-size: 14px; color: #696969'>$l3location</font>
+        <span class='ofw_breadcrumb_separator'>/</span>
+        <span class='ofw_breadcrumb_item ofw_breadcrumb_last'>$l3location</span>
 END
         ;
     }
 print <<END
-</td>
-    </tr>
-END
-;
-    print "</table>\n";
-    &showsubsection($location);
-    print <<END
-</td>
-</tr>
-</table>
+    </div>
+</div>
 <!-- OPENFIREWALL CONTENT -->
 END
         ;
