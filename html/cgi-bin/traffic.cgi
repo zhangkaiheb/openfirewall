@@ -111,23 +111,37 @@ if ($cgiparams{'SHOW_PAGE'} ne 'detailed') {
 
 &Header::openpage($Lang::tr{'sstraffic'}, 1, '');
 
-&Header::openbigbox('100%', 'left');
+print "<div class='status-widget-grid'>\n";
 
 ###############
 # DEBUG DEBUG
 if ($TRAFFIC::debugFormparams == 1) {
-    &Header::openbox('100%', 'left', 'DEBUG');
+    print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">DEBUG</span>
+    </div>
+    <div class="widget-body">
+END
+;
     my $debugCount = 0;
     foreach my $line (sort keys %cgiparams) {
         print "$line = $cgiparams{$line}<br />\n";
         $debugCount++;
     }
     print "&nbsp;Count: $debugCount\n";
-    &Header::closebox();
+    print "</div></div>\n";
 }
 
 if ($cgiparams{'SHOW_PAGE'} ne 'detailed') {
-    &Header::openbox('100%', 'left', "");
+    print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'sstraffic'}</span>
+    </div>
+    <div class="widget-body">
+END
+;
 
     my $firstDayTxt = '';
 
@@ -203,10 +217,17 @@ END
         </table>
 END
 
-    &Header::closebox();
+    print "</div></div>\n";
 }    # 'normal' page / overview
 else {
-    &Header::openbox('100%', 'left', "");
+    print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'sstraffic'}</span>
+    </div>
+    <div class="widget-body">
+END
+;
 
     if($cgiparams{'STARTMONTH'} eq 'rollingWindow') {
         $cgiparams{'STARTMONTH'} = $startMonthPreset ;
@@ -315,11 +336,18 @@ END
         </table>
 END
 
-    &Header::closebox();
+    print "</div></div>\n";
 
 }    # detailed page
 
-&Header::openbox('100%', 'left', "$Lang::tr{'traffics'}:");
+print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'traffics'}</span>
+    </div>
+    <div class="widget-body">
+END
+;
 
 my %devices     = ();
 my %ifaceCounts = ();
@@ -375,9 +403,9 @@ elsif($showAllTraff && $TRAFFIC::settings{'MONITOR_TRAFFIC_ENABLED'} eq 'on')
 }
 
 print <<END;
-	<table width='100%'>
-	<tr>
-		<td width='$dateWidth' align='center' class='boldbase'></td>
+		<table width='100%'>
+		<tr>
+			<td width='$dateWidth' align='center' class='boldbase'></td>
 END
 
 
@@ -405,9 +433,9 @@ foreach my $device (@sortedDeviceKeys) {
 }
 
 print <<END;
-	</tr>
-	<tr>
-		<td width='$dateWidth' align='center' class='boldbase'><b>$Lang::tr{'date'}</b></td>
+		</tr>
+		<tr>
+			<td width='$dateWidth' align='center' class='boldbase'><b>$Lang::tr{'date'}</b></td>
 END
 
 my %total_bytes = ();
@@ -763,12 +791,12 @@ END
 print "</tr>\n";
 
 print <<END;
-	</table>
+		</table>
+    </div>
+</div>
 END
 
-&Header::closebox();
-
-&Header::closebigbox();
+print "</div>\n";
 
 &Header::closepage();
 

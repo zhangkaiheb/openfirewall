@@ -320,12 +320,19 @@ END
     $onload_menu = "onload=\"domMenu_activate('domMenu_main', '$location');\"" if ($menu == 1);
 
     my @cgigraphs = split(/graph=/, $ENV{'QUERY_STRING'});
-    if (defined($cgigraphs[1])) {
+    if (defined($cgigraphs[1]) && $cgigraphs[1] ne '') {
         if ($cgigraphs[1] =~ /(GREEN|BLUE|ORANGE|RED|network)/) {
             $location    = $Lang::tr{'status'};
             $sublocation = $Lang::tr{'sstraffic graphs'};
         }
-        if ($cgigraphs[1] =~ /(cpu|memory|swap|disk)/) {
+        elsif ($cgigraphs[1] =~ /(cpu|memory|swap|disk)/) {
+            $location    = $Lang::tr{'status'};
+            $sublocation = $Lang::tr{'system graphs'};
+        }
+    }
+    else {
+        # Default: graphs.cgi without graph parameter shows system graphs
+        if ($URI[0] =~ /graphs\.cgi/) {
             $location    = $Lang::tr{'status'};
             $sublocation = $Lang::tr{'system graphs'};
         }

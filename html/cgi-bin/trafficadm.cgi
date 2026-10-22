@@ -82,7 +82,7 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'save'}) {
     }
 }    # end if ($cgiparams{'ACTION'} eq $Lang::tr{'save'})
 
-# if user want to save settings and get a errormessage, we don´t
+# if user want to save settings and get a errormessage, we don't
 # overwrite users input
 unless ($saveerror) {
 
@@ -185,36 +185,63 @@ $radio{'PERIOD_TYPE'}{$cgiparams{'PERIOD_TYPE'}} = "checked='checked'";
 #~ $btnTestmailDisabled = "disabled='disabled'" if($cgiparams{'SEND_EMAIL_ENABLED'} ne 'on');
 
 &Header::openpage($Lang::tr{'traffic monitor'}, 1, '');
-&Header::openbigbox('100%', 'left');
+
+print "<div class='status-widget-grid'>\n";
 
 ###############
 # DEBUG DEBUG
 if ($TRAFFIC::debugFormparams == 1) {
-    &Header::openbox('100%', 'left', 'DEBUG');
+    print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">DEBUG</span>
+    </div>
+    <div class="widget-body">
+END
+;
     my $debugCount = 0;
     foreach my $line (sort keys %cgiparams) {
         print "$line = $cgiparams{$line}<br />\n";
         $debugCount++;
     }
     print "&nbsp;Count: $debugCount\n";
-    &Header::closebox();
+    print "</div></div>\n";
 }
 
 if ($errormessage) {
-    &Header::openbox('100%', 'left', "$Lang::tr{'error messages'}:", 'error');
-    print "<font class='base'>$errormessage&nbsp;</font>";
-    &Header::closebox();
+    print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'error messages'}</span>
+    </div>
+    <div class="widget-body">
+        <font class='base'>$errormessage&nbsp;</font>
+    </div>
+</div>
+END
+;
 }
 
 if ($infomessage) {
-    &Header::openbox('100%', 'left', "$Lang::tr{'traffic info messages'}:");
-    print "<font class='base'>$infomessage&nbsp;</font>";
-    &Header::closebox();
+    print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'traffic info messages'}</span>
+    </div>
+    <div class="widget-body">
+        <font class='base'>$infomessage&nbsp;</font>
+    </div>
+</div>
+END
+;
 }
 
-&Header::openbox('100%', 'left', "$Lang::tr{'traffic configuration'}:");
-
-print <<END;
+print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'traffic configuration'}</span>
+    </div>
+    <div class="widget-body">
 <form method='post' action='$ENV{'SCRIPT_NAME'}'>
 <table width='100%'>
 <tr>
@@ -438,10 +465,11 @@ print <<END;
     <td width='10%'><a href='/cgi-bin/traffic.cgi'><img src='/images/back.png' alt='$Lang::tr{'back'}' title='$Lang::tr{'back'}' /></a></td>
     <td>&nbsp;</td>
 </tr></table>
+    </div>
+</div>
 END
 
-&Header::closebox();
-&Header::closebigbox();
+print "</div>\n";
 &Header::closepage();
 
 sub validSave

@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
-# 
+#
 #
 # (c) 2014-2018, the Openfirewall Team
 #
@@ -58,29 +58,17 @@ my %servicenames =
 
 &Header::openpage($Lang::tr{'status information'}, 1, '');
 
-&Header::openbigbox('100%', 'left');
+print "<div class='status-widget-grid'>\n";
 
-my $araid = '';
-$araid = "<a href='#raid'>$Lang::tr{'RAID status'}</a> |" if (-e "/proc/mdstat");
-
+# Services widget
 print <<END
-<table width='100%' cellspacing='0' cellpadding='5' border='0'>
-<tr><td style="background-color: #FFFFFF;" align='left'>
-    <a href='#services'>$Lang::tr{'services'}</a> |
-    <a href='#inodes'>$Lang::tr{'inodes usage'}</a> |
-    $araid    
-    <a href='#uptime'>$Lang::tr{'uptime and users'}</a> |
-    <a href='#kernel'>$Lang::tr{'kernel version'}</a>
-</td></tr></table>
-END
-;
-
-print "<a name='services'/>\n";
-&Header::openbox('100%', 'left', "$Lang::tr{'services'}:");
-
-print <<END
-<div align='center'>
-<table width='60%' cellspacing='1' cellpadding='2' border='0'>
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'services'}</span>
+    </div>
+    <div class="widget-body">
+        <table class="widget-table">
+            <tr><th>Name</th><th>Size</th><th>Status</th></tr>
 END
 ;
 
@@ -88,9 +76,8 @@ my $lines = 0;
 my $key = '';
 foreach $key (sort keys %servicenames)
 {
-    my $tid = ($lines % 2) + 1;
-    print "<tr class='table${tid}colour'>\n"; 
-    print "<td align='left'>$key</td>\n";
+    print "<tr>\n";
+    print "<td>$key</td>\n";
     my $shortname = $servicenames{$key};
     my $status = &General::isrunning($shortname);
     print "$status\n";
@@ -98,25 +85,29 @@ foreach $key (sort keys %servicenames)
     $lines++;
 }
 
-
-print "</table></div>\n";
-
-&Header::closebox();
-
-
-print "<a name='inodes'/>\n";
-&Header::openbox('100%', 'left', $Lang::tr{'inodes usage'}.':');
-print "<table>\n";
-
 print <<END
-<tr>
-<td align='left' class='boldbase'>$Lang::tr{'device'}</td>
-<td align='left' class='boldbase'>$Lang::tr{'mounted on'}</td>
-<td align='center' class='boldbase'>Inodes</td>
-<td align='center' class='boldbase'>$Lang::tr{'used'}</td>
-<td align='center' class='boldbase'>$Lang::tr{'free'}</td>
-<td align='left' class='boldbase' colspan='2'>$Lang::tr{'percentage'}</td>
-</tr>
+        </table>
+    </div>
+</div>
+END
+;
+
+# Inodes Usage widget
+print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'inodes usage'}</span>
+    </div>
+    <div class="widget-body">
+        <table class="widget-table">
+            <tr>
+                <th>$Lang::tr{'device'}</th>
+                <th>$Lang::tr{'mounted on'}</th>
+                <th>Inodes</th>
+                <th>$Lang::tr{'used'}</th>
+                <th>$Lang::tr{'free'}</th>
+                <th colspan='2'>$Lang::tr{'percentage'}</th>
+            </tr>
 END
 ;
 
@@ -165,25 +156,34 @@ END
 ;
 
 }
-print "</table>\n";
-&Header::closebox();
+print <<END
+        </table>
+    </div>
+</div>
+END
+;
 
+# RAID Status widget (conditional)
 if (-e "/etc/mdadm/mdadm.conf") {
-    print "<a name='raid'/>\n";
-    &Header::openbox('100%', 'left', "$Lang::tr{'RAID status'}:");
     print <<END
-<table cellspacing='1' cellpadding='2' border='0'><tr>
-    <td align='left' class='boldbase'>$Lang::tr{'device'}</td>
-    <td align='left' class='boldbase'>$Lang::tr{'status'}</td>
-    <td align='center' class='boldbase'>Active</td>
-    <td align='center' class='boldbase'>Working</td>
-    <td align='center' class='boldbase'>Failed</td>
-</tr>
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'RAID status'}</span>
+    </div>
+    <div class="widget-body">
+        <table class="widget-table">
+            <tr>
+                <th>$Lang::tr{'device'}</th>
+                <th>$Lang::tr{'status'}</th>
+                <th>Active</th>
+                <th>Working</th>
+                <th>Failed</th>
+            </tr>
 END
 ;
     for (my $i=0; $i < 2; $i++) {
         my $state = "";
-        my $rowtext = "<td align='center'>md$i</td>";
+        my $rowtext = "<td>md$i</td>";
 
         open(MDADM, "/usr/local/bin/sysinfo --raid=md$i |");
         while(<MDADM>) {
@@ -206,40 +206,67 @@ END
 
         print "<tr $state>$rowtext</tr>";
     }
-    print "</table>\n";
-    &Header::closebox();
+    print <<END
+        </table>
+    </div>
+</div>
+END
+;
 }
 
-print "<a name='uptime'/>\n";
-&Header::openbox('100%', 'left', "$Lang::tr{'uptime and users'}:");
+# Uptime and Users widget
+print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'uptime and users'}</span>
+    </div>
+    <div class="widget-body">
+        <table class="widget-table">
+END
+;
+
 my $output = `/usr/bin/w`;
 $output = &Header::cleanhtml($output,"y");
-print "<table>";
 foreach my $line (split(/\n/, $output))
 {
     if (index($line, 'load average') != -1) {
-        # Line containing uptime and load average is the first line, put it in a seperate table
-        print "<tr><td>$line</td></tr></table><br /><table>\n"
+        print "<tr><td colspan='7'>$line</td></tr>\n";
     }
     elsif ($line =~ m/^(\S*)\s+(\S*)\s+(\S*)\s+(\S*)\s+(\S*)\s+(\S*)\s+(.*)$/) {
         my $classbold = '';
-        $classbold = "class='boldbase'" if(index($line, 'LOGIN@') != -1);
+        $classbold = "style='font-weight:bold'" if(index($line, 'LOGIN@') != -1);
         print "<tr $classbold><td>$1</td><td>$2</td><td>$3</td><td>$4</td><td>$5</td><td>$6</td><td>$7</td></tr>\n";
     } else {
         print "<tr><td colspan='7'>$line</td></tr>\n"
     }
 }
-print "</table>";
-&Header::closebox();
+print <<END
+        </table>
+    </div>
+</div>
+END
+;
 
-print "<a name='kernel'/>\n";
-&Header::openbox('100%', 'left', "$Lang::tr{'kernel version'}:");
-print `/bin/uname -o`." ".`/bin/uname -r`."<br />";
-print `/bin/uname -v`."<br />";
-print `/bin/uname -m`." ".`/bin/uname -p`." ".`/bin/uname -i`;
-&Header::closebox();
+# Kernel Version widget
+print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'kernel version'}</span>
+    </div>
+    <div class="widget-body">
+        <pre>
+END
+;
+print `/bin/uname -o`." ".`/bin/uname -r`."\n";
+print `/bin/uname -v`."\n";
+print `/bin/uname -m`." ".`/bin/uname -p`." ".`/bin/uname -i`."\n";
+print <<END
+        </pre>
+    </div>
+</div>
+END
+;
 
-&Header::closebigbox();
+print "</div>\n";
 
 &Header::closepage();
-

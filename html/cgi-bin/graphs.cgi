@@ -56,7 +56,8 @@ if ($cgigraphs[1] =~ /(network|GREEN|BLUE|ORANGE|RED)/) {
 else {
     &Header::openpage($Lang::tr{'system graphs'}, 1, '');
 }
-&Header::openbigbox('100%', 'left');
+
+print "<div class='status-widget-grid'>\n";
 
 if ($cgigraphs[1] =~ /(GREEN|BLUE|ORANGE|RED|cpu|memory|diskuse|disk)/) {
     # Display 1 specific graph
@@ -77,22 +78,28 @@ if ($cgigraphs[1] =~ /(GREEN|BLUE|ORANGE|RED|cpu|memory|diskuse|disk)/) {
         $back = "<a href='/cgi-bin/graphs.cgi'>";
     }
 
-    &Header::openbox('100%', 'center', "$title $Lang::tr{'graph'}");
-
-    if (-e "$graphdir/${graph}-day.png") {
-        print <<END
+    print <<END
+<div class="widget-card widget-wide">
+    <div class="widget-header">
+        <span class="widget-title">$title $Lang::tr{'graph'}</span>
+    </div>
+    <div class="widget-body">
 <table width='100%'><tr>
     <td width='10%'>$back<img src='/images/back.png' alt='$Lang::tr{'back'}' title='$Lang::tr{'back'}' /></a></td>
     <td>&nbsp;</td>
 </tr></table>
 <hr />
+END
+;
+    if (-e "$graphdir/${graph}-day.png") {
+        print <<END
 <img src='/graphs/${graph}-day.png' border='0' alt='${graph}-$Lang::tr{'day'}' /><hr />
 <img src='/graphs/${graph}-week.png' border='0' alt='${graph}-$Lang::tr{'week'}' /><hr />
 <img src='/graphs/${graph}-month.png' border='0' alt='${graph}-$Lang::tr{'month'}' /><hr />
 <img src='/graphs/${graph}-year.png' border='0' alt='${graph}-$Lang::tr{'year'}' />
 END
         ;
-    } 
+    }
     else {
         print $Lang::tr{'no information available'};
     }
@@ -103,9 +110,10 @@ END
     <td width='10%'>$back<img src='/images/back.png' alt='$Lang::tr{'back'}' title='$Lang::tr{'back'}' /></a></td>
     <td>&nbsp;</td>
 </tr></table>
+    </div>
+</div>
 END
     ;
-    &Header::closebox();
 }
 elsif ($cgigraphs[1] =~ /network/) {
     # Display network graphs
@@ -125,13 +133,19 @@ elsif ($cgigraphs[1] =~ /network/) {
         my ($title, $count) = split('_', $graphname);
         $title = $Lang::tr{(lc($title))};
         $title = $title." ".$count if ( $count >= 2 );
-        &Header::openbox('100%', 'center', "$title $Lang::tr{'graph'}");
-
+        print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$title $Lang::tr{'graph'}</span>
+    </div>
+    <div class="widget-body">
+END
+;
         if (-e "$graphdir/${graphname}-day.png") {
             print "<a href='/cgi-bin/graphs.cgi?graph=$graphname'>";
             print "<img src='/graphs/${graphname}-day.png' alt='${graphname}-$Lang::tr{'day'}' border='0' />";
             print "</a><br />";
-        } 
+        }
         else {
             print $Lang::tr{'no information available'};
         }
@@ -149,7 +163,7 @@ elsif ($cgigraphs[1] =~ /network/) {
 END
             ;
         }
-        &Header::closebox();
+        print "</div></div>\n";
     }
 }
 else {
@@ -161,7 +175,7 @@ else {
     &disp_graph("$Lang::tr{'disk access'} $Lang::tr{'graph'}", "disk", "disk-$Lang::tr{'day'}");
 }
 
-&Header::closebigbox();
+print "</div>\n";
 &Header::closepage();
 
 
@@ -171,7 +185,14 @@ sub disp_graph
     my $file  = shift;
     my $alt   = shift;
 
-    &Header::openbox('100%', 'center', $title);
+    print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$title</span>
+    </div>
+    <div class="widget-body">
+END
+;
     if (-e "$graphdir/$file-day.png") {
         print "<a href='/cgi-bin/graphs.cgi?graph=$file'>";
         print "<img src='/graphs/$file-day.png' alt='$alt' border='0' />";
@@ -194,5 +215,5 @@ sub disp_graph
 END
         ;
     }
-    &Header::closebox();
+    print "</div></div>\n";
 }

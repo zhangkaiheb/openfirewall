@@ -63,12 +63,30 @@ $cgiparams{'SEE_MARK'}  = '';
 $cgiparams{'SEE_SRC'}   = '';
 $cgiparams{'SEE_DEST'}  = '';
 $cgiparams{'SEE_SORT'}  = '';
+$cgiparams{'PAGE'}      = '1';
+$cgiparams{'PAGE_SIZE'} = '25';
+
+# Save query string before getcgihash (CGI object may consume it)
+my $query_string = $ENV{'QUERY_STRING'} || '';
+
 &General::getcgihash(\%cgiparams);
+
+# GET parameters for pagination (getcgihash only handles POST)
+if ($query_string) {
+    my %getparams = ();
+    foreach my $pair (split(/&/, $query_string)) {
+        my ($key, $val) = split(/=/, $pair);
+        $getparams{$key} = $val if defined $key;
+    }
+    $cgiparams{'PAGE'}      = $getparams{'PAGE'}      if defined $getparams{'PAGE'};
+    $cgiparams{'PAGE_SIZE'} = $getparams{'PAGE_SIZE'} if defined $getparams{'PAGE_SIZE'};
+}
 
 
 &Header::showhttpheaders();
 &Header::openpage($Lang::tr{'connections'}, 1, '');
-&Header::openbigbox('100%', 'left');
+
+print "<div class='status-widget-grid'>\n";
 
 
 if ($cgiparams{'ACTION'} eq 'SAVE') {
@@ -358,19 +376,32 @@ my $menu_sort  = &make_select('SEE_SORT',  $cgiparams{'SEE_SORT'},  @list_sort);
 if ($debug > 0) {
     my $id = 0;
     my $line;
-    &Header::openbox('100%', 'left', $Lang::tr{'connection tracking'});
-    print "<table width='100%'>";
+    print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'connection tracking'} (DEBUG)</span>
+    </div>
+    <div class="widget-body">
+END
+;
+    print "<table class='widget-table'>";
     print "<tr><th>Address</th><th>Port</th><th>Protocol</th><th>Colour</th></tr>\n";
     foreach $line (@network) {
         print "<tr><td>$network[$id]</td><td>$ports[$id]</td><td>$protocols[$id]</td><td class='$colour[$id]'>$colour[$id]</td></tr>";
         $id++;
     }
     print "</table>";
-    &Header::closebox();
+    print "</div></div>\n";
 }
 
-
-&Header::openbox('100%', 'left', $Lang::tr{'connection tracking'});
+print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'connection tracking'}</span>
+    </div>
+    <div class="widget-body">
+END
+;
 
 my %selected = ();
 $selected{'TRAFFIC'}                            = '';
@@ -427,17 +458,33 @@ END
     ;
 }    
 
-foreach my $entry (sort sort_entries keys %entries) {
+my @sorted_entries = sort sort_entries keys %entries;
+my $total_entries = scalar @sorted_entries;
+my $page_size = $cgiparams{'PAGE_SIZE'};
+$page_size =~ s/\|.*//;
+$page_size = $page_size + 0;
+$page_size = 25 if ($page_size < 1);
+my $current_page = $cgiparams{'PAGE'};
+$current_page =~ s/\|.*//;
+$current_page = $current_page + 0;
+$current_page = 1 if ($current_page < 1);
+my $total_pages = int(($total_entries + $page_size - 1) / $page_size);
+$total_pages = 1 if ($total_pages < 1);
+$current_page = $total_pages if ($current_page > $total_pages);
+my $offset = ($current_page - 1) * $page_size;
+my @page_entries = splice(@sorted_entries, $offset, $page_size);
+
+foreach my $entry (@page_entries) {
     my $orgsipcolour = &ipcolour($entries{$entry}->{orgsip}, $entries{$entry}->{orgsp}, $entries{$entry}->{protocol});
     my $orgdipcolour = &ipcolour($entries{$entry}->{orgdip}, $entries{$entry}->{orgdp}, $entries{$entry}->{protocol});
     my $repsipcolour = &ipcolour($entries{$entry}->{repsip}, $entries{$entry}->{repsp}, $entries{$entry}->{protocol});
     my $repdipcolour = &ipcolour($entries{$entry}->{repdip}, $entries{$entry}->{repdp}, $entries{$entry}->{protocol});
-    
+
     my $trafficoriginal = "";
     $trafficoriginal = "<td align='center'>$entries{$entry}->{orgtraf}</td>" if ($mainsettings{'DISPLAY_CONNECTIONS'} eq 'TRAFFIC');
     my $trafficreply = "";
     $trafficreply = "<td align='center'>$entries{$entry}->{reptraf}</td>" if ($mainsettings{'DISPLAY_CONNECTIONS'} eq 'TRAFFIC');
-    
+
     print <<END
 <tr class='table1colour'>
     <td align='center'>$entries{$entry}->{protocol}</td>
@@ -449,7 +496,7 @@ foreach my $entry (sort sort_entries keys %entries) {
         <a href='/cgi-bin/ipinfo.cgi?ip=$entries{$entry}->{orgdip}' class='$orgdipcolour'>
         $entries{$entry}->{orgdip}
         </a>:$entries{$entry}->{orgdp}</td>
-    $trafficoriginal	
+    $trafficoriginal
     <td align='center' class='$repsipcolour'>
         <a href='/cgi-bin/ipinfo.cgi?ip=$entries{$entry}->{repsip}' class='$repsipcolour'>
         $entries{$entry}->{repsip}
@@ -472,11 +519,59 @@ END
 END
        ;
     }
-    print "</tr>\n";    
+    print "</tr>\n";
 }
 
+print "</table>\n";
+
+# Pagination controls
+my $query_base = $query_string;
+$query_base =~ s/&?PAGE=\d+//g;
+$query_base =~ s/&?PAGE_SIZE=\d+//g;
+$query_base = $query_base ? "$query_base&" : "";
+
+my $prev_page = $current_page - 1;
+$prev_page = 1 if ($prev_page < 1);
+my $next_page = $current_page + 1;
+$next_page = $total_pages if ($next_page > $total_pages);
+
+my $delta = 2;
+my $left = $current_page - $delta;
+$left = 1 if ($left < 1);
+my $right = $current_page + $delta;
+$right = $total_pages if ($right > $total_pages);
+
+my $pagination_html = '<div class="ofw_pagination">';
+$pagination_html .= qq{<a href="/cgi-bin/connections.cgi?${query_base}PAGE=1&PAGE_SIZE=${page_size}" class="ofw_page_btn" } . ($current_page == 1 ? 'style="pointer-events:none;opacity:0.5;"' : '') . qq{>First</a>};
+$pagination_html .= qq{<a href="/cgi-bin/connections.cgi?${query_base}PAGE=${prev_page}&PAGE_SIZE=${page_size}" class="ofw_page_btn" } . ($current_page == 1 ? 'style="pointer-events:none;opacity:0.5;"' : '') . qq{>Prev</a>};
+
+if ($left > 1) {
+    $pagination_html .= qq{<a href="/cgi-bin/connections.cgi?${query_base}PAGE=1&PAGE_SIZE=${page_size}" class="ofw_page_btn">1</a>};
+}
+if ($left > 2) {
+    $pagination_html .= '<span class="ofw_page_ellipsis">...</span>';
+}
+
+for (my $i = $left; $i <= $right; $i++) {
+    my $active = ($i == $current_page) ? 'active' : '';
+    $pagination_html .= qq{<a href="/cgi-bin/connections.cgi?${query_base}PAGE=${i}&PAGE_SIZE=${page_size}" class="ofw_page_btn $active">$i</a>};
+}
+
+if ($right < $total_pages - 1) {
+    $pagination_html .= '<span class="ofw_page_ellipsis">...</span>';
+}
+if ($right < $total_pages) {
+    $pagination_html .= qq{<a href="/cgi-bin/connections.cgi?${query_base}PAGE=${total_pages}&PAGE_SIZE=${page_size}" class="ofw_page_btn">$total_pages</a>};
+}
+
+$pagination_html .= qq{<a href="/cgi-bin/connections.cgi?${query_base}PAGE=${next_page}&PAGE_SIZE=${page_size}" class="ofw_page_btn" } . ($current_page == $total_pages ? 'style="pointer-events:none;opacity:0.5;"' : '') . qq{>Next</a>};
+$pagination_html .= qq{<a href="/cgi-bin/connections.cgi?${query_base}PAGE=${total_pages}&PAGE_SIZE=${page_size}" class="ofw_page_btn" } . ($current_page == $total_pages ? 'style="pointer-events:none;opacity:0.5;"' : '') . qq{>Last</a>};
+$pagination_html .= qq{<span class="ofw_page_info">Total: $total_entries | Page $current_page of $total_pages</span>};
+$pagination_html .= '</div>';
+
+print $pagination_html;
+
 print <<END
-</table>
 <hr />
 <form method='post' action='$ENV{'SCRIPT_NAME'}'>
 <table width='100%'><tr>
@@ -496,11 +591,12 @@ print <<END
         <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a></td>
 </tr></table>
 </form>
+    </div>
+</div>
 END
 ;
 
-&Header::closebox();
-&Header::closebigbox();
+print "</div>\n";
 &Header::closepage();
 
 sub ipcolour($) {

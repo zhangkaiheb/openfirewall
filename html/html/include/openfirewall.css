@@ -422,21 +422,27 @@ div.ofw_pagination {
     border-top: none;
 }
 
-button.ofw_page_btn {
+button.ofw_page_btn,
+a.ofw_page_btn {
     padding: 4px 12px;
     background: #fff;
     border: 1px solid #d0d0d0;
     border-radius: 4px;
     cursor: pointer;
     font-size: 13px;
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
 }
 
-button.ofw_page_btn:hover:not(:disabled) {
+button.ofw_page_btn:hover:not(:disabled),
+a.ofw_page_btn:hover {
     background: #e6f3fc;
     border-color: #5B9BD5;
 }
 
-button.ofw_page_btn.active {
+button.ofw_page_btn.active,
+a.ofw_page_btn.active {
     background: #5B9BD5;
     color: #fff;
     border-color: #5B9BD5;
@@ -964,5 +970,79 @@ td.label {
 
 .ofw_btn_cancel:hover {
     background: #e0e0e0;
+}
+
+/* Status page widget grid */
+.status-widget-grid {
+    column-count: 2;
+    column-gap: 16px;
+    padding: 16px;
+}
+
+.status-widget-grid .widget-card {
+    border: 1px solid #D0D0D0;
+    border-radius: 2px;
+    background: #fff;
+    break-inside: avoid;
+    margin-bottom: 16px;
+    display: inline-block;
+    width: 100%;
+}
+
+.status-widget-grid .widget-wide {
+    column-span: all;
+}
+
+.status-widget-grid .widget-header {
+    padding: 8px 12px;
+    background: linear-gradient(to bottom, #f5f5f5, #e0e0e0);
+    border-bottom: 1px solid #D0D0D0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 2px 2px 0 0;
+}
+
+.status-widget-grid .widget-title {
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}
+
+.status-widget-grid .widget-body {
+    padding: 4px 8px 8px 8px;
+}
+
+.status-widget-grid .widget-body img {
+    max-width: 100%;
+    height: auto;
+}
+
+.status-widget-grid .widget-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.status-widget-grid .widget-table th,
+.status-widget-grid .widget-table td {
+    border: 1px solid #D0D0D0;
+    padding: 5px 6px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.status-widget-grid .widget-table th {
+    background: #5B9BD5;
+    color: #FFFFFF;
+    font-weight: 500;
+}
+
+.status-widget-grid .widget-table tbody tr:nth-child(even) {
+    background: #F5F5F5;
+}
+
+.status-widget-grid .widget-table tbody tr:nth-child(odd) {
+    background: #FFFFFF;
 }
 

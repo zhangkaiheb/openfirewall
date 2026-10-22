@@ -29,7 +29,7 @@ $cgigraphs[1] = '' unless defined $cgigraphs[1];
 
 &Header::openpage($Lang::tr{'proxy access graphs'}, 1, '');
 
-&Header::openbigbox('100%', 'left');
+print "<div class='status-widget-grid'>\n";
 
 if ($cgigraphs[1] =~ /(squid-requests|squid-hits)/) {
     # Display 1 specific graph
@@ -41,7 +41,14 @@ if ($cgigraphs[1] =~ /(squid-requests|squid-hits)/) {
     $title = $Lang::tr{'proxy requests'} if ($graph eq 'squid-requests');
     $title = $Lang::tr{'proxy hits percentage'} if ($graph eq 'squid-hits');
 
-    &Header::openbox('100%', 'center', "$title $Lang::tr{'graph'}");
+    print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$title $Lang::tr{'graph'}</span>
+    </div>
+    <div class="widget-body">
+END
+;
 
     if (-e "$graphdir/${graph}-day.png") {
         print <<END
@@ -67,17 +74,17 @@ END
     <td width='10%'><a href='/cgi-bin/proxygraphs.cgi'><img src='/images/back.png' alt='$Lang::tr{'back'}' title='$Lang::tr{'back'}' /></a></td>
     <td>&nbsp;</td>
 </tr></table>
+    </div>
+</div>
 END
-    ;
-    &Header::closebox();
+;
 }
 else {
     &disp_graph("$Lang::tr{'proxy access graphs'}", "squid-requests", "squid-requests-$Lang::tr{'day'}");
     &disp_graph("$Lang::tr{'proxy access graphs'}", "squid-hits", "squid-hits-$Lang::tr{'day'}");
 }
 
-&Header::closebigbox();
-
+print "</div>\n";
 &Header::closepage();
 
 
@@ -87,7 +94,14 @@ sub disp_graph
     my $file  = shift;
     my $alt   = shift;
 
-    &Header::openbox('100%', 'center', $title);
+    print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$title</span>
+    </div>
+    <div class="widget-body">
+END
+;
     if (-e "$graphdir/$file-day.png") {
         print "<a href='/cgi-bin/proxygraphs.cgi?graph=$file'>";
         print "<img src='/graphs/$file-day.png' alt='$alt' border='0' />";
@@ -110,5 +124,9 @@ sub disp_graph
 END
         ;
     }
-    &Header::closebox();
+    print <<END
+    </div>
+</div>
+END
+;
 }

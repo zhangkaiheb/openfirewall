@@ -33,14 +33,24 @@ require '/usr/lib/ofw/header.pl';
 
 &Header::showhttpheaders();
 &Header::openpage($Lang::tr{'proxy'}, 1, '');
-&Header::openbigbox('100%', 'left');
-&Header::openbox('100%', 'left', $Lang::tr{'proxy'});
+
+print "<div class='status-widget-grid'>\n";
+
+# Proxy Status widget
+print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'proxy'}</span>
+    </div>
+    <div class="widget-body">
+END
+;
 
 my $sactive = &General::isrunning('squid', 'nosize');
 
 print <<END
 <form method='post' action='$ENV{'SCRIPT_NAME'}'>
-<table width='100%'>
+<table class="widget-table">
 <tr>
     <td width='25%'>$Lang::tr{'web proxy'}:</td>
     $sactive
@@ -76,6 +86,11 @@ else {
     print $Lang::tr{'no information available'};
 }
 
-&Header::closebox();
-&Header::closebigbox();
+print <<END
+    </div>
+</div>
+END
+;
+
+print "</div>\n";
 &Header::closepage();

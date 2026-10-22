@@ -16,6 +16,7 @@
 # along with Openfirewall.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
+#
 
 # Add entry in menu
 # MENUENTRY status 010 "alt home" "alt home"
@@ -68,34 +69,41 @@ elsif ($mainsettings{'REFRESHINDEX'} eq 'on') {
 }
 
 &Header::openpage($Lang::tr{'main page'}, 1, $refresh);
-&Header::openbigbox('', 'center');
 
-print "<div align='center'>";
-&Header::openbox('50%', 'center', &Header::cleanhtml(`/bin/uname -n`, "y"), '', '#69C');
+print "<div class='status-widget-grid'>\n";
+
+# Connection Status widget
+my $hostname = &Header::cleanhtml(`/bin/uname -n`, "y");
+print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$hostname</span>
+    </div>
+    <div class="widget-body">
+END
+;
 
 # hide buttons only when pppsettings mandatory used and not valid
 if (   ($pppsettings{'VALID'} eq 'yes')
     || (($netsettings{'RED_COUNT'} >= 1) && $netsettings{'RED_1_TYPE'} =~ /^(DHCP|STATIC)$/))
 {
     print <<END
-<table border='0'>
-<tr>
-    <td align='center'><form method='post' action='/cgi-bin/dial.cgi'>
+<div style="text-align:center; margin-bottom:12px;">
+    <form method='post' action='/cgi-bin/dial.cgi' style="display:inline;">
         <input type='submit' name='ACTION' value='$Lang::tr{'dial'}' />
-    </form></td>
-    <td>&nbsp;&nbsp;</td>
-    <td align='center'><form method='post' action='/cgi-bin/dial.cgi'>
+    </form>
+    <form method='post' action='/cgi-bin/dial.cgi' style="display:inline; margin-left:8px;">
         <input type='submit' name='ACTION' value='$Lang::tr{'hangup'}' />
-    </form></td>
-    <td>&nbsp;&nbsp;</td>
-    <td align='center'><form method='post' action="$ENV{'SCRIPT_NAME'}">
+    </form>
+    <form method='post' action="$ENV{'SCRIPT_NAME'}" style="display:inline; margin-left:8px;">
         <input type='submit' name='ACTION' value='$Lang::tr{'refresh'}' />
-    </form></td>
-</tr></table><br />
+    </form>
+</div>
 END
-        ;
+;
 }
 
+print "<div style='text-align:center;'>\n";
 print "<font face='Helvetica' size='4'><b>";
 if (!(($netsettings{'RED_COUNT'} >= 1) && $netsettings{'RED_1_TYPE'} =~ /^(DHCP|STATIC)$/)) {
     print "<u>$Lang::tr{'current profile'}: $pppsettings{'PROFILENAME'}</u><br />\n";
@@ -142,7 +150,7 @@ else {
     print "$Lang::tr{'profile has errors'}\n </b></font>\n";
 }
 
-print "<br />\n";
+print "</div>\n";
 
 # Reboot required flagfile
 if (-e '/rebootrequired') {
@@ -197,8 +205,10 @@ else {
    print "<br />\n";
 }
 
+print "<div style='text-align:center; margin-top:8px;'>\n";
 print "<a href='${General::adminmanualurl}/homepage.html' target='_blank'>
     <img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>";
+print "</div>\n";
 
 if($TRAFFIC::settings{'SHOW_AT_HOME'} eq 'on') {
     my %calc = ();
@@ -311,14 +321,30 @@ END
 
 }
 
-&Header::closebox();
+print <<END
+    </div>
+</div>
+END
+;
 
-print "</div>";
-print "<div style='float:left; margin-right:5px'>";
+# Memory widget
+print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'memory'}</span>
+    </div>
+    <div class="widget-body">
+        <table class="widget-table">
+            <tr>
+                <th>&nbsp;</th>
+                <th>$Lang::tr{'size'}</th>
+                <th>$Lang::tr{'used'}</th>
+                <th>$Lang::tr{'free'}</th>
+                <th colspan='2'>$Lang::tr{'percentage'}</th>
+            </tr>
+END
+;
 
-print "<a name='memory'/>\n";
-&Header::openbox('50%', 'left', "$Lang::tr{'memory'}:", '', '#69C');
-print "<table>";
 my $mem_size=0;
 my $mem_used=0;
 my $mem_free=0;
@@ -349,12 +375,6 @@ close FREE;
 
 print <<END
 <tr>
-    <td>&nbsp;</td>
-    <td align='center' class='boldbase'>$Lang::tr{'size'}</td>
-    <td align='center' class='boldbase'>$Lang::tr{'used'}</td>
-    <td align='center' class='boldbase'>$Lang::tr{'free'}</td>
-    <td align='left' class='boldbase' colspan='2'>$Lang::tr{'percentage'}</td>
-</tr><tr>
     <td class='boldbase'>$Lang::tr{'ram'}</td>
     <td align='right'>$mem_size</td>
     <td align='right'>$mem_used</td>
@@ -391,27 +411,29 @@ else {
 }
 &Header::percentbar($percent);
 print "</td><td align='right'>$percent</td></tr>";
-print "</table>";
-&Header::closebox();
-print "</div>";
-#print "<div align='left'>";
-
-
-print "<div style='float:right; margin-left:5px'>";
-
-print "<a name='disk'/>\n";
-&Header::openbox('50%', 'left', "$Lang::tr{'disk usage'}:", '', '#69C');
-print "<table>\n";
-
 print <<END
-<tr>
-<td align='left' class='boldbase'>$Lang::tr{'device'}</td>
-<td align='left' class='boldbase'>$Lang::tr{'mounted on'}</td>
-<td align='center' class='boldbase'>$Lang::tr{'size'}</td>
-<td align='center' class='boldbase'>$Lang::tr{'used'}</td>
-<td align='center' class='boldbase'>$Lang::tr{'free'}</td>
-<td align='left' class='boldbase' colspan='2'>$Lang::tr{'percentage'}</td>
-</tr>
+        </table>
+    </div>
+</div>
+END
+;
+
+# Disk Usage widget
+print <<END
+<div class="widget-card">
+    <div class="widget-header">
+        <span class="widget-title">$Lang::tr{'disk usage'}</span>
+    </div>
+    <div class="widget-body">
+        <table class="widget-table">
+            <tr>
+                <th>$Lang::tr{'device'}</th>
+                <th>$Lang::tr{'mounted on'}</th>
+                <th>$Lang::tr{'size'}</th>
+                <th>$Lang::tr{'used'}</th>
+                <th>$Lang::tr{'free'}</th>
+                <th colspan='2'>$Lang::tr{'percentage'}</th>
+            </tr>
 END
 ;
 
@@ -460,17 +482,13 @@ END
 ;
 
 }
-print "<tr><td>1</td></tr>";
-print "</table>\n";
-&Header::closebox();
+print <<END
+        </table>
+    </div>
+</div>
+END
+;
 
-print "</div>";
-
-# If an AddOn wants to insert own box, than this is the spot to do it.
-# Add code and html below this line.
-# Markeraddonbox
-
-
-&Header::closebigbox();
+print "</div>\n";
 
 &Header::closepage();
