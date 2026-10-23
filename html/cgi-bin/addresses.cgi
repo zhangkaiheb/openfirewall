@@ -35,8 +35,6 @@ require '/usr/lib/ofw/lang.pl';
 require '/usr/lib/ofw/header.pl';
 require '/usr/lib/ofw/firewall-lib.pl';
 
-&Header::showhttpheaders();
-
 my %cgiparams    = ();
 my $errormessage = '';
 my $error        = '';
@@ -74,6 +72,9 @@ $cgiparams{'ADDRESS_TYPE'} = 'ip';
 
 $cgiparams{'ADR_NAME'} = &Header::cleanConfNames($cgiparams{'ADR_NAME'});
 
+# Handle POST actions before sending HTTP headers (redirect must come before any output)
+my $redirectAfterPost = 0;
+
 if ($cgiparams{'ACTION'} eq $Lang::tr{'add'}) {
     &validateAddressParams(\%custAddresses);
 
@@ -86,12 +87,11 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'add'}) {
         &DATA::saveCustAddresses(\%custAddresses);
 
         &General::log("$Lang::tr{'address added'}: $cgiparams{'ADR_NAME'}");
-        undef %cgiparams;
-        $cgiparams{'ACTION'} = '';
+        $redirectAfterPost = 1;
     }
 }
 
-if ($cgiparams{'ACTION'} eq $Lang::tr{'update'}) {
+if ($cgiparams{'ACTION'} eq $Lang::tr{'update'} && !$redirectAfterPost) {
     &validateAddressParams(\%custAddresses);
 
     if ($errormessage) {
@@ -116,41 +116,34 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'update'}) {
         &DATA::saveCustAddresses(\%custAddresses);
 
         &General::log("$Lang::tr{'address updated'}: $cgiparams{'ADR_NAME'}");
-        undef %cgiparams;
-        $cgiparams{'ACTION'} = '';
-        `/usr/local/bin/setfwrules --user < /dev/null > /dev/null 2>&1 &`;
+        $redirectAfterPost = 1;
     }
 }
 
-if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-
-    # on an update error we use the entered data, we do not re-read from stored config
-    unless ($errormessage) {
-        if (defined($custAddresses{$cgiparams{'ADR_NAME'}}{'ADDRESS'})) {
-            $cgiparams{'ADDRESS_TYPE'} = $custAddresses{$cgiparams{'ADR_NAME'}}{'ADDRESS_TYPE'};
-            $cgiparams{'ADDRESS_TXT'}  = $custAddresses{$cgiparams{'ADR_NAME'}}{'ADDRESS'};
-            $cgiparams{'NETMASK'}      = $custAddresses{$cgiparams{'ADR_NAME'}}{'NETMASK'};
-        }
+if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'} && !$redirectAfterPost) {
+    # Support batch delete: ADR_NAME may contain multiple names joined by ','
+    my @addressesToDelete = split(/,/, $cgiparams{'ADR_NAME'});
+    foreach my $adrName (@addressesToDelete) {
+        delete($custAddresses{$adrName});
+        &General::log("$Lang::tr{'address removed'}: $adrName");
     }
-}
-
-if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
-    delete($custAddresses{$cgiparams{'ADR_NAME'}});
 
     &DATA::saveCustAddresses(\%custAddresses);
-
-    &General::log("$Lang::tr{'address removed'}: $cgiparams{'ADR_NAME'}");
-    undef %cgiparams;
-    $cgiparams{'ACTION'} = '';
+    $redirectAfterPost = 1;
 }
+
+if ($redirectAfterPost) {
+    &Header::showhttpheaders();
+    print "Location: $ENV{'SCRIPT_NAME'}\n\n";
+    exit;
+}
+
+&Header::showhttpheaders();
 
 if ($cgiparams{'ACTION'} eq $Lang::tr{'reset'}) {
     undef %cgiparams;
     $cgiparams{'ACTION'} = '';
 }
-
-&Header::openpage($Lang::tr{'address settings'}, 1, '');
-&Header::openbigbox('100%', 'left');
 
 if ($cgiparams{'ACTION'} eq '') {
     $cgiparams{'ADDRESS_TXT'}  = '';
@@ -159,13 +152,9 @@ if ($cgiparams{'ACTION'} eq '') {
     $cgiparams{'ADDRESS_TYPE'} = 'ip';
 }
 
-# DEBUG DEBUG
-#&Header::openbox('100%', 'left', 'DEBUG');
-#foreach my $line (keys %cgiparams) {
-#   print "$line = $cgiparams{$line}<br />\n";
-#}
-#print "$ENV{'QUERY_STRING'}\n";
-#&Header::closebox();
+&Header::openpage($Lang::tr{'address settings'}, 1, '');
+
+&Header::openbigbox('100%', 'left');
 
 if ($errormessage) {
     &Header::openbox('100%', 'left', "$Lang::tr{'error messages'}:", 'error');
@@ -175,230 +164,342 @@ if ($errormessage) {
     $error = 'error';
 }
 
-my $disabled      = '';
-my $hiddenAdrName = '';
-if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-    &Header::openbox('100%', 'left', "$Lang::tr{'edit address'}:", $error);
-    if ($cgiparams{'USED_COUNT'} > 0) {
-        $disabled      = "disabled='disabled'";
-        $hiddenAdrName = "<input type='hidden' name='ADR_NAME' value='$cgiparams{'ADR_NAME'}' />";
+# Convert addresses to JavaScript format
+my @jsData;
+my @sortedKeys = sort keys %custAddresses;
+foreach my $adrName (@sortedKeys) {
+    my $addr = $custAddresses{$adrName};
+
+    # Escape special characters for JavaScript
+    my $jsName = $adrName;
+    $jsName =~ s/(['\\])/\\$1/g;
+    my $jsAddress = $addr->{'ADDRESS'};
+    $jsAddress =~ s/(['\\])/\\$1/g;
+    my $jsNetmask = $addr->{'NETMASK'};
+    $jsNetmask =~ s/(['\\])/\\$1/g;
+
+    push @jsData, sprintf(
+        "{id:'%s',name:'%s',addressType:'%s',address:'%s',netmask:'%s',usedCount:%d}",
+        $jsName, $jsName, $addr->{'ADDRESS_TYPE'}, $jsAddress, $jsNetmask, $addr->{'USED_COUNT'}
+    );
+}
+my $jsDataStr = join(",\n", @jsData);
+
+# Prepare translation strings for JavaScript
+my $trSequence = $Lang::tr{'sequence'};
+my $trName = $Lang::tr{'name'};
+my $trAddressType = $Lang::tr{'addressformat'};
+my $trAddress = $Lang::tr{'address'};
+my $trNetmask = $Lang::tr{'netmask'};
+my $trUsed = $Lang::tr{'used'};
+my $trAddAddress = $Lang::tr{'add address'};
+my $trEditAddress = $Lang::tr{'edit address'};
+my $trAddressName = $Lang::tr{'name'};
+my $trAddressFormat = $Lang::tr{'addressformat'};
+my $trNetmaskLabel = $Lang::tr{'netmask'};
+my $trCancel = $Lang::tr{'cancel'};
+my $trUpdate = $Lang::tr{'update'};
+my $trRemove = $Lang::tr{'remove'};
+my $trAdd = $Lang::tr{'add'};
+my $trDeleteConfirm = $Lang::tr{'are you sure you want to delete this address'};
+my $trDeleteConfirmPlural = $Lang::tr{'are you sure you want to delete these addresses'};
+my $scriptName = $ENV{'SCRIPT_NAME'};
+
+print <<END;
+<script src="/include/datatable.js"></script>
+<script>
+var tableData = [
+$jsDataStr
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    window.addressesTable = new DataTable('#addressesTable', {
+        data: tableData,
+        columns: [
+            { key: 'id', title: '$trSequence', sortable: true },
+            { key: 'name', title: '$trName', sortable: true },
+            { key: 'addressType', title: '$trAddressType', sortable: true },
+            { key: 'address', title: '$trAddress', sortable: true },
+            { key: 'netmask', title: '$trNetmask', sortable: true },
+            { key: 'usedCount', title: '$trUsed', sortable: true }
+        ],
+        selectable: true,
+        actions: ['create', 'edit', 'delete', 'refresh'],
+        onAddModal: function() {
+            openAddAddressModal();
+        },
+        onEditModal: function(row) {
+            openEditAddressModal(row);
+        },
+        onDeleteConfirm: function(selectedRows) {
+            deleteAddresses(selectedRows);
+        }
+    });
+});
+
+function makeModalDraggable(modalId) {
+    var modal = document.getElementById(modalId);
+    if (!modal) return;
+
+    var dialog = modal.querySelector('.ofw_modal_dialog');
+    var header = modal.querySelector('.ofw_modal_header');
+    if (!dialog || !header) return;
+
+    var isDragging = false;
+    var offsetX, offsetY;
+
+    header.addEventListener('mousedown', function(e) {
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        var rect = dialog.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        dialog.style.position = 'fixed';
+        dialog.style.margin = '0';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        var x = e.clientX - offsetX;
+        var y = e.clientY - offsetY;
+        dialog.style.left = x + 'px';
+        dialog.style.top = y + 'px';
+    });
+
+    document.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+}
+
+function openAddAddressModal() {
+    // Prevent duplicate modals
+    if (document.querySelector('#addAddressModal')) return;
+
+    var modalHtml = '<div class="ofw_modal_overlay" id="addAddressModal">' +
+        '<div class="ofw_modal_dialog" style="width:500px;">' +
+        '<div class="ofw_modal_header" style="cursor:move;">' +
+        '<span class="ofw_modal_title">$trAddAddress</span>' +
+        '<button type="button" class="ofw_modal_close" onclick="closeAddAddressModal()">&times;</button>' +
+        '</div>' +
+        '<div class="ofw_modal_body">' +
+        '<form id="addAddressForm" method="post" action="$scriptName">' +
+        '<input type="hidden" name="ACTION" value="$trAdd">' +
+        '<table style="width:100%;border-collapse:collapse;">' +
+        '<tr>' +
+        '<td style="width:160px;padding:8px 12px 8px 0;text-align:right;"><label>$trAddressName:</label></td>' +
+        '<td><input type="text" name="ADR_NAME" style="width:200px;" required maxlength="20"></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td style="padding:8px 12px 8px 0;text-align:right;"><label>$trAddressFormat:</label></td>' +
+        '<td>' +
+        '<select name="ADDRESS_TYPE" style="width:200px;">' +
+        '<option value="ip" selected>IP</option>' +
+        '<option value="mac">MAC</option>' +
+        '</select>' +
+        '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td style="padding:8px 12px 8px 0;text-align:right;"><label>$trAddress:</label></td>' +
+        '<td><input type="text" name="ADDRESS_TXT" style="width:200px;" maxlength="17"></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td style="padding:8px 12px 8px 0;text-align:right;"><label>$trNetmaskLabel:</label></td>' +
+        '<td><input type="text" name="NETMASK" style="width:200px;" maxlength="15"></td>' +
+        '</tr>' +
+        '</table>' +
+        '</form>' +
+        '</div>' +
+        '<div class="ofw_modal_footer">' +
+        '<button type="button" class="ofw_btn" onclick="closeAddAddressModal()">$trCancel</button>' +
+        '<button type="button" class="ofw_btn ofw_btn_primary" onclick="submitAddAddressForm()">$trAdd</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    makeModalDraggable('addAddressModal');
+}
+
+function closeAddAddressModal() {
+    var modal = document.getElementById('addAddressModal');
+    if (modal) {
+        modal.remove();
     }
 }
-else {
-    &Header::openbox('100%', 'left', "$Lang::tr{'add address'}:", $error);
+
+function submitAddAddressForm() {
+    var form = document.getElementById('addAddressForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    var formData = new FormData(form);
+    fetch('$scriptName', {
+        method: 'POST',
+        body: formData
+    }).then(function() {
+        window.location.href = '$scriptName';
+    }).catch(function(error) {
+        alert('Error: ' + error.message);
+    });
 }
 
-my %selected = ();
-$selected{'ADDRESS_TYPE'}{'ip'}                       = '';
-$selected{'ADDRESS_TYPE'}{'mac'}                      = '';
-$selected{'ADDRESS_TYPE'}{$cgiparams{'ADDRESS_TYPE'}} = "selected='selected'";
+function openEditAddressModal(row) {
+    // Prevent duplicate modals
+    if (document.querySelector('#editAddressModal')) return;
 
-print <<END;
-<form method='post' action='$ENV{'SCRIPT_NAME'}'>
-<div align='center'>
-<table width='100%'>
-<tr>
-    <td width='25%'>$Lang::tr{'name'}:&nbsp;</td>
-    <td>
-        <input type='text' name='ADR_NAME' value='$cgiparams{'ADR_NAME'}' size='20' maxlength='20' $disabled />
-        $hiddenAdrName
-    </td>
-    <td width='25%'>&nbsp;</td>
-    <td width='25%'>&nbsp;</td>
-</tr><tr>
-    <td>$Lang::tr{'addressformat'}:&nbsp;</td>
-    <td>
-        <select name='ADDRESS_TYPE'>
-            <option value='ip' $selected{'ADDRESS_TYPE'}{'ip'}>IP</option>
-            <option value='mac' $selected{'ADDRESS_TYPE'}{'mac'}>MAC</option>
-        </select>
-    </td>
-    <td colspan='2'>&nbsp;</td>
-</tr><tr>
-    <td>$Lang::tr{'address'}:&nbsp;</td>
-    <td>
-        <input type='text' name='ADDRESS_TXT' value='$cgiparams{'ADDRESS_TXT'}' size='19' maxlength='17' />
-    </td>
-    <td>$Lang::tr{'netmask'}:&nbsp;<img src='/blob.gif' alt='*' /></td>
-    <td>
-        <input type='text' name='NETMASK' value='$cgiparams{'NETMASK'}' size='19' maxlength='15' />
-    </td>
-</tr>
-</table>
-<hr />
-<table width='100%'>
-<tr>
-    <td class='comment2buttons'>
-        <strong>$Lang::tr{'note'}</strong>:&nbsp;$Lang::tr{'mac adr not as dest'}
-    </td>
-    <td colspan='3'>&nbsp;</td>
-</tr><tr>
-    <td class='comment2buttons'>
-        <img src='/blob.gif' alt='*' align='top' />&nbsp;$Lang::tr{'this field may be blank'}
-    </td>
-END
+    var modalHtml = '<div class="ofw_modal_overlay" id="editAddressModal">' +
+        '<div class="ofw_modal_dialog" style="width:500px;">' +
+        '<div class="ofw_modal_header" style="cursor:move;">' +
+        '<span class="ofw_modal_title">$trEditAddress</span>' +
+        '<button type="button" class="ofw_modal_close" onclick="closeEditAddressModal()">&times;</button>' +
+        '</div>' +
+        '<div class="ofw_modal_body">' +
+        '<form id="editAddressForm" method="post" action="$scriptName">' +
+        '<input type="hidden" name="ACTION" value="$trUpdate">' +
+        '<input type="hidden" name="OLD_ADR_NAME" value="' + row.id + '">' +
+        '<table style="width:100%;border-collapse:collapse;">' +
+        '<tr>' +
+        '<td style="width:160px;padding:8px 12px 8px 0;text-align:right;"><label>$trAddressName:</label></td>' +
+        '<td><input type="text" name="ADR_NAME" value="' + row.name + '" style="width:200px;" required maxlength="20"></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td style="padding:8px 12px 8px 0;text-align:right;"><label>$trAddressFormat:</label></td>' +
+        '<td>' +
+        '<select name="ADDRESS_TYPE" style="width:200px;">' +
+        '<option value="ip"' + (row.addressType === 'ip' ? ' selected' : '') + '>IP</option>' +
+        '<option value="mac"' + (row.addressType === 'mac' ? ' selected' : '') + '>MAC</option>' +
+        '</select>' +
+        '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td style="padding:8px 12px 8px 0;text-align:right;"><label>$trAddress:</label></td>' +
+        '<td><input type="text" name="ADDRESS_TXT" value="' + row.address + '" style="width:200px;" maxlength="17"></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td style="padding:8px 12px 8px 0;text-align:right;"><label>$trNetmaskLabel:</label></td>' +
+        '<td><input type="text" name="NETMASK" value="' + row.netmask + '" style="width:200px;" maxlength="15"></td>' +
+        '</tr>' +
+        '</table>' +
+        '</form>' +
+        '</div>' +
+        '<div class="ofw_modal_footer">' +
+        '<button type="button" class="ofw_btn" onclick="closeEditAddressModal()">$trCancel</button>' +
+        '<button type="button" class="ofw_btn ofw_btn_primary" onclick="submitEditAddressForm()">$trUpdate</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
 
-if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-
-    #   put in next release - author has authorized GPL inclusion
-    #   print "<td align='center'><a href='ipcalc.cgi' target='_blank'>IP Calculator</a></td>\n";
-    print "<td class='button2buttons'><input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'update'}' />\n";
-    print "<input type='hidden' name='OLD_ADR_NAME' value='$cgiparams{'ADR_NAME'}' /></td>\n";
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    makeModalDraggable('editAddressModal');
 }
-else {
 
-    #   put in next release - author has authorized GPL inclusion
-    #   print "<td align='center'><a href='ipcalc.cgi' target='_blank'>IP Calculator</a></td>\n";
-    print "<td class='button2buttons'><input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'add'}' /></td>\n";
+function closeEditAddressModal() {
+    var modal = document.getElementById('editAddressModal');
+    if (modal) {
+        modal.remove();
+    }
 }
-print <<END;
-    <td class='button2buttons'>
-        <input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'reset'}' />
-    </td>
-    <td class='onlinehelp'>
-        <a href='${General::adminmanualurl}/firewall-addresses.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
-    </td>
-</tr>
-</table>
-</div>
-</form>
+
+function submitEditAddressForm() {
+    var form = document.getElementById('editAddressForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    var formData = new FormData(form);
+    fetch('$scriptName', {
+        method: 'POST',
+        body: formData
+    }).then(function() {
+        window.location.href = '$scriptName';
+    }).catch(function(error) {
+        alert('Error: ' + error.message);
+    });
+}
+
+var pendingDeleteRows = [];
+
+function deleteAddresses(selectedRows) {
+    if (!selectedRows || selectedRows.length === 0) return;
+
+    // Prevent duplicate modals
+    if (document.querySelector('#deleteConfirmModal')) return;
+
+    var confirmMsg = selectedRows.length === 1 ?
+        '$trDeleteConfirm' :
+        '$trDeleteConfirmPlural';
+
+    // Build list of address names to display
+    var listHtml = '<ul style="margin:0;padding-left:20px;">';
+    selectedRows.forEach(function(row) {
+        listHtml += '<li>' + row.name + '</li>';
+    });
+    listHtml += '</ul>';
+
+    var modalHtml = '<div class="ofw_modal_overlay" id="deleteConfirmModal">' +
+        '<div class="ofw_modal_dialog" style="width:480px;">' +
+        '<div class="ofw_modal_header" style="cursor:move;">' +
+        '<span class="ofw_modal_title">$trDeleteConfirm</span>' +
+        '<button type="button" class="ofw_modal_close" onclick="closeDeleteConfirmModal()">&times;</button>' +
+        '</div>' +
+        '<div class="ofw_modal_body">' +
+        '<p style="padding:10px 0;">' + confirmMsg + '</p>' +
+        '<div style="margin-top:12px;padding:8px 12px;background:#f5f5f5;border-radius:4px;">' +
+        listHtml +
+        '</div>' +
+        '</div>' +
+        '<div class="ofw_modal_footer">' +
+        '<button type="button" class="ofw_btn" onclick="closeDeleteConfirmModal()">$trCancel</button>' +
+        '<button type="button" class="ofw_btn ofw_btn_primary" onclick="doDeleteAddresses()">OK</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+
+    pendingDeleteRows = selectedRows;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    makeModalDraggable('deleteConfirmModal');
+}
+
+function closeDeleteConfirmModal() {
+    var modal = document.getElementById('deleteConfirmModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function doDeleteAddresses() {
+    closeDeleteConfirmModal();
+    var addresses = [];
+    pendingDeleteRows.forEach(function(row) {
+        if (row.usedCount === 0) {
+            addresses.push(row.name);
+        }
+    });
+    if (addresses.length === 0) return;
+
+    var formData = new FormData();
+    formData.append('ACTION', '$trRemove');
+    formData.append('ADR_NAME', addresses.join(','));
+
+    fetch('$scriptName', {
+        method: 'POST',
+        body: formData
+    }).then(function() {
+        window.location.href = '$scriptName';
+    }).catch(function(error) {
+        alert('Error: ' + error.message);
+    });
+}
+</script>
+
+<div id="addressesTable"></div>
+
 END
 
-&Header::closebox();
-
-&Header::openbox('100%', 'left', "$Lang::tr{'custom addresses'}:");
-print <<END;
-<div align='center'>
-<table width='100%' align='center'>
-<tr align="center">
-    <td width='25%'><strong>$Lang::tr{'name'}</strong></td>
-    <td width='25%'><strong>$Lang::tr{'address'}</strong></td>
-    <td width='25%'><strong>$Lang::tr{'netmask'}</strong></td>
-    <td width='25%'><strong>$Lang::tr{'used'}</strong></td>
-    <td width='5%'>&nbsp;</td>
-    <td width='5%'>&nbsp;</td>
-</tr>
-END
-
-&display_custom_addresses(\%custAddresses);
-print <<END;
-</table>
-</div>
-END
-
-&Header::closebox();
-
-&Header::openbox('100%', 'left', "$Lang::tr{'default networks'}:");
-print <<END;
-<div align='center'>
-<table width='100%' align='center'>
-<tr align="center">
-    <td><strong>$Lang::tr{'name'}</strong></td>
-    <td><strong>$Lang::tr{'color'}</strong></td>
-    <td><strong>$Lang::tr{'ip address'}</strong></td>
-    <td><strong>$Lang::tr{'netmask'}</strong></td>
-</tr>
-END
-
-&display_default_networks();
-print <<END;
-</table>
-</div>
-END
-
-&Header::closebox();
 &Header::closebigbox();
 &Header::closepage();
-
-# $addressesRef->{$adrName}{'ADDRESS_TYPE'}
-# $addressesRef->{$adrName}{'ADDRESS'}
-# $addressesRef->{$adrName}{'NETMASK'}
-# $addressesRef->{$adrName}{'USED_COUNT'}
-sub display_custom_addresses {
-    my $addressesRef = shift;
-
-    my $id = 0;
-    foreach my $adrName (sort keys %$addressesRef) {
-
-        # highlight the row we are editing
-        if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'ADR_NAME'} eq $adrName) {
-            print "<tr class='selectcolour'>\n";
-        }
-        else {
-            print "<tr class='table".int(($id % 2) + 1)."colour'>";
-        }
-        print <<END;
-    <td>$adrName</td>
-    <td align='center'>$addressesRef->{$adrName}{'ADDRESS'}</td>
-    <td align='center'>$addressesRef->{$adrName}{'NETMASK'}</td>
-    <td align='center'>$addressesRef->{$adrName}{'USED_COUNT'}x</td>
-    <td align='center'>
-    <form method='post' name='frm$id' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='ACTION' value='$Lang::tr{'edit'}' />
-        <input type='image' name='$Lang::tr{'edit'}' src='/images/edit.gif' alt='$Lang::tr{'edit'}' title='$Lang::tr{'edit'}'/>
-        <input type='hidden' name='ADR_NAME' value='$adrName' />
-        <input type='hidden' name='USED_COUNT' value='$addressesRef->{$adrName}{'USED_COUNT'}' />
-    </form>
-    </td>
-END
-        if ($addressesRef->{$adrName}{'USED_COUNT'} > 0) {
-            print "<td align='center'></td>";
-        }
-        else {
-            print <<END;
-    <td align='center'>
-    <form method='post' name='frmb$id' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='ACTION' value='$Lang::tr{'remove'}' />
-        <input type='image' name='$Lang::tr{'remove'}' src='/images/delete.gif' alt='$Lang::tr{'remove'}' title='$Lang::tr{'remove'}'/>
-        <input type='hidden' name='ADR_NAME' value='$adrName' />
-    </form>
-    </td>
-END
-        }
-        print "</tr>\n";
-        $id++;
-    }
-}
-
-sub display_default_networks {
-    my %networks = ();
-    &DATA::setup_default_networks(\%networks);
-
-    my $id = 0;
-    foreach my $name (sort keys %networks) {
-        my $adrColor = '';
-        print "<tr class='table".int(($id % 2) + 1)."colour'>";
-
-        if ($networks{$name}{'COLOR'} eq 'GREEN_COLOR') {
-            $adrColor = "class='ofw_iface_bg_green'";
-        }
-        elsif ($networks{$name}{'COLOR'} eq 'BLUE_COLOR') {
-            $adrColor = "class='ofw_iface_bg_blue'";
-        }
-        elsif ($networks{$name}{'COLOR'} eq 'ORANGE_COLOR') {
-            $adrColor = "class='ofw_iface_bg_orange'";
-        }
-        elsif ($networks{$name}{'COLOR'} eq 'RED_COLOR') {
-            $adrColor = "class='ofw_iface_bg_red'";
-        }
-        elsif ($networks{$name}{'COLOR'} eq 'IPSEC_COLOR') {
-            $adrColor = "class='ofw_iface_bg_ipsec'";
-        }
-        elsif ($networks{$name}{'COLOR'} eq 'OVPN_COLOR') {
-            $adrColor = "class='ofw_iface_bg_ovpn'";
-        }
-        elsif ($networks{$name}{'COLOR'} eq 'LOCAL_COLOR') {
-            $adrColor = "class='ofw_iface_bg_fw'";
-        }
-
-        print "<td>$name</td>\n";
-        print "<td width='4%' align='center' $adrColor></td>\n";
-        print "<td align='center'>$networks{$name}{'ADR'}</td>\n";
-        print "<td align='center'>$networks{$name}{'MASK'}</td>\n";
-        print "</tr>\n";
-        $id++;
-    }
-}
 
 # Validate Field Entries
 sub validateAddressParams {

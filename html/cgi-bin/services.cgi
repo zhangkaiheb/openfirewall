@@ -97,8 +97,10 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'add'}) {
         &DATA::saveCustServices(\%custServices);
 
         &General::log("$Lang::tr{'service added'}: $cgiparams{'SERVICE_NAME'}");
-        undef %cgiparams;
-        $cgiparams{'ACTION'} = '';
+        
+        # Send redirect to avoid form resubmission
+        print "Location: $ENV{'SCRIPT_NAME'}\n\n";
+        exit;
     }
 }
 
@@ -131,24 +133,10 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'update'}) {
         &DATA::saveCustServices(\%custServices);
 
         &General::log("$Lang::tr{'service updated'}: $cgiparams{'SERVICE_NAME'}");
-        undef %cgiparams;
-        $cgiparams{'ACTION'} = '';
-        `/usr/local/bin/setfwrules --user < /dev/null > /dev/null 2>&1 &`;
-    }
-}
-
-if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-
-    # on an update error we use the entered data, we do not re-read from stored config
-    unless ($errormessage) {
-        if (defined($custServices{$cgiparams{'SERVICE_NAME'}}{'PROTOCOL'})) {
-            $cgiparams{'PORTS'}            = $custServices{$cgiparams{'SERVICE_NAME'}}{'PORT_NR'};
-            $cgiparams{'PROTOCOL'}         = $custServices{$cgiparams{'SERVICE_NAME'}}{'PROTOCOL'};
-            $cgiparams{'PORT_INVERT'}      = $custServices{$cgiparams{'SERVICE_NAME'}}{'PORT_INVERT'};
-            $cgiparams{'PROTOCOL_INVERT'}  = $custServices{$cgiparams{'SERVICE_NAME'}}{'PROTOCOL_INVERT'};
-            $cgiparams{'ICMP_TYPE'}        = $custServices{$cgiparams{'SERVICE_NAME'}}{'ICMP_TYPE'};
-            $cgiparams{'OLD_SERVICE_NAME'} = $cgiparams{'SERVICE_NAME'};
-        }
+        
+        # Send redirect to avoid form resubmission
+        print "Location: $ENV{'SCRIPT_NAME'}\n\n";
+        exit;
     }
 }
 
@@ -158,8 +146,9 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
     &DATA::saveCustServices(\%custServices);
     &General::log("$Lang::tr{'service removed'}: $cgiparams{'SERVICE_NAME'}");
 
-    undef %cgiparams;
-    $cgiparams{'ACTION'} = '';
+    # Send redirect to avoid form resubmission
+    print "Location: $ENV{'SCRIPT_NAME'}\n\n";
+    exit;
 }
 
 if ($cgiparams{'ACTION'} eq $Lang::tr{'reset'}) {
@@ -180,44 +169,9 @@ if ($cgiparams{'ACTION'} eq '') {
 # Bring in the protocols file built from /etc/protocols into hash %protocol
 require '/usr/lib/ofw/protocols.pl';
 
-# figure out which protocol is selected
-$selected{'PROTOCOL'}{'tcp'}    = '';
-$selected{'PROTOCOL'}{'udp'}    = '';
-$selected{'PROTOCOL'}{'tcpudp'} = '';
-$selected{'PROTOCOL'}{'icmp'}   = '';
-$selected{'PROTOCOL'}{'gre'}    = '';
-foreach my $line (keys %Protocols::protocols) {
-
-    #   $selected{'PROTOCOL'}{"$Protocols::protocols{$line}"}= '';
-    $selected{'PROTOCOL'}{$line} = '';
-}
-$selected{'PROTOCOL'}{$cgiparams{'PROTOCOL'}} = "selected='selected'";
-
-# figure out which icmptype is selected
-$selected{'ICMP_TYPE'}{'BLANK'}                 = '';
-$selected{'ICMP_TYPE'}{'ALL'}                   = '';
-$selected{'ICMP_TYPE'}{$cgiparams{'ICMP_TYPE'}} = "selected='selected'";
-
-$checked{'PORT_INVERT'}{'off'}                             = '';
-$checked{'PORT_INVERT'}{'on'}                              = '';
-$checked{'PORT_INVERT'}{$cgiparams{'PORT_INVERT'}}         = "checked='checked'";
-$checked{'PROTOCOL_INVERT'}{'off'}                         = '';
-$checked{'PROTOCOL_INVERT'}{'on'}                          = '';
-$checked{'PROTOCOL_INVERT'}{$cgiparams{'PROTOCOL_INVERT'}} = "checked='checked'";
-
 &Header::openpage($Lang::tr{'services settings'}, 1, '');
 
 &Header::openbigbox('100%', 'left');
-
-# DEBUG DEBUG
-#&Header::openbox('100%', 'left', 'DEBUG');
-#foreach my $line (keys %cgiparams) {
-#   print "$line = $cgiparams{$line}<br />\n";
-#}
-#print "SortCol: $sort_col<br />\n";
-#print "Query: $ENV{'QUERY_STRING'}<br />\n";
-#print "Script: $ENV{'SCRIPT_NAME'}<br />\n";
-#&Header::closebox();
 
 if ($errormessage) {
     &Header::openbox('100%', 'left', "$Lang::tr{'error messages'}:", 'error');
@@ -227,305 +181,323 @@ if ($errormessage) {
     $error = 'error';
 }
 
-my $disabled          = '';
-my $hiddenServiceName = '';
-if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-    &Header::openbox('100%', 'left', "$Lang::tr{'edit service'}:", $error);
-    if ($cgiparams{'USED_COUNT'} > 0) {
-        $disabled          = "disabled='disabled'";
-        $hiddenServiceName = "<input type='hidden' name='SERVICE_NAME' value='$cgiparams{'SERVICE_NAME'}' />";
+# Convert services to JavaScript format
+my @jsData;
+my @sortedKeys = sort keys %custServices;
+foreach my $serviceName (@sortedKeys) {
+    my $svc = $custServices{$serviceName};
+    my $port_inv = '';
+    my $prot_inv = '';
+    my $icmp_inv = '';
+    
+    if ($svc->{'PORT_INVERT'} eq 'on') {
+        $port_inv = "! ";
     }
+    
+    if ($svc->{'PROTOCOL_INVERT'} eq 'on') {
+        $prot_inv = "! ";
+    }
+    
+    my $ports = $port_inv . &cleanport($svc->{'PORT_NR'});
+    my $protocol = &cleanprotocol($svc->{'PROTOCOL'});
+    if ($prot_inv) {
+        $protocol = $prot_inv . $protocol;
+    }
+    
+    my $icmpType = 'N/A';
+    if ($svc->{'ICMP_TYPE'} ne 'BLANK') {
+        $icmpType = $icmpTypeHash{$svc->{'ICMP_TYPE'}} . " (" . $svc->{'ICMP_TYPE'} . ")";
+        if ($svc->{'PROTOCOL_INVERT'} eq 'on' && $svc->{'PROTOCOL'} =~ /icmp/ && $svc->{'ICMP_TYPE'} ne 'ALL') {
+            $icmpType = "! " . $icmpType;
+        }
+    }
+    
+    push @jsData, sprintf(
+        "{id:'%s',name:'%s',ports:'%s',protocol:'%s',icmpType:'%s',usedCount:%d}",
+        $serviceName, $serviceName, $ports, $protocol, $icmpType, $svc->{'USED_COUNT'}
+    );
 }
-else {
-    &Header::openbox('100%', 'left', "$Lang::tr{'add service'}:", $error);
-}
+my $jsDataStr = join(",\n", @jsData);
 
-# Show protocols with TCP, UDP, etc at the top of the list.
-print <<END;
-<form method='post' action='$ENV{'SCRIPT_NAME'}'>
-<table width='100%'>
-<tr>
-    <td width='25%'>$Lang::tr{'servicename'}:</td>
-    <td width='25%'>
-        <input type='text' name='SERVICE_NAME' value='$cgiparams{'SERVICE_NAME'}' size='20' maxlength='20' $disabled />
-        $hiddenServiceName
-    </td>
-    <td width='25%'>&nbsp;</td>
-    <td width='25%'>&nbsp;</td>
-</tr><tr>
-    <td colspan='4'>&nbsp;</td>
-</tr><tr>
-    <td>$Lang::tr{'protocol'}:</td>
-    <td>
-        <select name='PROTOCOL'>
-            <option value='tcp' $selected{'PROTOCOL'}{'tcp'}>TCP</option>
-            <option value='udp' $selected{'PROTOCOL'}{'udp'}>UDP</option>
-            <option value='tcpudp' $selected{'PROTOCOL'}{'tcpudp'}>TCP &amp; UDP</option>
-            <option value='icmp' $selected{'PROTOCOL'}{'icmp'}>ICMP</option>
-            <option value='gre' $selected{'PROTOCOL'}{'gre'}>GRE</option>
-END
-
+# Build protocol options
+my $protocolOptions = '';
 foreach my $line (sort keys %Protocols::protocols) {
-
-    # do not have duplicates in the list
-    if (   $Protocols::protocols{$line} ne '6'
-        && $Protocols::protocols{$line} ne '17'
-        && $Protocols::protocols{$line} ne '1'
-        && $Protocols::protocols{$line} ne '47')
-    {
-
-        #       print "<option value='$line' $selected{'PROTOCOL'}{$Protocols::protocols{$line}}>".uc($line)."</option>\n";
-        print "<option value='$line' $selected{'PROTOCOL'}{$line}>"
-            . uc($line)
-            . "&nbsp;(#&nbsp;$Protocols::protocols{$line})</option>\n";
+    my $label = uc($line);
+    if ($Protocols::protocols{$line} ne '6' && 
+        $Protocols::protocols{$line} ne '17' && 
+        $Protocols::protocols{$line} ne '1' && 
+        $Protocols::protocols{$line} ne '47') {
+        $label .= "&nbsp;(#&nbsp;$Protocols::protocols{$line})";
     }
+    $protocolOptions .= "<option value='$line'>$label</option>\n";
 }
-print <<END;
-        </select>
-    </td>
-    <td>$Lang::tr{'invert'}:</td>
-    <td><input type='checkbox' name='PROTOCOL_INVERT' $checked{'PROTOCOL_INVERT'}{'on'} /></td>
-</tr><tr>
-    <td>$Lang::tr{'ports'}:</td>
-    <td><input type='text' name='PORTS' value='$cgiparams{'PORTS'}' size='15' maxlength='11' /></td>
-    <td>$Lang::tr{'invert'}:</td>
-    <td><input type='checkbox' name='PORT_INVERT' $checked{'PORT_INVERT'}{'on'} /></td>
-</tr><tr>
-    <td>$Lang::tr{'icmp type'}:</td>
-    <td>
-        <select name='ICMP_TYPE'>
-            <option value='BLANK' $selected{'ICMP_TYPE'}{'BLANK'}>-- $Lang::tr{'valid icmp types'} --</option>
-            <option value='ALL' $selected{'ICMP_TYPE'}{'ALL'}>$Lang::tr{'all icmp types'}</option>
-END
 
+# Build ICMP type options
+my $icmpTypeOptions = "<option value='BLANK'>-- $Lang::tr{'valid icmp types'} --</option>\n";
+$icmpTypeOptions .= "<option value='ALL'>$Lang::tr{'all icmp types'}</option>\n";
 foreach my $line (@icmptypes) {
-    if ($cgiparams{'ICMP_TYPE'} eq $line) {
-        print "<option value='$line' selected='selected'>$icmpTypeHash{$line} ($line)</option>\n";
-    }
-    else {
-        print "<option value='$line' >$icmpTypeHash{$line} ($line)</option>\n";
-    }
+    $icmpTypeOptions .= "<option value='$line'>$icmpTypeHash{$line} ($line)</option>\n";
 }
+
 print <<END;
-        </select>
-    </td>
-    <td colspan='2'>&nbsp;</td>
-</tr>
-</table>
-<hr />
-<table width='100%' cellpadding='0' cellspacing='5' border='0'>
-<tr>
-    <td class='comment2buttons'>&nbsp;</td>
+<script src="/include/datatable.js"></script>
+<script>
+const servicesData = [
+$jsDataStr
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    const table = new DataTable('#servicesTable', {
+        data: servicesData,
+        columns: [
+            { key: 'name', title: '$Lang::tr{'servicename'}', sortable: true },
+            { key: 'ports', title: '$Lang::tr{'ports'}', sortable: true },
+            { key: 'protocol', title: '$Lang::tr{'protocol'}', sortable: true },
+            { key: 'icmpType', title: '$Lang::tr{'icmp type'}', sortable: true },
+            { key: 'usedCount', title: '$Lang::tr{'used'}', sortable: true }
+        ],
+        defaultSort: { key: 'name', order: 'asc' },
+        pageSize: 20,
+        selectable: true,
+        actions: ['create', 'edit', 'delete', 'refresh'],
+        disabledActions: [],
+        onAddModal: function() {
+            openAddServiceModal();
+        },
+        onEditModal: function(rowData) {
+            openEditServiceModal(rowData);
+        },
+        onDeleteConfirm: function(selectedIds) {
+            deleteServices(selectedIds);
+        }
+    });
+    table.render();
+});
+
+function openAddServiceModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'ofw_modal_overlay';
+    overlay.innerHTML = \`
+        <div class="ofw_modal_dialog" style="width:500px;">
+            <div class="ofw_modal_header">
+                <svg class="ofw_modal_icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <span class="ofw_modal_title">$Lang::tr{'add service'}</span>
+                <button class="ofw_modal_close">&times;</button>
+            </div>
+            <div class="ofw_modal_body">
+                <form id="addServiceForm" method="post" action="$ENV{'SCRIPT_NAME'}">
+                    <input type="hidden" name="ACTION" value="$Lang::tr{'add'}">
+                    <table style="width:100%;border-collapse:collapse;">
+                        <tr>
+                            <td style="width:160px;padding:8px 12px 8px 0;text-align:right;"><label>$Lang::tr{'servicename'}:</label></td>
+                            <td><input type="text" name="SERVICE_NAME" style="width:200px;" required maxlength="20"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 12px 8px 0;text-align:right;"><label>$Lang::tr{'protocol'}:</label></td>
+                            <td>
+                                <select name="PROTOCOL" style="width:200px;">
+                                    <option value="tcp" selected>TCP</option>
+                                    <option value="udp">UDP</option>
+                                    <option value="tcpudp">TCP &amp; UDP</option>
+                                    <option value="icmp">ICMP</option>
+                                    <option value="gre">GRE</option>
+                                    $protocolOptions
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 12px 8px 0;text-align:right;"><label>$Lang::tr{'ports'}:</label></td>
+                            <td><input type="text" name="PORTS" style="width:200px;" maxlength="11"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 12px 8px 0;text-align:right;"><label>$Lang::tr{'invert'}:</label></td>
+                            <td>
+                                <input type="checkbox" name="PORT_INVERT" value="on"> $Lang::tr{'ports'}
+                                &nbsp;&nbsp;
+                                <input type="checkbox" name="PROTOCOL_INVERT" value="on"> $Lang::tr{'protocol'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 12px 8px 0;text-align:right;"><label>$Lang::tr{'icmp type'}:</label></td>
+                            <td>
+                                <select name="ICMP_TYPE" style="width:200px;">
+                                    $icmpTypeOptions
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div class="ofw_modal_footer">
+                <button class="ofw_btn ofw_btn_cancel">Cancel</button>
+                <button class="ofw_btn ofw_btn_primary" onclick="submitAddServiceForm()">Add</button>
+            </div>
+        </div>
+    \`;
+    
+    document.body.appendChild(overlay);
+    
+    overlay.querySelector('.ofw_modal_close').addEventListener('click', () => {
+        overlay.remove();
+    });
+    
+    overlay.querySelector('.ofw_btn_cancel').addEventListener('click', () => {
+        overlay.remove();
+    });
+}
+
+function submitAddServiceForm() {
+    const form = document.getElementById('addServiceForm');
+    const formData = new FormData(form);
+    
+    fetch('$ENV{'SCRIPT_NAME'}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            window.location.reload();
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+function openEditServiceModal(rowData) {
+    if (!rowData) return;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'ofw_modal_overlay';
+    overlay.innerHTML = \`
+        <div class="ofw_modal_dialog" style="width:500px;">
+            <div class="ofw_modal_header">
+                <svg class="ofw_modal_icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                <span class="ofw_modal_title">$Lang::tr{'edit service'}</span>
+                <button class="ofw_modal_close">&times;</button>
+            </div>
+            <div class="ofw_modal_body">
+                <form id="editServiceForm" method="post" action="$ENV{'SCRIPT_NAME'}">
+                    <input type="hidden" name="ACTION" value="$Lang::tr{'update'}">
+                    <input type="hidden" name="OLD_SERVICE_NAME" value="\${rowData.id}">
+                    <table style="width:100%;border-collapse:collapse;">
+                        <tr>
+                            <td style="width:160px;padding:8px 12px 8px 0;text-align:right;"><label>$Lang::tr{'servicename'}:</label></td>
+                            <td><input type="text" name="SERVICE_NAME" value="\${rowData.id}" style="width:200px;" required maxlength="20"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 12px 8px 0;text-align:right;"><label>$Lang::tr{'protocol'}:</label></td>
+                            <td>
+                                <select name="PROTOCOL" style="width:200px;">
+                                    <option value="tcp">TCP</option>
+                                    <option value="udp">UDP</option>
+                                    <option value="tcpudp">TCP &amp; UDP</option>
+                                    <option value="icmp">ICMP</option>
+                                    <option value="gre">GRE</option>
+                                    $protocolOptions
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 12px 8px 0;text-align:right;"><label>$Lang::tr{'ports'}:</label></td>
+                            <td><input type="text" name="PORTS" value="\${rowData.ports}" style="width:200px;" maxlength="11"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 12px 8px 0;text-align:right;"><label>$Lang::tr{'invert'}:</label></td>
+                            <td>
+                                <input type="checkbox" name="PORT_INVERT" value="on"> $Lang::tr{'ports'}
+                                &nbsp;&nbsp;
+                                <input type="checkbox" name="PROTOCOL_INVERT" value="on"> $Lang::tr{'protocol'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 12px 8px 0;text-align:right;"><label>$Lang::tr{'icmp type'}:</label></td>
+                            <td>
+                                <select name="ICMP_TYPE" style="width:200px;">
+                                    $icmpTypeOptions
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div class="ofw_modal_footer">
+                <button class="ofw_btn ofw_btn_cancel">Cancel</button>
+                <button class="ofw_btn ofw_btn_primary" onclick="submitEditServiceForm()">Save</button>
+            </div>
+        </div>
+    \`;
+    
+    document.body.appendChild(overlay);
+    
+    overlay.querySelector('.ofw_modal_close').addEventListener('click', () => {
+        overlay.remove();
+    });
+    
+    overlay.querySelector('.ofw_btn_cancel').addEventListener('click', () => {
+        overlay.remove();
+    });
+}
+
+function submitEditServiceForm() {
+    const form = document.getElementById('editServiceForm');
+    const formData = new FormData(form);
+    
+    fetch('$ENV{'SCRIPT_NAME'}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            window.location.reload();
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+function deleteServices(selectedIds) {
+    if (selectedIds.length === 0) return;
+    
+    const msg = selectedIds.length === 1 
+        ? 'Are you sure you want to delete this service?'
+        : 'Are you sure you want to delete ' + selectedIds.length + ' services?';
+    
+    if (!confirm(msg)) return;
+    
+    // Delete services one by one
+    let deleteCount = 0;
+    selectedIds.forEach(id => {
+        const formData = new FormData();
+        formData.append('ACTION', '$Lang::tr{'remove'}');
+        formData.append('SERVICE_NAME', id);
+        
+        fetch('$ENV{'SCRIPT_NAME'}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            deleteCount++;
+            if (deleteCount === selectedIds.length) {
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            alert('Error deleting service: ' + error.message);
+        });
+    });
+}
+</script>
+<div id="servicesTable"></div>
 END
 
-if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-    print <<END;
-    <td class='button2buttons'>
-        <input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'update'}' />
-        <input type='hidden' name='OLD_SERVICE_NAME' value='$cgiparams{'OLD_SERVICE_NAME'}' />
-    </td>
-    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' /></td>
-END
-}
-else {
-    print <<END;
-    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' /></td>
-    <td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' /></td>
-END
-}
-print <<END;
-    <td class='onlinehelp'>
-        <a href='${General::adminmanualurl}/firewall-services.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
-    </td>
-</tr>
-</table>
-</form>
-END
-
-&Header::closebox();
-
-&Header::openbox('100%', 'left', "$Lang::tr{'custom services'}:");
-print <<END;
-<div align='center'>
-<table width='100%' align='center'>
-<tr align="center">
-END
-
-# Add visual indicators to column headings to show sort order
-my $sortarrow;
-if ($sort_dir eq 'asc') {
-    $sortarrow = $Header::sortup;
-}
-else {
-    $sortarrow = $Header::sortdn;
-}
-
-my %sortCols = ();
-$sortCols{'SERVICE_NAME'}{'asc'} = '';
-$sortCols{'SERVICE_NAME'}{'dsc'} = '';
-$sortCols{'PORT_NR'}{'asc'}      = '';
-$sortCols{'PORT_NR'}{'dsc'}      = '';
-$sortCols{'PROTOCOL'}{'asc'}     = '';
-$sortCols{'PROTOCOL'}{'dsc'}     = '';
-$sortCols{'USED_COUNT'}{'asc'}   = '';
-$sortCols{'USED_COUNT'}{'dsc'}   = '';
-$sortCols{$sort_col}{$sort_dir}  = $sortarrow;
-
-if ($sort_dir eq 'asc' && $sort_col eq 'SERVICE_NAME') {
-    print
-"<td width='20%'><strong><a href='$ENV{'SCRIPT_NAME'}?sortcol=SERVICE_NAME&amp;srtype=a&amp;srtdir=dsc' title='$Lang::tr{'sort descending'}'>$Lang::tr{'servicename'}</a></strong> $sortCols{'SERVICE_NAME'}{'asc'}</td>\n";
-}
-else {
-    print
-"<td width='20%'><strong><a href='$ENV{'SCRIPT_NAME'}?sortcol=SERVICE_NAME&amp;srtype=a&amp;srtdir=asc' title='$Lang::tr{'sort ascending'}'>$Lang::tr{'servicename'}</a></strong> $sortCols{'SERVICE_NAME'}{'dsc'}</td>\n";
-}
-if ($sort_dir eq 'asc' && $sort_col eq 'PORT_NR') {
-    print
-"<td width='20%'><strong><a href='$ENV{'SCRIPT_NAME'}?sortcol=PORT_NR&amp;srtype=n&amp;srtdir=dsc' title='$Lang::tr{'sort descending'}'>$Lang::tr{'ports'}</a></strong> $sortCols{'PORT_NR'}{'asc'}</td>\n";
-}
-else {
-    print
-"<td width='20%'><strong><a href='$ENV{'SCRIPT_NAME'}?sortcol=PORT_NR&amp;srtype=n&amp;srtdir=asc' title='$Lang::tr{'sort ascending'}'>$Lang::tr{'ports'}</a></strong> $sortCols{'PORT_NR'}{'dsc'}</td>\n";
-}
-if ($sort_dir eq 'asc' && $sort_col eq 'PROTOCOL') {
-    print
-"<td width='20%'><strong><a href='$ENV{'SCRIPT_NAME'}?sortcol=PROTOCOL&amp;srtype=a&amp;srtdir=dsc' title='$Lang::tr{'sort descending'}'>$Lang::tr{'protocol'}</a></strong> $sortCols{'PROTOCOL'}{'asc'}</td>\n";
-}
-else {
-    print
-"<td width='20%'><strong><a href='$ENV{'SCRIPT_NAME'}?sortcol=PROTOCOL&amp;srtype=a&amp;srtdir=asc' title='$Lang::tr{'sort ascending'}'>$Lang::tr{'protocol'}</a></strong> $sortCols{'PROTOCOL'}{'dsc'}</td>\n";
-}
-
-print "<td width='25%'><strong>$Lang::tr{'icmp type'}</strong></td>";
-
-if ($sort_dir eq 'asc' && $sort_col eq 'USED_COUNT') {
-    print
-"<td width='15%'><strong><a href='$ENV{'SCRIPT_NAME'}?sortcol=USED_COUNT&amp;srtype=n&amp;srtdir=dsc' title='$Lang::tr{'sort descending'}'>$Lang::tr{'used'}</a></strong> $sortCols{'USED_COUNT'}{'asc'}</td>\n";
-}
-else {
-    print
-"<td width='15%'><strong><a href='$ENV{'SCRIPT_NAME'}?sortcol=USED_COUNT&amp;srtype=n&amp;srtdir=asc' title='$Lang::tr{'sort ascending'}'>$Lang::tr{'used'}</a></strong> $sortCols{'USED_COUNT'}{'dsc'}</td>\n";
-}
-print <<END;
-    <td width='5%'>&nbsp;</td>
-    <td width='5%'>&nbsp;</td>
-</tr>
-END
-
-&display_custom_services(\%custServices, \%icmpTypeHash);
-print <<END;
-</table>
-</div>
-END
-&Header::closebox();
 &Header::closebigbox();
 &Header::closepage();
-
-# $cServicesRef->{$serviceName}{'PORT_NR'}
-# $cServicesRef->{$serviceName}{'PROTOCOL'}
-# $cServicesRef->{$serviceName}{'PORT_INVERT'}
-# $cServicesRef->{$serviceName}{'PROTOCOL_INVERT'}
-# $cServicesRef->{$serviceName}{'ICMP_TYPE'}
-# $cServicesRef->{$serviceName}{'USED_COUNT'}
-sub display_custom_services {
-    my $cServicesRef = shift;
-    my $icmpTypes    = shift;
-
-    my @sortedKeys = &General::sortHashArray($sort_col, $sort_type, $sort_dir, $cServicesRef);
-
-    my $id = 0;
-    foreach my $serviceName (@sortedKeys) {
-        my $port_inv      = '';
-        my $prot_inv      = '';
-        my $port_inv_tail = '';
-        my $prot_inv_tail = '';
-        my $icmp_inv      = '';
-        my $icmp_inv_tail = '';
-
-        # highlight the row we are editing
-        if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'SERVICE_NAME'} eq $serviceName) {
-            print "<tr class='selectcolour'>";
-        }
-        else {
-            print "<tr class='table".int(($id % 2) + 1)."colour'>";
-        }
-        print "<td>$serviceName</td>\n";
-
-        if ($cServicesRef->{$serviceName}{'PORT_INVERT'} eq 'on') {
-            $port_inv      = " <strong><font color='RED'>! (</font></strong>";
-            $port_inv_tail = "<strong><font color='RED'>)</font></strong>";
-        }
-
-        if ($cServicesRef->{$serviceName}{'PROTOCOL_INVERT'} eq 'on') {
-            if ($cServicesRef->{$serviceName}{'PROTOCOL'} =~ /tcp|udp/) {
-                $port_inv      = " <strong><font color='RED'>! (</font></strong>";
-                $port_inv_tail = "<strong><font color='RED'>)</font></strong>";
-            }
-            elsif ($cServicesRef->{$serviceName}{'PROTOCOL'} =~ /icmp/) {
-                if ($cServicesRef->{$serviceName}{'ICMP_TYPE'} ne 'ALL') {
-                    $icmp_inv      = " <strong><font color='RED'>! (</font></strong>";
-                    $icmp_inv_tail = "<strong><font color='RED'>)</font></strong>";
-                }
-                else {
-                    $prot_inv      = " <strong><font color='RED'>! (</font></strong>";
-                    $prot_inv_tail = "<strong><font color='RED'>)</font></strong>";
-                }
-            }
-            else {
-                $prot_inv      = " <strong><font color='RED'>! (</font></strong>";
-                $prot_inv_tail = "<strong><font color='RED'>)</font></strong>";
-            }
-        }
-
-        print "<td align='center'>"
-            . $port_inv
-            . &cleanport($cServicesRef->{$serviceName}{'PORT_NR'})
-            . $port_inv_tail
-            . "</td>\n";
-        print "<td align='center'>"
-            . $prot_inv
-            . &cleanprotocol($cServicesRef->{$serviceName}{'PROTOCOL'})
-            . $prot_inv_tail
-            . "</td>\n";
-        if ($cServicesRef->{$serviceName}{'ICMP_TYPE'} eq 'BLANK') {
-            print "<td align='center'>N/A</td>\n";
-        }
-        else {
-            print "<td align='center'>"
-                . $icmp_inv
-                . " $icmpTypes->{$cServicesRef->{$serviceName}{'ICMP_TYPE'}} ($cServicesRef->{$serviceName}{'ICMP_TYPE'})"
-                . $icmp_inv_tail
-                . "</td>\n";
-        }
-        print <<END;
-    <td align='center'>$cServicesRef->{$serviceName}{'USED_COUNT'}x</td>
-    <td align='center'>
-    <form method='post' name='frm$id' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='ACTION' value='$Lang::tr{'edit'}' />
-        <input type='image' name='$Lang::tr{'edit'}' src='/images/edit.gif' alt='$Lang::tr{'edit'}' title='$Lang::tr{'edit'}'/>
-        <input type='hidden' name='SERVICE_NAME' value='$serviceName' />
-        <input type='hidden' name='USED_COUNT' value='$cServicesRef->{$serviceName}{'USED_COUNT'}' />
-    </form>
-    </td>
-END
-        if ($cServicesRef->{$serviceName}{'USED_COUNT'} > 0) {
-            print "<td><img src='/images/null.gif' width='20' height='20' alt='' /></td>";
-        }
-        else {
-            print <<END;
-    <td align='center'>
-    <form method='post' name='frmb$id' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='ACTION' value='$Lang::tr{'remove'}' />
-        <input type='image' name='$Lang::tr{'remove'}' src='/images/delete.gif' alt='$Lang::tr{'remove'}' title='$Lang::tr{'remove'}'/>
-        <input type='hidden' name='SERVICE_NAME' value='$serviceName' />
-    </form>
-    </td>
-END
-        }
-        print "</tr>\n";
-        $id++;
-    }
-}
 
 sub cleanprotocol {
     my $prtcl = $_[0];

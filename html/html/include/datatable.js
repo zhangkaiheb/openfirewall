@@ -19,7 +19,11 @@
                 loading: false,
                 onAction: null,
                 onSelectionChange: null,
-                onRowClick: null
+                onRowClick: null,
+                onAddModal: null,
+                onEditModal: null,
+                onDeleteConfirm: null,
+                disableDeleteCheck: false
             }, options);
 
             this.state = {
@@ -135,8 +139,8 @@
             if (needsSelection.includes(action) && this.state.selectedKeys.size === 0) return true;
             // edit only works with exactly one selection
             if (action === 'edit' && this.state.selectedKeys.size > 1) return true;
-            // delete not allowed for physical interfaces (type 0)
-            if (action === 'delete' && this.state.selectedKeys.size > 0) {
+            // delete not allowed for physical interfaces (type 0) unless disableDeleteCheck is true
+            if (action === 'delete' && this.state.selectedKeys.size > 0 && !this.options.disableDeleteCheck) {
                 const allPhysical = Array.from(this.state.selectedKeys).every(key => {
                     const row = this.options.data.find(r => r[this.options.rowKey] == key);
                     return row && row.typeCode === '0';
@@ -157,16 +161,26 @@
         }
 
         handleAction(action) {
-            if (this.options.onAction) {
-                if (action === 'edit') {
-                    this.openEditModal(this.selectedRows[0]);
-                } else if (action === 'delete') {
-                    this.openDeleteConfirm();
-                } else if (action === 'create') {
-                    this.openAddModal();
+            if (action === 'edit') {
+                if (this.options.onEditModal) {
+                    this.options.onEditModal(this.selectedRows[0]);
                 } else {
-                    this.options.onAction(action);
+                    this.openEditModal(this.selectedRows[0]);
                 }
+            } else if (action === 'delete') {
+                if (this.options.onDeleteConfirm) {
+                    this.options.onDeleteConfirm(this.selectedRows);
+                } else {
+                    this.openDeleteConfirm();
+                }
+            } else if (action === 'create') {
+                if (this.options.onAddModal) {
+                    this.options.onAddModal();
+                } else {
+                    this.openAddModal();
+                }
+            } else if (this.options.onAction) {
+                this.options.onAction(action);
             }
         }
 
@@ -728,7 +742,7 @@
             if (this.pagedData.length === 0) {
                 html += `<tr><td colspan="${visibleCols.length + (this.options.selectable ? 1 : 0)}" class="ofw_no_data">No data</td></tr>`;
             } else {
-                this.pagedData.forEach(row => {
+                this.pagedData.forEach((row, index) => {
                     const selected = this.isSelected(row) ? 'selected' : '';
                     html += `<tr class="${selected}" data-key="${row[this.options.rowKey]}">`;
 
@@ -738,7 +752,13 @@
                     }
 
                     visibleCols.forEach(col => {
-                        const value = col.render ? col.render(row[col.key], row) : (row[col.key] || '');
+                        let value;
+                        // 如果是序号列（key为'id'且title包含'序号'或'Index'），动态计算序号
+                        if (col.key === 'id' && (col.title === '序号' || col.title === 'Index' || col.title.includes('序号'))) {
+                            value = (this.state.currentPage - 1) * this.options.pageSize + index + 1;
+                        } else {
+                            value = col.render ? col.render(row[col.key], row) : (row[col.key] || '');
+                        }
                         html += `<td>${value}</td>`;
                     });
 

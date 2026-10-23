@@ -87,41 +87,37 @@ $cgiparams{'GROUP_NEW'} = &Header::cleanConfNames($cgiparams{'GROUP_NEW'});
 if ($cgiparams{'ACTION'} eq $Lang::tr{'add'}) {
     &validateAddressGroupingParams(\%addressGroupConf);
     unless ($errormessage) {
-        my %newEntry = ();
-        if ($cgiparams{'GROUP_TYP'} eq 'existing') {
-            $newEntry{'GROUP_NAME'} = $cgiparams{'GROUP_EXISTING'};
-            $newEntry{'ENABLED'}    = $cgiparams{'ENABLED'};
-        }
-        else {
-            $newEntry{'GROUP_NAME'}                                  = $cgiparams{'GROUP_NEW'};
-            $addressGroupConf{$newEntry{'GROUP_NAME'}}{'USED_COUNT'} = 0;
-            $addressGroupConf{$newEntry{'GROUP_NAME'}}{'REMARK'}     = $cgiparams{'REMARK'};
-            $addressGroupConf{$newEntry{'GROUP_NAME'}}{'ADDRESSES'}  = ();
+        my $groupName = $cgiparams{'GROUP_NEW'};
+        $addressGroupConf{$groupName}{'USED_COUNT'} = 0;
+        $addressGroupConf{$groupName}{'REMARK'}     = $cgiparams{'REMARK'};
+        $addressGroupConf{$groupName}{'ADDRESSES'}  = [];
 
-            # we have to be sure that at least one address is enabled,
-            # this is the first address -> enable it
-            $newEntry{'ENABLED'} = 'on';
+        # Process selected addresses (pipe-separated from dual-listbox)
+        my %networks = ();
+        &DATA::setup_default_networks(\%networks);
+
+        if ($cgiparams{'SELECTED_ADDRESSES'} ne '') {
+            my @addrs = split(/\|/, $cgiparams{'SELECTED_ADDRESSES'});
+            my %seen;
+            foreach my $addr (@addrs) {
+                next if $addr eq '';
+                next if $seen{$addr}++;
+                my %entry = ();
+                if (exists $networks{$addr}) {
+                    $entry{'ADDRESS_TYP'}  = 'default';
+                } else {
+                    $entry{'ADDRESS_TYP'}  = 'custom';
+                    &FW::changeUsedCountAdr($addr, "", "add");
+                }
+                $entry{'ADDRESS_NAME'} = $addr;
+                $entry{'ENABLED'}      = 'on';
+                push(@{$addressGroupConf{$groupName}{'ADDRESSES'}}, \%entry);
+                &General::log("$Lang::tr{'address added to group'}: $addr -> $groupName");
+            }
         }
 
-        $newEntry{'ADDRESS_TYP'} = $cgiparams{'ADDRESS_TYP'};
-        if ($cgiparams{'ADDRESS_TYP'} eq 'default') {
-            $newEntry{'ADDRESS_NAME'} = $cgiparams{'ADDRESS_NAME_DEFAULT'};
-        }
-        else {
-            $newEntry{'ADDRESS_NAME'} = $cgiparams{'ADDRESS_NAME_CUSTOM'};
-            &FW::changeUsedCountAdr($newEntry{'ADDRESS_NAME'}, "", "add");
-        }
-
-        push(@{$addressGroupConf{$newEntry{'GROUP_NAME'}}{'ADDRESSES'}}, \%newEntry);
         &DATA::saveAddressGroupConf(\%addressGroupConf);
-        &General::log("$Lang::tr{'address added to group'}: $newEntry{'ADDRESS_NAME'} -> $newEntry{'GROUP_NAME'}");
 
-        # submit the changes to iptables rules
-        if (   $addressGroupConf{$newEntry{'GROUP_NAME'}}{'USED_COUNT'} > 0
-            && $cgiparams{'GROUP_TYP'} eq 'existing')
-        {
-            `/usr/local/bin/setfwrules --user < /dev/null > /dev/null 2>&1 &`;
-        }
         undef %cgiparams;
         $cgiparams{'ACTION'} = '';
     }
@@ -136,22 +132,53 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'update'}) {
     unless ($errormessage) {
         my $group    = $cgiparams{'GROUP_NEW'};
         my $groupOld = $cgiparams{'OLD_GROUP'};
-        $addressGroupConf{$groupOld}{'REMARK'} = $cgiparams{'REMARK'};
 
-        # if the name (==Key) has changed, we have to copy/move the old data to new key
+        # Remove old custom address used counts
+        foreach my $oldAddr (@{$addressGroupConf{$groupOld}{'ADDRESSES'}}) {
+            if ($oldAddr->{'ADDRESS_TYP'} ne 'default') {
+                &FW::changeUsedCountAdr($oldAddr->{'ADDRESS_NAME'}, "", "remove");
+            }
+        }
+
+        # Build new address list from SELECTED_ADDRESSES
+        my @newAddresses = ();
+        my %networks = ();
+        &DATA::setup_default_networks(\%networks);
+
+        if ($cgiparams{'SELECTED_ADDRESSES'} ne '') {
+            my @addrs = split(/\|/, $cgiparams{'SELECTED_ADDRESSES'});
+            my %seen;
+            foreach my $addr (@addrs) {
+                next if $addr eq '';
+                next if $seen{$addr}++;
+                my %entry = ();
+                if (exists $networks{$addr}) {
+                    $entry{'ADDRESS_TYP'}  = 'default';
+                } else {
+                    $entry{'ADDRESS_TYP'}  = 'custom';
+                    &FW::changeUsedCountAdr($addr, "", "add");
+                }
+                $entry{'ADDRESS_NAME'} = $addr;
+                $entry{'ENABLED'}      = 'on';
+                push(@newAddresses, \%entry);
+            }
+        }
+
+        # Update group
+        $addressGroupConf{$groupOld}{'REMARK'}   = $cgiparams{'REMARK'};
+        $addressGroupConf{$groupOld}{'ADDRESSES'} = \@newAddresses;
+
+        # Rename group if name changed
         if ($group ne $groupOld) {
             $addressGroupConf{$group}{'REMARK'}     = $addressGroupConf{$groupOld}{'REMARK'};
             $addressGroupConf{$group}{'USED_COUNT'} = $addressGroupConf{$groupOld}{'USED_COUNT'};
-            $addressGroupConf{$group}{'ADDRESSES'}  = ();
-
-            foreach my $address (@{$addressGroupConf{$groupOld}{'ADDRESSES'}}) {
-                push(@{$addressGroupConf{$group}{'ADDRESSES'}}, $address);
-            }
+            $addressGroupConf{$group}{'ADDRESSES'}  = \@newAddresses;
             delete($addressGroupConf{$groupOld});
         }
-        &DATA::saveAddressGroupConf(\%addressGroupConf);
 
+        &DATA::saveAddressGroupConf(\%addressGroupConf);
         &General::log("$Lang::tr{'address group updated'}: $group");
+
         undef %cgiparams;
         $cgiparams{'ACTION'} = '';
     }
@@ -182,14 +209,19 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
     my $group = $cgiparams{'GROUP'};
 
     if ($cgiparams{'TYP'} eq 'group') {
-        foreach my $address (@{$addressGroupConf{$group}{'ADDRESSES'}}) {
-            if ($address->{'ADDRESS_TYP'} ne 'default') {
-                &FW::changeUsedCountAdr($address->{'ADDRESS_NAME'}, "", "remove");
+        # Support batch delete: GROUP may contain multiple names joined by ','
+        my @groupsToDelete = split(/,/, $group);
+        foreach my $g (@groupsToDelete) {
+            next unless defined $addressGroupConf{$g}{'ADDRESSES'};
+            foreach my $address (@{$addressGroupConf{$g}{'ADDRESSES'}}) {
+                if ($address->{'ADDRESS_TYP'} ne 'default') {
+                    &FW::changeUsedCountAdr($address->{'ADDRESS_NAME'}, "", "remove");
+                }
             }
+            delete($addressGroupConf{$g});
+            &General::log("$Lang::tr{'address group deleted'}: $g");
         }
-        delete($addressGroupConf{$group});
         &DATA::saveAddressGroupConf(\%addressGroupConf);
-        &General::log("$Lang::tr{'address group deleted'}: $group");
 
         # A group can only be removed when it is not used
         # -> no need to run setfwrules
@@ -277,14 +309,6 @@ if (   $cgiparams{'ACTION'} eq ''
     $cgiparams{'DEFAULT_ADDRESS'}      = '';
 }
 
-# DEBUG DEBUG
-#&Header::openbox('100%', 'left', 'DEBUG');
-#foreach my $line (keys %cgiparams) {
-#   print "$line = $cgiparams{$line}<br />\n";
-#}
-#print "$ENV{'QUERY_STRING'}\n";
-#&Header::closebox();
-
 if ($errormessage) {
     &Header::openbox('100%', 'left', "$Lang::tr{'error messages'}:", 'error');
     print "<font class='base'>$errormessage&nbsp;</font>";
@@ -293,295 +317,545 @@ if ($errormessage) {
     $error = 'error';
 }
 
-&Header::openbox('100%', 'left', "$Lang::tr{'add address grouping'}:", $error);
+# Prepare data for DataTable
+my @jsData;
+my $rowId = 0;
+foreach my $group (sort keys %addressGroupConf) {
+    my $remark = defined($addressGroupConf{$group}{'REMARK'}) ? $addressGroupConf{$group}{'REMARK'} : '';
+    my $addressCount = scalar(@{$addressGroupConf{$group}{'ADDRESSES'}});
+    my $usedCount = $addressGroupConf{$group}{'USED_COUNT'};
 
-$radio{'GROUP_TYP'}{'new'}                   = '';
-$radio{'GROUP_TYP'}{'existing'}              = '';
-$radio{'GROUP_TYP'}{$cgiparams{'GROUP_TYP'}} = "checked='checked'";
-
-$radio{'ADDRESS_TYP'}{'default'}                 = '';
-$radio{'ADDRESS_TYP'}{'custom'}                  = '';
-$radio{'ADDRESS_TYP'}{$cgiparams{'ADDRESS_TYP'}} = "checked='checked'";
-
-$cgiparams{'ENABLED'} = 'off' if ($cgiparams{'ENABLED'} ne 'on');
-$checked{'ENABLED'}{'off'}                 = '';
-$checked{'ENABLED'}{'on'}                  = '';
-$checked{'ENABLED'}{$cgiparams{'ENABLED'}} = "checked='checked'";
-
-my @existingGroups      = sort(keys(%addressGroupConf));
-my $existingGroupsCount = @existingGroups;
-
-print <<END;
-<form method='post' action='$ENV{'SCRIPT_NAME'}'>
-<div align='center'>
-<table width='100%' cellpadding='0' cellspacing='5' border='0'>
-<tr align="left">
-    <td width='25%' class='base'>
-END
-
-if($existingGroupsCount > 0) {
-    print"<input type='radio' name='GROUP_TYP' value='new' $radio{'GROUP_TYP'}{'new'} />\n";
-}
-else
-{
-    print"<input type='hidden' name='GROUP_TYP' value='new' />\n";
-}
-
-print <<END;
-        $Lang::tr{'address group name'}:
-    </td>
-    <td width='25%' class='base'>
-        <input type='text' name='GROUP_NEW' value='$cgiparams{'GROUP_NEW'}' size='20' maxlength='18' $disabledNameTxt />
-        $hiddenGroupName
-    </td>
-    <td colspan='2'>&nbsp;</td>
-</tr>
-END
-
-if ($existingGroupsCount > 0) {
-    print <<END;
-    <tr>
-    <td align='left' class='base'>
-        <input type='radio' name='GROUP_TYP' value='existing' $radio{'GROUP_TYP'}{'existing'} $disabled/>
-        $Lang::tr{'address group name'}:&nbsp;
-    </td>
-    <td colspan='3' align='left' class='base'>
-        <select name='GROUP_EXISTING' $disabled>
-END
-
-    foreach my $group (@existingGroups) {
-        print "<option value='$group' ";
-        print " selected='selected'" if ($cgiparams{'GROUP_EXISTING'} eq $group);
-        print ">$group</option>";
+    # Build addresses list for edit modal
+    my @addrNames = ();
+    foreach my $addr (@{$addressGroupConf{$group}{'ADDRESSES'}}) {
+        my $name = $addr->{'ADDRESS_NAME'};
+        $name =~ s/(['\\])/\\$1/g;
+        push @addrNames, $name;
     }
-    print <<END;
-        </select>
-    </td>
-</tr>
-END
+    my $addressesStr = join(',', @addrNames);
+
+    # Escape special characters for JavaScript
+    $group =~ s/(['\\])/\\$1/g;
+    $remark =~ s/(['\\])/\\$1/g;
+
+    push @jsData, sprintf(
+        "{id:'%d',group:'%s',remark:'%s',addressCount:%d,usedCount:%d,addresses:'%s'}",
+        $rowId, $group, $remark, $addressCount, $usedCount, $addressesStr
+    );
+    $rowId++;
 }
+my $tableDataJs = join(",\n", @jsData);
+
+# Build address group data for edit modal
+my %addressGroupData = ();
+foreach my $group (keys %addressGroupConf) {
+    my @addrNames = ();
+    foreach my $addr (@{$addressGroupConf{$group}{'ADDRESSES'}}) {
+        push @addrNames, $addr->{'ADDRESS_NAME'};
+    }
+    $addressGroupData{$group} = join(',', @addrNames);
+}
+
+my @agEntries = ();
+foreach my $group (keys %addressGroupData) {
+    my $jsGroup = $group;
+    $jsGroup =~ s/'/\\'/g;
+    my $jsAddrs = $addressGroupData{$group};
+    push @agEntries, "'$jsGroup':'$jsAddrs'";
+}
+my $addressGroupDataJs = "{" . join(',', @agEntries) . "}";
+
+# Prepare translation strings for JavaScript
+my $trSequence = $Lang::tr{'sequence'};
+my $trAddressGroupName = $Lang::tr{'address group name'};
+my $trRemark = $Lang::tr{'remark'};
+my $trAddresses = $Lang::tr{'addresses'};
+my $trUsed = $Lang::tr{'used'};
+my $trAddAddressToGroup = $Lang::tr{'add address to group'};
+my $trAdd = $Lang::tr{'add'};
+my $trAddressGroupNameLabel = $Lang::tr{'address group name'};
+my $trRemarkLabel = $Lang::tr{'remark'};
+my $trAddressType = $Lang::tr{'address type'};
+my $trDefaultNetworks = $Lang::tr{'default networks'};
+my $trCustomAddresses = $Lang::tr{'custom addresses'};
+my $trAddress = $Lang::tr{'address'};
+my $trSelect = $Lang::tr{'select'};
+my $trEnabled = $Lang::tr{'enabled'};
+my $trCancel = $Lang::tr{'cancel'};
+my $trUpdate = $Lang::tr{'update'};
+my $trRemove = $Lang::tr{'remove'};
+my $trEditAddressGroup = $Lang::tr{'edit address group'};
+my $trEditAddressToGroup = $Lang::tr{'edit address to group'};
+my $trAvailableAddresses = $Lang::tr{'available addresses'};
+my $trSelectedAddresses = $Lang::tr{'selected addresses'};
+my $trDeleteConfirm = $Lang::tr{'are you sure you want to delete this address group'};
+my $trDeleteConfirmPlural = $Lang::tr{'are you sure you want to delete these address groups'};
+my $scriptName = $ENV{'SCRIPT_NAME'};
+
 print <<END;
-<tr>
-    <td>$Lang::tr{'remark'}:&nbsp;<img src='/blob.gif' alt='*' /></td>
-    <td colspan='3'><input type='text' name='REMARK' value='$cgiparams{'REMARK'}' maxlength='50' /></td>
-</tr><tr>
-    <td colspan='4' bgcolor='#000000'><img src='/images/null.gif' width='1' height='1' border='0' alt='--------' /></td>
-</tr><tr>
-    <td>
+<script src="/include/datatable.js"></script>
+<script>
+var addressGroupData = $addressGroupDataJs;
+var tableData = [
+$tableDataJs
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    window.addressGroupsTable = new DataTable('#addressGroupsTable', {
+        data: tableData,
+        columns: [
+            { key: 'id', title: '$trSequence', sortable: true },
+            { key: 'group', title: '$trAddressGroupName', sortable: true },
+            { key: 'remark', title: '$trRemark', sortable: true },
+            { key: 'addressCount', title: '$trAddresses', sortable: true },
+            { key: 'usedCount', title: '$trUsed', sortable: true }
+        ],
+        selectable: true,
+        actions: ['create', 'edit', 'delete', 'refresh'],
+        onAddModal: function() {
+            openAddAddressModal();
+        },
+        onEditModal: function(row) {
+            openEditGroupModal(row);
+        },
+        onDeleteConfirm: function(selectedRows) {
+            deleteGroups(selectedRows);
+        }
+    });
+});
+
+function makeModalDraggable(modalId) {
+    var modal = document.getElementById(modalId);
+    if (!modal) return;
+
+    var dialog = modal.querySelector('.ofw_modal_dialog');
+    var header = modal.querySelector('.ofw_modal_header');
+    if (!dialog || !header) return;
+
+    var isDragging = false;
+    var offsetX, offsetY;
+
+    header.addEventListener('mousedown', function(e) {
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        var rect = dialog.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        dialog.style.position = 'fixed';
+        dialog.style.margin = '0';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        var x = e.clientX - offsetX;
+        var y = e.clientY - offsetY;
+        dialog.style.left = x + 'px';
+        dialog.style.top = y + 'px';
+    });
+
+    document.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+}
+
+function openAddAddressModal() {
+    // Prevent duplicate modals
+    if (document.querySelector('#addAddressModal')) return;
+
+    var modalHtml = '<div class="ofw_modal_overlay" id="addAddressModal">' +
+        '<div class="ofw_modal_dialog" style="width:680px;">' +
+        '<div class="ofw_modal_header" style="cursor:move;">' +
+        '<span class="ofw_modal_title">$trAddAddressToGroup</span>' +
+        '<button type="button" class="ofw_modal_close" onclick="closeAddAddressModal()">&times;</button>' +
+        '</div>' +
+        '<div class="ofw_modal_body">' +
+        '<form id="addAddressForm" method="post" action="$scriptName">' +
+        '<input type="hidden" name="ACTION" value="$trAdd">' +
+        '<input type="hidden" name="GROUP_TYP" value="new">' +
+        '<table width="100%" cellpadding="5" cellspacing="0" border="0">' +
+        '<tr>' +
+        '<td width="30%" align="right">$trAddressGroupNameLabel</td>' +
+        '<td><input type="text" name="GROUP_NEW" style="width:300px;" maxlength="18" required></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right">$trRemarkLabel</td>' +
+        '<td><input type="text" name="REMARK" style="width:300px;" maxlength="50"></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right" valign="top">$trAddresses</td>' +
+        '<td>' +
+        '<div style="display:flex;gap:10px;align-items:center;">' +
+        '<div style="flex:1;display:flex;flex-direction:column;">' +
+        '<div style="margin-bottom:5px;font-weight:bold;">$trAvailableAddresses</div>' +
+        '<select id="availableAddressSelect" multiple size="8" style="width:100%;min-height:160px;">';
 END
 
-if($#customAddresses >= 0) {
-    print"<input type='radio' name='ADDRESS_TYP' value='default' $radio{'ADDRESS_TYP'}{'default'} $disabled/>\n";
+# Build combined list of all addresses
+my %allAddressesMap = ();
+foreach my $addr (@customAddresses) {
+    $allAddressesMap{$addr} = 'custom';
 }
-else
-{
-    print"<input type='hidden' name='ADDRESS_TYP' value='default' />\n";
-}
-
-print <<END;
-
-        $Lang::tr{'default networks'}:
-    </td>
-    <td colspan='3'>
-        <select name='ADDRESS_NAME_DEFAULT' $disabled>
-END
-
 my %networks = ();
 &DATA::setup_default_networks(\%networks);
-
-print "<option value='BLANK'";
-print "selected='selected'" unless (defined $cgiparams{'DEFAULT_ADDRESS'});
-print ">-- $Lang::tr{'default networks'} --</option>";
-foreach my $defAddress (sort keys %networks) {
-    print "<option value='$defAddress'";
-    print " selected='selected'" if ($cgiparams{'ADDRESS_NAME_DEFAULT'} eq $defAddress);
-    print ">$defAddress</option>";
+foreach my $addr (keys %networks) {
+    $allAddressesMap{$addr} = 'default';
 }
+
+# Output default networks group
+print "modalHtml += '<optgroup label=\\\"$trDefaultNetworks\\\">';\n";
+foreach my $addr (sort keys %allAddressesMap) {
+    next unless $allAddressesMap{$addr} eq 'default';
+    my $jsAddr = $addr;
+    $jsAddr =~ s/'/\\'/g;
+    print "modalHtml += '<option value=\\\"$jsAddr\\\">$jsAddr</option>';\n";
+}
+print "modalHtml += '</optgroup>';\n";
+# Output custom addresses group
+print "modalHtml += '<optgroup label=\\\"$trCustomAddresses\\\">';\n";
+foreach my $addr (sort keys %allAddressesMap) {
+    next unless $allAddressesMap{$addr} eq 'custom';
+    my $jsAddr = $addr;
+    $jsAddr =~ s/'/\\'/g;
+    print "modalHtml += '<option value=\\\"$jsAddr\\\">$jsAddr</option>';\n";
+}
+print "modalHtml += '</optgroup>';\n";
+
 print <<END;
-        </select>
-    </td>
-</tr>
-END
+        modalHtml += '</select>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:5px;justify-content:center;">' +
+        '<button type="button" onclick="moveSelectedToRight()" style="padding:4px 12px;">&gt;&gt;</button>' +
+        '<button type="button" onclick="moveSelectedToLeft()" style="padding:4px 12px;">&lt;&lt;</button>' +
+        '</div>' +
+        '<div style="flex:1;display:flex;flex-direction:column;">' +
+        '<div style="margin-bottom:5px;font-weight:bold;">$trSelectedAddresses</div>' +
+        '<select id="selectedAddressSelect" multiple size="8" style="width:100%;min-height:160px;"></select>' +
+        '</div>' +
+        '</div>' +
+        '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right">$trEnabled:</td>' +
+        '<td><input type="checkbox" name="ENABLED" value="on" checked></td>' +
+        '</tr>' +
+        '</table>' +
+        '</form>' +
+        '</div>' +
+        '<div class="ofw_modal_footer">' +
+        '<button type="button" class="ofw_btn" onclick="closeAddAddressModal()">$trCancel</button>' +
+        '<button type="button" class="ofw_btn ofw_btn_primary" onclick="submitAddAddressForm()">$trAdd</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
 
-if ($#customAddresses >= 0) {
-    print <<END;
-<tr align="left">
-    <td class='base'>
-        <input type='radio' name='ADDRESS_TYP' value='custom' $radio{'ADDRESS_TYP'}{'custom'} $disabled />
-        $Lang::tr{'custom addresses'}:
-    </td>
-    <td colspan='3' class='base'>
-        <select name='ADDRESS_NAME_CUSTOM' $disabled>
-END
-    print "<option value='BLANK' selected='selected'>N/A</option>" if ($#customAddresses < 0);
-    foreach my $address (@customAddresses) {
-        print "<option value='$address'";
-        print " selected='selected'" if ($cgiparams{'ADDRESS_NAME_CUSTOM'} eq $address);
-        print ">$address</option>";
-
-    }
-    print <<END;
-        </select>
-    </td>
-</tr>
-END
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    makeModalDraggable('addAddressModal');
 }
+
+function closeAddAddressModal() {
+    var modal = document.getElementById('addAddressModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function moveSelectedToRight() {
+    var available = document.getElementById('availableAddressSelect');
+    var selected = document.getElementById('selectedAddressSelect');
+    var options = Array.from(available.selectedOptions);
+    for (var i = 0; i < options.length; i++) {
+        selected.appendChild(options[i]);
+    }
+}
+
+function moveSelectedToLeft() {
+    var available = document.getElementById('availableAddressSelect');
+    var selected = document.getElementById('selectedAddressSelect');
+    var options = Array.from(selected.selectedOptions);
+    for (var i = 0; i < options.length; i++) {
+        available.appendChild(options[i]);
+    }
+}
+
+function submitAddAddressForm() {
+    var form = document.getElementById('addAddressForm');
+    // Collect selected addresses into hidden field
+    var selected = document.getElementById('selectedAddressSelect');
+    var values = [];
+    for (var i = 0; i < selected.options.length; i++) {
+        values.push(selected.options[i].value);
+    }
+    // Remove old hidden field if exists
+    var oldHidden = document.getElementById('selectedAddressesHidden');
+    if (oldHidden) oldHidden.remove();
+    var hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'SELECTED_ADDRESSES';
+    hidden.id = 'selectedAddressesHidden';
+    hidden.value = values.join('|');
+    form.appendChild(hidden);
+    if (form.checkValidity()) {
+        form.submit();
+    } else {
+        form.reportValidity();
+    }
+}
+
+function openEditGroupModal(row) {
+    // Prevent duplicate modals
+    if (document.querySelector('#editGroupModal')) return;
+
+    var modalHtml = '<div class="ofw_modal_overlay" id="editGroupModal">' +
+        '<div class="ofw_modal_dialog" style="width:680px;">' +
+        '<div class="ofw_modal_header" style="cursor:move;">' +
+        '<span class="ofw_modal_title">$trEditAddressToGroup</span>' +
+        '<button type="button" class="ofw_modal_close" onclick="closeEditGroupModal()">&times;</button>' +
+        '</div>' +
+        '<div class="ofw_modal_body">' +
+        '<form id="editGroupForm" method="post" action="$scriptName">' +
+        '<input type="hidden" name="ACTION" value="$trUpdate">' +
+        '<input type="hidden" name="GROUP_TYP" value="new">' +
+        '<input type="hidden" name="OLD_GROUP" value="' + row.group + '">' +
+        '<table width="100%" cellpadding="5" cellspacing="0" border="0">' +
+        '<tr>' +
+        '<td width="30%" align="right">$trAddressGroupNameLabel</td>' +
+        '<td><input type="text" name="GROUP_NEW" value="' + row.group + '" style="width:300px;" maxlength="18" required></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right">$trRemarkLabel</td>' +
+        '<td><input type="text" name="REMARK" value="' + row.remark + '" style="width:300px;" maxlength="50"></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right" valign="top">$trAddresses</td>' +
+        '<td>' +
+        '<div style="display:flex;gap:10px;align-items:center;">' +
+        '<div style="flex:1;display:flex;flex-direction:column;">' +
+        '<div style="margin-bottom:5px;font-weight:bold;">$trAvailableAddresses</div>' +
+        '<select id="availableAddressSelectEdit" multiple size="8" style="width:100%;min-height:160px;">';
+END
+
+# Build combined list of all addresses for edit modal
+my %allAddressesMapEdit = ();
+foreach my $addr (@customAddresses) {
+    $allAddressesMapEdit{$addr} = 'custom';
+}
+my %networksEdit = ();
+&DATA::setup_default_networks(\%networksEdit);
+foreach my $addr (keys %networksEdit) {
+    $allAddressesMapEdit{$addr} = 'default';
+}
+
+# Output default networks group
+print "modalHtml += '<optgroup label=\\\"$trDefaultNetworks\\\">';\n";
+foreach my $addr (sort keys %allAddressesMapEdit) {
+    next unless $allAddressesMapEdit{$addr} eq 'default';
+    my $jsAddr = $addr;
+    $jsAddr =~ s/'/\\'/g;
+    print "modalHtml += '<option value=\\\"$jsAddr\\\">$jsAddr</option>';\n";
+}
+print "modalHtml += '</optgroup>';\n";
+# Output custom addresses group
+print "modalHtml += '<optgroup label=\\\"$trCustomAddresses\\\">';\n";
+foreach my $addr (sort keys %allAddressesMapEdit) {
+    next unless $allAddressesMapEdit{$addr} eq 'custom';
+    my $jsAddr = $addr;
+    $jsAddr =~ s/'/\\'/g;
+    print "modalHtml += '<option value=\\\"$jsAddr\\\">$jsAddr</option>';\n";
+}
+print "modalHtml += '</optgroup>';\n";
+
 print <<END;
-<tr>
-    <td>$Lang::tr{'enabled'}:</td>
-    <td colspan='3'><input type='checkbox' name='ENABLED' $checked{'ENABLED'}{'on'} $disabled /></td>
-</tr>
-</table>
-<hr />
-<table width='100%' cellpadding='0' cellspacing='5' border='0'>
-<tr>
-    <td class='comment2buttons'>
-        <strong>$Lang::tr{'note'}</strong>:&nbsp;$Lang::tr{'mac adr not as dest'}
-        <br />
-    </td>
-    <td colspan='3'>&nbsp;</td>
-</tr>
-<tr>
-    <td class='comment2buttons'>
-        <img src='/blob.gif' alt='*' align='top' />&nbsp;
-        <font class='base'>$Lang::tr{'this field may be blank'}</font>
-    </td>
-END
+        modalHtml += '</select>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:5px;justify-content:center;">' +
+        '<button type="button" onclick="moveSelectedToRightEdit()" style="padding:4px 12px;">&gt;&gt;</button>' +
+        '<button type="button" onclick="moveSelectedToLeftEdit()" style="padding:4px 12px;">&lt;&lt;</button>' +
+        '</div>' +
+        '<div style="flex:1;display:flex;flex-direction:column;">' +
+        '<div style="margin-bottom:5px;font-weight:bold;">$trSelectedAddresses</div>' +
+        '<select id="selectedAddressSelectEdit" multiple size="8" style="width:100%;min-height:160px;"></select>' +
+        '</div>' +
+        '</div>' +
+        '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right">$trEnabled:</td>' +
+        '<td><input type="checkbox" name="ENABLED" value="on" checked></td>' +
+        '</tr>' +
+        '</table>' +
+        '</form>' +
+        '</div>' +
+        '<div class="ofw_modal_footer">' +
+        '<button type="button" class="ofw_btn" onclick="closeEditGroupModal()">$trCancel</button>' +
+        '<button type="button" class="ofw_btn ofw_btn_primary" onclick="submitEditGroupForm()">$trUpdate</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
 
-if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-    print "<td class='button2buttons'><input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'update'}' />\n";
-    print "<input type='hidden' name='OLD_GROUP' value='$cgiparams{'GROUP'}' /></td>\n";
-    print "<td class='button2buttons'><input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'reset'}' /></td>\n";
-}
-else {
-    print "<td class='button2buttons'><input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'add'}' /></td>\n";
-    print "<td class='button2buttons'><input type='submit' name='ACTION' class='commonbuttons' value='$Lang::tr{'reset'}' /></td>\n";
-}
-print <<END;
-    <td class='onlinehelp'>
-        <a href='${General::adminmanualurl}/firewall-addressgroups.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
-    </td>
-</tr>
-</table>
-</div>
-</form>
-END
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    makeModalDraggable('editGroupModal');
 
-&Header::closebox();
+    // Pre-fill selected addresses from row data
+    setTimeout(function() {
+        var addresses = (row.addresses || '').split(',');
+        var available = document.getElementById('availableAddressSelectEdit');
+        var selected = document.getElementById('selectedAddressSelectEdit');
 
-&Header::openbox('100%', 'left', "$Lang::tr{'address groups'}:");
+        for (var i = 0; i < addresses.length; i++) {
+            var addrName = addresses[i].trim();
+            if (!addrName) continue;
 
-foreach my $group (sort keys %addressGroupConf) {
-    my $remark = "";
-    if (defined($addressGroupConf{$group}{'REMARK'}) && $addressGroupConf{$group}{'REMARK'} ne "") {
-        $remark = " - " . $addressGroupConf{$group}{'REMARK'};
-    }
-    my $color = "";
-    if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'GROUP'} eq $group) {
-        $color = "class='selectcolour'";
-    }
-
-    print <<END;
-<div align='center'>
-<table width='100%' align='center'>
-<tr align="left" $color>
-    <td colspan='2'>
-        <strong>
-            $group $remark - $Lang::tr{'used'}&nbsp;$addressGroupConf{$group}{'USED_COUNT'}x :
-        </strong>
-    </td>
-    <td align='center'>
-    <form method='post' name='frm$group' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='TYP' value='group' />
-        <input type='hidden' name='ACTION' value='$Lang::tr{'edit'}' />
-        <input type='image' name='$Lang::tr{'edit'}' src='/images/edit.gif'  alt='$Lang::tr{'edit'}' title='$Lang::tr{'edit'}' />
-        <input type='hidden' name='GROUP' value='$group' />
-    </form>
-    </td>
-END
-
-    if ($addressGroupConf{$group}{'USED_COUNT'} > 0) {
-        print "<td align='center'><img src='/images/null.gif' width='20' height='20' border='0' alt='' /></td>";
-    }
-    else {
-        print <<END;
-    <td align='center'>
-    <form method='post' name='frm$group' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='TYP' value='group' />
-        <input type='hidden' name='ACTION' value='$Lang::tr{'remove'}' />
-        <input type='image' name='$Lang::tr{'remove'}' src='/images/delete.gif' alt='$Lang::tr{'remove'}' title='$Lang::tr{'remove'}' />
-        <input type='hidden' name='GROUP' value='$group' />
-    </form>
-    </td>
-END
-    }
-    print "</tr>\n";
-
-    my $id = 0;
-    my ($gif, $toggle, $typ);
-    my $addressCount = @{$addressGroupConf{$group}{'ADDRESSES'}};
-    foreach my $entry (@{$addressGroupConf{$group}{'ADDRESSES'}}) {
-
-        #       print FILE "ADDRESS,$key,$entry->{'ADDRESS_NAME'},$entry->{'ADDRESS_TYP'},$entry->{'ENABLED'}\n";
-        if ($entry->{'ENABLED'} eq 'on') {
-            $gif    = 'on';
-            $toggle = 'off';
+            // Find and move option from available to selected
+            for (var j = 0; j < available.options.length; j++) {
+                if (available.options[j].value === addrName) {
+                    selected.appendChild(available.options[j].cloneNode(true));
+                    available.remove(j);
+                    break;
+                }
+            }
         }
-        else {
-            $gif    = 'off';
-            $toggle = 'on';
-        }
-        print "<tr class='table".int(($id % 2) + 1)."colour'>";
-        if ($entry->{'ADDRESS_TYP'} eq 'default') {
-            $typ = $Lang::tr{'typ default'};
-        }
-        else {
-            $typ = $Lang::tr{'typ custom'};
-        }
-
-        print <<END;
-    <td align='center' width='50%'>$entry->{'ADDRESS_NAME'}</td>
-    <td align='center' width='50%'>$typ</td>
-END
-
-        if ($addressCount < 2) {
-            print "<td align='center'><img src='/images/$gif.gif' width='20' height='20' border='0' alt='$gif' /></td>";
-            print "<td align='center'><img src='/images/null.gif' width='20' height='20' border='0' alt='' /></td>";
-        }
-        else {
-            print <<END;
-    <td align='center'>
-    <form method='post' name='frm$group' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='image' name='$Lang::tr{'toggle enable disable'}' src='/images/$gif.gif' alt='$Lang::tr{'toggle enable disable'}' title='$Lang::tr{'toggle enable disable'}' />
-        <input type='hidden' name='ACTION' value='$Lang::tr{'toggle enable disable'}' />
-        <input type='hidden' name='GROUP' value='$group' />
-        <input type='hidden' name='ADDRESS_ID' value='$id' />
-        <input type='hidden' name='ENABLED' value='$toggle' />
-    </form>
-    </td>
-    <td align='center'>
-    <form method='post' name='frm$group' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='TYP' value='address' />
-        <input type='hidden' name='ACTION' value='$Lang::tr{'remove'}' />
-        <input type='image' name='$Lang::tr{'remove'}' src='/images/delete.gif' alt='$Lang::tr{'remove'}' title='$Lang::tr{'remove'}' />
-        <input type='hidden' name='GROUP' value='$group' />
-        <input type='hidden' name='ADDRESS_ID' value='$id' />
-    </form>
-    </td>
-END
-        }
-        print "</tr>\n";
-        $id++;
-    }
-
-    print <<END;
-</table>
-</div>
-<br/>
-END
+    }, 100);
 }
 
-&Header::closebox();
+function closeEditGroupModal() {
+    var modal = document.getElementById('editGroupModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function moveSelectedToRightEdit() {
+    var available = document.getElementById('availableAddressSelectEdit');
+    var selected = document.getElementById('selectedAddressSelectEdit');
+    var options = Array.from(available.selectedOptions);
+    for (var i = 0; i < options.length; i++) {
+        selected.appendChild(options[i]);
+    }
+}
+
+function moveSelectedToLeftEdit() {
+    var available = document.getElementById('availableAddressSelectEdit');
+    var selected = document.getElementById('selectedAddressSelectEdit');
+    var options = Array.from(selected.selectedOptions);
+    for (var i = 0; i < options.length; i++) {
+        available.appendChild(options[i]);
+    }
+}
+
+function submitEditGroupForm() {
+    var form = document.getElementById('editGroupForm');
+    var selected = document.getElementById('selectedAddressSelectEdit');
+    var values = [];
+    for (var i = 0; i < selected.options.length; i++) {
+        values.push(selected.options[i].value);
+    }
+    var oldHidden = document.getElementById('selectedAddressesHiddenEdit');
+    if (oldHidden) oldHidden.remove();
+    var hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'SELECTED_ADDRESSES';
+    hidden.id = 'selectedAddressesHiddenEdit';
+    hidden.value = values.join('|');
+    form.appendChild(hidden);
+    if (form.checkValidity()) {
+        form.submit();
+    } else {
+        form.reportValidity();
+    }
+}
+
+var pendingDeleteRows = [];
+
+function deleteGroups(selectedRows) {
+    if (!selectedRows || selectedRows.length === 0) return;
+
+    // Prevent duplicate modals
+    if (document.querySelector('#deleteConfirmModal')) return;
+
+    var confirmMsg = selectedRows.length === 1 ?
+        '$trDeleteConfirm' :
+        '$trDeleteConfirmPlural';
+
+    // Build list of group names to display
+    var listHtml = '<ul style="margin:0;padding-left:20px;">';
+    selectedRows.forEach(function(row) {
+        listHtml += '<li>' + row.group + '</li>';
+    });
+    listHtml += '</ul>';
+
+    var modalHtml = '<div class="ofw_modal_overlay" id="deleteConfirmModal">' +
+        '<div class="ofw_modal_dialog" style="width:480px;">' +
+        '<div class="ofw_modal_header" style="cursor:move;">' +
+        '<span class="ofw_modal_title">$trDeleteConfirm</span>' +
+        '<button type="button" class="ofw_modal_close" onclick="closeDeleteConfirmModal()">&times;</button>' +
+        '</div>' +
+        '<div class="ofw_modal_body">' +
+        '<p style="padding:10px 0;">' + confirmMsg + '</p>' +
+        '<div style="margin-top:12px;padding:8px 12px;background:#f5f5f5;border-radius:4px;">' +
+        listHtml +
+        '</div>' +
+        '</div>' +
+        '<div class="ofw_modal_footer">' +
+        '<button type="button" class="ofw_btn" onclick="closeDeleteConfirmModal()">$trCancel</button>' +
+        '<button type="button" class="ofw_btn ofw_btn_primary" onclick="doDeleteGroups()">OK</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+
+    pendingDeleteRows = selectedRows;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    makeModalDraggable('deleteConfirmModal');
+}
+
+function closeDeleteConfirmModal() {
+    var modal = document.getElementById('deleteConfirmModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function doDeleteGroups() {
+    closeDeleteConfirmModal();
+    var groups = [];
+    pendingDeleteRows.forEach(function(row) {
+        if (row.usedCount === 0) {
+            groups.push(row.group);
+        }
+    });
+    if (groups.length === 0) return;
+
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = '$scriptName';
+
+    var actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'ACTION';
+    actionInput.value = '$trRemove';
+    form.appendChild(actionInput);
+
+    var typInput = document.createElement('input');
+    typInput.type = 'hidden';
+    typInput.name = 'TYP';
+    typInput.value = 'group';
+    form.appendChild(typInput);
+
+    var groupInput = document.createElement('input');
+    groupInput.type = 'hidden';
+    groupInput.name = 'GROUP';
+    groupInput.value = groups.join(',');
+    form.appendChild(groupInput);
+
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+
+<div id="addressGroupsTable"></div>
+
+END
+
 &Header::closebigbox();
 &Header::closepage();
 
@@ -622,48 +896,12 @@ sub validateAddressGroupingParams {
         $errormessage .= "$Lang::tr{'select address group typ'} <br />";
     }
 
-    my $typ = $cgiparams{'ADDRESS_TYP'};
-    if ($typ eq 'default' || $typ eq 'custom') {
-        if (
-            (
-                $typ eq 'default' && ($cgiparams{'ADDRESS_NAME_DEFAULT'} eq ''
-                    || $cgiparams{'ADDRESS_NAME_DEFAULT'} eq 'BLANK')
-            )
-            || ($typ eq 'custom' && $cgiparams{'ADDRESS_NAME_CUSTOM'} eq '')
-            )
-        {
-            $errormessage .= "$Lang::tr{'invalid address'}<br />";
-        }
-        elsif ($group ne '') {
-
-            # we only have to check for existing address in group
-            # when group and address names are ok
-            my $found       = 0;
-            my $addressName = $cgiparams{'ADDRESS_NAME_DEFAULT'};
-            if ($typ eq 'custom') {
-                $addressName = $cgiparams{'ADDRESS_NAME_CUSTOM'};
-            }
-
-            foreach my $entry (@{$addressGroupConfRef->{$group}{'ADDRESSES'}}) {
-                if (   $entry->{'ADDRESS_TYP'} eq $typ
-                    && $entry->{'ADDRESS_NAME'} eq $addressName)
-                {
-                    $found = 1;
-                    last;
-                }
-            }
-
-            if ($found) {
-                $errormessage .= "$Lang::tr{'address already in group'} <br />";
-            }
-        }
-    }
-    else {
-        $errormessage .= "$Lang::tr{'none address type'} <br />";
+    # Validate that at least one address is selected
+    unless ($cgiparams{'SELECTED_ADDRESSES'} ne '') {
+        $errormessage .= "$Lang::tr{'invalid address'}<br />";
     }
 
     if ($cgiparams{'ENABLED'} ne 'on') {
         $cgiparams{'ENABLED'} = 'off';
     }
 }
-

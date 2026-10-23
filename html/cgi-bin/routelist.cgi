@@ -72,54 +72,74 @@ $cgiparams{'IFACE'}    = '';
 
 &Header::openpage($Lang::tr{'network status information'}, 1, '');
 
-if ($errormessage) {
-    &Header::openbox('100%', 'left', "$Lang::tr{'error messages'}:", 'error');
-    print "<font class='base'>$errormessage&nbsp;</font>";
-    &Header::closebox();
-
-    $error = 'error';
-}
-
 print "<a name='routing'/>\n";
-##&Header::openbox('100%', 'left', "$Lang::tr{'routing table entries'}:");
-$output = `/sbin/ip route list`;
-$output = &Header::cleanhtml($output,"y");
-print <<END
-<div align='center'>
-<table width='100%'>
-<tr class='headbar'>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'destination ip or net'}</td>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'gateway ip'}</td>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'interface'}</td>
-    <td width='25%' class='boldbase'>$Lang::tr{'remark'}</td>
-</tr>
-END
-;
-my $count = 0;
-foreach my $line (split(/\n/, $output))
-{
-    print "<tr class='table".int(($count % 2) + 1)."colour'>";
+
+# Get routing table entries
+my $routeOutput = `/sbin/ip route list`;
+$routeOutput = &Header::cleanhtml($routeOutput, "y");
+
+# Convert to JavaScript format
+my @jsData;
+my $idx = 1;
+foreach my $line (split(/\n/, $routeOutput)) {
+    my ($dest, $gateway, $iface, $remark);
     if ($line =~ m/^(.*) dev ([^ ]+) (.*) src (.*)$/) {
-        print "<td align='center'>$1</td><td align='center'>$4</td>";
-        print "<td align='center'>".&General::color_devices($2)."</td><td>$3</td></tr>";
+        $dest = $1;
+        $iface = $2;
+        $gateway = $4;
+        $remark = $3;
     }
     elsif ($line =~ m/^(.*) via (.*) dev (.*)$/) {
-        print "<td align='center'>$1</td><td align='center'>$2</td>";
-        print "<td align='center'>".&General::color_devices($3)."</td><td>&nbsp;</td></tr>";
+        $dest = $1;
+        $gateway = $2;
+        $iface = $3;
+        $remark = '';
     }
     elsif ($line =~ m/^(.*) dev ipsec(\d*)  (.*)$/) {
-        print "<td align='center'>$1</td><td align='center'>&nbsp;</td>";
-        print "<td align='center'>".&General::color_devices("ipsec$2")."</td><td>$3</td></tr>";
+        $dest = $1;
+        $iface = "ipsec$2";
+        $gateway = '';
+        $remark = $3;
     }
     else {
-        print "<td colspan='4'>$line</td></tr>";
+        next;
     }
-
-    $count++;
+    
+    push @jsData, sprintf(
+        "{id:'%d',dest:'%s',gateway:'%s',iface:'%s',remark:'%s'}",
+        $idx, $dest, $gateway, $iface, $remark
+    );
+    $idx++;
 }
-print "</table> </div>";
-#&Header::closebox();
+my $jsDataStr = join(",\n", @jsData);
 
-#&Header::closebigbox();
+print <<END;
+<script src="/include/datatable.js"></script>
+<script>
+const routeData = [
+$jsDataStr
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    const table = new DataTable('#routeTable', {
+        data: routeData,
+        columns: [
+            { key: 'id', title: '$Lang::tr{'sequence'}', sortable: true },
+            { key: 'dest', title: '$Lang::tr{'destination ip or net'}', sortable: true },
+            { key: 'gateway', title: '$Lang::tr{'gateway ip'}', sortable: true },
+            { key: 'iface', title: '$Lang::tr{'interface'}', sortable: true },
+            { key: 'remark', title: '$Lang::tr{'remark'}', sortable: true }
+        ],
+        defaultSort: { key: 'id', order: 'asc' },
+        pageSize: 20,
+        selectable: false,
+        actions: [],
+        disabledActions: []
+    });
+    table.render();
+});
+</script>
+<div id="routeTable"></div>
+END
+
 &Header::closepage();
-

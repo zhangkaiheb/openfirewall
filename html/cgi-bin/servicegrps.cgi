@@ -87,41 +87,39 @@ $cgiparams{'GROUP_NEW'} = &Header::cleanConfNames($cgiparams{'GROUP_NEW'});
 if ($cgiparams{'ACTION'} eq $Lang::tr{'add'}) {
     &validateServiceGroupingParams(\%serviceGroupConf);
     unless ($errormessage) {
-        my %newEntry = ();
-        if ($cgiparams{'GROUP_TYP'} eq 'existing') {
-            $newEntry{'GROUP_NAME'} = $cgiparams{'GROUP_EXISTING'};
-            $newEntry{'ENABLED'}    = $cgiparams{'ENABLED'};
-        }
-        else {
-            $newEntry{'GROUP_NAME'}                                  = $cgiparams{'GROUP_NEW'};
-            $serviceGroupConf{$newEntry{'GROUP_NAME'}}{'USED_COUNT'} = 0;
-            $serviceGroupConf{$newEntry{'GROUP_NAME'}}{'REMARK'}     = $cgiparams{'REMARK'};
-            $serviceGroupConf{$newEntry{'GROUP_NAME'}}{'SERVICES'}   = ();
+        my $groupName = $cgiparams{'GROUP_NEW'};
+        $serviceGroupConf{$groupName}{'USED_COUNT'} = 0;
+        $serviceGroupConf{$groupName}{'REMARK'}     = $cgiparams{'REMARK'};
+        $serviceGroupConf{$groupName}{'SERVICES'}   = [];
 
-            # we have to be sure that at least one service is enabled,
-            # this is the first service -> enable it
-            $newEntry{'ENABLED'} = 'on';
+        # Process selected services (pipe-separated from dual-listbox)
+        my %ofwSvcs = ();
+        &DATA::readOfwServices(\%ofwSvcs);
+        my %defSvcs = ();
+        &DATA::readDefaultServices(\%defSvcs);
+
+        if ($cgiparams{'SELECTED_SERVICES'} ne '') {
+            my @svcs = split(/\|/, $cgiparams{'SELECTED_SERVICES'});
+            my %seen;
+            foreach my $svc (@svcs) {
+                next if $svc eq '';
+                next if $seen{$svc}++;
+                my %entry = ();
+                if (exists $ofwSvcs{$svc} || exists $defSvcs{$svc}) {
+                    $entry{'SERVICE_TYP'}  = 'default';
+                } else {
+                    $entry{'SERVICE_TYP'}  = 'custom';
+                    &FW::changeUsedCountService($svc, "add");
+                }
+                $entry{'SERVICE_NAME'} = $svc;
+                $entry{'ENABLED'}      = 'on';
+                push(@{$serviceGroupConf{$groupName}{'SERVICES'}}, \%entry);
+                &General::log("$Lang::tr{'service added to group'}: $svc -> $groupName");
+            }
         }
 
-        $newEntry{'SERVICE_TYP'} = $cgiparams{'SERVICE_TYP'};
-        if ($cgiparams{'SERVICE_TYP'} eq 'default') {
-            $newEntry{'SERVICE_NAME'} = $cgiparams{'SERVICE_NAME_DEFAULT'};
-        }
-        else {
-            $newEntry{'SERVICE_NAME'} = $cgiparams{'SERVICE_NAME_CUSTOM'};
-            &FW::changeUsedCountService($newEntry{'SERVICE_NAME'}, "add");
-        }
-
-        push(@{$serviceGroupConf{$newEntry{'GROUP_NAME'}}{'SERVICES'}}, \%newEntry);
         &DATA::saveServiceGroupConf(\%serviceGroupConf);
-        &General::log("$Lang::tr{'service added to group'}: $newEntry{'SERVICE_NAME'} -> $newEntry{'GROUP_NAME'}");
 
-        # submit the changes to iptables rules
-        if (   $serviceGroupConf{$newEntry{'GROUP_NAME'}}{'USED_COUNT'} > 0
-            && $cgiparams{'GROUP_TYP'} eq 'existing')
-        {
-            `/usr/local/bin/setfwrules --user < /dev/null > /dev/null 2>&1 &`;
-        }
         undef %cgiparams;
         $cgiparams{'ACTION'} = '';
     }
@@ -136,22 +134,55 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'update'}) {
     unless ($errormessage) {
         my $group    = $cgiparams{'GROUP_NEW'};
         my $groupOld = $cgiparams{'OLD_GROUP'};
-        $serviceGroupConf{$groupOld}{'REMARK'} = $cgiparams{'REMARK'};
 
-        # if the name (==Key) has changed, we have to copy/move the old data to new key
+        # Remove old custom service used counts
+        foreach my $oldService (@{$serviceGroupConf{$groupOld}{'SERVICES'}}) {
+            if ($oldService->{'SERVICE_TYP'} ne 'default') {
+                &FW::changeUsedCountService($oldService->{'SERVICE_NAME'}, "remove");
+            }
+        }
+
+        # Build new service list from SELECTED_SERVICES
+        my @newServices = ();
+        my %ofwSvcs = ();
+        &DATA::readOfwServices(\%ofwSvcs);
+        my %defSvcs = ();
+        &DATA::readDefaultServices(\%defSvcs);
+
+        if ($cgiparams{'SELECTED_SERVICES'} ne '') {
+            my @svcs = split(/\|/, $cgiparams{'SELECTED_SERVICES'});
+            my %seen;
+            foreach my $svc (@svcs) {
+                next if $svc eq '';
+                next if $seen{$svc}++;
+                my %entry = ();
+                if (exists $ofwSvcs{$svc} || exists $defSvcs{$svc}) {
+                    $entry{'SERVICE_TYP'}  = 'default';
+                } else {
+                    $entry{'SERVICE_TYP'}  = 'custom';
+                    &FW::changeUsedCountService($svc, "add");
+                }
+                $entry{'SERVICE_NAME'} = $svc;
+                $entry{'ENABLED'}      = 'on';
+                push(@newServices, \%entry);
+            }
+        }
+
+        # Update group
+        $serviceGroupConf{$groupOld}{'REMARK'}   = $cgiparams{'REMARK'};
+        $serviceGroupConf{$groupOld}{'SERVICES'} = \@newServices;
+
+        # Rename group if name changed
         if ($group ne $groupOld) {
             $serviceGroupConf{$group}{'REMARK'}     = $serviceGroupConf{$groupOld}{'REMARK'};
             $serviceGroupConf{$group}{'USED_COUNT'} = $serviceGroupConf{$groupOld}{'USED_COUNT'};
-            $serviceGroupConf{$group}{'SERVICES'}   = ();
-
-            foreach my $service (@{$serviceGroupConf{$groupOld}{'SERVICES'}}) {
-                push(@{$serviceGroupConf{$group}{'SERVICES'}}, $service);
-            }
+            $serviceGroupConf{$group}{'SERVICES'}   = \@newServices;
             delete($serviceGroupConf{$groupOld});
         }
-        &DATA::saveServiceGroupConf(\%serviceGroupConf);
 
+        &DATA::saveServiceGroupConf(\%serviceGroupConf);
         &General::log("$Lang::tr{'service group updated'}: $group");
+
         undef %cgiparams;
         $cgiparams{'ACTION'} = '';
     }
@@ -182,14 +213,19 @@ if ($cgiparams{'ACTION'} eq $Lang::tr{'remove'}) {
     my $group = $cgiparams{'GROUP'};
 
     if ($cgiparams{'TYP'} eq 'group') {
-        foreach my $service (@{$serviceGroupConf{$group}{'SERVICES'}}) {
-            if ($service->{'SERVICE_TYP'} ne 'default') {
-                &FW::changeUsedCountService($service->{'SERVICE_NAME'}, "remove");
+        # Support batch delete: GROUP may contain multiple names joined by ','
+        my @groupsToDelete = split(/,/, $group);
+        foreach my $g (@groupsToDelete) {
+            next unless defined $serviceGroupConf{$g}{'SERVICES'};
+            foreach my $service (@{$serviceGroupConf{$g}{'SERVICES'}}) {
+                if ($service->{'SERVICE_TYP'} ne 'default') {
+                    &FW::changeUsedCountService($service->{'SERVICE_NAME'}, "remove");
+                }
             }
+            delete($serviceGroupConf{$g});
+            &General::log("$Lang::tr{'service group deleted'}: $g");
         }
-        delete($serviceGroupConf{$group});
         &DATA::saveServiceGroupConf(\%serviceGroupConf);
-        &General::log("$Lang::tr{'service group deleted'}: $group");
 
         # A group can only be removed when it is not used
         # -> no need to run setfwrules
@@ -277,14 +313,6 @@ if (   $cgiparams{'ACTION'} eq ''
     $cgiparams{'DEFAULT_SERVICE'}      = '';
 }
 
-# DEBUG DEBUG
-#&Header::openbox('100%', 'left', 'DEBUG');
-#foreach my $line (keys %cgiparams) {
-#   print "$line = $cgiparams{$line}<br />\n";
-#}
-#print "$ENV{'QUERY_STRING'}\n";
-#&Header::closebox();
-
 if ($errormessage) {
     &Header::openbox('100%', 'left', "$Lang::tr{'error messages'}:", 'error');
     print "<font class='base'>$errormessage&nbsp;</font>";
@@ -293,295 +321,577 @@ if ($errormessage) {
     $error = 'error';
 }
 
-&Header::openbox('100%', 'left', "$Lang::tr{'add service grouping'}:", $error);
-
-$radio{'GROUP_TYP'}{'new'}                   = '';
-$radio{'GROUP_TYP'}{'existing'}              = '';
-$radio{'GROUP_TYP'}{$cgiparams{'GROUP_TYP'}} = "checked='checked'";
-
-$radio{'SERVICE_TYP'}{'default'}                 = '';
-$radio{'SERVICE_TYP'}{'custom'}                  = '';
-$radio{'SERVICE_TYP'}{$cgiparams{'SERVICE_TYP'}} = "checked='checked'";
-
-$cgiparams{'ENABLED'} = 'off' if ($cgiparams{'ENABLED'} ne 'on');
-$checked{'ENABLED'}{'off'}                 = '';
-$checked{'ENABLED'}{'on'}                  = '';
-$checked{'ENABLED'}{$cgiparams{'ENABLED'}} = "checked='checked'";
-
-my @existingGroups      = sort(keys(%serviceGroupConf));
-my $existingGroupsCount = @existingGroups;
-
-print <<END;
-<form method='post' action='$ENV{'SCRIPT_NAME'}'>
-<table width='100%' cellpadding='0' cellspacing='5' border='0'>
-<tr>
-    <td width='25%'>
-END
-
-if($existingGroupsCount > 0) {
-    print"<input type='radio' name='GROUP_TYP' value='new' $radio{'GROUP_TYP'}{'new'} />\n";
-}
-else
-{
-    print"<input type='hidden' name='GROUP_TYP' value='new' />\n";
-}
-
-print <<END;
-        $Lang::tr{'service group name'}:
-    </td>
-    <td width='25%'>
-        <input type='text' name='GROUP_NEW' value='$cgiparams{'GROUP_NEW'}' size='20' maxlength='18' $disabledNameTxt  onkeyup='this.form.GROUP_TYP[0].checked=true'/>
-        $hiddenGroupName
-    </td>
-    <td width='25%'>&nbsp;</td>
-    <td width='25%'>&nbsp;</td>
-</tr>
-END
-
-if ($existingGroupsCount > 0) {
-    print <<END;
-<tr>
-    <td>
-        <input type='radio' name='GROUP_TYP' value='existing' $radio{'GROUP_TYP'}{'existing'} $disabled/>
-        $Lang::tr{'service group name'}:
-    </td>
-    <td colspan='3'>
-        <select name='GROUP_EXISTING' $disabled onclick='this.form.GROUP_TYP[1].checked=true'>
-END
-
-    foreach my $group (@existingGroups) {
-        print "<option value='$group' ";
-        print " selected='selected'" if ($cgiparams{'GROUP_EXISTING'} eq $group);
-        print ">$group</option>";
+# Prepare data for DataTable
+my @jsData;
+my $rowId = 0;
+foreach my $group (sort keys %serviceGroupConf) {
+    my $remark = defined($serviceGroupConf{$group}{'REMARK'}) ? $serviceGroupConf{$group}{'REMARK'} : '';
+    my $serviceCount = scalar(@{$serviceGroupConf{$group}{'SERVICES'}});
+    my $usedCount = $serviceGroupConf{$group}{'USED_COUNT'};
+    
+    # Build services list for edit modal
+    my @serviceNames = ();
+    foreach my $svc (@{$serviceGroupConf{$group}{'SERVICES'}}) {
+        my $name = $svc->{'SERVICE_NAME'};
+        $name =~ s/(['\\])/\\$1/g;
+        push @serviceNames, $name;
     }
-    print <<END;
-        </select>
-    </td>
-</tr>
-END
+    my $servicesStr = join(',', @serviceNames);
+    
+    # Escape special characters for JavaScript
+    $group =~ s/(['\\])/\\$1/g;
+    $remark =~ s/(['\\])/\\$1/g;
+    
+    push @jsData, sprintf(
+        "{id:'%d',group:'%s',remark:'%s',serviceCount:%d,usedCount:%d,services:'%s'}",
+        $rowId, $group, $remark, $serviceCount, $usedCount, $servicesStr
+    );
+    $rowId++;
 }
+my $tableDataJs = join(",\n", @jsData);
+
+# Build service group data for edit modal
+my %serviceGroupData = ();
+foreach my $group (keys %serviceGroupConf) {
+    my @svcNames = ();
+    foreach my $svc (@{$serviceGroupConf{$group}{'SERVICES'}}) {
+        push @svcNames, $svc->{'SERVICE_NAME'};
+    }
+    $serviceGroupData{$group} = join(',', @svcNames);
+}
+
+my @sgEntries = ();
+foreach my $group (keys %serviceGroupData) {
+    my $jsGroup = $group;
+    $jsGroup =~ s/'/\\'/g;
+    my $jsSvcs = $serviceGroupData{$group};
+    push @sgEntries, "'$jsGroup':'$jsSvcs'";
+}
+my $serviceGroupDataJs = "{" . join(',', @sgEntries) . "}";
+
+# Prepare translation strings for JavaScript
+my $trSequence = $Lang::tr{'sequence'};
+my $trServiceGroupName = $Lang::tr{'service group name'};
+my $trRemark = $Lang::tr{'remark'};
+my $trServices = $Lang::tr{'services'};
+my $trUsed = $Lang::tr{'used'};
+my $trAddServiceToGroup = $Lang::tr{'add service to group'};
+my $trAdd = $Lang::tr{'add'};
+my $trServiceGroupNameLabel = $Lang::tr{'service group name'};
+my $trRemarkLabel = $Lang::tr{'remark'};
+my $trServiceType = $Lang::tr{'service type'};
+my $trDefaultServices = $Lang::tr{'default services'};
+my $trCustomServices = $Lang::tr{'custom services'};
+my $trService = $Lang::tr{'service'};
+my $trSelect = $Lang::tr{'select'};
+my $trEnabled = $Lang::tr{'enabled'};
+my $trCancel = $Lang::tr{'cancel'};
+my $trUpdate = $Lang::tr{'update'};
+my $trRemove = $Lang::tr{'remove'};
+my $trEditServiceGroup = $Lang::tr{'edit service group'};
+my $trEditServiceToGroup = $Lang::tr{'edit service to group'};
+my $trAvailableServices = $Lang::tr{'available services'};
+my $trSelectedServices = $Lang::tr{'selected services'};
+my $trDeleteConfirm = $Lang::tr{'are you sure you want to delete this service group'};
+my $trDeleteConfirmPlural = $Lang::tr{'are you sure you want to delete these service groups'};
+my $scriptName = $ENV{'SCRIPT_NAME'};
+
 print <<END;
-<tr>
-    <td>$Lang::tr{'remark'}:&nbsp;<img src='/blob.gif' alt='*' /></td>
-    <td colspan='3'><input type='text' name='REMARK' value='$cgiparams{'REMARK'}' maxlength='50' /></td>
-</tr><tr>
-    <td colspan='4' bgcolor='#000000'><img src='/images/null.gif' width='1' height='1' border='0' alt='--------' /></td>
-</tr>
-<tr>
-    <td>
+<script src="/include/datatable.js"></script>
+<script>
+var serviceGroupData = $serviceGroupDataJs;
+var tableData = [
+$tableDataJs
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    window.serviceGroupsTable = new DataTable('#serviceGroupsTable', {
+        data: tableData,
+        columns: [
+            { key: 'id', title: '$trSequence', sortable: true },
+            { key: 'group', title: '$trServiceGroupName', sortable: true },
+            { key: 'remark', title: '$trRemark', sortable: true },
+            { key: 'serviceCount', title: '$trServices', sortable: true },
+            { key: 'usedCount', title: '$trUsed', sortable: true }
+        ],
+        selectable: true,
+        actions: ['create', 'edit', 'delete', 'refresh'],
+        onAddModal: function() {
+            openAddServiceModal();
+        },
+        onEditModal: function(row) {
+            openEditGroupModal(row);
+        },
+        onDeleteConfirm: function(selectedIds) {
+            deleteGroups(selectedIds);
+        }
+    });
+});
+
+function makeModalDraggable(modalId) {
+    var modal = document.getElementById(modalId);
+    if (!modal) return;
+    
+    var dialog = modal.querySelector('.ofw_modal_dialog');
+    var header = modal.querySelector('.ofw_modal_header');
+    if (!dialog || !header) return;
+    
+    var isDragging = false;
+    var offsetX, offsetY;
+    
+    header.addEventListener('mousedown', function(e) {
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        var rect = dialog.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        dialog.style.position = 'fixed';
+        dialog.style.margin = '0';
+        e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        var x = e.clientX - offsetX;
+        var y = e.clientY - offsetY;
+        dialog.style.left = x + 'px';
+        dialog.style.top = y + 'px';
+    });
+    
+    document.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+}
+
+function openAddServiceModal() {
+    // Prevent duplicate modals
+    if (document.querySelector('#addServiceModal')) return;
+    
+    var modalHtml = '<div class="ofw_modal_overlay" id="addServiceModal">' +
+        '<div class="ofw_modal_dialog" style="width:680px;">' +
+        '<div class="ofw_modal_header" style="cursor:move;">' +
+        '<span class="ofw_modal_title">$trAddServiceToGroup</span>' +
+        '<button type="button" class="ofw_modal_close" onclick="closeAddServiceModal()">&times;</button>' +
+        '</div>' +
+        '<div class="ofw_modal_body">' +
+        '<form id="addServiceForm" method="post" action="$scriptName">' +
+        '<input type="hidden" name="ACTION" value="$trAdd">' +
+        '<input type="hidden" name="GROUP_TYP" value="new">' +
+        '<table width="100%" cellpadding="5" cellspacing="0" border="0">' +
+        '<tr>' +
+        '<td width="30%" align="right">$trServiceGroupNameLabel</td>' +
+        '<td><input type="text" name="GROUP_NEW" style="width:300px;" maxlength="18" required></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right">$trRemarkLabel</td>' +
+        '<td><input type="text" name="REMARK" style="width:300px;" maxlength="50"></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right" valign="top">$trServices</td>' +
+        '<td>' +
+        '<div style="display:flex;gap:10px;align-items:center;">' +
+        '<div style="flex:1;display:flex;flex-direction:column;">' +
+        '<div style="margin-bottom:5px;font-weight:bold;">$trAvailableServices</div>' +
+        '<select id="availableServiceSelect" multiple size="8" style="width:100%;min-height:160px;">';
 END
 
-if($#customServices >= 0) {
-    print"<input type='radio' name='SERVICE_TYP' value='default' $radio{'SERVICE_TYP'}{'default'} $disabled/>\n";
+# Build combined list of all services
+my %allServicesMap = ();
+foreach my $svc (@customServices) {
+    $allServicesMap{$svc} = 'custom';
 }
-else
-{
-    print"<input type='hidden' name='SERVICE_TYP' value='default' />\n";
-}
-
-print <<END;
-        $Lang::tr{'default services'}:
-    </td>
-    <td colspan='3'>
-        <select name='SERVICE_NAME_DEFAULT' $disabled  onclick='this.form.SERVICE_TYP[0].checked=true'>
-END
-
-my %defaultServices = ();
-&DATA::readDefaultServices(\%defaultServices);
 my %ofwServices = ();
 &DATA::readOfwServices(\%ofwServices);
-
-print "<option value='BLANK'";
-print "selected='selected'" unless (defined $cgiparams{'DEFAULT_SERVICE'});
-print ">-- $Lang::tr{'default services'} --</option>";
-foreach my $defService (sort keys %ofwServices) {
-    print "<option value='$defService'";
-    print " selected='selected'" if ($cgiparams{'SERVICE_NAME_DEFAULT'} eq $defService);
-    print ">$defService ($ofwServices{$defService}{'PORT_NR'})</option>";
-
+foreach my $svc (keys %ofwServices) {
+    $allServicesMap{$svc} = 'default';
 }
-print "<option value='BLANK'> --- </option>";
-foreach my $defService (sort keys %defaultServices) {
-    print "<option value='$defService'";
-    print " selected='selected'" if ($cgiparams{'SERVICE_NAME_DEFAULT'} eq $defService);
-    print ">$defService ($defaultServices{$defService}{'PORT_NR'})</option>";
-
+my %defaultServices = ();
+&DATA::readDefaultServices(\%defaultServices);
+foreach my $svc (keys %defaultServices) {
+    $allServicesMap{$svc} = 'default';
 }
+
+# Output default services group
+print "modalHtml += '<optgroup label=\\\"$trDefaultServices\\\">';\n";
+foreach my $svc (sort keys %allServicesMap) {
+    next unless $allServicesMap{$svc} eq 'default';
+    my $label = $svc;
+    if (exists $ofwServices{$svc}) {
+        $label .= " ($ofwServices{$svc}{'PORT_NR'})";
+    } elsif (exists $defaultServices{$svc}) {
+        $label .= " ($defaultServices{$svc}{'PORT_NR'})";
+    }
+    my $jsLabel = $label;
+    $jsLabel =~ s/'/\\'/g;
+    my $jsSvc = $svc;
+    $jsSvc =~ s/'/\\'/g;
+    print "modalHtml += '<option value=\\\"$jsSvc\\\">$jsLabel</option>';\n";
+}
+print "modalHtml += '</optgroup>';\n";
+# Output custom services group
+print "modalHtml += '<optgroup label=\\\"$trCustomServices\\\">';\n";
+foreach my $svc (sort keys %allServicesMap) {
+    next unless $allServicesMap{$svc} eq 'custom';
+    my $label = $svc;
+    my $jsLabel = $label;
+    $jsLabel =~ s/'/\\'/g;
+    my $jsSvc = $svc;
+    $jsSvc =~ s/'/\\'/g;
+    print "modalHtml += '<option value=\\\"$jsSvc\\\">$jsLabel</option>';\n";
+}
+print "modalHtml += '</optgroup>';\n";
+
 print <<END;
-        </select>
-    </td>
-</tr>
+        modalHtml += '</select>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:5px;justify-content:center;">' +
+        '<button type="button" onclick="moveSelectedToRight()" style="padding:4px 12px;">&gt;&gt;</button>' +
+        '<button type="button" onclick="moveSelectedToLeft()" style="padding:4px 12px;">&lt;&lt;</button>' +
+        '</div>' +
+        '<div style="flex:1;display:flex;flex-direction:column;">' +
+        '<div style="margin-bottom:5px;font-weight:bold;">$trSelectedServices</div>' +
+        '<select id="selectedServiceSelect" multiple size="8" style="width:100%;min-height:160px;"></select>' +
+        '</div>' +
+        '</div>' +
+        '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right">$trEnabled:</td>' +
+        '<td><input type="checkbox" name="ENABLED" value="on" checked></td>' +
+        '</tr>' +
+        '</table>' +
+        '</form>' +
+        '</div>' +
+        '<div class="ofw_modal_footer">' +
+        '<button type="button" class="ofw_btn" onclick="closeAddServiceModal()">$trCancel</button>' +
+        '<button type="button" class="ofw_btn ofw_btn_primary" onclick="submitAddServiceForm()">$trAdd</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    makeModalDraggable('addServiceModal');
+}
+
+function closeAddServiceModal() {
+    var modal = document.getElementById('addServiceModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function moveSelectedToRight() {
+    var available = document.getElementById('availableServiceSelect');
+    var selected = document.getElementById('selectedServiceSelect');
+    var options = Array.from(available.selectedOptions);
+    for (var i = 0; i < options.length; i++) {
+        selected.appendChild(options[i]);
+    }
+}
+
+function moveSelectedToLeft() {
+    var available = document.getElementById('availableServiceSelect');
+    var selected = document.getElementById('selectedServiceSelect');
+    var options = Array.from(selected.selectedOptions);
+    for (var i = 0; i < options.length; i++) {
+        available.appendChild(options[i]);
+    }
+}
+
+function submitAddServiceForm() {
+    var form = document.getElementById('addServiceForm');
+    // Collect selected services into hidden field
+    var selected = document.getElementById('selectedServiceSelect');
+    var values = [];
+    for (var i = 0; i < selected.options.length; i++) {
+        values.push(selected.options[i].value);
+    }
+    // Remove old hidden field if exists
+    var oldHidden = document.getElementById('selectedServicesHidden');
+    if (oldHidden) oldHidden.remove();
+    var hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'SELECTED_SERVICES';
+    hidden.id = 'selectedServicesHidden';
+    hidden.value = values.join('|');
+    form.appendChild(hidden);
+    if (form.checkValidity()) {
+        form.submit();
+    } else {
+        form.reportValidity();
+    }
+}
+
+function openEditGroupModal(row) {
+    // Prevent duplicate modals
+    if (document.querySelector('#editGroupModal')) return;
+    
+    var modalHtml = '<div class="ofw_modal_overlay" id="editGroupModal">' +
+        '<div class="ofw_modal_dialog" style="width:680px;">' +
+        '<div class="ofw_modal_header" style="cursor:move;">' +
+        '<span class="ofw_modal_title">$trEditServiceToGroup</span>' +
+        '<button type="button" class="ofw_modal_close" onclick="closeEditGroupModal()">&times;</button>' +
+        '</div>' +
+        '<div class="ofw_modal_body">' +
+        '<form id="editGroupForm" method="post" action="$scriptName">' +
+        '<input type="hidden" name="ACTION" value="$trUpdate">' +
+        '<input type="hidden" name="GROUP_TYP" value="new">' +
+        '<input type="hidden" name="OLD_GROUP" value="' + row.group + '">' +
+        '<table width="100%" cellpadding="5" cellspacing="0" border="0">' +
+        '<tr>' +
+        '<td width="30%" align="right">$trServiceGroupNameLabel</td>' +
+        '<td><input type="text" name="GROUP_NEW" value="' + row.group + '" style="width:300px;" maxlength="18" required></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right">$trRemarkLabel</td>' +
+        '<td><input type="text" name="REMARK" value="' + row.remark + '" style="width:300px;" maxlength="50"></td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right" valign="top">$trServices</td>' +
+        '<td>' +
+        '<div style="display:flex;gap:10px;align-items:center;">' +
+        '<div style="flex:1;display:flex;flex-direction:column;">' +
+        '<div style="margin-bottom:5px;font-weight:bold;">$trAvailableServices</div>' +
+        '<select id="availableServiceSelectEdit" multiple size="8" style="width:100%;min-height:160px;">';
 END
 
-if ($#customServices >= 0) {
-    print <<END;
-<tr>
-    <td>
-        <input type='radio' name='SERVICE_TYP' value='custom' $radio{'SERVICE_TYP'}{'custom'} $disabled />
-        $Lang::tr{'custom services'}:
-    </td>
-    <td colspan='3'>
-        <select name='SERVICE_NAME_CUSTOM' $disabled onclick='this.form.SERVICE_TYP[1].checked=true'>
-END
-    print "<option value='BLANK' selected='selected'>N/A</option>" if ($#customServices < 0);
-    foreach my $service (@customServices) {
-        print "<option value='$service'";
-        print " selected='selected'" if ($cgiparams{'SERVICE_NAME_CUSTOM'} eq $service);
-        print ">$service</option>";
-    }
-    print <<END;
-        </select>
-    </td>
-</tr>
-END
+# Build combined list of all services for edit modal
+my %allServicesMapEdit = ();
+foreach my $svc (@customServices) {
+    $allServicesMapEdit{$svc} = 'custom';
 }
+my %ofwServicesEdit = ();
+&DATA::readOfwServices(\%ofwServicesEdit);
+foreach my $svc (keys %ofwServicesEdit) {
+    $allServicesMapEdit{$svc} = 'default';
+}
+my %defaultServicesEdit = ();
+&DATA::readDefaultServices(\%defaultServicesEdit);
+foreach my $svc (keys %defaultServicesEdit) {
+    $allServicesMapEdit{$svc} = 'default';
+}
+
+# Output default services group
+print "modalHtml += '<optgroup label=\\\"$trDefaultServices\\\">';\n";
+foreach my $svc (sort keys %allServicesMapEdit) {
+    next unless $allServicesMapEdit{$svc} eq 'default';
+    my $label = $svc;
+    if (exists $ofwServicesEdit{$svc}) {
+        $label .= " ($ofwServicesEdit{$svc}{'PORT_NR'})";
+    } elsif (exists $defaultServicesEdit{$svc}) {
+        $label .= " ($defaultServicesEdit{$svc}{'PORT_NR'})";
+    }
+    my $jsLabel = $label;
+    $jsLabel =~ s/'/\\'/g;
+    my $jsSvc = $svc;
+    $jsSvc =~ s/'/\\'/g;
+    print "modalHtml += '<option value=\\\"$jsSvc\\\">$jsLabel</option>';\n";
+}
+print "modalHtml += '</optgroup>';\n";
+# Output custom services group
+print "modalHtml += '<optgroup label=\\\"$trCustomServices\\\">';\n";
+foreach my $svc (sort keys %allServicesMapEdit) {
+    next unless $allServicesMapEdit{$svc} eq 'custom';
+    my $label = $svc;
+    my $jsLabel = $label;
+    $jsLabel =~ s/'/\\'/g;
+    my $jsSvc = $svc;
+    $jsSvc =~ s/'/\\'/g;
+    print "modalHtml += '<option value=\\\"$jsSvc\\\">$jsLabel</option>';\n";
+}
+print "modalHtml += '</optgroup>';\n";
+
 print <<END;
-<tr>
-    <td>$Lang::tr{'enabled'}:</td>
-    <td colspan='3'><input type='checkbox' name='ENABLED' $checked{'ENABLED'}{'on'} $disabled /></td>
-</tr>
-</table>
-<hr />
-<table width='100%'>
-<tr>
-    <td class='comment2buttons'>
-        <img src='/blob.gif' alt='*' align='top' />&nbsp;
-        <font class='base'>$Lang::tr{'this field may be blank'}</font>
-    </td>
-END
-
-if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'}) {
-    print "<td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'update'}' />\n";
-    print "<input type='hidden' name='OLD_GROUP' value='$cgiparams{'GROUP'}' /></td>\n";
-    print "<td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' /></td>\n";
-}
-else {
-    print "<td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'add'}' /></td>\n";
-    print "<td class='button2buttons'><input type='submit' class='commonbuttons' name='ACTION' value='$Lang::tr{'reset'}' /></td>\n";
-}
-print <<END;
-    <td class='onlinehelp'>
-        <a href='${General::adminmanualurl}/firewall-servicegroups.html' target='_blank'><img src='/images/web-support.png' alt='$Lang::tr{'online help en'}' title='$Lang::tr{'online help en'}' /></a>
-    </td>
-</tr>
-</table>
-</form>
-END
-
-&Header::closebox();
-
-&Header::openbox('100%', 'left', "$Lang::tr{'service groups'}:");
-
-foreach my $group (sort keys %serviceGroupConf) {
-    my $remark = "";
-    if (defined($serviceGroupConf{$group}{'REMARK'}) && $serviceGroupConf{$group}{'REMARK'} ne "") {
-        $remark = " - " . $serviceGroupConf{$group}{'REMARK'};
-    }
-    my $color = "";
-    if ($cgiparams{'ACTION'} eq $Lang::tr{'edit'} && $cgiparams{'GROUP'} eq $group) {
-        $color = "class='selectcolour'";
-    }
-
-    print <<END;
-<div align='center'>
-<table width='100%' align='center'>
-<tr align="left" $color>
-    <td colspan='2'>
-        <strong>
-            $group $remark - $Lang::tr{'used'}&nbsp;$serviceGroupConf{$group}{'USED_COUNT'}x :
-        </strong>
-    </td>
-    <td align='center'>
-    <form method='post' name='frm$group' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='TYP' value='group' />
-        <input type='hidden' name='ACTION' value='$Lang::tr{'edit'}' />
-        <input type='image' name='$Lang::tr{'edit'}' src='/images/edit.gif'  alt='$Lang::tr{'edit'}' title='$Lang::tr{'edit'}' />
-        <input type='hidden' name='GROUP' value='$group' />
-    </form>
-    </td>
-END
-
-    if ($serviceGroupConf{$group}{'USED_COUNT'} > 0) {
-        print "<td align='center'><img src='/images/null.gif' width='20' height='20' border='0' alt='' /></td>";
-    }
-    else {
-        print <<END;
-    <td align='center'>
-    <form method='post' name='frm$group' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='TYP' value='group' />
-        <input type='hidden' name='ACTION' value='$Lang::tr{'remove'}' />
-        <input type='image' name='$Lang::tr{'remove'}' src='/images/delete.gif' alt='$Lang::tr{'remove'}' title='$Lang::tr{'remove'}' />
-        <input type='hidden' name='GROUP' value='$group' />
-    </form>
-    </td>
-END
-    }
-    print "</tr>\n";
-
-    my $id = 0;
-    my ($gif, $toggle, $typ);
-    my $serviceCount = @{$serviceGroupConf{$group}{'SERVICES'}};
-    foreach my $entry (@{$serviceGroupConf{$group}{'SERVICES'}}) {
-
-        #       print FILE "SERVICE,$key,$entry->{'SERVICE_NAME'},$entry->{'SERVICE_TYP'},$entry->{'ENABLED'}\n";
-        if ($entry->{'ENABLED'} eq 'on') {
-            $gif    = 'on';
-            $toggle = 'off';
+        modalHtml += '</select>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:5px;justify-content:center;">' +
+        '<button type="button" onclick="moveSelectedToRightEdit()" style="padding:4px 12px;">&gt;&gt;</button>' +
+        '<button type="button" onclick="moveSelectedToLeftEdit()" style="padding:4px 12px;">&lt;&lt;</button>' +
+        '</div>' +
+        '<div style="flex:1;display:flex;flex-direction:column;">' +
+        '<div style="margin-bottom:5px;font-weight:bold;">$trSelectedServices</div>' +
+        '<select id="selectedServiceSelectEdit" multiple size="8" style="width:100%;min-height:160px;"></select>' +
+        '</div>' +
+        '</div>' +
+        '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td align="right">$trEnabled:</td>' +
+        '<td><input type="checkbox" name="ENABLED" value="on" checked></td>' +
+        '</tr>' +
+        '</table>' +
+        '</form>' +
+        '</div>' +
+        '<div class="ofw_modal_footer">' +
+        '<button type="button" class="ofw_btn" onclick="closeEditGroupModal()">$trCancel</button>' +
+        '<button type="button" class="ofw_btn ofw_btn_primary" onclick="submitEditGroupForm()">$trUpdate</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    makeModalDraggable('editGroupModal');
+    
+    // Pre-fill selected services from row data
+    setTimeout(function() {
+        var services = (row.services || '').split(',');
+        var available = document.getElementById('availableServiceSelectEdit');
+        var selected = document.getElementById('selectedServiceSelectEdit');
+        
+        for (var i = 0; i < services.length; i++) {
+            var svcName = services[i].trim();
+            if (!svcName) continue;
+            
+            // Find and move option from available to selected
+            for (var j = 0; j < available.options.length; j++) {
+                if (available.options[j].value === svcName) {
+                    selected.appendChild(available.options[j].cloneNode(true));
+                    available.remove(j);
+                    break;
+                }
+            }
         }
-        else {
-            $gif    = 'off';
-            $toggle = 'on';
-        }
-        print "<tr class='table".int(($id % 2) + 1)."colour'>";
-        if ($entry->{'SERVICE_TYP'} eq 'default') {
-            $typ = $Lang::tr{'typ default'};
-        }
-        else {
-            $typ = $Lang::tr{'typ custom'};
-        }
-
-        print <<END;
-    <td align='center' width='50%'>$entry->{'SERVICE_NAME'}</td>
-    <td align='center' width='50%'>$typ</td>
-END
-
-        if ($serviceCount < 2) {
-            print "<td align='center'><img src='/images/$gif.gif' width='20' height='20' border='0' alt='$gif' /></td>";
-            print "<td align='center'><img src='/images/null.gif' width='20' height='20' border='0' alt='' /></td>";
-        }
-        else {
-            print <<END;
-    <td align='center'>
-    <form method='post' name='frm$group' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='image' name='$Lang::tr{'toggle enable disable'}' src='/images/$gif.gif' alt='$Lang::tr{'toggle enable disable'}' title='$Lang::tr{'toggle enable disable'}' />
-        <input type='hidden' name='ACTION' value='$Lang::tr{'toggle enable disable'}' />
-        <input type='hidden' name='GROUP' value='$group' />
-        <input type='hidden' name='SERVICE_ID' value='$id' />
-        <input type='hidden' name='ENABLED' value='$toggle' />
-    </form>
-    </td>
-    <td align='center'>
-    <form method='post' name='frm$group' action='$ENV{'SCRIPT_NAME'}'>
-        <input type='hidden' name='TYP' value='service' />
-        <input type='hidden' name='ACTION' value='$Lang::tr{'remove'}' />
-        <input type='image' name='$Lang::tr{'remove'}' src='/images/delete.gif' alt='$Lang::tr{'remove'}' title='$Lang::tr{'remove'}' />
-        <input type='hidden' name='GROUP' value='$group' />
-        <input type='hidden' name='SERVICE_ID' value='$id' />
-    </form>
-    </td>
-END
-        }
-        print "</tr>\n";
-        $id++;
-    }
-    print <<END;
-</table>
-</div>
-<br/>
-END
+    }, 100);
 }
 
-&Header::closebox();
+function closeEditGroupModal() {
+    var modal = document.getElementById('editGroupModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function moveSelectedToRightEdit() {
+    var available = document.getElementById('availableServiceSelectEdit');
+    var selected = document.getElementById('selectedServiceSelectEdit');
+    var options = Array.from(available.selectedOptions);
+    for (var i = 0; i < options.length; i++) {
+        selected.appendChild(options[i]);
+    }
+}
+
+function moveSelectedToLeftEdit() {
+    var available = document.getElementById('availableServiceSelectEdit');
+    var selected = document.getElementById('selectedServiceSelectEdit');
+    var options = Array.from(selected.selectedOptions);
+    for (var i = 0; i < options.length; i++) {
+        available.appendChild(options[i]);
+    }
+}
+
+function submitEditGroupForm() {
+    var form = document.getElementById('editGroupForm');
+    var selected = document.getElementById('selectedServiceSelectEdit');
+    var values = [];
+    for (var i = 0; i < selected.options.length; i++) {
+        values.push(selected.options[i].value);
+    }
+    var oldHidden = document.getElementById('selectedServicesHiddenEdit');
+    if (oldHidden) oldHidden.remove();
+    var hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'SELECTED_SERVICES';
+    hidden.id = 'selectedServicesHiddenEdit';
+    hidden.value = values.join('|');
+    form.appendChild(hidden);
+    if (form.checkValidity()) {
+        form.submit();
+    } else {
+        form.reportValidity();
+    }
+}
+
+var pendingDeleteRows = [];
+
+function deleteGroups(selectedRows) {
+    if (!selectedRows || selectedRows.length === 0) return;
+
+    // Prevent duplicate modals
+    if (document.querySelector('#deleteConfirmModal')) return;
+
+    var confirmMsg = selectedRows.length === 1 ?
+        '$trDeleteConfirm' :
+        '$trDeleteConfirmPlural';
+
+    // Build list of group names to display
+    var listHtml = '<ul style="margin:0;padding-left:20px;">';
+    selectedRows.forEach(function(row) {
+        listHtml += '<li>' + row.group + '</li>';
+    });
+    listHtml += '</ul>';
+
+    var modalHtml = '<div class="ofw_modal_overlay" id="deleteConfirmModal">' +
+        '<div class="ofw_modal_dialog" style="width:480px;">' +
+        '<div class="ofw_modal_header" style="cursor:move;">' +
+        '<span class="ofw_modal_title">$trDeleteConfirm</span>' +
+        '<button type="button" class="ofw_modal_close" onclick="closeDeleteConfirmModal()">&times;</button>' +
+        '</div>' +
+        '<div class="ofw_modal_body">' +
+        '<p style="padding:10px 0;">' + confirmMsg + '</p>' +
+        '<div style="margin-top:12px;padding:8px 12px;background:#f5f5f5;border-radius:4px;">' +
+        listHtml +
+        '</div>' +
+        '</div>' +
+        '<div class="ofw_modal_footer">' +
+        '<button type="button" class="ofw_btn" onclick="closeDeleteConfirmModal()">$trCancel</button>' +
+        '<button type="button" class="ofw_btn ofw_btn_primary" onclick="doDeleteGroups()">OK</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+
+    pendingDeleteRows = selectedRows;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    makeModalDraggable('deleteConfirmModal');
+}
+
+function closeDeleteConfirmModal() {
+    var modal = document.getElementById('deleteConfirmModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function doDeleteGroups() {
+    closeDeleteConfirmModal();
+    var groups = [];
+    pendingDeleteRows.forEach(function(row) {
+        if (row.usedCount === 0) {
+            groups.push(row.group);
+        }
+    });
+    if (groups.length === 0) return;
+
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = '$scriptName';
+
+    var actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'ACTION';
+    actionInput.value = '$trRemove';
+    form.appendChild(actionInput);
+
+    var typInput = document.createElement('input');
+    typInput.type = 'hidden';
+    typInput.name = 'TYP';
+    typInput.value = 'group';
+    form.appendChild(typInput);
+
+    var groupInput = document.createElement('input');
+    groupInput.type = 'hidden';
+    groupInput.name = 'GROUP';
+    groupInput.value = groups.join(',');
+    form.appendChild(groupInput);
+
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+
+<div id="serviceGroupsTable"></div>
+
+END
+
 &Header::closebigbox();
 &Header::closepage();
 
@@ -622,42 +932,9 @@ sub validateServiceGroupingParams {
         $errormessage .= "$Lang::tr{'select service group typ'} <br />";
     }
 
-    my $typ = $cgiparams{'SERVICE_TYP'};
-    if ($typ eq 'default' || $typ eq 'custom') {
-        if (
-            (
-                $typ eq 'default' && ($cgiparams{'SERVICE_NAME_DEFAULT'} eq ''
-                    || $cgiparams{'SERVICE_NAME_DEFAULT'} eq 'BLANK')
-            )
-            || ($typ eq 'custom' && $cgiparams{'SERVICE_NAME_CUSTOM'} eq '')
-            )
-        {
-            $errormessage .= "$Lang::tr{'invalid service'}<br />";
-        }
-        elsif ($group ne '') {    # we only have to check for existing service in group
-                                  # when group and service names are ok
-            my $found       = 0;
-            my $serviceName = $cgiparams{'SERVICE_NAME_DEFAULT'};
-            if ($typ eq 'custom') {
-                $serviceName = $cgiparams{'SERVICE_NAME_CUSTOM'};
-            }
-
-            foreach my $entry (@{$serviceGroupConfRef->{$group}{'SERVICES'}}) {
-                if (   $entry->{'SERVICE_TYP'} eq $typ
-                    && $entry->{'SERVICE_NAME'} eq $serviceName)
-                {
-                    $found = 1;
-                    last;
-                }
-            }
-
-            if ($found) {
-                $errormessage .= "$Lang::tr{'service already in group'} <br />";
-            }
-        }
-    }
-    else {
-        $errormessage .= "$Lang::tr{'none service type'} <br />";
+    # Validate that at least one service is selected
+    unless ($cgiparams{'SELECTED_SERVICES'} ne '') {
+        $errormessage .= "$Lang::tr{'invalid service'}<br />";
     }
 
     if ($cgiparams{'ENABLED'} ne 'on') {

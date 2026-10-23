@@ -64,40 +64,59 @@ if ($ENV{'QUERY_STRING'} ne '') {
 &Header::openpage($Lang::tr{'network status information'}, 1, '');
 
 print "<a name='arp'/>\n";
-#&Header::openbox('100%', 'left', "$Lang::tr{'arp table entries'}:");
-$output = `/sbin/ip neigh list`;
-$output = &Header::cleanhtml($output,"y");
-print <<END
-<div align='center'>
-<table width='100%'>
-<tr class='headbar'>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'ip address'}</td>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'interface'}</td>
-    <td width='25%' align='center' class='boldbase'>$Lang::tr{'mac address'}</td>
-    <td width='25%' class='boldbase'>$Lang::tr{'status'}</td>
-</tr>
-END
-;
-my $count = 0;
-foreach my $line (split(/\n/, $output))
-{
-    print "<tr class='table".int(($count % 2) + 1)."colour'>";
+
+# Get ARP table entries
+my $arpOutput = `/sbin/ip neigh list`;
+$arpOutput = &Header::cleanhtml($arpOutput, "y");
+
+# Convert to JavaScript format
+my @jsData;
+my $idx = 1;
+foreach my $line (split(/\n/, $arpOutput)) {
     if ($line =~ m/^(.*) dev ([^ ]+) lladdr ([0-9a-f:]*) (.*)$/) {
-        print "<td align='center'>$1</td><td align='center'>".&General::color_devices($2)."</td>";
-        print "<td align='center'>$3</td><td>$4</td></tr>";
+        push @jsData, sprintf(
+            "{id:'%d',ip:'%s',iface:'%s',mac:'%s',status:'%s'}",
+            $idx, $1, $2, $3, $4
+        );
+        $idx++;
     }
     elsif ($line =~ m/^(.*) dev ([^ ]+)  (.*)$/) {
-        print "<td align='center'>$1</td><td align='center'>".&General::color_devices($2)."</td>";
-        print "<td align='center'>-</td><td>$3</td></tr>";
+        push @jsData, sprintf(
+            "{id:'%d',ip:'%s',iface:'%s',mac:'-',status:'%s'}",
+            $idx, $1, $2, $3
+        );
+        $idx++;
     }
-    else {
-        print "<td colspan='4'>$line</td></tr>";
-    }
-
-    $count++;
 }
-print "</table> </div>";
+my $jsDataStr = join(",\n", @jsData);
 
-#&Header::closebox();
+print <<END;
+<script src="/include/datatable.js"></script>
+<script>
+const arpData = [
+$jsDataStr
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    const table = new DataTable('#arpTable', {
+        data: arpData,
+        columns: [
+            { key: 'id', title: '$Lang::tr{'sequence'}', sortable: true },
+            { key: 'ip', title: '$Lang::tr{'ip address'}', sortable: true },
+            { key: 'iface', title: '$Lang::tr{'interface'}', sortable: true },
+            { key: 'mac', title: '$Lang::tr{'mac address'}', sortable: true },
+            { key: 'status', title: '$Lang::tr{'status'}', sortable: true }
+        ],
+        defaultSort: { key: 'id', order: 'asc' },
+        pageSize: 20,
+        selectable: false,
+        actions: [],
+        disabledActions: []
+    });
+    table.render();
+});
+</script>
+<div id="arpTable"></div>
+END
+
 &Header::closepage();
-
