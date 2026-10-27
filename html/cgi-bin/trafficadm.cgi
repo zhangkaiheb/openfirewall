@@ -28,6 +28,7 @@ require '/usr/lib/ofw/general-functions.pl';
 require "/usr/lib/ofw/lang.pl";
 require "/usr/lib/ofw/header.pl";
 require "/usr/lib/ofw/traffic-lib.pl";
+require '/usr/lib/ofw/widget-lib.pl';
 
 my %cgiparams;
 my $errormessage = '';
@@ -184,8 +185,14 @@ $radio{'PERIOD_TYPE'}{$cgiparams{'PERIOD_TYPE'}} = "checked='checked'";
 
 #~ $btnTestmailDisabled = "disabled='disabled'" if($cgiparams{'SEND_EMAIL_ENABLED'} ne 'on');
 
-&Header::openpage($Lang::tr{'traffic monitor'}, 1, '');
+my $extrahead = Widget::widget_css();
+&Header::openpage($Lang::tr{'traffic monitor'}, 1, $extrahead);
 
+my %icons = Widget::widget_icons();
+my $closeIcon = $icons{'close'};
+my $expandIcon = $icons{'expand'};
+
+print Widget::widget_add_button();
 print "<div class='status-widget-grid'>\n";
 
 ###############
@@ -195,6 +202,10 @@ if ($TRAFFIC::debugFormparams == 1) {
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">DEBUG</span>
+END
+;
+    print Widget::widget_header_buttons($closeIcon, $expandIcon);
+    print <<END
     </div>
     <div class="widget-body">
 END
@@ -213,7 +224,10 @@ if ($errormessage) {
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'error messages'}</span>
-    </div>
+END
+;
+    print Widget::widget_header_buttons($closeIcon, $expandIcon);
+    print <<END
     <div class="widget-body">
         <font class='base'>$errormessage&nbsp;</font>
     </div>
@@ -227,7 +241,10 @@ if ($infomessage) {
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'traffic info messages'}</span>
-    </div>
+END
+;
+    print Widget::widget_header_buttons($closeIcon, $expandIcon);
+    print <<END
     <div class="widget-body">
         <font class='base'>$infomessage&nbsp;</font>
     </div>
@@ -240,6 +257,10 @@ print <<END
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'traffic configuration'}</span>
+END
+;
+print Widget::widget_header_buttons($closeIcon, $expandIcon);
+print <<END
     </div>
     <div class="widget-body">
 <form method='post' action='$ENV{'SCRIPT_NAME'}'>
@@ -470,6 +491,8 @@ print <<END;
 END
 
 print "</div>\n";
+print Widget::widget_add_dialog($Lang::tr{'cancel'}, $Lang::tr{'add'});
+print Widget::widget_js();
 &Header::closepage();
 
 sub validSave

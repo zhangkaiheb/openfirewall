@@ -17,7 +17,7 @@
 #
 
 # Add entry in menu
-# MENUTHRDLVL "firewall rules" 020 "firewall access rules" "firewall access rules"
+# MENUTHRDLVL "firewall rules" 040 "firewall access rules" "firewall access rules"
 #
 # Make sure translation exists $Lang::tr{'firewall access rules'}
 

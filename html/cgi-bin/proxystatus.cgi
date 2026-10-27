@@ -30,10 +30,18 @@ use CGI::Carp 'fatalsToBrowser';
 require '/usr/lib/ofw/general-functions.pl';
 require '/usr/lib/ofw/lang.pl';
 require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/widget-lib.pl';
 
 &Header::showhttpheaders();
-&Header::openpage($Lang::tr{'proxy'}, 1, '');
 
+my $extrahead = Widget::widget_css();
+&Header::openpage($Lang::tr{'proxy'}, 1, $extrahead);
+
+my %icons = Widget::widget_icons();
+my $closeIcon = $icons{'close'};
+my $expandIcon = $icons{'expand'};
+
+print Widget::widget_add_button();
 print "<div class='status-widget-grid'>\n";
 
 # Proxy Status widget
@@ -41,6 +49,10 @@ print <<END
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'proxy'}</span>
+END
+;
+print Widget::widget_header_buttons($closeIcon, $expandIcon);
+print <<END
     </div>
     <div class="widget-body">
 END
@@ -93,4 +105,8 @@ END
 ;
 
 print "</div>\n";
+
+print Widget::widget_add_dialog($Lang::tr{'cancel'}, $Lang::tr{'add'});
+print Widget::widget_js();
+
 &Header::closepage();

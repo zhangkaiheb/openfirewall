@@ -43,6 +43,7 @@ use XML::Parser::Style::Tree;
 require '/usr/lib/ofw/general-functions.pl';
 require '/usr/lib/ofw/lang.pl';
 require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/widget-lib.pl';
 
 my $icount = 0;
 
@@ -84,8 +85,14 @@ if ($query_string) {
 
 
 &Header::showhttpheaders();
-&Header::openpage($Lang::tr{'connections'}, 1, '');
+my $extrahead = Widget::widget_css();
+&Header::openpage($Lang::tr{'connections'}, 1, $extrahead);
 
+my %icons = Widget::widget_icons();
+my $closeIcon = $icons{'close'};
+my $expandIcon = $icons{'expand'};
+
+print Widget::widget_add_button();
 print "<div class='status-widget-grid'>\n";
 
 
@@ -380,6 +387,10 @@ if ($debug > 0) {
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'connection tracking'} (DEBUG)</span>
+END
+;
+    print Widget::widget_header_buttons($closeIcon, $expandIcon);
+    print <<END
     </div>
     <div class="widget-body">
 END
@@ -398,6 +409,10 @@ print <<END
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'connection tracking'}</span>
+END
+;
+print Widget::widget_header_buttons($closeIcon, $expandIcon);
+print <<END
     </div>
     <div class="widget-body">
 END
@@ -597,6 +612,8 @@ END
 ;
 
 print "</div>\n";
+print Widget::widget_add_dialog($Lang::tr{'cancel'}, $Lang::tr{'add'});
+print Widget::widget_js();
 &Header::closepage();
 
 sub ipcolour($) {

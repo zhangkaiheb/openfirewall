@@ -33,6 +33,7 @@ require '/usr/lib/ofw/general-functions.pl';
 require '/usr/lib/ofw/lang.pl';
 require '/usr/lib/ofw/header.pl';
 require '/usr/lib/ofw/traffic-lib.pl';
+require '/usr/lib/ofw/widget-lib.pl';
 
 my %mainsettings  = ();
 my %cgiparams     = ();
@@ -68,16 +69,33 @@ elsif ($mainsettings{'REFRESHINDEX'} eq 'on') {
     $refresh = "<meta http-equiv='refresh' content='600;' />";
 }
 
-&Header::openpage($Lang::tr{'main page'}, 1, $refresh);
+my $extrahead = Widget::widget_css();
+&Header::openpage($Lang::tr{'main page'}, 1, $refresh . $extrahead);
+
+# Add Widget button at top
+print <<'HTML'
+<div style="padding: 16px 16px 0 16px;">
+    <button id="addWidgetBtn" class="widget-action-btn" style="padding: 8px 16px; width: auto; height: auto; background: none; color: #4a9e4a; border: 1px solid #4a9e4a;" onclick="showAddWidgetDialog()">
+        + Add Widget
+    </button>
+</div>
+HTML
+;
 
 print "<div class='status-widget-grid'>\n";
 
 # Connection Status widget
 my $hostname = &Header::cleanhtml(`/bin/uname -n`, "y");
+my $closeIcon = '&times;';
+my $expandIcon = '&#x2922;';
 print <<END
-<div class="widget-card">
+<div class="widget-card" data-widget-id="connection">
     <div class="widget-header">
         <span class="widget-title">$hostname</span>
+        <div class="widget-actions">
+            <button class="widget-action-btn widget-action-close" onclick="toggleWidget(this)" title="Close">$closeIcon</button>
+            <button class="widget-action-btn widget-action-expand" onclick="toggleFullscreen(this)" title="Expand">$expandIcon</button>
+        </div>
     </div>
     <div class="widget-body">
 END
@@ -329,9 +347,13 @@ END
 
 # Memory widget
 print <<END
-<div class="widget-card">
+<div class="widget-card" data-widget-id="memory">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'memory'}</span>
+        <div class="widget-actions">
+            <button class="widget-action-btn widget-action-close" onclick="toggleWidget(this)" title="Close">$closeIcon</button>
+            <button class="widget-action-btn widget-action-expand" onclick="toggleFullscreen(this)" title="Expand">$expandIcon</button>
+        </div>
     </div>
     <div class="widget-body">
         <table class="widget-table">
@@ -420,9 +442,13 @@ END
 
 # Disk Usage widget
 print <<END
-<div class="widget-card">
+<div class="widget-card" data-widget-id="disk">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'disk usage'}</span>
+        <div class="widget-actions">
+            <button class="widget-action-btn widget-action-close" onclick="toggleWidget(this)" title="Close">$closeIcon</button>
+            <button class="widget-action-btn widget-action-expand" onclick="toggleFullscreen(this)" title="Expand">$expandIcon</button>
+        </div>
     </div>
     <div class="widget-body">
         <table class="widget-table">
@@ -490,5 +516,102 @@ END
 ;
 
 print "</div>\n";
+
+# Add Widget button and dialog
+print <<'HTML'
+<div id="addWidgetDialog" class="ofw_modal_overlay" style="display: none;">
+    <div class="ofw_modal_dialog" style="width:350px;">
+        <div class="ofw_modal_header">
+            <span class="ofw_modal_title">Add Widget</span>
+            <button type="button" class="ofw_modal_close" onclick="closeAddWidgetDialog()">&times;</button>
+        </div>
+        <div class="ofw_modal_body">
+            <label for="widgetSelect">Select Widget:</label>
+            <select id="widgetSelect" style="width: 100%; padding: 8px; margin-top: 8px;">
+                <option value="">-- Select Widget --</option>
+            </select>
+        </div>
+        <div class="ofw_modal_footer">
+            <button type="button" class="ofw_btn" onclick="closeAddWidgetDialog()">Cancel</button>
+            <button type="button" class="ofw_btn ofw_btn_primary" onclick="addWidget()">Add</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleWidget(btn) {
+    var card = btn.closest('.widget-card');
+    if (card.classList.contains('widget-collapsed')) {
+        card.classList.remove('widget-collapsed');
+    } else {
+        card.classList.add('widget-collapsed');
+    }
+}
+
+// Open widget in a new window
+function toggleFullscreen(btn) {
+    var card = btn.closest('.widget-card');
+    if (card) {
+        var title = card.querySelector('.widget-title').textContent;
+        var bodyHtml = card.querySelector('.widget-body').innerHTML;
+        var w = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+        if (w) {
+            w.document.write('<!DOCTYPE html><html><head><title>' + title + '</title>');
+            w.document.write('<style>');
+            w.document.write('body{font-family:Arial,sans-serif;margin:16px;background:#fff;}');
+            w.document.write('h2{margin:0 0 12px 0;color:#333;font-size:18px;}');
+            w.document.write('table{width:100%;border-collapse:collapse;font-size:13px;}');
+            w.document.write('th,td{border:1px solid #D0D0D0;padding:5px 6px;text-align:left;vertical-align:top;}');
+            w.document.write('th{background:#5B9BD5;color:#fff;font-weight:500;}');
+            w.document.write('tbody tr:nth-child(even){background:#F5F5F5;}');
+            w.document.write('tbody tr:nth-child(odd){background:#fff;}');
+            w.document.write('pre{font-family:monospace;font-size:13px;}');
+            w.document.write('</style>');
+            w.document.write('</head><body>');
+            w.document.write('<h2>' + title + '</h2>');
+            w.document.write(bodyHtml);
+            w.document.write('</body></html>');
+            w.document.close();
+        }
+    }
+}
+
+function showAddWidgetDialog() {
+    var dialog = document.getElementById('addWidgetDialog');
+    var select = document.getElementById('widgetSelect');
+    var closedWidgets = document.querySelectorAll('.widget-card.widget-collapsed');
+    select.innerHTML = '<option value="">-- Select Widget --</option>';
+    for (var i = 0; i < closedWidgets.length; i++) {
+        var id = closedWidgets[i].getAttribute('data-widget-id');
+        var option = document.createElement('option');
+        option.value = id;
+        option.textContent = id.charAt(0).toUpperCase() + id.slice(1);
+        select.appendChild(option);
+    }
+    var dialogEl = dialog.querySelector('.ofw_modal_dialog');
+    dialogEl.style.left = '';
+    dialogEl.style.top = '';
+    dialogEl.style.transform = '';
+    dialog.style.display = 'block';
+}
+
+function closeAddWidgetDialog() {
+    document.getElementById('addWidgetDialog').style.display = 'none';
+}
+
+function addWidget() {
+    var select = document.getElementById('widgetSelect');
+    var widgetId = select.value;
+    if (widgetId) {
+        var card = document.querySelector('.widget-card[data-widget-id="' + widgetId + '"]');
+        if (card) {
+            card.classList.remove('widget-collapsed');
+        }
+    }
+    closeAddWidgetDialog();
+}
+</script>
+HTML
+;
 
 &Header::closepage();

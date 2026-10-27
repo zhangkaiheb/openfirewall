@@ -15,6 +15,7 @@ use strict;
 require '/usr/lib/ofw/general-functions.pl';
 require '/usr/lib/ofw/lang.pl';
 require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/widget-lib.pl';
 
 my %cgiparams=();
 my @cgigraphs=();
@@ -27,8 +28,14 @@ $ENV{'QUERY_STRING'} =~ s/&//g;
 @cgigraphs = split(/graph=/,$ENV{'QUERY_STRING'});
 $cgigraphs[1] = '' unless defined $cgigraphs[1];
 
-&Header::openpage($Lang::tr{'proxy access graphs'}, 1, '');
+my $extrahead = Widget::widget_css();
+&Header::openpage($Lang::tr{'proxy access graphs'}, 1, $extrahead);
 
+my %icons = Widget::widget_icons();
+my $closeIcon = $icons{'close'};
+my $expandIcon = $icons{'expand'};
+
+print Widget::widget_add_button();
 print "<div class='status-widget-grid'>\n";
 
 if ($cgigraphs[1] =~ /(squid-requests|squid-hits)/) {
@@ -45,6 +52,10 @@ if ($cgigraphs[1] =~ /(squid-requests|squid-hits)/) {
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$title $Lang::tr{'graph'}</span>
+END
+;
+    print Widget::widget_header_buttons($closeIcon, $expandIcon);
+    print <<END
     </div>
     <div class="widget-body">
 END
@@ -85,6 +96,8 @@ else {
 }
 
 print "</div>\n";
+print Widget::widget_add_dialog($Lang::tr{'cancel'}, $Lang::tr{'add'});
+print Widget::widget_js();
 &Header::closepage();
 
 
@@ -98,6 +111,10 @@ sub disp_graph
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$title</span>
+END
+;
+    print Widget::widget_header_buttons($closeIcon, $expandIcon);
+    print <<END
     </div>
     <div class="widget-body">
 END

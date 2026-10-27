@@ -462,7 +462,6 @@ foreach my $type (@runRuleTypes) {
         my $rulebody     = '';
 
         # incoming interface
-=pod
         if ($rule->{'SRC_NET_TYPE'} eq 'defaultSrcNet') {
             if (defined($FW::interfaces{$rule->{'SRC_NET'}})
                 && $FW::interfaces{$rule->{'SRC_NET'}}{'ACTIV'} eq 'yes')
@@ -482,13 +481,12 @@ foreach my $type (@runRuleTypes) {
             $srcInterface = $rule->{'SRC_NET'};
         }
         else {    # 'custSrcNet'
-=cut
             if ($custIfaces{$rule->{'SRC_NET'}} eq '') {
                 &General::log("ERROR in puzzleFwRules: Custom Interface $rule->{'SRC_NET'} does not exist");
                 next;
             }
             $inDev = $custIfaces{$rule->{'SRC_NET'}}{'IFACE'};
-#        }
+        }
 
         if ($inDev ne '') {
             $inDev = "-i $inDev";
@@ -1475,7 +1473,6 @@ sub buildAddressParams
             }
         }
     }
-=pod
     elsif ($p_addressType eq 'default') {
         # Check for defined and non-empty
         return () unless (defined($defaultNetworks{$p_addressName}{'IPT'}));
@@ -1483,7 +1480,6 @@ sub buildAddressParams
 
         return "$p_addressInv $prefixIP $defaultNetworks{$p_addressName}{'IPT'}";
     }
-=cut
 
     # we should never come to here
     return ();

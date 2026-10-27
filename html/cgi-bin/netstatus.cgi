@@ -19,6 +19,7 @@ use strict;
 require '/usr/lib/ofw/general-functions.pl';
 require '/usr/lib/ofw/lang.pl';
 require '/usr/lib/ofw/header.pl';
+require '/usr/lib/ofw/widget-lib.pl';
 
 my %dhcpsettings=();
 my %netsettings=();
@@ -32,7 +33,13 @@ my $dhcpserver = 0;
 &General::readhash('/var/ofw/ethernet/settings', \%netsettings);
 &General::readhash('/var/ofw/ppp/settings', \%pppsettings);
 &Header::showhttpheaders();
-&Header::openpage($Lang::tr{'network status information'}, 1, '');
+
+my $extrahead = Widget::widget_css();
+&Header::openpage($Lang::tr{'network status information'}, 1, $extrahead);
+
+my %icons = Widget::widget_icons();
+my $closeIcon = $icons{'close'};
+my $expandIcon = $icons{'expand'};
 
 my @DHCPINTERFACEs=('GREEN','BLUE');
 foreach my $interface (@DHCPINTERFACEs) {
@@ -43,6 +50,7 @@ foreach my $interface (@DHCPINTERFACEs) {
     }
 }
 
+print Widget::widget_add_button();
 print "<div class='status-widget-grid'>\n";
 
 # Interfaces - each interface as a separate widget
@@ -101,6 +109,10 @@ foreach my $iface (@interfaces) {
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$iface</span>
+END
+;
+print Widget::widget_header_buttons($closeIcon, $expandIcon);
+print <<END
     </div>
     <div class="widget-body">
         <table width='100%'>
@@ -120,6 +132,10 @@ print <<END
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'red'} $Lang::tr{'dns configuration'}</span>
+END
+;
+print Widget::widget_header_buttons($closeIcon, $expandIcon);
+print <<END
     </div>
     <div class="widget-body">
 END
@@ -153,6 +169,10 @@ if ( ($netsettings{'RED_COUNT'} >= 1)  && $netsettings{'RED_1_TYPE'} eq "DHCP") 
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'red'} $Lang::tr{'dhcp configuration'}</span>
+END
+;
+    print Widget::widget_header_buttons($closeIcon, $expandIcon);
+    print <<END
     </div>
     <div class="widget-body">
 END
@@ -225,6 +245,10 @@ if ( ($netsettings{'RED_COUNT'} == 0)  && (exists($pppsettings{'TYPE'})) ) {
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'adsl settings'}</span>
+END
+;
+        print Widget::widget_header_buttons($closeIcon, $expandIcon);
+        print <<END
     </div>
     <div class="widget-body">
         <pre>$output1$output2</pre>
@@ -240,6 +264,10 @@ END
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'adsl settings'}</span>
+END
+;
+        print Widget::widget_header_buttons($closeIcon, $expandIcon);
+        print <<END
     </div>
     <div class="widget-body">
         <pre>$output</pre>
@@ -255,6 +283,10 @@ END
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'adsl settings'}</span>
+END
+;
+        print Widget::widget_header_buttons($closeIcon, $expandIcon);
+        print <<END
     </div>
     <div class="widget-body">
         <pre>$output</pre>
@@ -270,6 +302,10 @@ END
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'adsl settings'}</span>
+END
+;
+        print Widget::widget_header_buttons($closeIcon, $expandIcon);
+        print <<END
     </div>
     <div class="widget-body">
         <pre>$output</pre>
@@ -285,6 +321,10 @@ END
 <div class="widget-card">
     <div class="widget-header">
         <span class="widget-title">$Lang::tr{'adsl settings'}</span>
+END
+;
+        print Widget::widget_header_buttons($closeIcon, $expandIcon);
+        print <<END
     </div>
     <div class="widget-body">
         <pre>$output</pre>
@@ -296,5 +336,8 @@ END
 }
 
 print "</div>\n";
+
+print Widget::widget_add_dialog($Lang::tr{'cancel'}, $Lang::tr{'add'});
+print Widget::widget_js();
 
 &Header::closepage();
