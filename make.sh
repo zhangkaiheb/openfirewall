@@ -44,13 +44,13 @@ NAME="Openfirewall"
 SNAME="openfirewall"
 
 # This is the Openfirewall version number for the release.
-VERSION=0.0.1
+VERSION=0.0.2
 
 # VERSIONSTEP is only used when the update is split into 2 versions/packages.
 #VERSIONSTEP=2.1.0
 
 # This is the last official Openfirewall version number. Needed for ./make.sh newupdate.
-PREVIOUSVERSION=0.0.0
+PREVIOUSVERSION=0.0.1
 # This is the SVN revision number for the last Openfirewall version. Needed for ChangeLog.
 PREVIOUSSVNREV=7814
 

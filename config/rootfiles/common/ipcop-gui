@@ -44,6 +44,7 @@ usr/local/apache/cgi-bin/modem.cgi
 usr/local/apache/cgi-bin/neighlist.cgi
 usr/local/apache/cgi-bin/neighstatic.cgi
 usr/local/apache/cgi-bin/neightable.cgi
+usr/local/apache/cgi-bin/networkspred.cgi
 usr/local/apache/cgi-bin/netstatus.cgi
 usr/local/apache/cgi-bin/openvpn.cgi
 usr/local/apache/cgi-bin/pppsetup.cgi
@@ -54,6 +55,10 @@ usr/local/apache/cgi-bin/proxy.cgi
 usr/local/apache/cgi-bin/proxygraphs.cgi
 usr/local/apache/cgi-bin/proxystatus.cgi
 usr/local/apache/cgi-bin/remote.cgi
+usr/local/apache/cgi-bin/ruleaccess.cgi
+usr/local/apache/cgi-bin/ruleexternalaccess.cgi
+usr/local/apache/cgi-bin/ruleoutgoing.cgi
+usr/local/apache/cgi-bin/ruleportfw.cgi
 usr/local/apache/cgi-bin/routelist.cgi
 usr/local/apache/cgi-bin/routestatic.cgi
 usr/local/apache/cgi-bin/routetable.cgi
@@ -162,6 +167,7 @@ usr/local/apache/html/images/warningboxtop2.png
 usr/local/apache/html/images/warningboxtop3.png
 usr/local/apache/html/images/web-support.png
 usr/local/apache/html/include
+usr/local/apache/html/include/datatable.js
 usr/local/apache/html/include/domLib.js
 usr/local/apache/html/include/domMenu.js
 usr/local/apache/html/js/dtree.js
